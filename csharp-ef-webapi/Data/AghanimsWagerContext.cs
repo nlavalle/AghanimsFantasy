@@ -35,6 +35,7 @@ public class AghanimsWagerContext : DbContext
     public DbSet<MatchDetailsPlayer> MatchDetailsPlayers { get; set; }
     public DbSet<MatchDetailsPlayersAbilityUpgrade> MatchDetailsPlayersAbilityUpgrades { get; set; }
     public DbSet<Hero> Heroes { get; set; }
+    public DbSet<Team> Teams { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
