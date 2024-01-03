@@ -5,21 +5,15 @@ using csharp_ef_webapi.Models;
 
 public class AghanimsFantasyContext : DbContext
 {
-    IConfiguration _configuration;
-    public AghanimsFantasyContext(IConfiguration configuration, DbContextOptions<AghanimsFantasyContext> options)
+    public AghanimsFantasyContext()
+    {
+    }
+    
+    public AghanimsFantasyContext(DbContextOptions<AghanimsFantasyContext> options)
         : base(options)
     {
-        _configuration = configuration;
     }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder options)
-    {
-        // connect to sqlite database
-        var conn_string = _configuration.GetConnectionString("AghanimsFantasyDatabase");
-        conn_string = conn_string.Replace("{SQL_USER}", Environment.GetEnvironmentVariable("SQL_USER"));
-        conn_string = conn_string.Replace("{SQL_PASSWORD}", Environment.GetEnvironmentVariable("SQL_PASSWORD"));
-        options.UseNpgsql(conn_string);
-    }
     public DbSet<BalanceLedger> BalanceLedger { get; set; }
     public DbSet<DiscordIds> DiscordIds { get; set; }
     public DbSet<PlayerMatchDetails> PlayerMatchDetails { get; set; }

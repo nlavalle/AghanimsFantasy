@@ -1,46 +1,59 @@
 using csharp_ef_webapi.Models;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace csharp_ef_webapi.Services;
-public class DotaWebApiService
+public class DotaWebApiService : BackgroundService
 {
     private readonly string _baseApiUrl;
     private readonly string _econApiUrl;
     private readonly string _steamKey;
     private readonly HttpClient _httpClient;
     private readonly ILogger<DotaWebApiService> _logger;
-    private readonly AghanimsFantasyContext _dbContext;
-
-    // Serialized tasks nothing concurrent, because we dependency inject the dbContext if we run parallel tasks it's
-    // going to blow up if it tries to commit two transactions at the same time with the same context.
-    private static readonly SemaphoreSlim _dbContextSemaphoreSlim = new SemaphoreSlim(1);
     private const long _delayBetweenRequests = 10_000_000 / 2; // Constant for ticks in a second divided by 2
     IConfiguration _configuration;
+    IServiceProvider _serviceProvider;
+    private Timer leagueTimer;
+    private Timer matchDetailsTimer;
+    private Timer teamsTimer;
+    private Timer heroesTimer;
 
-    public DotaWebApiService(ILogger<DotaWebApiService> logger, IConfiguration configuration, AghanimsFantasyContext dbContext)
+    public DotaWebApiService(ILogger<DotaWebApiService> logger, IConfiguration configuration, IServiceProvider serviceProvider, HttpClient httpClient)
     {
         _logger = logger;
-        _dbContext = dbContext;
         _configuration = configuration;
+        _serviceProvider = serviceProvider;
 
         _baseApiUrl = _configuration.GetSection("DotaWebApi").GetValue<string>("BaseUrl");
         _econApiUrl = _configuration.GetSection("DotaWebApi").GetValue<string>("EconUrl");
         _steamKey = Environment.GetEnvironmentVariable("STEAM_KEY") ?? "";
 
-        _httpClient = new HttpClient();
+        _httpClient = httpClient;
         _logger.LogInformation("Dota WebApi Service started");
+
+    }
+
+    public override Task StartAsync(CancellationToken cancellationToken)
+    {
         // We're running this once a day because the live games should get us the updates
-        new Timer(GetLeagueHistoryDataCallback, null, TimeSpan.Zero, TimeSpan.FromMinutes(30));
+        leagueTimer = new Timer(GetLeagueHistoryDataCallback, null, TimeSpan.Zero, TimeSpan.FromMinutes(30));
 
         // We're running this more frequently because it should typically find no new match details and skip
-        new Timer(GetMatchDetailDataCallback, null, TimeSpan.Zero, TimeSpan.FromMinutes(5));
+        matchDetailsTimer = new Timer(GetMatchDetailDataCallback, null, TimeSpan.Zero, TimeSpan.FromMinutes(5));
 
         // Heroes update like once a year
-        new Timer(GetHeroesDataCallback, null, TimeSpan.Zero, TimeSpan.FromDays(1));
+        heroesTimer = new Timer(GetHeroesDataCallback, null, TimeSpan.Zero, TimeSpan.FromDays(1));
 
         // Teams shouldn't change much but once a day
-        new Timer(GetTeamsDataCallback, null, TimeSpan.Zero, TimeSpan.FromDays(1));
+        teamsTimer = new Timer(GetTeamsDataCallback, null, TimeSpan.Zero, TimeSpan.FromDays(1));
+
+        return base.StartAsync(cancellationToken);
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        await Task.Delay(Timeout.Infinite, stoppingToken);
     }
 
     private async void GetLeagueHistoryDataCallback(object? state)
@@ -48,38 +61,36 @@ public class DotaWebApiService
         // Get all the Match Histories for the leagues, this is intended to be run first
         try
         {
-
-            List<League> leagues = _dbContext.Leagues.Where(l => l.isActive).ToList();
-            _logger.LogInformation($"Fetching league matches for {leagues.Count()} leagues");
-
-            List<Task<List<MatchHistory>>> fetchMatchHistoryTasks = new List<Task<List<MatchHistory>>>();
-
-            foreach (League league in leagues)
+            using (var scope = _serviceProvider.CreateScope())
             {
-                fetchMatchHistoryTasks.Add(GetMatchHistoryAsync(league.id));
-            }
+                AghanimsFantasyContext _dbContext = scope.ServiceProvider.GetRequiredService<AghanimsFantasyContext>();
 
-            await Task.WhenAll(fetchMatchHistoryTasks);
+                List<League> leagues = _dbContext.Leagues.Where(l => l.isActive).ToList();
+                _logger.LogInformation($"Fetching league matches for {leagues.Count()} leagues");
 
-            // Lock the context so other tasks don't try to perform transactions
-            await _dbContextSemaphoreSlim.WaitAsync();
+                List<Task<List<MatchHistory>>> fetchMatchHistoryTasks = new List<Task<List<MatchHistory>>>();
 
-            foreach (MatchHistory match in fetchMatchHistoryTasks.SelectMany(t => t.Result).ToList())
-            {
-                if (_dbContext.MatchHistory.FirstOrDefault(m => m.MatchId == match.MatchId) == null)
+                foreach (League league in leagues)
                 {
-                    // Set Players Match IDs since it's not in json
-                    foreach (MatchHistoryPlayer player in match.Players)
-                    {
-                        player.MatchId = match.MatchId;
-                    }
-                    _dbContext.MatchHistory.Add(match);
+                    fetchMatchHistoryTasks.Add(GetMatchHistoryAsync(league.id));
                 }
-            }
-            await _dbContext.SaveChangesAsync();
 
-            // Done with dbContext so release it for anything else
-            _dbContextSemaphoreSlim.Release();
+                await Task.WhenAll(fetchMatchHistoryTasks);
+
+                foreach (MatchHistory match in fetchMatchHistoryTasks.SelectMany(t => t.Result).ToList())
+                {
+                    if (_dbContext.MatchHistory.FirstOrDefault(m => m.MatchId == match.MatchId) == null)
+                    {
+                        // Set Players Match IDs since it's not in json
+                        foreach (MatchHistoryPlayer player in match.Players)
+                        {
+                            player.MatchId = match.MatchId;
+                        }
+                        _dbContext.MatchHistory.Add(match);
+                    }
+                }
+                await _dbContext.SaveChangesAsync();
+            }
 
             _logger.LogInformation($"League Match History fetch done");
 
@@ -97,70 +108,70 @@ public class DotaWebApiService
     {
         try
         {
-            // Find all the match histories without match detail rows and add tasks to fetch them all
-            List<MatchHistory> matchesWithoutDetails = _dbContext.MatchHistory
-                .GroupJoin(
-                    _dbContext.MatchDetails,
-                    match => match.MatchId,
-                    details => details.MatchId,
-                    (match, details) => new { Match = match, Details = details })
-                .SelectMany(
-                    m => m.Details.DefaultIfEmpty(),
-                    (match, details) => new { match.Match, Details = details }
-                )
-                .Where(joinResult => joinResult.Details == null)
-                .Select(joinResult => joinResult.Match)
-                .ToList();
-
-            if (matchesWithoutDetails.Count() > 0)
+            using (var scope = _serviceProvider.CreateScope())
             {
-                _logger.LogInformation($"Fetching {matchesWithoutDetails.Count()} new match details.");
-                List<Task<MatchDetail?>> fetchMatchDetailsTasks = new List<Task<MatchDetail?>>();
+                AghanimsFantasyContext _dbContext = scope.ServiceProvider.GetRequiredService<AghanimsFantasyContext>();
 
-                foreach (MatchHistory match in matchesWithoutDetails)
+                // Find all the match histories without match detail rows and add tasks to fetch them all
+                List<MatchHistory> matchesWithoutDetails = _dbContext.MatchHistory
+                    .GroupJoin(
+                        _dbContext.MatchDetails,
+                        match => match.MatchId,
+                        details => details.MatchId,
+                        (match, details) => new { Match = match, Details = details })
+                    .SelectMany(
+                        m => m.Details.DefaultIfEmpty(),
+                        (match, details) => new { match.Match, Details = details }
+                    )
+                    .Where(joinResult => joinResult.Details == null)
+                    .Select(joinResult => joinResult.Match)
+                    .ToList();
+
+                if (matchesWithoutDetails.Count() > 0)
                 {
-                    fetchMatchDetailsTasks.Add(GetMatchDetailsAsync(match.MatchId));
-                }
+                    _logger.LogInformation($"Fetching {matchesWithoutDetails.Count()} new match details.");
+                    List<Task<MatchDetail?>> fetchMatchDetailsTasks = new List<Task<MatchDetail?>>();
 
-                await Task.WhenAll(fetchMatchDetailsTasks);
-
-                await _dbContextSemaphoreSlim.WaitAsync();
-
-                foreach (MatchDetail? matchDetail in fetchMatchDetailsTasks.Select(t => t.Result))
-                {
-                    if (matchDetail != null)
+                    foreach (MatchHistory match in matchesWithoutDetails)
                     {
-                        if (_dbContext.MatchDetails.FirstOrDefault(m => m.MatchId == matchDetail.MatchId) == null)
+                        fetchMatchDetailsTasks.Add(GetMatchDetailsAsync(match.MatchId));
+                    }
+
+                    await Task.WhenAll(fetchMatchDetailsTasks);
+
+                    foreach (MatchDetail? matchDetail in fetchMatchDetailsTasks.Select(t => t.Result))
+                    {
+                        if (matchDetail != null)
                         {
-                            // Set PicksBans Match IDs since it's not in json
-                            foreach (MatchDetailsPicksBans picksBans in matchDetail.PicksBans)
+                            if (_dbContext.MatchDetails.FirstOrDefault(m => m.MatchId == matchDetail.MatchId) == null)
                             {
-                                picksBans.MatchId = matchDetail.MatchId;
-                            }
-
-                            // Set Players Match IDs since it's not in json
-                            foreach (MatchDetailsPlayer player in matchDetail.Players)
-                            {
-                                player.MatchId = matchDetail.MatchId;
-                                // Set Players Ability Upgrade PlayerIDs since it's not in json
-                                foreach (MatchDetailsPlayersAbilityUpgrade abilities in player.AbilityUpgrades)
+                                // Set PicksBans Match IDs since it's not in json
+                                foreach (MatchDetailsPicksBans picksBans in matchDetail.PicksBans)
                                 {
-                                    abilities.PlayerId = player.Id;
+                                    picksBans.MatchId = matchDetail.MatchId;
                                 }
-                            }
 
-                            _dbContext.MatchDetails.Add(matchDetail);
+                                // Set Players Match IDs since it's not in json
+                                foreach (MatchDetailsPlayer player in matchDetail.Players)
+                                {
+                                    player.MatchId = matchDetail.MatchId;
+                                    // Set Players Ability Upgrade PlayerIDs since it's not in json
+                                    foreach (MatchDetailsPlayersAbilityUpgrade abilities in player.AbilityUpgrades)
+                                    {
+                                        abilities.PlayerId = player.Id;
+                                    }
+                                }
+
+                                _dbContext.MatchDetails.Add(matchDetail);
+                            }
                         }
                     }
+                    await _dbContext.SaveChangesAsync();
+
+                    _logger.LogInformation($"Missing match details fetch done");
+
                 }
-                await _dbContext.SaveChangesAsync();
-
-                _dbContextSemaphoreSlim.Release();
-
-                _logger.LogInformation($"Missing match details fetch done");
-
             }
-
         }
         catch (Exception ex)
         {
@@ -175,27 +186,28 @@ public class DotaWebApiService
         {
             _logger.LogInformation($"Fetching heroes");
 
-            List<Hero> heroes = new List<Hero>();
-            heroes = await GetHeroesAsync();
-
-            await _dbContextSemaphoreSlim.WaitAsync();
-
-            foreach (Hero hero in heroes)
+            using (var scope = _serviceProvider.CreateScope())
             {
-                if (_dbContext.Heroes.FirstOrDefault(h => h.Id == hero.Id) == null)
-                {
-                    _dbContext.Heroes.Add(hero);
-                }
-                else
-                {
-                    Hero updateHero = _dbContext.Heroes.First(h => h.Id == hero.Id);
-                    updateHero.Name = hero.Name;
-                    _dbContext.Heroes.Update(updateHero);
-                }
-            }
-            await _dbContext.SaveChangesAsync();
+                AghanimsFantasyContext _dbContext = scope.ServiceProvider.GetRequiredService<AghanimsFantasyContext>();
 
-            _dbContextSemaphoreSlim.Release();
+                List<Hero> heroes = new List<Hero>();
+                heroes = await GetHeroesAsync();
+
+                foreach (Hero hero in heroes)
+                {
+                    if (_dbContext.Heroes.FirstOrDefault(h => h.Id == hero.Id) == null)
+                    {
+                        _dbContext.Heroes.Add(hero);
+                    }
+                    else
+                    {
+                        Hero updateHero = _dbContext.Heroes.First(h => h.Id == hero.Id);
+                        updateHero.Name = hero.Name;
+                        _dbContext.Heroes.Update(updateHero);
+                    }
+                }
+                await _dbContext.SaveChangesAsync();
+            }
 
             _logger.LogInformation($"Hero fetch done");
         }
@@ -210,42 +222,43 @@ public class DotaWebApiService
     {
         try
         {
-            // Find all the distinct teams from the league match histories
-            List<long> distinctTeams = _dbContext.MatchHistory
-                .Select(mh => mh.RadiantTeamId)
-                .Union(_dbContext.MatchHistory.Select(mh => mh.DireTeamId))
-                .Distinct()
-                .Where(t => t != 0)
-                .ToList();
-
-            List<long> newTeams = distinctTeams
-                .Except(_dbContext.Teams.Select(t => t.Id)).ToList();
-
-            if (newTeams.Count() > 0)
+            using (var scope = _serviceProvider.CreateScope())
             {
-                _logger.LogInformation($"Fetching {newTeams.Count()} new team details.");
-                List<Task<List<Team>>> fetchTeamsTasks = new List<Task<List<Team>>>();
+                AghanimsFantasyContext _dbContext = scope.ServiceProvider.GetRequiredService<AghanimsFantasyContext>();
+                // Find all the distinct teams from the league match histories
+                List<long> distinctTeams = _dbContext.MatchHistory
+                    .Select(mh => mh.RadiantTeamId)
+                    .Union(_dbContext.MatchHistory.Select(mh => mh.DireTeamId))
+                    .Distinct()
+                    .Where(t => t != 0)
+                    .ToList();
 
-                foreach (long teamId in newTeams)
+                List<long> newTeams = distinctTeams
+                    .Except(_dbContext.Teams.Select(t => t.Id)).ToList();
+
+                if (newTeams.Count() > 0)
                 {
-                    fetchTeamsTasks.Add(GetTeamAsync(teamId));
-                }
+                    _logger.LogInformation($"Fetching {newTeams.Count()} new team details.");
+                    List<Task<List<Team>>> fetchTeamsTasks = new List<Task<List<Team>>>();
 
-                await Task.WhenAll(fetchTeamsTasks);
-
-                await _dbContextSemaphoreSlim.WaitAsync();
-
-                foreach (Team team in fetchTeamsTasks.SelectMany(t => t.Result).ToList())
-                {
-                    if (_dbContext.Teams.FirstOrDefault(t => t.Id == team.Id) == null)
+                    foreach (long teamId in newTeams)
                     {
-
-                        _dbContext.Teams.Add(team);
+                        fetchTeamsTasks.Add(GetTeamAsync(teamId));
                     }
-                }
-                await _dbContext.SaveChangesAsync();
 
-                _dbContextSemaphoreSlim.Release();
+                    await Task.WhenAll(fetchTeamsTasks);
+
+                    foreach (Team team in fetchTeamsTasks.SelectMany(t => t.Result).ToList())
+                    {
+                        if (_dbContext.Teams.FirstOrDefault(t => t.Id == team.Id) == null)
+                        {
+
+                            _dbContext.Teams.Add(team);
+                        }
+                    }
+                    await _dbContext.SaveChangesAsync();
+
+                }
 
                 _logger.LogInformation($"Missing team details fetch done");
 
@@ -361,8 +374,9 @@ public class DotaWebApiService
 
         // Read and deserialize the matches from the json response
         JToken responseObject = responseRawJToken["result"] ?? "{}";
+        JToken heroesJson = responseObject["heroes"] ?? "[]";
 
-        List<Hero> heroesResponse = JsonConvert.DeserializeObject<List<Hero>>(responseObject.ToString()) ?? new List<Hero>();
+        List<Hero> heroesResponse = JsonConvert.DeserializeObject<List<Hero>>(heroesJson.ToString()) ?? new List<Hero>();
 
         return heroesResponse;
     }

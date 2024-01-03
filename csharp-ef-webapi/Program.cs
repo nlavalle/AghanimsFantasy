@@ -1,4 +1,5 @@
 using csharp_ef_webapi.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,7 +43,19 @@ if (builder.Environment.IsProduction())
 }
 
 // Add Database
-builder.Services.AddDbContextFactory<AghanimsFantasyContext>();
+builder.Services.AddDbContext<AghanimsFantasyContext>(
+    options =>
+    {
+        var conn_string = builder.Configuration.GetConnectionString("AghanimsFantasyDatabase");
+        conn_string = conn_string.Replace("{SQL_HOST}", Environment.GetEnvironmentVariable("SQL_HOST"));
+        conn_string = conn_string.Replace("{SQL_USER}", Environment.GetEnvironmentVariable("SQL_USER"));
+        conn_string = conn_string.Replace("{SQL_PASSWORD}", Environment.GetEnvironmentVariable("SQL_PASSWORD"));
+        options.UseNpgsql(conn_string);
+    }
+);
+
+// Add persistent HttpClient
+builder.Services.AddHttpClient();
 
 // Add services to the container.
 
@@ -52,20 +65,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Add WebApi Service
-builder.Services.AddScoped<DotaWebApiService>();
+builder.Services.AddHostedService<DotaWebApiService>();
 
 var app = builder.Build();
-
-using (var scope = app.Services.CreateScope())
-{
-    // Generate an instance of the service if we can hit the DB
-    var db = scope.ServiceProvider.GetRequiredService<AghanimsFantasyContext>();
-    if (db.Database.CanConnect())
-    {
-        var dotaWebApiService = app.Services.GetRequiredService<DotaWebApiService>();
-    }
-
-}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
