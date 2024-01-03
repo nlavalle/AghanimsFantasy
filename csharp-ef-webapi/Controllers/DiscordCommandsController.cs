@@ -1,9 +1,4 @@
 #nullable disable
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using csharp_ef_webapi.Models;
@@ -23,7 +18,7 @@ namespace csharp_ef_webapi.Controllers
 
         // GET: api/MostGamesPlayed
         [HttpGet("MostGamesPlayed")]
-        public async Task<ActionResult<String>> GetMostGamesPlayed()
+        public async Task<ActionResult<string>> GetMostGamesPlayed()
         {
             var discordIds = await _context.DiscordIds.ToListAsync();
             var validPlayers = await _context.DiscordIds.Select(x => x.AccountId).Distinct().ToListAsync();
@@ -32,14 +27,17 @@ namespace csharp_ef_webapi.Controllers
                                     .Join(_context.MatchStatus,
                                     matchDetail => matchDetail.MatchId,
                                     matchStatus => matchStatus.MatchId,
-                                    (matchDetail, matchStatus) => new {
-                                        matchDetail, matchStatus
+                                    (matchDetail, matchStatus) => new
+                                    {
+                                        matchDetail,
+                                        matchStatus
                                     }
                                     ).Where(x => x.matchStatus.Status == 2 || x.matchStatus.Status == 3)
                                     .OrderByDescending(x => x.matchDetail.MatchId)
                                     .Take(100) // Last 100 games so it's a rolling amount
                                     .GroupBy(x => x.matchDetail.AccountId)
-                                    .Select(group => new {
+                                    .Select(group => new
+                                    {
                                         AccountId = group.Key,
                                         GamesPlayed = group.Count(x => x.matchDetail.MatchId > 0)
                                     })
@@ -47,7 +45,7 @@ namespace csharp_ef_webapi.Controllers
             var mostGamesPlayedAccount = validGames.Where(x => x.GamesPlayed == validGames.Max(games => games.GamesPlayed)).FirstOrDefault().AccountId;
             var playerName = discordIds.Where(di => di.AccountId == mostGamesPlayedAccount).FirstOrDefault().DiscordName;
 
-            if(playerName == null)
+            if (playerName == null)
             {
                 playerName = "Unmapped Player";
             }
@@ -60,29 +58,35 @@ namespace csharp_ef_webapi.Controllers
         {
             List<Feederboard> feederResponse = new List<Feederboard>();
             var discordIds = await _context.DiscordIds.ToListAsync();
-            var validPlayers =  await _context.DiscordIds.Select(x => x.AccountId).Distinct().ToListAsync();
-            foreach(var player in validPlayers) {
+            var validPlayers = await _context.DiscordIds.Select(x => x.AccountId).Distinct().ToListAsync();
+            foreach (var player in validPlayers)
+            {
                 int lastNDeaths = _context.PlayerMatchDetails
                                         .Where(pmd => pmd.AccountId == player)
                                         .Join(_context.MatchStatus,
                                         matchDetail => matchDetail.MatchId,
                                         matchStatus => matchStatus.MatchId,
-                                        (matchDetail, matchStatus) => new {
-                                            matchDetail, matchStatus
+                                        (matchDetail, matchStatus) => new
+                                        {
+                                            matchDetail,
+                                            matchStatus
                                         }
                                         ).Where(x => x.matchStatus.Status == 2 || x.matchStatus.Status == 3)
                                         .OrderByDescending(x => x.matchDetail.MatchId)
                                         .Take(20)
-                                        .Sum( x=> x.matchDetail.Deaths.HasValue ? (int)x.matchDetail.Deaths : 0);
-                var feederRow = new Feederboard();
-                feederRow.Deaths = lastNDeaths;
-                feederRow.DiscordName = discordIds.Where(di => di.AccountId == player).Select(di => di.DiscordName).FirstOrDefault();
+                                        .Sum(x => x.matchDetail.Deaths.HasValue ? (int)x.matchDetail.Deaths : 0);
+                var feederRow = new Feederboard
+                {
+                    Deaths = lastNDeaths,
+                    DiscordName = discordIds.Where(di => di.AccountId == player).Select(di => di.DiscordName).FirstOrDefault()
+                };
                 feederResponse.Add(feederRow);
             }
             feederResponse = feederResponse.OrderByDescending(x => x.Deaths).ToList();
             // Set Ranks
-            for(int i=0;i<feederResponse.Count;i++){
-                feederResponse[i].Rank = i+1;
+            for (int i = 0; i < feederResponse.Count; i++)
+            {
+                feederResponse[i].Rank = i + 1;
             }
 
             return feederResponse;

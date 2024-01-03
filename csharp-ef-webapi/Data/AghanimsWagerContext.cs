@@ -27,6 +27,14 @@ public class AghanimsWagerContext : DbContext
     public DbSet<Bromance> Bromance { get; set; }
     public DbSet<BetStreak> BetStreaks { get; set; }
     public DbSet<MatchStreak> MatchStreaks { get; set; }
+    public DbSet<League> Leagues { get; set; }
+    public DbSet<MatchHistory> MatchHistory { get; set; }
+    public DbSet<MatchHistoryPlayer> MatchHistoryPlayers { get; set; }
+    public DbSet<MatchDetail> MatchDetails { get; set; }
+    public DbSet<MatchDetailsPicksBans> MatchDetailsPicksBans { get; set; }
+    public DbSet<MatchDetailsPlayer> MatchDetailsPlayers { get; set; }
+    public DbSet<MatchDetailsPlayersAbilityUpgrade> MatchDetailsPlayersAbilityUpgrades { get; set; }
+    public DbSet<Hero> Heroes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -38,11 +46,36 @@ public class AghanimsWagerContext : DbContext
 
         modelBuilder.Entity<Bromance>()
             .HasKey(b => new { b.bro1Name, b.bro2Name });
+
+        modelBuilder.Entity<League>()
+            .HasMany(l => l.leagueMatches)
+            .WithOne()
+            .HasForeignKey(m => m.LeagueId);
+
+        modelBuilder.Entity<MatchHistory>()
+            .HasMany(mh => mh.Players)
+            .WithOne()
+            .HasForeignKey(p => p.MatchId);
+
+        modelBuilder.Entity<MatchDetail>()
+            .HasMany(md => md.PicksBans)
+            .WithOne()
+            .HasForeignKey(pb => pb.MatchId);
+
+        modelBuilder.Entity<MatchDetail>()
+            .HasMany(md => md.Players)
+            .WithOne()
+            .HasForeignKey(p => p.MatchId);
+
+        modelBuilder.Entity<MatchDetailsPlayer>()
+            .HasMany(mdp => mdp.AbilityUpgrades)
+            .WithOne()
+            .HasForeignKey(au => au.PlayerId);
     }
 
     public class StringArrayValueConverter : ValueConverter<string[], string>
     {
-        public StringArrayValueConverter() : base(le => ArrayToString(le), (s => StringToArray(s)))
+        public StringArrayValueConverter() : base(le => ArrayToString(le), s => StringToArray(s))
         {
 
         }

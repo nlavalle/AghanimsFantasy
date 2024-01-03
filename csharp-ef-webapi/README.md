@@ -18,3 +18,4 @@ Create a model of what you need then
 
 ### Adding new migrations
 `dotnet ef migrations add <MigrationName> --context AghanimsWagerContext --output-dir Migrations`
+We don't apply the ef database update right now because the database existed a long time before EF, and we don't want to blow up the whole thing rerunning all of the migrations

@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+using csharp_ef_webapi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +16,7 @@ if (builder.Environment.IsDevelopment())
                                     policy.WithOrigins("http://localhost:8080",
                                                         "http://localhost:9000")
                                         .AllowAnyHeader()
-                                        .WithMethods("GET","POST")
+                                        .WithMethods("GET", "POST")
                                         .AllowCredentials();
                                 });
         }
@@ -34,7 +34,7 @@ if (builder.Environment.IsProduction())
                                 {
                                     policy.WithOrigins("https://localhost:5001")
                                         .AllowAnyHeader()
-                                        .WithMethods("GET","POST")
+                                        .WithMethods("GET", "POST")
                                         .AllowCredentials();
                                 });
         }
@@ -51,7 +51,21 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Add WebApi Service
+builder.Services.AddScoped<DotaWebApiService>();
+
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    // Generate an instance of the service if we can hit the DB
+    var db = scope.ServiceProvider.GetRequiredService<AghanimsWagerContext>();
+    if (db.Database.CanConnect())
+    {
+        var dotaWebApiService = app.Services.GetRequiredService<DotaWebApiService>();
+    }
+
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

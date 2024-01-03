@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace csharp_ef_webapi.Migrations
 {
     [DbContext(typeof(AghanimsWagerContext))]
-    partial class AghanimsWagerContextModelSnapshot : ModelSnapshot
+    [Migration("20231231054941_MatchDetails")]
+    partial class MatchDetails
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -103,24 +105,6 @@ namespace csharp_ef_webapi.Migrations
                     b.HasKey("DiscordId");
 
                     b.ToTable("discord_ids", "Kali");
-                });
-
-            modelBuilder.Entity("csharp_ef_webapi.Models.Hero", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Name")
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("dota_heroes", "Kali");
                 });
 
             modelBuilder.Entity("csharp_ef_webapi.Models.League", b =>
