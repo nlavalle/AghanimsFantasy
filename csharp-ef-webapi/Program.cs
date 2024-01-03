@@ -42,7 +42,7 @@ if (builder.Environment.IsProduction())
 }
 
 // Add Database
-builder.Services.AddDbContextFactory<AghanimsWagerContext>();
+builder.Services.AddDbContextFactory<AghanimsFantasyContext>();
 
 // Add services to the container.
 
@@ -59,7 +59,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     // Generate an instance of the service if we can hit the DB
-    var db = scope.ServiceProvider.GetRequiredService<AghanimsWagerContext>();
+    var db = scope.ServiceProvider.GetRequiredService<AghanimsFantasyContext>();
     if (db.Database.CanConnect())
     {
         var dotaWebApiService = app.Services.GetRequiredService<DotaWebApiService>();

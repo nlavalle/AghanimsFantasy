@@ -11,5 +11,4 @@ public class League
     public string? name { get; set; }
     [Column("is_active")]
     public bool isActive { get; set; }
-    public List<MatchHistory> leagueMatches { get; set; } = new List<MatchHistory>();
 }

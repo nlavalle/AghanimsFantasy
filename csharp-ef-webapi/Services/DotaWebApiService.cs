@@ -10,7 +10,7 @@ public class DotaWebApiService
     private readonly string _steamKey;
     private readonly HttpClient _httpClient;
     private readonly ILogger<DotaWebApiService> _logger;
-    private readonly AghanimsWagerContext _dbContext;
+    private readonly AghanimsFantasyContext _dbContext;
 
     // Serialized tasks nothing concurrent, because we dependency inject the dbContext if we run parallel tasks it's
     // going to blow up if it tries to commit two transactions at the same time with the same context.
@@ -18,7 +18,7 @@ public class DotaWebApiService
     private const long _delayBetweenRequests = 10_000_000 / 2; // Constant for ticks in a second divided by 2
     IConfiguration _configuration;
 
-    public DotaWebApiService(ILogger<DotaWebApiService> logger, IConfiguration configuration, AghanimsWagerContext dbContext)
+    public DotaWebApiService(ILogger<DotaWebApiService> logger, IConfiguration configuration, AghanimsFantasyContext dbContext)
     {
         _logger = logger;
         _dbContext = dbContext;

@@ -14,8 +14,8 @@ docker run -p 5001:5001 -e ASPNETCORE_HTTPS_PORT=5001 -e ASPNETCORE_Kestrel__Cer
 
 ### Adding new controllers
 Create a model of what you need then
-` dotnet aspnet-codegenerator controller -name BalanceLedgerController -async -api -m BalanceLedger -dc AghanimsWagerContext -outDir Controllers`
+` dotnet aspnet-codegenerator controller -name BalanceLedgerController -async -api -m BalanceLedger -dc AghanimsFantasyContext -outDir Controllers`
 
 ### Adding new migrations
-`dotnet ef migrations add <MigrationName> --context AghanimsWagerContext --output-dir Migrations`
+`dotnet ef migrations add <MigrationName> --context AghanimsFantasyContext --output-dir Migrations`
 We don't apply the ef database update right now because the database existed a long time before EF, and we don't want to blow up the whole thing rerunning all of the migrations

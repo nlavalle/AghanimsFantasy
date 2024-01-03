@@ -9,9 +9,9 @@ namespace csharp_ef_webapi.Controllers
     [ApiController]
     public class BalanceLedgerController : ControllerBase
     {
-        private readonly AghanimsWagerContext _context;
+        private readonly AghanimsFantasyContext _context;
 
-        public BalanceLedgerController(AghanimsWagerContext context)
+        public BalanceLedgerController(AghanimsFantasyContext context)
         {
             _context = context;
         }

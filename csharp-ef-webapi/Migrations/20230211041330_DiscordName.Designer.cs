@@ -2,14 +2,12 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace csharp_ef_webapi.Migrations
 {
-    [DbContext(typeof(AghanimsWagerContext))]
+    [DbContext(typeof(AghanimsFantasyContext))]
     [Migration("20230211041330_DiscordName")]
     partial class DiscordName
     {
@@ -17,7 +15,7 @@ namespace csharp_ef_webapi.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasDefaultSchema("Kali")
+                .HasDefaultSchema("nadcl")
                 .HasAnnotation("ProductVersion", "6.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -38,7 +36,7 @@ namespace csharp_ef_webapi.Migrations
 
                     b.HasKey("DiscordId");
 
-                    b.ToTable("balance_ledger", "Kali");
+                    b.ToTable("balance_ledger", "nadcl");
                 });
 
             modelBuilder.Entity("csharp_ef_webapi.Models.DiscordIds", b =>
@@ -65,7 +63,7 @@ namespace csharp_ef_webapi.Migrations
 
                     b.HasKey("DiscordId");
 
-                    b.ToTable("discord_ids", "Kali");
+                    b.ToTable("discord_ids", "nadcl");
                 });
 #pragma warning restore 612, 618
         }

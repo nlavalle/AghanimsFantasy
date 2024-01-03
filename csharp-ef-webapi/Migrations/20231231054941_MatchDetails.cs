@@ -11,7 +11,7 @@ namespace csharp_ef_webapi.Migrations
         {
             migrationBuilder.CreateTable(
                 name: "dota_match_details",
-                schema: "Kali",
+                schema: "nadcl",
                 columns: table => new
                 {
                     match_id = table.Column<long>(type: "bigint", nullable: false)
@@ -43,7 +43,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.CreateTable(
                 name: "dota_match_history_players",
-                schema: "Kali",
+                schema: "nadcl",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
@@ -61,7 +61,7 @@ namespace csharp_ef_webapi.Migrations
                     table.ForeignKey(
                         name: "FK_dota_match_history_players_dota_match_history_match_id",
                         column: x => x.match_id,
-                        principalSchema: "Kali",
+                        principalSchema: "nadcl",
                         principalTable: "dota_match_history",
                         principalColumn: "match_id",
                         onDelete: ReferentialAction.Cascade);
@@ -69,7 +69,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.CreateTable(
                 name: "dota_match_details_picks_bans",
-                schema: "Kali",
+                schema: "nadcl",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
@@ -86,7 +86,7 @@ namespace csharp_ef_webapi.Migrations
                     table.ForeignKey(
                         name: "FK_dota_match_details_picks_bans_dota_match_details_match_id",
                         column: x => x.match_id,
-                        principalSchema: "Kali",
+                        principalSchema: "nadcl",
                         principalTable: "dota_match_details",
                         principalColumn: "match_id",
                         onDelete: ReferentialAction.Cascade);
@@ -94,7 +94,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.CreateTable(
                 name: "dota_match_details_players",
-                schema: "Kali",
+                schema: "nadcl",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
@@ -143,7 +143,7 @@ namespace csharp_ef_webapi.Migrations
                     table.ForeignKey(
                         name: "FK_dota_match_details_players_dota_match_details_match_id",
                         column: x => x.match_id,
-                        principalSchema: "Kali",
+                        principalSchema: "nadcl",
                         principalTable: "dota_match_details",
                         principalColumn: "match_id",
                         onDelete: ReferentialAction.Cascade);
@@ -151,7 +151,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.CreateTable(
                 name: "dota_match_details_players_ability_upgrades",
-                schema: "Kali",
+                schema: "nadcl",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
@@ -167,7 +167,7 @@ namespace csharp_ef_webapi.Migrations
                     table.ForeignKey(
                         name: "FK_dota_match_details_players_ability_upgrades_dota_match_deta~",
                         column: x => x.player_id,
-                        principalSchema: "Kali",
+                        principalSchema: "nadcl",
                         principalTable: "dota_match_details_players",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -175,25 +175,25 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_dota_match_details_picks_bans_match_id",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "dota_match_details_picks_bans",
                 column: "match_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_dota_match_details_players_match_id",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "dota_match_details_players",
                 column: "match_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_dota_match_details_players_ability_upgrades_player_id",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "dota_match_details_players_ability_upgrades",
                 column: "player_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_dota_match_history_players_match_id",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "dota_match_history_players",
                 column: "match_id");
         }
@@ -202,23 +202,23 @@ namespace csharp_ef_webapi.Migrations
         {
             migrationBuilder.DropTable(
                 name: "dota_match_details_picks_bans",
-                schema: "Kali");
+                schema: "nadcl");
 
             migrationBuilder.DropTable(
                 name: "dota_match_details_players_ability_upgrades",
-                schema: "Kali");
+                schema: "nadcl");
 
             migrationBuilder.DropTable(
                 name: "dota_match_history_players",
-                schema: "Kali");
+                schema: "nadcl");
 
             migrationBuilder.DropTable(
                 name: "dota_match_details_players",
-                schema: "Kali");
+                schema: "nadcl");
 
             migrationBuilder.DropTable(
                 name: "dota_match_details",
-                schema: "Kali");
+                schema: "nadcl");
         }
     }
 }

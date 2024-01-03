@@ -11,7 +11,7 @@ namespace csharp_ef_webapi.Migrations
         {
             migrationBuilder.CreateTable(
                 name: "dota_teams",
-                schema: "Kali",
+                schema: "nadcl",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
@@ -43,7 +43,7 @@ namespace csharp_ef_webapi.Migrations
         {
             migrationBuilder.DropTable(
                 name: "dota_teams",
-                schema: "Kali");
+                schema: "nadcl");
         }
     }
 }

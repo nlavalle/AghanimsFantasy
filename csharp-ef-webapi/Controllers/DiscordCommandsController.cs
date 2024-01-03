@@ -9,9 +9,9 @@ namespace csharp_ef_webapi.Controllers
     [ApiController]
     public class DiscordCommandsController : ControllerBase
     {
-        private readonly AghanimsWagerContext _context;
+        private readonly AghanimsFantasyContext _context;
 
-        public DiscordCommandsController(AghanimsWagerContext context)
+        public DiscordCommandsController(AghanimsFantasyContext context)
         {
             _context = context;
         }

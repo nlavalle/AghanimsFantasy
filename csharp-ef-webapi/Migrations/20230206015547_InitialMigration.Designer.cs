@@ -2,14 +2,12 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace csharp_ef_webapi.Migrations
 {
-    [DbContext(typeof(AghanimsWagerContext))]
+    [DbContext(typeof(AghanimsFantasyContext))]
     [Migration("20230206015547_InitialMigration")]
     partial class InitialMigration
     {

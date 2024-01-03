@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using csharp_ef_webapi.Models;
 
-public class AghanimsWagerContext : DbContext
+public class AghanimsFantasyContext : DbContext
 {
     IConfiguration _configuration;
-    public AghanimsWagerContext(IConfiguration configuration, DbContextOptions<AghanimsWagerContext> options)
+    public AghanimsFantasyContext(IConfiguration configuration, DbContextOptions<AghanimsFantasyContext> options)
         : base(options)
     {
         _configuration = configuration;
@@ -15,7 +15,7 @@ public class AghanimsWagerContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
         // connect to sqlite database
-        var conn_string = _configuration.GetConnectionString("AghanimsWagerDatabase");
+        var conn_string = _configuration.GetConnectionString("AghanimsFantasyDatabase");
         conn_string = conn_string.Replace("{SQL_USER}", Environment.GetEnvironmentVariable("SQL_USER"));
         conn_string = conn_string.Replace("{SQL_PASSWORD}", Environment.GetEnvironmentVariable("SQL_PASSWORD"));
         options.UseNpgsql(conn_string);
@@ -39,19 +39,14 @@ public class AghanimsWagerContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.HasDefaultSchema("Kali");
-        modelBuilder.Entity<BalanceLedger>().ToTable("balance_ledger", "Kali");
+        modelBuilder.HasDefaultSchema("nadcl");
+        modelBuilder.Entity<BalanceLedger>().ToTable("balance_ledger", "nadcl");
 
         modelBuilder.Entity<PlayerMatchDetails>()
             .HasKey(pmd => new { pmd.MatchId, pmd.PlayerSlot });
 
         modelBuilder.Entity<Bromance>()
             .HasKey(b => new { b.bro1Name, b.bro2Name });
-
-        modelBuilder.Entity<League>()
-            .HasMany(l => l.leagueMatches)
-            .WithOne()
-            .HasForeignKey(m => m.LeagueId);
 
         modelBuilder.Entity<MatchHistory>()
             .HasMany(mh => mh.Players)
