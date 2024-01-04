@@ -1,3 +1,5 @@
 .vscode
 vue-microfrontend/aghanims-wager-spa.tar
 environments/development/ssl_certs
+frontend/aghanims-fantasy-spa.tar
+csharp-ef-webapi/aghanims-fantasy-webapi.tar
