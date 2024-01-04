@@ -39,6 +39,58 @@ namespace csharp_ef_webapi.Controllers
             return league;
         }
 
+        // GET: api/League/5/Match/History
+        [HttpGet("{leagueId}/match/history")]
+        public async Task<ActionResult<List<MatchHistory>>> GetLeagueMatchHistory(int leagueId)
+        {
+            var matches = await _dbContext.MatchHistory
+                .Where(md => md.LeagueId == leagueId)
+                .Include(md => md.Players)
+                .ToListAsync();
+
+            if (matches == null || matches.Count == 0)
+            {
+                return NotFound();
+            }
+
+            return matches;
+        }
+
+        // GET: api/League/5/Match/Details
+        [HttpGet("{leagueId}/match/details")]
+        public async Task<ActionResult<List<MatchDetail>>> GetLeagueMatchDetails(int leagueId)
+        {
+            var matches = await _dbContext.MatchDetails
+                .Where(md => md.LeagueId == leagueId)
+                .Include(md => md.PicksBans)
+                .ToListAsync();
+
+            if (matches == null || matches.Count == 0)
+            {
+                return NotFound();
+            }
+
+            return matches;
+        }
+
+        // GET: api/League/5/Match/6/Details
+        [HttpGet("{leagueId}/match/{matchId}/details")]
+        public async Task<ActionResult<MatchDetail>> GetLeagueMatchIdDetails(int leagueId, long matchId)
+        {
+            var matches = await _dbContext.MatchDetails
+                .Where(md => md.LeagueId == leagueId && md.MatchId == matchId)
+                .Include(md => md.PicksBans)
+                .Include(md => md.Players).ThenInclude(p => p.AbilityUpgrades)
+                .FirstOrDefaultAsync();
+
+            if (matches == null)
+            {
+                return NotFound();
+            }
+
+            return matches;
+        }
+
         // PUT: api/League/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]

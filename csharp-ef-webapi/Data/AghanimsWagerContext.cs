@@ -8,7 +8,7 @@ public class AghanimsFantasyContext : DbContext
     public AghanimsFantasyContext()
     {
     }
-    
+
     public AghanimsFantasyContext(DbContextOptions<AghanimsFantasyContext> options)
         : base(options)
     {
