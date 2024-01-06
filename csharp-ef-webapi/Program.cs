@@ -1,5 +1,12 @@
 using csharp_ef_webapi.Services;
+using csharp_ef_webapi.Services.OAuth;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Http.Headers;
+using System.Security.Claims;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,7 +64,54 @@ builder.Services.AddDbContext<AghanimsFantasyContext>(
 // Add persistent HttpClient
 builder.Services.AddHttpClient();
 
-// Add services to the container.
+// Add auth services
+builder.Services.AddDistributedMemoryCache(); // Required for Session
+builder.Services.AddSession();
+builder.Services.AddAntiforgery();
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = "OAuth";
+    })
+    .AddCookie()
+    .AddOAuth("OAuth", options =>
+    {
+        options.ClientId = Environment.GetEnvironmentVariable("DISCORD_APP_ID") ?? "";
+        options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_APP_SECRET") ?? "";
+
+        options.CallbackPath = new PathString("/api/auth/callback");
+        options.AuthorizationEndpoint = DiscordDefaults.AuthorizationEndpoint;
+        options.TokenEndpoint = DiscordDefaults.TokenEndpoint;
+        options.UserInformationEndpoint = DiscordDefaults.UserInformationEndpoint;
+        options.Scope.Add("identify");
+        options.SaveTokens = true;
+
+        options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id", ClaimValueTypes.UInteger64);
+        options.ClaimActions.MapJsonKey(ClaimTypes.Name, "username", ClaimValueTypes.String);
+        options.ClaimActions.MapJsonKey("urn:discord:discriminator", "discriminator", ClaimValueTypes.UInteger32);
+        options.ClaimActions.MapJsonKey("urn:discord:avatar", "avatar", ClaimValueTypes.String);
+        options.ClaimActions.MapJsonKey("urn:discord:verified", "verified", ClaimValueTypes.Boolean);
+
+        // Call the discord @me endpoint to get user info to set in httpcontext
+        options.Events = new OAuthEvents
+        {
+            OnCreatingTicket = async context =>
+            {
+                // Get user info from the userinfo endpoint and use it to populate user claims
+                var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
+                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
+                response.EnsureSuccessStatusCode();
+
+                var user = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+
+                context.RunClaimActions(user);
+            }
+        };
+    });
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -80,7 +134,10 @@ app.UseHttpsRedirection();
 
 app.UseCors(vueFrontEndOrigins);
 
+app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseSession();
 
 app.MapControllers();
 
