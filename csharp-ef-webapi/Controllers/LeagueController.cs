@@ -153,5 +153,52 @@ namespace csharp_ef_webapi.Controllers
         {
             return _dbContext.Leagues.Any(e => e.id == id);
         }
+
+        /*
+        *** TEAM Actions
+        */
+        // GET: api/League/Teams
+        [HttpGet("teams")]
+        public async Task<ActionResult<IEnumerable<Team>>> GetTeams()
+        {
+            return await _dbContext.Teams
+                .ToListAsync();
+        }
+
+        /*
+        *** HERO Actions
+        */
+        // GET: api/League/Heroes
+        [HttpGet("heroes")]
+        public async Task<ActionResult<IEnumerable<Hero>>> GetHeroes()
+        {
+            return await _dbContext.Heroes
+                .ToListAsync();
+        }
+
+        /*
+        *** PLAYER Actions
+        */
+        // GET: api/League/5/Players
+        [HttpGet("{leagueId}/players")]
+        public async Task<ActionResult<IEnumerable<MatchDetailsPlayer>>> GetMatchPlayers(int? leagueId)
+        {
+            return await _dbContext.MatchDetails
+                .Where(md => md.LeagueId == leagueId || leagueId == null)
+                .SelectMany(md => md.Players)
+                .Where(p => p.LeaverStatus != 1) // Filter out games players left (typically false starts)
+                .ToListAsync();
+        }
+
+        /*
+        *** ACCOUNTS Actions
+        */
+        // GET: api/League/accounts
+        [HttpGet("accounts")]
+        public async Task<ActionResult<IEnumerable<Account>>> GetAccounts()
+        {
+            return await _dbContext.Accounts
+                .ToListAsync();
+        }
     }
 }
