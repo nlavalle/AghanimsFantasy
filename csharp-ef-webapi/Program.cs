@@ -1,5 +1,4 @@
 using csharp_ef_webapi.Services;
-using csharp_ef_webapi.Services.OAuth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
@@ -81,9 +80,9 @@ builder.Services
         options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_APP_SECRET") ?? "";
 
         options.CallbackPath = new PathString("/api/auth/callback");
-        options.AuthorizationEndpoint = DiscordDefaults.AuthorizationEndpoint;
-        options.TokenEndpoint = DiscordDefaults.TokenEndpoint;
-        options.UserInformationEndpoint = DiscordDefaults.UserInformationEndpoint;
+        options.AuthorizationEndpoint = "https://discordapp.com/api/oauth2/authorize";
+        options.TokenEndpoint = "https://discordapp.com/api/oauth2/token";
+        options.UserInformationEndpoint = "https://discordapp.com/api/users/@me";
         options.Scope.Add("identify");
         options.SaveTokens = true;
 
