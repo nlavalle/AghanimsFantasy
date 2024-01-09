@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace csharp_ef_webapi.Migrations
 {
     [DbContext(typeof(AghanimsFantasyContext))]
-    partial class AghanimsFantasyContextModelSnapshot : ModelSnapshot
+    [Migration("20240107094025_FantasyDraft")]
+    partial class FantasyDraft
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -180,9 +182,6 @@ namespace csharp_ef_webapi.Migrations
 
                     b.Property<long>("FantasyDraftId")
                         .HasColumnType("bigint");
-
-                    b.Property<int>("DraftOrder")
-                        .HasColumnType("integer");
 
                     b.HasKey("FantasyPlayerId", "FantasyDraftId");
 

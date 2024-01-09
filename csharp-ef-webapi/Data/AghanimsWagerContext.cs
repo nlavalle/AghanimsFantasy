@@ -31,6 +31,9 @@ public class AghanimsFantasyContext : DbContext
     public DbSet<Account> Accounts { get; set; }
     public DbSet<Hero> Heroes { get; set; }
     public DbSet<Team> Teams { get; set; }
+    public DbSet<FantasyDraft> FantasyDrafts { get; set; }
+    public DbSet<FantasyPlayer> FantasyPlayers { get; set; }
+    public DbSet<FantasyDraftPlayer> FantasyDraftPlayers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -62,6 +65,29 @@ public class AghanimsFantasyContext : DbContext
             .HasMany(mdp => mdp.AbilityUpgrades)
             .WithOne()
             .HasForeignKey(au => au.PlayerId);
+
+        modelBuilder.Entity<FantasyPlayer>()
+            .HasOne(fp => fp.Team)
+            .WithMany()
+            .HasPrincipalKey(t => t.Id)
+            .HasForeignKey(fp => fp.TeamId)
+            .OnDelete(DeleteBehavior.ClientNoAction);
+
+        modelBuilder.Entity<FantasyPlayer>()
+            .HasOne(fp => fp.DotaAccount)
+            .WithOne()
+            .HasPrincipalKey<Account>(a => a.Id)
+            .HasForeignKey<FantasyPlayer>(fp => fp.DotaAccountId);
+
+        modelBuilder.Entity<FantasyDraftPlayer>()
+            .HasKey(fdp => new { fdp.FantasyPlayerId, fdp.FantasyDraftId });
+
+        modelBuilder.Entity<FantasyDraftPlayer>()
+            .HasOne(fdp => fdp.FantasyPlayer)
+            .WithMany()
+            .HasPrincipalKey(fp => fp.Id)
+            .HasForeignKey(fdp => fdp.FantasyPlayerId)
+            .OnDelete(DeleteBehavior.ClientSetNull);
     }
 
     public class StringArrayValueConverter : ValueConverter<string[], string>
