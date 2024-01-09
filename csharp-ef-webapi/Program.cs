@@ -83,6 +83,7 @@ builder.Services
         options.AuthorizationEndpoint = "https://discordapp.com/api/oauth2/authorize";
         options.TokenEndpoint = "https://discordapp.com/api/oauth2/token";
         options.UserInformationEndpoint = "https://discordapp.com/api/users/@me";
+        options.AccessDeniedPath = new PathString("/api/auth/accessdenied");
         options.Scope.Add("identify");
         options.SaveTokens = true;
 

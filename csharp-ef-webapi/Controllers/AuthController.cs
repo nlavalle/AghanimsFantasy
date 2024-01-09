@@ -18,19 +18,34 @@ namespace csharp_ef_webapi.Controllers
         public IActionResult DiscordIsAuthenicated()
         {
             bool IsAuthenticated = HttpContext.User.Identity.IsAuthenticated;
-            return Ok(IsAuthenticated);
+            return Ok(new { authenticated = IsAuthenticated });
         }
 
-        // GET: api/auth/authorize
+        // GET: api/auth/authorization
         [Authorize]
-        [HttpGet("authorize")]
-        public IActionResult DiscordAuthorize()
+        [HttpGet("authorization")]
+        public IActionResult DiscordAuthorization()
         {
             var userClaims = HttpContext.User.Claims
                 .Select(c => new { c.Type, c.Value })
                 .ToList();
 
             return Ok(userClaims);
+        }
+
+        // GET: api/auth/login
+        [Authorize]
+        [HttpGet("login")]
+        public IActionResult DiscordLogin()
+        {
+            return Ok("Login Successful");
+        }
+
+        // GET: api/auth/accessdenied
+        [HttpGet("accessdenied")]
+        public IActionResult DiscordLoginAccessDenied()
+        {
+            return BadRequest("OAuth Challenge failed");
         }
 
         // GET: api/auth/signout
