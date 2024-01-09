@@ -6,7 +6,7 @@ export const localApiService = {
     getLeagues() {
         return fetch(`${baseUrl}/league`)
             .then(function (response) {
-                if (response.status != 200) {
+                if (!response.ok) {
                     throw response.status;
                 } else {
                     return response.json();
@@ -23,7 +23,7 @@ export const localApiService = {
     getLeagueMatchHistory(leagueId) {
         return fetch(`${baseUrl}/league/${leagueId}/match/history`)
             .then(function (response) {
-                if (response.status != 200) {
+                if (!response.ok) {
                     throw response.status;
                 } else {
                     return response.json();
@@ -40,7 +40,7 @@ export const localApiService = {
     getLeaguePlayerData(leagueId) {
         return fetch(`${baseUrl}/league/${leagueId}/players`)
             .then(function (response) {
-                if (response.status != 200) {
+                if (!response.ok) {
                     throw response.status;
                 } else {
                     return response.json();
@@ -57,7 +57,7 @@ export const localApiService = {
     getTeams() {
         return fetch(`${baseUrl}/league/teams`)
             .then(function (response) {
-                if (response.status != 200) {
+                if (!response.ok) {
                     throw response.status;
                 } else {
                     return response.json();
@@ -74,7 +74,7 @@ export const localApiService = {
     getHeroes() {
         return fetch(`${baseUrl}/league/heroes`)
             .then(function (response) {
-                if (response.status != 200) {
+                if (!response.ok) {
                     throw response.status;
                 } else {
                     return response.json();
@@ -91,7 +91,7 @@ export const localApiService = {
     getAccounts() {
         return fetch(`${baseUrl}/league/accounts`)
             .then(function (response) {
-                if (response.status != 200) {
+                if (!response.ok) {
                     throw response.status;
                 } else {
                     return response.json();
@@ -104,5 +104,73 @@ export const localApiService = {
                 console.error('Error fetching data:', error);
                 throw error;
             });
+
     },
+    getFantasyPlayers(leagueId) {
+        return fetch(`${baseUrl}/fantasy/players/${leagueId}`)
+            .then(function (response) {
+                if (!response.ok) {
+                    throw response.status;
+                } else {
+                    return response.json();
+                }
+            }.bind(this))
+            .then(function (data) {
+                return data;
+            }.bind(this))
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                throw error;
+            });
+    },
+    getFantasyDraft(leagueId) {
+        return fetch(`${baseUrl}/fantasy/draft/${leagueId}`)
+            .then(function (response) {
+                if (!response.ok) {
+                    throw response.status;
+                } else {
+                    return response.json();
+                }
+            }.bind(this))
+            .then(function (data) {
+                return data;
+            }.bind(this))
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                throw error;
+            });
+    },
+    saveFantasyDraft(
+        user,
+        league,
+        draftPickArray
+    ) {
+        var updateRequest = {
+            leagueId: league.id,
+            disordAccountId: user.id,
+            draftPickOne: draftPickArray[0].id,
+            draftPickTwo: draftPickArray[1].id,
+            draftPickThree: draftPickArray[2].id,
+            draftPickFour: draftPickArray[3].id,
+            draftPickFive: draftPickArray[4].id,
+        }
+        return fetch(`${baseUrl}/fantasy/draft/${league.id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updateRequest),
+        })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw response.status;
+                } else {
+                    return response.json();
+                }
+            }.bind(this))
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                throw error;
+            });
+    }
 };

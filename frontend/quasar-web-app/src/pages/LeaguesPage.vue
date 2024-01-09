@@ -2,8 +2,8 @@
     <div class="flex-container">
         <div class="row">
             <div class="col left-fixed">
-                <q-select v-model="selectedLeague" :options="leagues" option-label="name" option-value="id" dark
-                    label-color="white" label="League" @update:model-value="selectLeague" />
+                <!-- <q-select v-model="selectedLeague" :options="leagues" option-label="name" option-value="id" dark
+                    label-color="white" label="League" @update:model-value="selectLeague" /> -->
                 <q-select v-model="selectedSeriesType" :options="seriesTypeOptions" option-label="name" option-value="id"
                     dark label-color="white" label="Series Type" />
             </div>
@@ -20,8 +20,8 @@
                     :description="(playerMostAssists.totalAssists ?? 0) + ' Assists'" />
             </div>
             <div class="col col-shrink">
-                <award-card-component class="award" :name="(playerMostLastHits.accountName ?? '')" award-title="Most Last Hits"
-                    :description="(playerMostLastHits.totalLastHits ?? 0) + ' Last Hits'" />
+                <award-card-component class="award" :name="(playerMostLastHits.accountName ?? '')"
+                    award-title="Most Last Hits" :description="(playerMostLastHits.totalLastHits ?? 0) + ' Last Hits'" />
             </div>
             <div class="col col-shrink">
                 <award-card-component class="award" :name="(playerMostDenies.accountName ?? '')" award-title="Most Denies"
@@ -29,7 +29,8 @@
             </div>
 
             <div class="col col-shrink">
-                <award-card-component class="award" :name="(playerMostNetworth.accountName ?? '')" award-title="Most Net Worth"
+                <award-card-component class="award" :name="(playerMostNetworth.accountName ?? '')"
+                    award-title="Most Net Worth"
                     :description="(playerMostNetworth.totalNetworth ?? 0) + ' Total Net Worth'" />
             </div>
         </div>
@@ -45,6 +46,7 @@
 <script>
 import { ref } from 'vue';
 import { localApiService } from 'src/services/localApiService';
+import { useLeagueStore } from 'src/stores/league';
 import AwardCardComponent from 'components/AwardCardComponent.vue';
 
 export default {
@@ -53,6 +55,8 @@ export default {
         AwardCardComponent,
     },
     setup() {
+        const leagueStore = useLeagueStore();
+
         // Data variables
         const leagues = ref([]);
         const players = ref([]);
@@ -62,6 +66,8 @@ export default {
         const leagueMatchHistory = ref([]);
 
         return {
+            leagueStore,
+
             leagues,
             players,
             teams,
@@ -70,7 +76,7 @@ export default {
             leagueMatchHistory,
 
             // Render variables
-            selectedLeague: ref(null),
+            // selectedLeague: ref(null),
             selectedSeriesType: ref({
                 id: "-1",
                 name: "All",
@@ -106,6 +112,7 @@ export default {
             this.teams = await localApiService.getTeams();
             this.heroes = await localApiService.getHeroes();
             this.accounts = await localApiService.getAccounts();
+            this.loadLeagueData();
         } catch (error) {
             console.error('Error in component:', error);
         }
@@ -145,7 +152,6 @@ export default {
             // Convert the object values back to an array
             const aggregatedPlayers = Object.values(aggregatedScores).sort((a, b) => b.totalKills - a.totalKills);
 
-            console.log(aggregatedPlayers);
             return aggregatedPlayers;
         },
         playerMostKills() {
@@ -218,21 +224,24 @@ export default {
         }
     },
     methods: {
-        selectLeague(selectedLeague) {
-            localApiService.getLeagueMatchHistory(selectedLeague.id)
-                .then(data => {
-                    this.leagueMatchHistory = data;
-                })
-                .catch(error => {
-                    console.error('Error in component:', error);
-                });
-            localApiService.getLeaguePlayerData(selectedLeague.id)
-                .then(data => {
-                    this.players = data;
-                })
-                .catch(error => {
-                    console.error('Error in component:', error);
-                });
+        loadLeagueData() {
+            if (this.leagueStore.selectedLeague) {
+                localApiService.getLeagueMatchHistory(this.leagueStore.selectedLeague.id)
+                    .then(data => {
+                        this.leagueMatchHistory = data;
+                    })
+                    .catch(error => {
+                        console.error('Error in component:', error);
+                    });
+                localApiService.getLeaguePlayerData(this.leagueStore.selectedLeague.id)
+                    .then(data => {
+                        this.players = data;
+                    })
+                    .catch(error => {
+                        console.error('Error in component:', error);
+                    });
+            }
+
         }
     }
 }

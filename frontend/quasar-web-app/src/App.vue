@@ -1,23 +1,5 @@
 <template>
   <q-layout view="hHh lpR fFf" id="app">
-
-    <q-header elevated class="bg-primary text-white" height-hint="98">
-      <q-toolbar>
-        <q-toolbar-title>
-          <q-avatar>
-            <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
-          </q-avatar>
-          Title
-        </q-toolbar-title>
-      </q-toolbar>
-
-      <q-tabs align="left">
-        <q-route-tab to="/about" label="About" />
-        <q-route-tab to="/players" label="Players" />
-        <q-route-tab to="/matches" label="Matches" />
-      </q-tabs>
-    </q-header>
-
     <q-page-container>
       <router-view />
     </q-page-container>
@@ -40,7 +22,7 @@ export default defineComponent({
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  margin-top: 20px;
 }
 
 .nav-container {
@@ -56,7 +38,8 @@ export default defineComponent({
 
 body {
   margin: 0;
-  background: radial-gradient(ellipse farthest-corner at center top, #6492f3 0%, #416de7 100%);
+  background: radial-gradient(ellipse farthest-corner at center top, #373c4b 0%, #192038 100%);
+  /* background-color:#192038; */
   color: #fff;
 }
 </style>

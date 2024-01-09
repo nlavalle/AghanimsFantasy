@@ -31,7 +31,6 @@ module.exports = configure(function (/* ctx */) {
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
     boot: [
 
-
     ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
@@ -99,6 +98,7 @@ module.exports = configure(function (/* ctx */) {
           pathRewrite: {
             '^/api': '/api'
           },
+          secure: false,
           onProxyReq(proxyReq) {
             proxyReq.setHeader('Access-Control-Allow-Origin', '*');
             proxyReq.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -214,7 +214,7 @@ module.exports = configure(function (/* ctx */) {
       builder: {
         // https://www.electron.build/configuration/configuration
 
-        appId: 'aghanims-wager-web-app'
+        appId: 'aghanims-fantasy-web-app'
       }
     },
 

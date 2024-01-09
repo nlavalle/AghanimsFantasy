@@ -1,7 +1,7 @@
 <template>
   <div class="about">
     <p class="text-white">
-      This is a sample about page.
+      NADCL Fantasy Draft, click the fantasy tab to get started.
     </p>
   </div>
 </template>
