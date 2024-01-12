@@ -1,12 +1,11 @@
 <template>
-    <q-select filled :modelValue="modelValue" @update:model-value="updateSelectedOption" :options="selectOptions" option-label="name" dark
-        :label="selectLabel ?? ''" color="teal" clearable options-selected-class="text-deep-orange-8">
+    <q-select ref="expandSelect" filled :modelValue="modelValue" @update:model-value="updateSelectedOption"
+        :options="selectOptions" option-label="name" dark :label="selectLabel ?? ''" color="teal" clearable>
         <template v-slot:option="scope">
-            <q-expansion-item expand-separator :default-opened="hasChild(scope)"
-                header-class="text-weight-bold" :label="scope.opt.label">
+            <q-expansion-item expand-separator :default-opened="hasChild(scope)" header-class="text-weight-bold"
+                :label="scope.opt.label">
                 <template v-for="child in scope.opt.options" :key="child.label">
-                    <q-item clickable v-ripple v-close-popup @click="changeOption(child)"
-                        :class="{ 'bg-light-blue-10': modelValue === child }">
+                    <q-item clickable @click="changeOption(child)" :class="{ 'bg-light-blue-10': modelValue === child }">
                         <q-item-section>
                             <q-item-label class="q-ml-md">{{ child.name }}</q-item-label>
                         </q-item-section>
@@ -18,7 +17,6 @@
 </template>
 
 <script>
-
 export default {
     name: 'SelectExpansionGroup',
     props: {
@@ -45,10 +43,12 @@ export default {
         },
         changeOption(option) {
             this.$emit('update:modelValue', option);
+            this.$refs.expandSelect.hidePopup(); // v-close-popup on the q-item freaks out with the dropdown options changing so we need to call it here
         },
-        updateSelectedOption(event) {
-            this.$emit('update:modelValue', event);
-        }
+        updateSelectedOption(option) {
+            this.$emit('update:modelValue', option);
+            this.$refs.expandSelect.hidePopup();
+        },
     }
 };
 </script>

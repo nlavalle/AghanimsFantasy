@@ -1,14 +1,19 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout>
     <q-header elevated class="header text-white" height-hint="40">
       <q-toolbar>
-        <LeagueSelector />
+        <LeagueSelector class="league-selector" />
 
-        <q-toolbar-title class="title">
+        <q-toolbar-title v-if="isWideScreen" class="title">
           <q-avatar>
-            <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
+            <img src="~assets/BannerAvatar.png">
           </q-avatar>
           Aghanim's Fantasy
+        </q-toolbar-title>
+        <q-toolbar-title v-else class="title">
+          <q-avatar>
+            <img src="~assets/BannerAvatar.png">
+          </q-avatar>
         </q-toolbar-title>
 
         <q-space />
@@ -17,7 +22,7 @@
       <q-separator color="white" />
       <q-tabs align="left">
         <q-route-tab to="/about" label="About" />
-        <q-route-tab to="/league" label="Leagues" />
+        <!-- <q-route-tab to="/league" label="Leagues" /> -->
         <q-route-tab to="/fantasy" label="Fantasy" />
       </q-tabs>
     </q-header>
@@ -38,6 +43,11 @@ export default defineComponent({
   components: {
     LoginDiscord,
     LeagueSelector,
+  },
+  computed: {
+    isWideScreen() {
+      return window.outerWidth >= 600;
+    }
   }
 });
 </script>
@@ -45,7 +55,10 @@ export default defineComponent({
 <style>
 .debug {
   border: 1px solid red;
-  padding: 10px;
+}
+
+.league-selector {
+  min-width: 180px;
 }
 
 .header {

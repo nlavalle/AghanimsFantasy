@@ -1,33 +1,42 @@
 <template>
   <div class="flex-container">
     <div v-if="authenticated" style="width:100%">
-      <div class="row">
-        <div class="col col-2 draft-player">
-          <select-expansion-group v-model="draftedPlayerOne" :select-options="fantasyTeamPlayers"
-            select-label="Draft First Player" />
-        </div>
-        <div class="col col-2 draft-player">
-          <select-expansion-group v-model="draftedPlayerTwo" :select-options="fantasyTeamPlayers"
-            select-label="Draft Second Player" />
-        </div>
-        <div class="col col-2 draft-player">
-          <select-expansion-group v-model="draftedPlayerThree" :select-options="fantasyTeamPlayers"
-            select-label="Draft Third Player" />
-        </div>
-        <div class="col col-2 draft-player">
-          <select-expansion-group v-model="draftedPlayerFour" :select-options="fantasyTeamPlayers"
-            select-label="Draft Fourth Player" />
-        </div>
-        <div class="col col-2 draft-player">
-          <select-expansion-group v-model="draftedPlayerFive" :select-options="fantasyTeamPlayers"
-            select-label="Draft Fifth Player" />
-        </div>
+      <div v-if="fantasyDraft.length > 0 && userDraftPoints">
+        <current-draft :FantasyDraft="fantasyDraft" :FantasyPoints="userDraftPoints" />
       </div>
-      <div class="row">
+      <div v-if="updateDraftVisibility" class="row">
         <q-space />
-        <q-btn class="text-white" @click="saveDraft()">Save Draft</q-btn>
+        <q-btn class="btn-fantasy" @click="toggleUpdateDraft()">Update Draft</q-btn>
       </div>
-
+      <div v-else class="row">
+        <div class="row">
+          <div class="col col-2 draft-player">
+            <select-expansion-group v-model="draftedPlayerOne" :select-options="fantasyTeamPlayers"
+              @update:model-value="updateSelectedPlayers" select-label="Draft First Player" />
+          </div>
+          <div class="col col-2 draft-player">
+            <select-expansion-group v-model="draftedPlayerTwo" :select-options="fantasyTeamPlayers"
+              @update:model-value="updateSelectedPlayers" select-label="Draft Second Player" />
+          </div>
+          <div class="col col-2 draft-player">
+            <select-expansion-group v-model="draftedPlayerThree" :select-options="fantasyTeamPlayers"
+              @update:model-value="updateSelectedPlayers" select-label="Draft Third Player" />
+          </div>
+          <div class="col col-2 draft-player">
+            <select-expansion-group v-model="draftedPlayerFour" :select-options="fantasyTeamPlayers"
+              @update:model-value="updateSelectedPlayers" select-label="Draft Fourth Player" />
+          </div>
+          <div class="col col-2 draft-player">
+            <select-expansion-group v-model="draftedPlayerFive" :select-options="fantasyTeamPlayers"
+              @update:model-value="updateSelectedPlayers" select-label="Draft Fifth Player" />
+          </div>
+        </div>
+        <div class="row">
+          <q-space />
+          <q-btn class="btn-fantasy" @click="toggleUpdateDraft()">Cancel</q-btn>
+          <q-btn class="btn-fantasy" @click="saveDraft()">Save Draft</q-btn>
+        </div>
+      </div>
       <AlertDialog v-model="showSuccessModal" />
     </div>
     <div v-else class="text-white">
@@ -43,20 +52,25 @@ import { useLeagueStore } from 'src/stores/league';
 import { localApiService } from 'src/services/localApiService';
 import SelectExpansionGroup from 'src/components/SelectExpansionGroup.vue';
 import AlertDialog from 'src/components/AlertDialog.vue'
+import CurrentDraft from 'src/components/fantasy/CurrentDraft.vue'
 
 export default {
   name: 'FantasyPage',
   components: {
     SelectExpansionGroup,
-    AlertDialog
+    AlertDialog,
+    CurrentDraft
   },
   setup() {
     const authStore = useAuthStore();
     const leagueStore = useLeagueStore();
 
+    const updateDraftVisibility = ref(false);
     const fantasyPlayers = ref([]);
     const fantasyDraft = ref([]);
+    const userDraftPoints = ref({});
     const selectedFantasyPlayer = ref(null);
+    const selectedPlayerIds = ref([]);
     const draftedPlayerOne = ref(null);
     const draftedPlayerTwo = ref(null);
     const draftedPlayerThree = ref(null);
@@ -71,7 +85,8 @@ export default {
         return {
           label: teamName,
           options: fantasyPlayers.value
-            .filter(opt => opt.team.name === teamName)
+            .filter(opt => opt.team.name === teamName) // Filter team
+            .filter(opt => !selectedPlayerIds.value.some((sel) => sel == opt.id)) // Filter selected players
             .map(player => (
               {
                 id: player.id,
@@ -81,6 +96,27 @@ export default {
         };
       })
     });
+
+    const updateSelectedPlayers = () => {
+      selectedPlayerIds.value[0] = draftedPlayerOne.value?.id ?? 0;
+      selectedPlayerIds.value[1] = draftedPlayerTwo.value?.id ?? 0;
+      selectedPlayerIds.value[2] = draftedPlayerThree.value?.id ?? 0;
+      selectedPlayerIds.value[3] = draftedPlayerFour.value?.id ?? 0;
+      selectedPlayerIds.value[4] = draftedPlayerFive.value?.id ?? 0;
+    };
+
+    const clearSelectedPlayers = () => {
+      selectedPlayerIds.value[0] = 0;
+      selectedPlayerIds.value[1] = 0;
+      selectedPlayerIds.value[2] = 0;
+      selectedPlayerIds.value[3] = 0;
+      selectedPlayerIds.value[4] = 0;
+      draftedPlayerOne.value = null;
+      draftedPlayerTwo.value = null;
+      draftedPlayerThree.value = null;
+      draftedPlayerFour.value = null;
+      draftedPlayerFive.value = null;
+    }
 
     const fetchFantasyData = async () => {
       await authStore.checkAuthenticatedAsync();
@@ -103,6 +139,10 @@ export default {
       }
     }
 
+    const toggleUpdateDraft = () => {
+      updateDraftVisibility.value = !updateDraftVisibility.value
+    };
+
     const saveDraft = async () => {
       await localApiService.saveFantasyDraft(
         authStore.user,
@@ -116,27 +156,42 @@ export default {
         ]
       )
       showSuccessModal.value = true;
+      fetchFantasyData();
+      localApiService.getUserDraftPoints(leagueStore.selectedLeague.id).then(result => userDraftPoints.value = result);
     };
 
-    onMounted(fetchFantasyData);
+    onMounted(() => {
+      fetchFantasyData();
+      if (authStore.authenticated && leagueStore.selectedLeague) {
+        localApiService.getUserDraftPoints(leagueStore.selectedLeague.id).then(result => userDraftPoints.value = result);
+      }
+
+    });
 
     watch(() => authStore.authenticated, (newValue) => {
       if (newValue) {
         fetchFantasyData();
+        if (authStore.authenticated && leagueStore.selectedLeague) {
+          localApiService.getUserDraftPoints(leagueStore.selectedLeague.id).then(result => userDraftPoints.value = result);
+        }
       }
     });
 
     watch(() => leagueStore.selectedLeague, (newValue) => {
       if (newValue) {
+        clearSelectedPlayers(); // We don't want to persist any players in dropdowns
         fetchFantasyData();
+        if (authStore.authenticated && leagueStore.selectedLeague) {
+          localApiService.getUserDraftPoints(leagueStore.selectedLeague.id).then(result => userDraftPoints.value = result);
+        }
       }
     });
 
     return {
-      authStore, fantasyPlayers, fantasyTeamPlayers, selectedFantasyPlayer,
-      draftedPlayerOne, draftedPlayerTwo, draftedPlayerThree, draftedPlayerFour, draftedPlayerFive,
-      showSuccessModal,
-      fetchFantasyData, saveDraft
+      authStore, fantasyDraft, fantasyPlayers, fantasyTeamPlayers, selectedFantasyPlayer, selectedPlayerIds,
+      draftedPlayerOne, draftedPlayerTwo, draftedPlayerThree, draftedPlayerFour, draftedPlayerFive, userDraftPoints,
+      showSuccessModal, updateDraftVisibility,
+      fetchFantasyData, saveDraft, toggleUpdateDraft, updateSelectedPlayers, clearSelectedPlayers
     };
   },
   computed: {
@@ -154,7 +209,14 @@ export default {
 }
 
 .draft-player {
+  min-width: 250px;
   padding: 10px;
+}
+
+.btn-fantasy {
+  color: white;
+  background-color: #3a404d;
+  margin: 10px;
 }
 
 .left-fixed {
@@ -165,7 +227,8 @@ export default {
   display: flex;
   flex-flow: row wrap;
   max-width: 100%;
-  padding: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 .flex-break {

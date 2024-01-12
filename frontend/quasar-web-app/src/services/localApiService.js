@@ -140,6 +140,23 @@ export const localApiService = {
                 throw error;
             });
     },
+    getUserDraftPoints(leagueId) {
+        return fetch(`${baseUrl}/fantasy/draft/${leagueId}/points`)
+            .then(function (response) {
+                if (!response.ok) {
+                    throw response.status;
+                } else {
+                    return response.json();
+                }
+            }.bind(this))
+            .then(function (data) {
+                return data;
+            }.bind(this))
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                throw error;
+            });
+    },
     saveFantasyDraft(
         user,
         league,
@@ -154,7 +171,7 @@ export const localApiService = {
             draftPickFour: draftPickArray[3].id,
             draftPickFive: draftPickArray[4].id,
         }
-        return fetch(`${baseUrl}/fantasy/draft/${league.id}`, {
+        return fetch(`${baseUrl}/fantasy/draft`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

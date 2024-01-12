@@ -1,5 +1,5 @@
 <template>
-    <div class="league-container col-2">
+    <div class="league-container">
         <q-select class="league-selector" dense filled dark v-model="selectedLeague" :options="leagueOptions" @update:model-value="updateSelectedLeague"
             option-label="name" option-value="id" label="Select League" />
     </div>

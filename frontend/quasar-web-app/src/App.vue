@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="hHh lpR fFf" id="app">
+  <q-layout id="app">
     <q-page-container>
       <router-view />
     </q-page-container>
@@ -22,7 +22,6 @@ export default defineComponent({
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 20px;
 }
 
 .nav-container {
