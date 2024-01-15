@@ -21,36 +21,27 @@ internal class HeroesContext : DotaOperationContext
 
     protected override async Task OperateAsync(CancellationToken cancellationToken)
     {
+        _logger.LogInformation($"Fetching heroes");
 
-        try
+        List<Hero> heroes = new List<Hero>();
+        heroes = await GetHeroesAsync(cancellationToken);
+
+        foreach (Hero hero in heroes)
         {
-            _logger.LogInformation($"Fetching heroes");
-
-                List<Hero> heroes = new List<Hero>();
-                heroes = await GetHeroesAsync(cancellationToken);
-
-                foreach (Hero hero in heroes)
-                {
-                    if (_dbContext.Heroes.FirstOrDefault(h => h.Id == hero.Id) == null)
-                    {
-                        _dbContext.Heroes.Add(hero);
-                    }
-                    else
-                    {
-                        Hero updateHero = _dbContext.Heroes.First(h => h.Id == hero.Id);
-                        updateHero.Name = hero.Name;
-                        _dbContext.Heroes.Update(updateHero);
-                    }
-                }
-                await _dbContext.SaveChangesAsync();
-
-            _logger.LogInformation($"Hero fetch done");
+            if (_dbContext.Heroes.FirstOrDefault(h => h.Id == hero.Id) == null)
+            {
+                _dbContext.Heroes.Add(hero);
+            }
+            else
+            {
+                Hero updateHero = _dbContext.Heroes.First(h => h.Id == hero.Id);
+                updateHero.Name = hero.Name;
+                _dbContext.Heroes.Update(updateHero);
+            }
         }
-        catch (Exception ex)
-        {
-            // Handle exceptions here
-            Console.WriteLine($"An error occurred: {ex.Message}");
-        }
+        await _dbContext.SaveChangesAsync();
+
+        _logger.LogInformation($"Hero fetch done");
     }
 
     private async Task<List<Hero>> GetHeroesAsync(CancellationToken cancellationToken)

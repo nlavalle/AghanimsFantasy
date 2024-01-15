@@ -63,28 +63,28 @@ public class DotaWebApiService : BackgroundService
         _logger.LogInformation("Dota WebApi Service started");
 
         Task[] tasks = new Task[4];
-        
+
         tasks[0] = LoopOperation<HeroesContext>(TimeSpan.FromDays(1), stoppingToken);
         tasks[1] = LoopOperation<LeagueHistoryContext>(TimeSpan.FromMinutes(30), stoppingToken);
         tasks[2] = LoopOperation<MatchDetailsContext>(TimeSpan.FromMinutes(5), stoppingToken);
         tasks[3] = LoopOperation<TeamsContext>(TimeSpan.FromDays(1), stoppingToken);
 
-        
+
         await Task.WhenAll(tasks);
     }
 
-//     internal async Task StartOperation<T>(CancellationToken cancellationToken, bool ignoreCooldown = false) where T : DotaOperationContext
-//     {
-//         await _tcsReadyForRequests.Task;
+    //     internal async Task StartOperation<T>(CancellationToken cancellationToken, bool ignoreCooldown = false) where T : DotaOperationContext
+    //     {
+    //         await _tcsReadyForRequests.Task;
 
-//         if (!TryGetLauncher<T>(out var launcher))
-//         {
-//             // TODO: Specify
-//             throw new InvalidOperationException();
-//         }
+    //         if (!TryGetLauncher<T>(out var launcher))
+    //         {
+    //             // TODO: Specify
+    //             throw new InvalidOperationException();
+    //         }
 
-//         await launcher.StartOperation(cancellationToken, ignoreCooldown);
-//     }
+    //         await launcher.StartOperation(cancellationToken, ignoreCooldown);
+    //     }
 
     private void CreateLauncher<T>(TimeSpan cooldown, Uri baseApiUri, Dictionary<string, string> baseQuery) where T : DotaOperationContext
     {
@@ -118,19 +118,21 @@ public class DotaWebApiService : BackgroundService
                 await current.ExecuteAsync(cancellationToken);
             }
 
+
+            // if (current.IsCompleted)
+            // {
             var stop = current.StopTicks;
             var now = DateTimeOffset.UtcNow.Ticks;
             Debug.Assert(stop < now);
+            Debug.Assert(stop != 0);
 
             var wait = now - stop + argTicks;
-            if (stop == 0)
-            {
-                // First task hasn't run yet we don't want to wait 2024 years
-                await Task.Delay(new TimeSpan(argTicks), cancellationToken);
-            } else if (wait > 0)
+            if (wait > 0)
             {
                 await Task.Delay(new TimeSpan(wait), cancellationToken);
             }
+            // }
+
         }
     }
 

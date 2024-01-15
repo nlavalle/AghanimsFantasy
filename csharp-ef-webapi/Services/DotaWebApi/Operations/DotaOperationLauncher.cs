@@ -44,7 +44,7 @@ internal class DotaOperationLauncher<T> where T : DotaOperationContext
             if (stopTicks != 0)
             {
                 // Here the context is completed
-                if (overrideCooldown || stopTicks - DateTimeOffset.UtcNow.Ticks >= CoolDownTicks)
+                if (overrideCooldown || DateTimeOffset.UtcNow.Ticks - stopTicks >= CoolDownTicks)
                 {
                     // Here the context needs to be guaranteed or was completed long enough ago that we can start another
                     old = current;

@@ -116,6 +116,7 @@ internal class LeagueHistoryContext : DotaOperationContext
             HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);
 
             await WaitNextTaskScheduleAsync(cancellationToken);
+            
             HttpResponseMessage response = await _httpClient.SendAsync(httpRequest);
             _logger.LogInformation($"Request submitted at {DateTime.Now.Ticks}");
             response.EnsureSuccessStatusCode();

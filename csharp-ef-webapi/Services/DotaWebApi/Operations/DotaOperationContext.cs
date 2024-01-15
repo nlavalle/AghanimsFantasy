@@ -26,8 +26,8 @@ internal abstract class DotaOperationContext : IDisposable
     // | _stopTicks == 0                    | Uncompleted   |
     // | _stopTicks != 0                    | Completed     | Completion Time
 
+    public long StartTicks => Volatile.Read(ref _startTicks);
     public long StopTicks => Volatile.Read(ref _stopTicks);
-    public long StartTicks => Volatile.Read(ref _stopTicks);
     public bool IsStarted => StartTicks != 0;
     public bool IsCompleted => StopTicks != 0;
 
@@ -53,7 +53,18 @@ internal abstract class DotaOperationContext : IDisposable
         if (current == null)
         {
             // Here, a task does not exist yet, so we'll try creating one
-            var temp = new Task(async () =>
+            // var temp = new Task(async () =>
+            // {
+            //     try
+            //     {
+            //         await OperateAsync(localToken);
+            //     }
+            //     catch
+            //     {
+            //         Volatile.Write(ref _stopTicks, DateTimeOffset.UtcNow.Ticks);
+            //     }
+            // }, localToken, TaskCreationOptions.LongRunning);
+            var temp = Task.Run(async () => 
             {
                 try
                 {
@@ -62,15 +73,15 @@ internal abstract class DotaOperationContext : IDisposable
                 finally
                 {
                     Volatile.Write(ref _stopTicks, DateTimeOffset.UtcNow.Ticks);
-                }
-            }, localToken);
+                }                
+            });
 
             current = Interlocked.CompareExchange(ref _task, temp, null);
             if (current == null)
             {
                 // Here, we created and placed the task, so we'll start that
                 Volatile.Write(ref _startTicks, DateTimeOffset.UtcNow.Ticks);
-                temp.Start();
+                // temp.Start();
                 current = temp;
             }
         }

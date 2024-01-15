@@ -33,19 +33,10 @@ internal class MatchDetailsContext : DotaOperationContext
         try
         {
             // Find all the match histories without match detail rows and add tasks to fetch them all
-            List<MatchHistory> matchesWithoutDetails = _dbContext.MatchHistory
-                .GroupJoin(
-                    _dbContext.MatchDetails,
-                    match => match.MatchId,
-                    details => details.MatchId,
-                    (match, details) => new { Match = match, Details = details })
-                .SelectMany(
-                    m => m.Details.DefaultIfEmpty(),
-                    (match, details) => new { match.Match, Details = details }
-                )
-                .Where(joinResult => joinResult.Details == null)
-                .Select(joinResult => joinResult.Match)
-                .ToList();
+            ImmutableSortedSet<long> knownMatchHistories = _dbContext.MatchHistory.Select(x => x.MatchId).ToImmutableSortedSet();
+            ImmutableSortedSet<long> knownMatchDetails = _dbContext.MatchDetails.Select(x => x.MatchId).ToImmutableSortedSet();
+
+            List<long> matchesWithoutDetails = knownMatchHistories.Except(knownMatchDetails).ToList();
 
             if (matchesWithoutDetails.Count() > 0)
             {
@@ -64,17 +55,14 @@ internal class MatchDetailsContext : DotaOperationContext
                 {
                     var match = matchesWithoutDetails[i];
 
-                    tasks[i] = GetMatchDetailsAsync(match.MatchId, cancellationToken);
+                    tasks[i] = GetMatchDetailsAsync(match, cancellationToken);
                 }
 
                 await Task.WhenAll(tasks);
 
-                // Going to assume that an ImmutableSortedSet is the fastest to do Contains()
-                var knownMatches = _dbContext.MatchDetails.Select(x => x.MatchId).ToImmutableSortedSet();
-
                 foreach (MatchDetail matchDetail in _matches)
                 {
-                    if (!knownMatches.Contains(matchDetail.MatchId))
+                    if (!knownMatchDetails.Contains(matchDetail.MatchId))
                     {
                         // Set PicksBans Match IDs since it's not in json
                         foreach (MatchDetailsPicksBans picksBans in matchDetail.PicksBans)
@@ -135,6 +123,8 @@ internal class MatchDetailsContext : DotaOperationContext
 
         if (matchResponse != null)
         {
+            matchResponse.MatchId = matchId;
+
             lock (_matches)
             {
                 _matches.Add(matchResponse);
