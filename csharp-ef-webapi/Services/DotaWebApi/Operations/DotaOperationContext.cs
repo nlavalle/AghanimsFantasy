@@ -14,7 +14,7 @@ internal abstract class DotaOperationContext : IDisposable
     private readonly CancellationTokenSource _cts;
 
     // Task 
-    private Task? _task = null;
+    private TaskCompletionSource? _tcs = null;
     private long _startTicks = 0;
     private long _stopTicks = 0;
     // Facts:
@@ -44,42 +44,52 @@ internal abstract class DotaOperationContext : IDisposable
     }
 
     // Note that this method is not async, it just passes through a Task
-    public Task ExecuteAsync(CancellationToken cancellationToken)
+    public async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         CancellationToken localToken = _cts.Token;
+        bool startTask = false;
 
         // Using Task to ensure only one thread ever runs the task
-        var current = Volatile.Read(ref _task);
+        var current = Volatile.Read(ref _tcs);
         if (current == null)
         {
             // Here, a task does not exist yet, so we'll try creating one
-            var temp = new Task(async () =>
-            {
-                await OperateAsync(localToken);
-            }, localToken);
-            temp.ContinueWith(temp => {
-                Volatile.Write(ref _stopTicks, DateTimeOffset.UtcNow.Ticks);
-            }, localToken, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
-
-            current = Interlocked.CompareExchange(ref _task, temp, null);
+            var temp = new TaskCompletionSource();
+            current = Interlocked.CompareExchange(ref _tcs, temp, null);
             if (current == null)
             {
-                // Here, we created and placed the task, so we'll start that
-                Volatile.Write(ref _startTicks, DateTimeOffset.UtcNow.Ticks);
-                temp.Start();
+                startTask = true;
                 current = temp;
             }
+        }
+
+        if (startTask)
+        {
+            Volatile.Write(ref _startTicks, DateTimeOffset.UtcNow.Ticks);
+
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await OperateAsync(localToken);
+                }
+                finally
+                {
+                    Volatile.Write(ref _stopTicks, DateTimeOffset.UtcNow.Ticks);
+                    current.SetResult();
+                }
+            }, localToken);
         }
 
         if (cancellationToken == _config.StoppingToken
             || cancellationToken == CancellationToken.None
             || cancellationToken == localToken)
         {
-            return current;
+            await current.Task;
         }
         else
         {
-            return current.ContinueWith((task) =>
+            await current.Task.ContinueWith((task) =>
             {
                 if (task.Exception != null)
                 {
@@ -136,7 +146,7 @@ internal abstract class DotaOperationContext : IDisposable
         public RateLimiter RateLimiter { get; }
         public CancellationToken StoppingToken { get; }
 
-        public Config(Uri baseUri, Dictionary<string,string> baseQuery, RateLimiter rateLimiter, CancellationToken stoppingToken)
+        public Config(Uri baseUri, Dictionary<string, string> baseQuery, RateLimiter rateLimiter, CancellationToken stoppingToken)
         {
             BaseUri = baseUri;
             _baseQuery = baseQuery;
