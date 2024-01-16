@@ -53,35 +53,20 @@ internal abstract class DotaOperationContext : IDisposable
         if (current == null)
         {
             // Here, a task does not exist yet, so we'll try creating one
-            // var temp = new Task(async () =>
-            // {
-            //     try
-            //     {
-            //         await OperateAsync(localToken);
-            //     }
-            //     catch
-            //     {
-            //         Volatile.Write(ref _stopTicks, DateTimeOffset.UtcNow.Ticks);
-            //     }
-            // }, localToken, TaskCreationOptions.LongRunning);
-            var temp = Task.Run(async () => 
+            var temp = new Task(async () =>
             {
-                try
-                {
-                    await OperateAsync(localToken);
-                }
-                finally
-                {
-                    Volatile.Write(ref _stopTicks, DateTimeOffset.UtcNow.Ticks);
-                }                
-            });
+                await OperateAsync(localToken);
+            }, localToken);
+            temp.ContinueWith(temp => {
+                Volatile.Write(ref _stopTicks, DateTimeOffset.UtcNow.Ticks);
+            }, localToken, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
 
             current = Interlocked.CompareExchange(ref _task, temp, null);
             if (current == null)
             {
                 // Here, we created and placed the task, so we'll start that
                 Volatile.Write(ref _startTicks, DateTimeOffset.UtcNow.Ticks);
-                // temp.Start();
+                temp.Start();
                 current = temp;
             }
         }

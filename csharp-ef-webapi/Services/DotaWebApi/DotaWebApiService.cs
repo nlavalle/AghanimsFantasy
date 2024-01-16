@@ -118,11 +118,8 @@ public class DotaWebApiService : BackgroundService
                 await current.ExecuteAsync(cancellationToken);
             }
 
-
-            // if (current.IsCompleted)
-            // {
-            var stop = current.StopTicks;
             var now = DateTimeOffset.UtcNow.Ticks;
+            var stop = current.StopTicks;
             Debug.Assert(stop < now);
             Debug.Assert(stop != 0);
 
@@ -131,8 +128,6 @@ public class DotaWebApiService : BackgroundService
             {
                 await Task.Delay(new TimeSpan(wait), cancellationToken);
             }
-            // }
-
         }
     }
 
