@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using csharp_ef_webapi.Models;
 
+namespace csharp_ef_webapi.Data;
 public class AghanimsFantasyContext : DbContext
 {
     public AghanimsFantasyContext()
@@ -75,9 +76,8 @@ public class AghanimsFantasyContext : DbContext
 
         modelBuilder.Entity<FantasyPlayer>()
             .HasOne(fp => fp.DotaAccount)
-            .WithOne()
-            .HasPrincipalKey<Account>(a => a.Id)
-            .HasForeignKey<FantasyPlayer>(fp => fp.DotaAccountId);
+            .WithMany()
+            .HasForeignKey(fp => fp.DotaAccountId);
 
         modelBuilder.Entity<FantasyDraftPlayer>()
             .HasKey(fdp => new { fdp.FantasyPlayerId, fdp.FantasyDraftId });

@@ -30,11 +30,11 @@ public class Team
 
     [Column("logo")]
     [JsonProperty("logo")]
-    public long Logo { get; set; }
+    public string? Logo { get; set; }
 
     [Column("logo_sponsor")]
     [JsonProperty("logo_sponsor")]
-    public long LogoSponsor { get; set; }
+    public string? LogoSponsor { get; set; }
 
     [Column("country_code")]
     [JsonProperty("country_code")]

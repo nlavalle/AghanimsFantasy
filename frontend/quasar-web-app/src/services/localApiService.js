@@ -38,7 +38,7 @@ export const localApiService = {
             });
     },
     getLeaguePlayerData(leagueId) {
-        return fetch(`${baseUrl}/league/${leagueId}/players`)
+        return fetch(`${baseUrl}/Match/${leagueId}/players`)
             .then(function (response) {
                 if (!response.ok) {
                     throw response.status;
@@ -55,7 +55,7 @@ export const localApiService = {
             });
     },
     getTeams() {
-        return fetch(`${baseUrl}/league/teams`)
+        return fetch(`${baseUrl}/Team/teams`)
             .then(function (response) {
                 if (!response.ok) {
                     throw response.status;
@@ -72,7 +72,7 @@ export const localApiService = {
             });
     },
     getHeroes() {
-        return fetch(`${baseUrl}/league/heroes`)
+        return fetch(`${baseUrl}/Hero/heroes`)
             .then(function (response) {
                 if (!response.ok) {
                     throw response.status;
@@ -89,7 +89,7 @@ export const localApiService = {
             });
     },
     getAccounts() {
-        return fetch(`${baseUrl}/league/accounts`)
+        return fetch(`${baseUrl}/Player/accounts`)
             .then(function (response) {
                 if (!response.ok) {
                     throw response.status;

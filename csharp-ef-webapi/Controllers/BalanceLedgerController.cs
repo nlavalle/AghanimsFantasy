@@ -1,6 +1,7 @@
 #nullable disable
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using csharp_ef_webapi.Data;
 using csharp_ef_webapi.Models;
 
 namespace csharp_ef_webapi.Controllers
@@ -20,7 +21,7 @@ namespace csharp_ef_webapi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BalanceLedger>>> GetBalanceLedger()
         {
-            return await _context.BalanceLedger.ToListAsync();
+            return Ok(await _context.BalanceLedger.ToListAsync());
         }
 
         // GET: api/BalanceLedger/5
@@ -34,7 +35,7 @@ namespace csharp_ef_webapi.Controllers
                 return NotFound();
             }
 
-            return balanceLedger;
+            return Ok(balanceLedger);
         }
 
         // PUT: api/BalanceLedger/5

@@ -61,6 +61,7 @@ export default defineComponent({
   },
   methods: {
     getImageUrl() {
+      if(this.imageSrc == 0) return null;
       return new URL(`../../assets/logos/teams_logo_${this.imageSrc}.png`, import.meta.url).toString();
     }
   }

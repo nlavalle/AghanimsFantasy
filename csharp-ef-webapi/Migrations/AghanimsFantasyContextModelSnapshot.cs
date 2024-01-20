@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using csharp_ef_webapi.Data;
 
 #nullable disable
 
@@ -34,6 +35,10 @@ namespace csharp_ef_webapi.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("text")
                         .HasColumnName("name");
+
+                    b.Property<string>("SteamProfilePicture")
+                        .HasColumnType("text")
+                        .HasColumnName("steam_profile_picture");
 
                     b.HasKey("Id");
 
@@ -164,8 +169,8 @@ namespace csharp_ef_webapi.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("draft_pick_two");
 
-                    b.Property<long>("LeagueId")
-                        .HasColumnType("bigint")
+                    b.Property<int>("LeagueId")
+                        .HasColumnType("integer")
                         .HasColumnName("league_id");
 
                     b.HasKey("Id");
@@ -214,8 +219,7 @@ namespace csharp_ef_webapi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DotaAccountId")
-                        .IsUnique();
+                    b.HasIndex("DotaAccountId");
 
                     b.HasIndex("TeamId");
 
@@ -248,6 +252,10 @@ namespace csharp_ef_webapi.Migrations
                         .HasColumnName("league_id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
+
+                    b.Property<DateTime>("fantasyDraftLocked")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fantasy_draft_locked_date");
 
                     b.Property<bool>("isActive")
                         .HasColumnType("boolean")
@@ -883,12 +891,12 @@ namespace csharp_ef_webapi.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("games_played");
 
-                    b.Property<long>("Logo")
-                        .HasColumnType("bigint")
+                    b.Property<string>("Logo")
+                        .HasColumnType("text")
                         .HasColumnName("logo");
 
-                    b.Property<long>("LogoSponsor")
-                        .HasColumnType("bigint")
+                    b.Property<string>("LogoSponsor")
+                        .HasColumnType("text")
                         .HasColumnName("logo_sponsor");
 
                     b.Property<string>("Name")
@@ -957,8 +965,8 @@ namespace csharp_ef_webapi.Migrations
             modelBuilder.Entity("csharp_ef_webapi.Models.FantasyPlayer", b =>
                 {
                     b.HasOne("csharp_ef_webapi.Models.Account", "DotaAccount")
-                        .WithOne()
-                        .HasForeignKey("csharp_ef_webapi.Models.FantasyPlayer", "DotaAccountId")
+                        .WithMany()
+                        .HasForeignKey("DotaAccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

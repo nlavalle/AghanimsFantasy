@@ -15,4 +15,8 @@ public class Account
     [Column("name")]
     [JsonProperty("name")]
     public string? Name { get; set; }
+
+    [Column("steam_profile_picture")]
+    [JsonProperty("steam_profile_picture")]
+    public string? SteamProfilePicture { get; set; }
 }

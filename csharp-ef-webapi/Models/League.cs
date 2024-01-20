@@ -11,4 +11,6 @@ public class League
     public string? name { get; set; }
     [Column("is_active")]
     public bool isActive { get; set; }
+    [Column("fantasy_draft_locked_date")]
+    public DateTime fantasyDraftLocked { get; set; }
 }

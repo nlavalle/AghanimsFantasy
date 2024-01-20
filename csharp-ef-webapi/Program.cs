@@ -1,3 +1,4 @@
+using csharp_ef_webapi.Data;
 using csharp_ef_webapi.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -120,6 +121,9 @@ builder.Services.AddSwaggerGen();
 
 // Add WebApi Service
 builder.Services.AddHostedService<DotaWebApiService>();
+
+// Add FantasyRepository to be used by controllers
+builder.Services.AddScoped<FantasyRepository>();
 
 var app = builder.Build();
 

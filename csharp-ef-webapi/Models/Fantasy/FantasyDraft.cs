@@ -11,7 +11,7 @@ public class FantasyDraft
     public long Id { get; set; }
 
     [Column("league_id")]
-    public long LeagueId { get; set; }
+    public int LeagueId { get; set; }
 
     [Column("discord_account_id")]
     public long? DiscordAccountId { get; set; }

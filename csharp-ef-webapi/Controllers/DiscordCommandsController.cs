@@ -1,6 +1,7 @@
 #nullable disable
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using csharp_ef_webapi.Data;
 using csharp_ef_webapi.Models;
 
 namespace csharp_ef_webapi.Controllers
@@ -49,7 +50,7 @@ namespace csharp_ef_webapi.Controllers
             {
                 playerName = "Unmapped Player";
             }
-            return playerName;
+            return Ok(playerName);
         }
 
         // GET: api/Feederboard
@@ -89,31 +90,28 @@ namespace csharp_ef_webapi.Controllers
                 feederResponse[i].Rank = i + 1;
             }
 
-            return feederResponse;
+            return Ok(feederResponse);
         }
 
         // GET: api/Bromance
         [HttpGet("Bromance")]
         public async Task<ActionResult<IEnumerable<Bromance>>> GetBromance()
         {
-            var bromances = await _context.Bromance.ToListAsync();
-            return bromances;
+            return Ok(await _context.Bromance.ToListAsync());
         }
 
         // GET: api/BetStreaks
         [HttpGet("BetStreaks")]
         public async Task<ActionResult<IEnumerable<BetStreak>>> GetBetStreaks()
         {
-            var betStreaks = await _context.BetStreaks.ToListAsync();
-            return betStreaks;
+            return Ok(await _context.BetStreaks.ToListAsync());
         }
 
         // GET: api/MatchStreaks
         [HttpGet("MatchStreaks")]
         public async Task<ActionResult<IEnumerable<MatchStreak>>> GetMatchStreaks()
         {
-            var matchStreaks = await _context.MatchStreaks.ToListAsync();
-            return matchStreaks;
+            return Ok(await _context.MatchStreaks.ToListAsync());
         }
     }
 }

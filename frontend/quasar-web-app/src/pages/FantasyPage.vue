@@ -4,9 +4,9 @@
       <div v-if="fantasyDraft.length > 0 && userDraftPoints">
         <current-draft :FantasyDraft="fantasyDraft" :FantasyPoints="userDraftPoints" />
       </div>
-      <div v-if="updateDraftVisibility" class="row">
+      <div v-if="updateDraftVisibility || updateDisabled" class="row">
         <q-space />
-        <q-btn class="btn-fantasy" @click="toggleUpdateDraft()">Update Draft</q-btn>
+        <q-btn class="btn-fantasy" :disabled="updateDisabled" @click="toggleUpdateDraft()">{{ updateDisabled ? "Draft Locked" : "Update Draft" }}</q-btn>
       </div>
       <div v-else class="row">
         <div class="row">
@@ -95,6 +95,12 @@ export default {
             )),
         };
       })
+    });
+
+    const updateDisabled = computed(() => {
+      var currentDate = new Date();
+      var lockDate = new Date(leagueStore.selectedLeague?.fantasyDraftLocked ?? new Date());
+      return currentDate > lockDate;
     });
 
     const updateSelectedPlayers = () => {
@@ -190,7 +196,7 @@ export default {
     return {
       authStore, fantasyDraft, fantasyPlayers, fantasyTeamPlayers, selectedFantasyPlayer, selectedPlayerIds,
       draftedPlayerOne, draftedPlayerTwo, draftedPlayerThree, draftedPlayerFour, draftedPlayerFive, userDraftPoints,
-      showSuccessModal, updateDraftVisibility,
+      showSuccessModal, updateDraftVisibility, updateDisabled,
       fetchFantasyData, saveDraft, toggleUpdateDraft, updateSelectedPlayers, clearSelectedPlayers
     };
   },

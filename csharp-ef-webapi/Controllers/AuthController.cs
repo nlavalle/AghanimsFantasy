@@ -51,7 +51,7 @@ namespace csharp_ef_webapi.Controllers
         // GET: api/auth/signout
         [Authorize]
         [HttpGet("signout")]
-        public async Task<ActionResult> DiscordSignOut()
+        public async Task<IActionResult> DiscordSignOut()
         {
             await HttpContext.SignOutAsync();
 
