@@ -5,3 +5,4 @@ frontend/aghanims-fantasy-spa.tar
 csharp-ef-webapi/aghanims-fantasy-webapi.tar
 environments/development/*.env
 frontend/prod-nginx.conf
+csharp-ef-webapi/appsettings.Local.json
