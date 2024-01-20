@@ -10,7 +10,7 @@ namespace csharp_ef_webapi.Migrations
         {
             migrationBuilder.CreateTable(
                 name: "bets_streaks",
-                schema: "Kali",
+                schema: "nadcl",
                 columns: table => new
                 {
                     discord_name = table.Column<string>(type: "text", nullable: false),
@@ -23,7 +23,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.CreateTable(
                 name: "bromance_last_60",
-                schema: "Kali",
+                schema: "nadcl",
                 columns: table => new
                 {
                     bro_1_name = table.Column<string>(type: "text", nullable: false),
@@ -38,7 +38,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.CreateTable(
                 name: "matches_streaks",
-                schema: "Kali",
+                schema: "nadcl",
                 columns: table => new
                 {
                     discord_name = table.Column<string>(type: "text", nullable: false),
@@ -54,15 +54,15 @@ namespace csharp_ef_webapi.Migrations
         {
             migrationBuilder.DropTable(
                 name: "bets_streaks",
-                schema: "Kali");
+                schema: "nadcl");
 
             migrationBuilder.DropTable(
                 name: "bromance_last_60",
-                schema: "Kali");
+                schema: "nadcl");
 
             migrationBuilder.DropTable(
                 name: "matches_streaks",
-                schema: "Kali");
+                schema: "nadcl");
         }
     }
 }

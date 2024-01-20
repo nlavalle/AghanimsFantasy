@@ -14,15 +14,15 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
-    path: '/players',
+    path: '/league',
     component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/PlayersPage.vue') }],
+    children: [{ path: '', component: () => import('pages/LeaguesPage.vue') }],
   },
 
   {
-    path: '/matches',
+    path: '/fantasy',
     component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/MatchesPage.vue') }],
+    children: [{ path: '', component: () => import('pages/FantasyPage.vue') }],
   },
 
   // Always leave this as last one,

@@ -10,7 +10,7 @@ namespace csharp_ef_webapi.Migrations
         {
             migrationBuilder.AlterColumn<int>(
                 name: "xp_per_min",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -19,7 +19,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "tower_damage",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -28,7 +28,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "team_slot",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -37,7 +37,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "team_number",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -46,7 +46,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "scaled_tower_damage",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -55,7 +55,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "scaled_hero_healing",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -64,7 +64,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "scaled_hero_damage",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -73,7 +73,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<long>(
                 name: "net_worth",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "bigint",
                 nullable: true,
@@ -82,7 +82,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "moonshard",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -91,7 +91,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "level",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -100,7 +100,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "leaver_status",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -109,7 +109,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "last_hits",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -118,7 +118,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "kills",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -127,7 +127,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "item_neutral",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -136,7 +136,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "item_5",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -145,7 +145,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "item_4",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -154,7 +154,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "item_3",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -163,7 +163,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "item_2",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -172,7 +172,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "item_1",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -181,7 +181,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "item_0",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -190,7 +190,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "hero_healing",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -199,7 +199,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "hero_damage",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -208,7 +208,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "gold_spent",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -217,7 +217,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "gold_per_min",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -226,7 +226,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "gold",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -235,7 +235,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "denies",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -244,7 +244,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "deaths",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -253,7 +253,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "backpack_2",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -262,7 +262,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "backpack_1",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -271,7 +271,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "backpack_0",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -280,7 +280,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "assists",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -289,7 +289,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "aghanims_shard",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -298,7 +298,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "aghanims_scepter",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: true,
@@ -310,7 +310,7 @@ namespace csharp_ef_webapi.Migrations
         {
             migrationBuilder.AlterColumn<int>(
                 name: "xp_per_min",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -321,7 +321,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "tower_damage",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -332,7 +332,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "team_slot",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -343,7 +343,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "team_number",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -354,7 +354,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "scaled_tower_damage",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -365,7 +365,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "scaled_hero_healing",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -376,7 +376,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "scaled_hero_damage",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -387,7 +387,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<long>(
                 name: "net_worth",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "bigint",
                 nullable: false,
@@ -398,7 +398,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "moonshard",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -409,7 +409,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "level",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -420,7 +420,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "leaver_status",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -431,7 +431,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "last_hits",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -442,7 +442,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "kills",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -453,7 +453,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "item_neutral",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -464,7 +464,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "item_5",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -475,7 +475,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "item_4",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -486,7 +486,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "item_3",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -497,7 +497,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "item_2",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -508,7 +508,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "item_1",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -519,7 +519,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "item_0",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -530,7 +530,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "hero_healing",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -541,7 +541,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "hero_damage",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -552,7 +552,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "gold_spent",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -563,7 +563,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "gold_per_min",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -574,7 +574,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "gold",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -585,7 +585,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "denies",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -596,7 +596,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "deaths",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -607,7 +607,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "backpack_2",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -618,7 +618,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "backpack_1",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -629,7 +629,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "backpack_0",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -640,7 +640,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "assists",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -651,7 +651,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "aghanims_shard",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,
@@ -662,7 +662,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.AlterColumn<int>(
                 name: "aghanims_scepter",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "player_match_details",
                 type: "integer",
                 nullable: false,

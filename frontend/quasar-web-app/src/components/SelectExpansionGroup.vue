@@ -1,0 +1,73 @@
+<template>
+    <q-select ref="expandSelect" filled :modelValue="modelValue" @update:model-value="updateSelectedOption"
+        :options="selectOptions" option-label="name" dark :label="selectLabel ?? ''" color="teal" clearable>
+        <template v-slot:option="scope">
+            <q-expansion-item expand-separator :default-opened="hasChild(scope)" header-class="text-weight-bold"
+                :label="scope.opt.label">
+                <template v-for="child in scope.opt.options" :key="child.label">
+                    <q-item clickable @click="changeOption(child)" :class="{ 'bg-light-blue-10': modelValue === child }">
+                        <q-item-section>
+                            <q-item-label class="q-ml-md">{{ child.name }}</q-item-label>
+                        </q-item-section>
+                    </q-item>
+                </template>
+            </q-expansion-item>
+        </template>
+    </q-select>
+</template>
+
+<script>
+export default {
+    name: 'SelectExpansionGroup',
+    props: {
+        modelValue: {
+            type: Object,
+        },
+        defaultOpened: {
+            type: Boolean,
+            required: false,
+        },
+        selectLabel: {
+            type: String,
+            required: false,
+        },
+        selectOptions: {
+            type: Array,
+            required: true,
+        },
+    },
+    emits: ['update:modelValue'],
+    methods: {
+        hasChild(scope) {
+            return scope.opt.options.some(c => c === this.modelValue)
+        },
+        changeOption(option) {
+            this.$emit('update:modelValue', option);
+            this.$refs.expandSelect.hidePopup(); // v-close-popup on the q-item freaks out with the dropdown options changing so we need to call it here
+        },
+        updateSelectedOption(option) {
+            this.$emit('update:modelValue', option);
+            this.$refs.expandSelect.hidePopup();
+        },
+    }
+};
+</script>
+<style>
+.login-container {
+    box-sizing: border-box;
+    border: 2px solid gray;
+    border-radius: 10px;
+    margin: auto;
+    align-items: center;
+}
+
+.log-btn {
+    margin: 2px;
+    border-radius: 8px;
+}
+
+.welcome {
+    color: white;
+    margin: 5px;
+}
+</style>

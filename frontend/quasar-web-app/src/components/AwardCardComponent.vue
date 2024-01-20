@@ -1,6 +1,6 @@
 <template>
   <q-card class="card-container">
-    <q-img :src="imageSrc" style="height: 200px" />
+    <q-img v-if="imageSrc" :src="imageSrc" style="height: 200px" />
     <q-card-section class="award-title">
       <div class="award-name">
         {{ awardTitle }}
@@ -39,7 +39,7 @@ export default defineComponent({
     },
     imageSrc: {
       type: String,
-      required: true
+      required: false
     },
   },
 });
@@ -47,8 +47,6 @@ export default defineComponent({
 
 <style scoped>
 .card-container {
-  width: 400px;
-  height: 400px;
   margin: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);

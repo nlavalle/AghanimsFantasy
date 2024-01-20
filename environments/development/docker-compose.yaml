@@ -5,7 +5,7 @@ services:
     ports:
       - "5432:5432"
     env_file:
-      - .postgres-env
+      - postgres.env
     volumes:
      - ../../postgres-db/data:/var/lib/postgresql/data
       # The init script will be executed when the database is first run
@@ -18,9 +18,9 @@ services:
     ports:
       - "5001:5001"
     env_file:
-      - .webapi-env
+      - webapi.env
     volumes:
-     - ../../csharp-ef-webapi/dev-cert:/https/
+     - ./ssl_certs:/https/
     depends_on:
       - postgres
   spa:
@@ -35,7 +35,7 @@ services:
     links:
       - webapi:webapi
     volumes:
-      - ./ssl_certs:/etc/letsencrypt/live/aghanimswager.com
+      - ./ssl_certs:/etc/letsencrypt/live/aghanimsfantasy.com
     depends_on:
       - postgres
       - webapi

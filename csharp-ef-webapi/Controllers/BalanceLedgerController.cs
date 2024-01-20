@@ -1,11 +1,7 @@
 #nullable disable
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using csharp_ef_webapi.Data;
 using csharp_ef_webapi.Models;
 
 namespace csharp_ef_webapi.Controllers
@@ -14,9 +10,9 @@ namespace csharp_ef_webapi.Controllers
     [ApiController]
     public class BalanceLedgerController : ControllerBase
     {
-        private readonly AghanimsWagerContext _context;
+        private readonly AghanimsFantasyContext _context;
 
-        public BalanceLedgerController(AghanimsWagerContext context)
+        public BalanceLedgerController(AghanimsFantasyContext context)
         {
             _context = context;
         }
@@ -25,7 +21,7 @@ namespace csharp_ef_webapi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BalanceLedger>>> GetBalanceLedger()
         {
-            return await _context.BalanceLedger.ToListAsync();
+            return Ok(await _context.BalanceLedger.ToListAsync());
         }
 
         // GET: api/BalanceLedger/5
@@ -39,7 +35,7 @@ namespace csharp_ef_webapi.Controllers
                 return NotFound();
             }
 
-            return balanceLedger;
+            return Ok(balanceLedger);
         }
 
         // PUT: api/BalanceLedger/5

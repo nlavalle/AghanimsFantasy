@@ -1,43 +1,31 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
+  <q-layout>
+    <q-header elevated class="header text-white" height-hint="40">
       <q-toolbar>
-        <!-- <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        /> -->
+        <LeagueSelector class="league-selector" />
 
-        <q-toolbar-title>
-          Quasar App
+        <q-toolbar-title v-if="isWideScreen" class="title">
+          <q-avatar>
+            <img src="~assets/BannerAvatar.png">
+          </q-avatar>
+          Aghanim's Fantasy
+        </q-toolbar-title>
+        <q-toolbar-title v-else class="title">
+          <q-avatar>
+            <img src="~assets/BannerAvatar.png">
+          </q-avatar>
         </q-toolbar-title>
 
-        <div>Quasar v{{ $q.version }}</div>
+        <q-space />
+        <LoginDiscord />
       </q-toolbar>
+      <q-separator color="white" />
+      <q-tabs align="left">
+        <q-route-tab to="/about" label="About" />
+        <!-- <q-route-tab to="/league" label="Leagues" /> -->
+        <q-route-tab to="/fantasy" label="Fantasy" />
+      </q-tabs>
     </q-header>
-
-    <!-- <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-    >
-      <q-list>
-        <q-item-label
-          header
-        >
-          Essential Links
-        </q-item-label>
-
-        <EssentialLink
-          v-for="link in essentialLinks"
-          :key="link.title"
-          v-bind="link"
-        />
-      </q-list>
-    </q-drawer> -->
 
     <q-page-container>
       <router-view />
@@ -46,71 +34,41 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-// import EssentialLink from 'components/EssentialLink.vue';
-
-const linksList = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
-  }
-];
+import { defineComponent } from 'vue';
+import LoginDiscord from 'src/components/LoginDiscord.vue'
+import LeagueSelector from 'src/components/LeagueSelector.vue'
 
 export default defineComponent({
   name: 'MainLayout',
-
-  // components: {
-  //   EssentialLink
-  // },
-
-  setup() {
-    const leftDrawerOpen = ref(false)
-
-    return {
-      essentialLinks: linksList,
-      leftDrawerOpen,
-      toggleLeftDrawer() {
-        leftDrawerOpen.value = !leftDrawerOpen.value
-      }
+  components: {
+    LoginDiscord,
+    LeagueSelector,
+  },
+  computed: {
+    isWideScreen() {
+      return window.outerWidth >= 600;
     }
   }
 });
 </script>
+
+<style>
+.debug {
+  border: 1px solid red;
+}
+
+.league-selector {
+  min-width: 180px;
+}
+
+.header {
+  background-color: #3a404d;
+  /* z-index: 9000; */
+}
+
+.title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+</style>

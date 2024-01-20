@@ -1,6 +1,5 @@
 namespace csharp_ef_webapi.Models;
 
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 [Table("player_match_details")]

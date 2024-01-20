@@ -1,48 +1,18 @@
 <template>
-  <q-page class="row items-center justify-evenly">
+  <q-page class="row justify-evenly">
     <div class="index">
-      <p>
-        This is a sample index page.
+      <h3 class="text-white">Welcome to the NADCL fantasy draft</h3>
+      <p class="text-white">
+        The about page will detail the scoring/rules, and the fantasy page will allow you to set up your draft for the upcoming league.
       </p>
     </div>
   </q-page>
 </template>
 
 <script lang="ts">
-// import { Todo, Meta } from 'components/models';
-// import ExampleComponent from 'components/ExampleComponent.vue';
 import { defineComponent, ref } from 'vue';
 
 export default defineComponent({
   name: 'IndexPage',
-  // components: { ExampleComponent },
-  // setup () {
-  //   const todos = ref<Todo[]>([
-  //     {
-  //       id: 1,
-  //       content: 'ct1'
-  //     },
-  //     {
-  //       id: 2,
-  //       content: 'ct2'
-  //     },
-  //     {
-  //       id: 3,
-  //       content: 'ct3'
-  //     },
-  //     {
-  //       id: 4,
-  //       content: 'ct4'
-  //     },
-  //     {
-  //       id: 5,
-  //       content: 'ct5'
-  //     }
-  //   ]);
-  //   const meta = ref<Meta>({
-  //     totalCount: 1200
-  //   });
-  //   return { todos, meta };
-  // }
 });
 </script>

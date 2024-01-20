@@ -10,16 +10,16 @@ namespace csharp_ef_webapi.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.EnsureSchema(
-                name: "Kali");
+                name: "nadcl");
 
             migrationBuilder.RenameTable(
                 name: "balance_ledger",
                 newName: "balance_ledger",
-                newSchema: "Kali");
+                newSchema: "nadcl");
 
             migrationBuilder.AlterColumn<long>(
                 name: "discord_id",
-                schema: "Kali",
+                schema: "nadcl",
                 table: "balance_ledger",
                 type: "bigint",
                 nullable: false,
@@ -29,7 +29,7 @@ namespace csharp_ef_webapi.Migrations
 
             migrationBuilder.CreateTable(
                 name: "discord_ids",
-                schema: "Kali",
+                schema: "nadcl",
                 columns: table => new
                 {
                     discord_id = table.Column<long>(type: "bigint", nullable: false)
@@ -48,11 +48,11 @@ namespace csharp_ef_webapi.Migrations
         {
             migrationBuilder.DropTable(
                 name: "discord_ids",
-                schema: "Kali");
+                schema: "nadcl");
 
             migrationBuilder.RenameTable(
                 name: "balance_ledger",
-                schema: "Kali",
+                schema: "nadcl",
                 newName: "balance_ledger");
 
             migrationBuilder.AlterColumn<string>(

@@ -12,8 +12,8 @@ FROM nginx:stable-alpine as production-stage
 ARG nginx_config=prod-nginx.conf
 COPY --from=build-quasar-app /app/dist/spa /usr/share/nginx/html
 COPY $nginx_config /etc/nginx/conf.d/default.conf
-COPY $nginx_config /etc/nginx/sites-available/aghanimswager.com
-COPY $nginx_config /etc/nginx/sites-enabled/aghanimswager.com
+COPY $nginx_config /etc/nginx/sites-available/aghanimsfantasy.com
+COPY $nginx_config /etc/nginx/sites-enabled/aghanimsfantasy.com
 
 # install certbot
 RUN apk add certbot certbot-nginx
