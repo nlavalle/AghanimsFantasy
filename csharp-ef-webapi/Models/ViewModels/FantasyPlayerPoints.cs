@@ -9,6 +9,7 @@ public class FantasyPlayerPoints
     private const decimal LastHitsValue = 0.003M;
     private const decimal GoldPerMinValue = 0.002M;
     private const decimal XpPerMinValue = 0.002M;
+    public FantasyDraft FantasyDraft {get;set; } = new FantasyDraft();
     public FantasyPlayer FantasyPlayer { get; set; } = new FantasyPlayer();
     public MatchDetailsPlayer Match { get; set; } = new MatchDetailsPlayer();
     public int Kills

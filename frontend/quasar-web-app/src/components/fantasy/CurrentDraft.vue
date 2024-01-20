@@ -5,20 +5,25 @@
         </div>
         <div class="row justify-evenly">
             <draft-pick-card class="col-2 draft-card" :name="FantasyDraft[0].players[0].dotaAccount.name"
-                :team="FantasyDraft[0].players[0].team.name" :fantasyPoints="FantasyPoints.draftPickOnePoints ?? 0" role="Core"
-                description="Stuff" :imageSrc="FantasyDraft[0].players[0].teamId" />
+                :team="FantasyDraft[0].players[0].team.name" :fantasyPoints="FantasyPoints.draftPickOnePoints ?? 0"
+                role="Core" description="Stuff" :playerImageSrc="FantasyDraft[0].players[0].dotaAccount.steamProfilePicture"
+                :teamImageSrc="FantasyDraft[0].players[0].teamId" />
             <draft-pick-card class="col-2 draft-card" :name="FantasyDraft[0].players[1].dotaAccount.name"
-                :team="FantasyDraft[0].players[1].team.name" :fantasyPoints="FantasyPoints.draftPickTwoPoints ?? 0" role="Core"
-                description="Stuff" :imageSrc="FantasyDraft[0].players[1].teamId" />
+                :team="FantasyDraft[0].players[1].team.name" :fantasyPoints="FantasyPoints.draftPickTwoPoints ?? 0"
+                role="Core" description="Stuff" :playerImageSrc="FantasyDraft[0].players[1].dotaAccount.steamProfilePicture"
+                :teamImageSrc="FantasyDraft[0].players[1].teamId" />
             <draft-pick-card class="col-2 draft-card" :name="FantasyDraft[0].players[2].dotaAccount.name"
-                :team="FantasyDraft[0].players[2].team.name" :fantasyPoints="FantasyPoints.draftPickThreePoints ?? 0" role="Core"
-                description="Stuff" :imageSrc="FantasyDraft[0].players[2].teamId" />
+                :team="FantasyDraft[0].players[2].team.name" :fantasyPoints="FantasyPoints.draftPickThreePoints ?? 0"
+                role="Core" description="Stuff" :playerImageSrc="FantasyDraft[0].players[2].dotaAccount.steamProfilePicture"
+                :teamImageSrc="FantasyDraft[0].players[2].teamId" />
             <draft-pick-card class="col-2 draft-card" :name="FantasyDraft[0].players[3].dotaAccount.name"
-                :team="FantasyDraft[0].players[3].team.name" :fantasyPoints="FantasyPoints.draftPickFourPoints ?? 0" role="Core"
-                description="Stuff" :imageSrc="FantasyDraft[0].players[3].teamId" />
+                :team="FantasyDraft[0].players[3].team.name" :fantasyPoints="FantasyPoints.draftPickFourPoints ?? 0"
+                role="Core" description="Stuff" :playerImageSrc="FantasyDraft[0].players[3].dotaAccount.steamProfilePicture"
+                :teamImageSrc="FantasyDraft[0].players[3].teamId" />
             <draft-pick-card class="col-2 draft-card" :name="FantasyDraft[0].players[4].dotaAccount.name"
-                :team="FantasyDraft[0].players[4].team.name" :fantasyPoints="FantasyPoints.draftPickFivePoints ?? 0" role="Core"
-                description="Stuff" :imageSrc="FantasyDraft[0].players[4].teamId" />
+                :team="FantasyDraft[0].players[4].team.name" :fantasyPoints="FantasyPoints.draftPickFivePoints ?? 0"
+                role="Core" description="Stuff" :playerImageSrc="FantasyDraft[0].players[4].dotaAccount.steamProfilePicture"
+                :teamImageSrc="FantasyDraft[0].players[4].teamId" />
         </div>
 
     </div>

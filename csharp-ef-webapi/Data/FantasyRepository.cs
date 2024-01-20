@@ -56,58 +56,129 @@ public class FantasyRepository : IFantasyRepository
     public async Task<IEnumerable<FantasyPlayerPoints>> GetFantasyPlayerPointsAsync(int LeagueId)
     {
         _logger.LogInformation($"Fetching Fantasy Points for LeagueID: {LeagueId}");
-        List<FantasyPlayerPoints> fantasyPlayerMatches = await _dbContext.MatchDetails
-            .Where(md => md.LeagueId == LeagueId)
-            .SelectMany(md => md.Players)
+        List<FantasyPlayerPoints> fantasyPlayerMatches = await _dbContext.FantasyDrafts
+            .Where(fd => fd.LeagueId == LeagueId)
+            .Join(
+                _dbContext.FantasyDraftPlayers,
+                fd => fd.Id,
+                fdp => fdp.FantasyDraftId,
+                (fd, fdp) => new { FantasyDraft = fd, FantasyDraftPlayer = fdp }
+            )
             .Join(
                 _dbContext.FantasyPlayers,
-                matchDetail => matchDetail.AccountId,
-                fantasyPlayer => fantasyPlayer.DotaAccountId,
-                (matchDetail, fantasyPlayer) => new FantasyPlayerPoints { Match = matchDetail, FantasyPlayer = fantasyPlayer })
+                fdp => fdp.FantasyDraftPlayer.FantasyPlayerId,
+                fp => fp.Id,
+                (fdp, fp) => new { fdp.FantasyDraftPlayer, FantasyPlayer = fp }
+            )
+            .Join(
+                _dbContext.MatchDetailsPlayers,
+                fp => fp.FantasyPlayer.DotaAccountId,
+                mdp => mdp.AccountId,
+                (fp, mdp) => new { fp.FantasyDraftPlayer, MatchDetailPlayer = mdp }
+            )
+            .Select(fdp => new FantasyPlayerPoints
+            {
+                FantasyDraft = fdp.FantasyDraftPlayer.FantasyDraft,
+                Match = fdp.MatchDetailPlayer,
+                FantasyPlayer = fdp.FantasyDraftPlayer.FantasyPlayer
+            })
             .ToListAsync();
 
         return fantasyPlayerMatches;
+    }
+
+    public async Task<IEnumerable<object?>> GetPlayersTotalFantasyPointsByLeagueAsync(int LeagueId)
+    {
+        _logger.LogInformation($"Fetching Top 10 Fantasy Points for LeagueID: {LeagueId}");
+        List<FantasyPlayerPoints> fantasyPlayerPoints = await _dbContext.FantasyPlayers
+            .Where(fp => fp.LeagueId == LeagueId)
+            .Include(fp => fp.Team)
+            .Include(fp => fp.DotaAccount)
+            .Join(
+                _dbContext.MatchDetailsPlayers,
+                fp => fp.DotaAccountId,
+                mdp => mdp.AccountId,
+                (fp, mdp) => new { FantasyPlayer = fp, MatchDetailPlayer = mdp }
+            )
+            .Select(fdp => new FantasyPlayerPoints
+            {
+                Match = fdp.MatchDetailPlayer,
+                FantasyPlayer = fdp.FantasyPlayer
+            })
+            .ToListAsync();
+
+        var fantasyPlayerTotals = fantasyPlayerPoints
+                                        .GroupBy(fp => fp.FantasyPlayer)
+                                        .Select(group => new
+                                        {
+                                            FantasyPlayer = group.Key,
+                                            TotalMatches = group.Count(),
+                                            TotalKills = group.Sum(result => result.Kills),
+                                            TotalKillsPoints = group.Sum(result => result.KillsPoints),
+                                            TotalDeaths = group.Sum(result => result.Deaths),
+                                            TotalDeathsPoints = group.Sum(result => result.DeathsPoints),
+                                            TotalAssists = group.Sum(result => result.Assists),
+                                            TotalAssistsPoints = group.Sum(result => result.AssistsPoints),
+                                            TotalLastHits = group.Sum(result => result.LastHits),
+                                            TotalLastHitsPoints = group.Sum(result => result.LastHitsPoints),
+                                            TotalGoldPerMin = group.Average(result => result.GoldPerMin),
+                                            TotalGoldPerMinPoints = group.Sum(result => result.GoldPerMinPoints),
+                                            TotalXpPerMin = group.Average(result => result.XpPerMin),
+                                            TotalXpPerMinPoints = group.Sum(result => result.XpPerMinPoints),
+                                            TotalMatchFantasyPoints = group.Sum(result => result.TotalMatchFantasyPoints)
+                                        })
+                                        .OrderByDescending(fdp => fdp.TotalMatchFantasyPoints)
+                                        .ToList();
+
+        return fantasyPlayerTotals;
     }
 
     public async Task<object?> GetUserTotalFantasyPointsByLeagueAsync(long UserDiscordAccountId, int LeagueId)
     {
         _logger.LogInformation($"Fetching User {UserDiscordAccountId} Fantasy Points for LeagueID: {LeagueId}");
         var fantasyPoints = await GetFantasyPlayerPointsAsync(LeagueId);
-        var fantasyTotalLeaguePoints = fantasyPoints
-                                        .GroupBy(fp => fp.FantasyPlayer)
-                                        .Select(group => new
-                                        {
-                                            FantasyPlayer = group.Key,
-                                            TotalLeaguePoints = group.Sum(result => result.TotalMatchFantasyPoints)
-                                        })
-                                        .ToList();
-        var userDraft = await _dbContext.FantasyDrafts
-                                .Where(fd => fd.LeagueId == LeagueId && fd.DiscordAccountId == UserDiscordAccountId)
-                                .Select(fd => fd)
-                                .FirstOrDefaultAsync();
 
-        if (userDraft == null)
+        var userDraftWithPoints = fantasyPoints
+            .Where(fdp => fdp.FantasyDraft.LeagueId == LeagueId && fdp.FantasyDraft.DiscordAccountId == UserDiscordAccountId)
+            .GroupBy(fdp => fdp.FantasyDraft)
+            .Select(fdp => new
+            {
+                FantasyDraft = fdp.Key,
+                DraftPickOnePoints = fdp.Where(fdp => fdp.FantasyPlayer.Id == fdp.FantasyDraft.DraftPickOne).Sum(result => result.TotalMatchFantasyPoints),
+                DraftPickTwoPoints = fdp.Where(fdp => fdp.FantasyPlayer.Id == fdp.FantasyDraft.DraftPickTwo).Sum(result => result.TotalMatchFantasyPoints),
+                DraftPickThreePoints = fdp.Where(fdp => fdp.FantasyPlayer.Id == fdp.FantasyDraft.DraftPickThree).Sum(result => result.TotalMatchFantasyPoints),
+                DraftPickFourPoints = fdp.Where(fdp => fdp.FantasyPlayer.Id == fdp.FantasyDraft.DraftPickFour).Sum(result => result.TotalMatchFantasyPoints),
+                DraftPickFivePoints = fdp.Where(fdp => fdp.FantasyPlayer.Id == fdp.FantasyDraft.DraftPickFive).Sum(result => result.TotalMatchFantasyPoints)
+            })
+            .FirstOrDefault();
+
+        // Mask the userDraftWithPoints
+        if (userDraftWithPoints != null)
         {
-            return null;
+            userDraftWithPoints.FantasyDraft.DiscordAccountId = null;
         }
-        var userDraftWithPoints = new
-        {
-            userDraft.LeagueId,
-            userDraft.DraftCreated,
-            userDraft.DraftLastUpdated,
-            userDraft.DraftPickOne,
-            DraftPickOnePoints = fantasyTotalLeaguePoints.Where(tlp => tlp.FantasyPlayer.Id == userDraft.DraftPickOne).Select(tlp => tlp.TotalLeaguePoints).FirstOrDefault(),
-            userDraft.DraftPickTwo,
-            DraftPickTwoPoints = fantasyTotalLeaguePoints.Where(tlp => tlp.FantasyPlayer.Id == userDraft.DraftPickTwo).Select(tlp => tlp.TotalLeaguePoints).FirstOrDefault(),
-            userDraft.DraftPickThree,
-            DraftPickThreePoints = fantasyTotalLeaguePoints.Where(tlp => tlp.FantasyPlayer.Id == userDraft.DraftPickThree).Select(tlp => tlp.TotalLeaguePoints).FirstOrDefault(),
-            userDraft.DraftPickFour,
-            DraftPickFourPoints = fantasyTotalLeaguePoints.Where(tlp => tlp.FantasyPlayer.Id == userDraft.DraftPickFour).Select(tlp => tlp.TotalLeaguePoints).FirstOrDefault(),
-            userDraft.DraftPickFive,
-            DraftPickFivePoints = fantasyTotalLeaguePoints.Where(tlp => tlp.FantasyPlayer.Id == userDraft.DraftPickFive).Select(tlp => tlp.TotalLeaguePoints).FirstOrDefault()
-        };
+
         return userDraftWithPoints;
     }
+
+    public async Task<IEnumerable<object?>> GetTopNTotalFantasyPointsByLeagueAsync(int LeagueId, int Limit)
+    {
+        _logger.LogInformation($"Fetching Top 10 Fantasy Points for LeagueID: {LeagueId}");
+        var fantasyPoints = await GetFantasyPlayerPointsAsync(LeagueId);
+        var fantasyTotalLeaguePoints = fantasyPoints
+                                        .GroupBy(fp => fp.FantasyDraft)
+                                        .Select(group => new
+                                        {
+                                            FantasyDraft = group.Key,
+                                            TotalMatchFantasyPoints = group.Sum(result => result.TotalMatchFantasyPoints)
+                                        })
+                                        .OrderByDescending(fdp => fdp.TotalMatchFantasyPoints)
+                                        .Take(Limit)
+                                        .ToList();
+
+        return fantasyTotalLeaguePoints;
+    }
+
 
     public async Task<DateTime> GetLeagueLockedDate(int LeagueId)
     {

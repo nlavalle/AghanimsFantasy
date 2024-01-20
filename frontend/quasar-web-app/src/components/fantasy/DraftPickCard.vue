@@ -1,7 +1,10 @@
 <template>
   <q-card class="card-container">
     <q-card-section class="draft-image">
-      <q-img :src="getImageUrl()" />
+      <div class="flex-container">
+        <q-img height="115px" width="38%" :src="playerImageSrc" />
+        <q-img height="115px" width="62%" :src="getImageUrl()" />
+      </div>
     </q-card-section>
     <q-card-section class="draft-header">
       <div>
@@ -54,15 +57,19 @@ export default defineComponent({
       type: String,
       required: true
     },
-    imageSrc: {
+    playerImageSrc: {
+      type: String,
+      required: false
+    },
+    teamImageSrc: {
       type: Number,
       required: false
     },
   },
   methods: {
     getImageUrl() {
-      if(this.imageSrc == 0) return null;
-      return new URL(`../../assets/logos/teams_logo_${this.imageSrc}.png`, import.meta.url).toString();
+      if (this.teamImageSrc == 0) return null;
+      return new URL(`../../assets/logos/teams_logo_${this.teamImageSrc}.png`, import.meta.url).toString();
     }
   }
 });
@@ -110,4 +117,13 @@ export default defineComponent({
   margin-top: 8px;
   color: #555;
 }
+
+.flex-container {
+  display: flex;
+  flex-flow: row wrap;
+  max-width: 100%;
+  /* padding-left: 20px;
+  padding-right: 20px; */
+}
+
 </style>

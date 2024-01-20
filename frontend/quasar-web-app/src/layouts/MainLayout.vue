@@ -24,6 +24,8 @@
         <q-route-tab to="/about" label="About" />
         <!-- <q-route-tab to="/league" label="Leagues" /> -->
         <q-route-tab to="/fantasy" label="Fantasy" />
+        <q-route-tab to="/stats" label="Stats" />
+        <!-- <q-route-tab to="/leaderboard" label="Leaderboard" /> -->
       </q-tabs>
     </q-header>
 

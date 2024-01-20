@@ -135,11 +135,31 @@ export default {
           .then((result) => {
             fantasyDraft.value = result;
             if (fantasyDraft.value.length > 0) {
-              draftedPlayerOne.value = { id: fantasyDraft.value[0].players[0].id, name: fantasyDraft.value[0].players[0].dotaAccount.name }
-              draftedPlayerTwo.value = { id: fantasyDraft.value[0].players[1].id, name: fantasyDraft.value[0].players[1].dotaAccount.name }
-              draftedPlayerThree.value = { id: fantasyDraft.value[0].players[2].id, name: fantasyDraft.value[0].players[2].dotaAccount.name }
-              draftedPlayerFour.value = { id: fantasyDraft.value[0].players[3].id, name: fantasyDraft.value[0].players[3].dotaAccount.name }
-              draftedPlayerFive.value = { id: fantasyDraft.value[0].players[4].id, name: fantasyDraft.value[0].players[4].dotaAccount.name }
+              draftedPlayerOne.value = {
+                id: fantasyDraft.value[0].players[0].id,
+                name: fantasyDraft.value[0].players[0].dotaAccount.name,
+                steamProfilePicture: fantasyDraft.value[0].players[0].dotaAccount.steamProfilePicture
+              }
+              draftedPlayerTwo.value = {
+                id: fantasyDraft.value[0].players[1].id,
+                name: fantasyDraft.value[0].players[1].dotaAccount.name,
+                steamProfilePicture: fantasyDraft.value[0].players[1].dotaAccount.steamProfilePicture
+              }
+              draftedPlayerThree.value = {
+                id: fantasyDraft.value[0].players[2].id,
+                name: fantasyDraft.value[0].players[2].dotaAccount.name,
+                steamProfilePicture: fantasyDraft.value[0].players[2].dotaAccount.steamProfilePicture
+              }
+              draftedPlayerFour.value = {
+                id: fantasyDraft.value[0].players[3].id,
+                name: fantasyDraft.value[0].players[3].dotaAccount.name,
+                steamProfilePicture: fantasyDraft.value[0].players[3].dotaAccount.steamProfilePicture
+              }
+              draftedPlayerFive.value = {
+                id: fantasyDraft.value[0].players[4].id,
+                name: fantasyDraft.value[0].players[4].dotaAccount.name,
+                steamProfilePicture: fantasyDraft.value[0].players[4].dotaAccount.steamProfilePicture
+              }
             }
           })
       }

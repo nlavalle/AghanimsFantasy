@@ -25,6 +25,19 @@ namespace csharp_ef_webapi.Controllers
             return Ok(players);
         }
 
+        // GET: api/fantasy/players/5
+        [HttpGet("players/{leagueId}/points")]
+        public async Task<ActionResult<List<FantasyPlayer>>> GetFantasyPlayersPoints(int? leagueId)
+        {
+            if (leagueId == null)
+            {
+                return BadRequest("Please provide a League ID to fetch fantasy player points of");
+            }
+
+            var players = await _service.GetPlayersTotalFantasyPointsByLeagueAsync(leagueId.Value);
+            return Ok(players);
+        }
+
         // GET: api/fantasy/draft/5
         [Authorize]
         [HttpGet("draft/{leagueId}")]
@@ -46,7 +59,7 @@ namespace csharp_ef_webapi.Controllers
             return Ok(await _service.GetUserFantasyDraftsByLeagueAsync(userDiscordAccountId, leagueId.Value));
         }
 
-        // GET: api/fantasy/draft/5
+        // GET: api/fantasy/draft/5/points
         [Authorize]
         [HttpGet("draft/{leagueId}/points")]
         public async Task<IActionResult> GetUserDraftPoints(int? leagueId)
@@ -80,6 +93,33 @@ namespace csharp_ef_webapi.Controllers
             return Ok(userDraftWithPoints);
         }
 
+        // GET: api/fantasy/5/top10
+        [Authorize]
+        [HttpGet("{leagueId}/top10")]
+        public async Task<IActionResult> GetTop10FantasyPoints(int? leagueId)
+        {
+            if (!HttpContext.User.Identity.IsAuthenticated)
+            {
+                // Authorize should take care of this but just in case
+                return BadRequest("User not authenticated");
+            }
+
+            bool getAccountId = long.TryParse(HttpContext.User.Claims.Where(c => c.Type == ClaimTypes.NameIdentifier).FirstOrDefault().Value, out long userDiscordAccountId);
+
+            if (leagueId == null || !leagueId.HasValue)
+            {
+                return BadRequest("Please provide a League ID to fetch a draft of");
+            }
+
+            var fantasyPoints = await _service.GetTopNTotalFantasyPointsByLeagueAsync(leagueId.Value, 10);
+            if (fantasyPoints.Count() == 0)
+            {
+                // League doesn't have fantasy players/points yet
+                return Ok(new { });
+            }
+            return Ok(fantasyPoints);
+        }
+
         // POST: api/fantasy/draft
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [Authorize]
@@ -102,7 +142,7 @@ namespace csharp_ef_webapi.Controllers
             var existingUserDraft = await _service.GetUserFantasyDraftsByLeagueAsync(userDiscordAccountId, fantasyDraft.LeagueId);
 
             var draftLockedDate = await _service.GetLeagueLockedDate(fantasyDraft.LeagueId);
-            if(existingUserDraft.Count() > 0 && DateTime.UtcNow > draftLockedDate)
+            if (existingUserDraft.Count() > 0 && DateTime.UtcNow > draftLockedDate)
             {
                 // If a user hasn't drafted yet let them add it in late, if they already have a draft though return a bad request cannot update
                 return BadRequest("Draft is locked for this league");

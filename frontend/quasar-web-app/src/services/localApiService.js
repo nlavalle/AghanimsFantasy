@@ -157,6 +157,40 @@ export const localApiService = {
                 throw error;
             });
     },
+    getPlayerFantasyStats(leagueId) {
+        return fetch(`${baseUrl}/fantasy/players/${leagueId}/points`)
+            .then(function (response) {
+                if (!response.ok) {
+                    throw response.status;
+                } else {
+                    return response.json();
+                }
+            }.bind(this))
+            .then(function (data) {
+                return data;
+            }.bind(this))
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                throw error;
+            });
+    },
+    getTopTenDrafts(leagueId) {
+        return fetch(`${baseUrl}/fantasy/${leagueId}/top10`)
+            .then(function (response) {
+                if (!response.ok) {
+                    throw response.status;
+                } else {
+                    return response.json();
+                }
+            }.bind(this))
+            .then(function (data) {
+                return data;
+            }.bind(this))
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                throw error;
+            });
+    },
     saveFantasyDraft(
         user,
         league,
