@@ -110,12 +110,12 @@ export default defineComponent({
 .draft-body-main {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #333;
+  /* color: #333; */
 }
 
 .draft-body-details {
   margin-top: 8px;
-  color: #555;
+  /* color: #555; */
 }
 
 .flex-container {

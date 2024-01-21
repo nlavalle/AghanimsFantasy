@@ -6,8 +6,10 @@
           NADCL Fantasy Draft, click the fantasy tab to get started.
           <br />
           Points are calculated using the pattern below
-          following the TI fantasy scoring. Certain statistics require parsing the .dem replay files to measure, so the unavailable 
-          metrics won't be involved in the calculation until that is added to the API service that fetches match data (hopefully by Season 7).
+          following the TI fantasy scoring. Certain statistics require parsing the .dem replay files to measure, so the
+          unavailable
+          metrics won't be involved in the calculation until that is added to the API service that fetches match data
+          (hopefully by Season 7).
         </p>
       </div>
     </div>
@@ -133,6 +135,7 @@ const headers = [
 .score-table {
   max-width: 375px;
 }
+
 .score-table th {
   background-color: #3a404d;
   color: white;
@@ -141,7 +144,7 @@ const headers = [
 }
 
 .score-table tbody td {
-  background-color: #192038;
+  /* background-color: #192038; */
   color: white;
   font-family: Arial, Helvetica, sans-serif;
   font-size: 16px;

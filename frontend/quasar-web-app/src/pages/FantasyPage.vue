@@ -86,13 +86,31 @@ export default {
     const showErrorModal = ref(false);
     const errorDetails = ref(null);
 
+    // // Define a computed property to generate a grouped list of players per team
+    // const fantasyTeamPlayers = computed(() => {
+    //   return fantasyPlayers.value.map(opt => ({
+    //     id: opt.id,
+    //     team: opt.team.name,
+    //     name: opt.dotaAccount.name
+    //   }));
+    // });
+
     // Define a computed property to generate a grouped list of players per team
     const fantasyTeamPlayers = computed(() => {
-      return fantasyPlayers.value.map(opt => ({
-        id: opt.id,
-        team: opt.team.name,
-        name: opt.dotaAccount.name
-      }));
+      return Array.from(new Set(fantasyPlayers.value.map(opt => opt.team.name))).map(teamName => {
+        return {
+          label: teamName,
+          options: fantasyPlayers.value
+            .filter(opt => opt.team.name === teamName) // Filter team
+            .filter(opt => !selectedPlayerIds.value.some((sel) => sel == opt.id)) // Filter selected players
+            .map(player => (
+              {
+                id: player.id,
+                name: player.dotaAccount.name
+              }
+            )),
+        };
+      })
     });
 
     const updateDisabled = computed(() => {

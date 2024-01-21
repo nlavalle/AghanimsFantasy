@@ -1,5 +1,5 @@
 <template>
-    <!-- <q-select ref="expandSelect" use-input filled input-debounce="500" :modelValue="modelValue"
+    <q-select ref="expandSelect" use-input filled input-debounce="500" :modelValue="modelValue"
         @update:model-value="updateSelectedOption" :options="options" @filter="filterFn" option-label="name" dark
         :label="selectLabel ?? ''" color="teal" clearable>
         <template v-slot:option="scope">
@@ -14,10 +14,10 @@
                 </template>
             </q-expansion-item>
         </template>
-    </q-select> -->
-    <q-select ref="expandSelect" use-input filled input-debounce="500" :modelValue="modelValue"
-        @update:model-value="updateSelectedOption" :options="options" remove-selected @filter="filterFn" option-label="name" dark :label="selectLabel ?? ''"
-        color="teal" clearable/>
+    </q-select>
+    <!-- <q-select ref="expandSelect" use-input filled input-debounce="500" :modelValue="modelValue"
+        @update:model-value="updateSelectedOption" :options="options" remove-selected @filter="filterFn" option-label="name" :label="selectLabel ?? ''"
+        color="teal" clearable/> -->
 </template>
 
 <script>
@@ -48,32 +48,32 @@ export default {
         return {
             options,
 
-            filterFn(val, update) {
-                const filterCriteria = val.toLowerCase()
-                update(() => {
-                    options.value = props.selectOptions.filter(option => option.name.toLowerCase().includes(filterCriteria))
-                })
-            }
             // filterFn(val, update) {
             //     const filterCriteria = val.toLowerCase()
             //     update(() => {
-            //         options.value = props.selectOptions.map(team => {
-            //             return {
-            //                 label: team.label,
-            //                 options: team.options.filter(option => option.name.toLowerCase().includes(filterCriteria))
-            //             }
-            //         })
+            //         options.value = props.selectOptions.filter(option => option.name.toLowerCase().includes(filterCriteria))
             //     })
             // }
+            filterFn(val, update) {
+                const filterCriteria = val.toLowerCase()
+                update(() => {
+                    options.value = props.selectOptions.map(team => {
+                        return {
+                            label: team.label,
+                            options: team.options.filter(option => option.name.toLowerCase().includes(filterCriteria))
+                        }
+                    })
+                })
+            }
         }
     },
     emits: ['update:modelValue'],
     methods: {
-        // changeOption(option) {
-        //     this.$refs.expandSelect.updateInputValue('', true);
-        //     this.$emit('update:modelValue', option);
-        //     this.$refs.expandSelect.hidePopup(); // v-close-popup on the q-item freaks out with the dropdown options changing so we need to call it here
-        // },
+        changeOption(option) {
+            this.$refs.expandSelect.updateInputValue('', true);
+            this.$emit('update:modelValue', option);
+            this.$refs.expandSelect.hidePopup(); // v-close-popup on the q-item freaks out with the dropdown options changing so we need to call it here
+        },
         updateSelectedOption(option) {
             this.$emit('update:modelValue', option);
             this.$refs.expandSelect.hidePopup();
