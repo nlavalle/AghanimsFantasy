@@ -21,21 +21,52 @@ namespace csharp_ef_webapi.Controllers
         [HttpGet("players/{leagueId}")]
         public async Task<ActionResult<List<FantasyPlayer>>> GetFantasyPlayers(int? leagueId)
         {
-            var players = await _service.GetFantasyPlayersAsync(leagueId);
+            var players = await _service.FantasyPlayersByLeagueAsync(leagueId);
             return Ok(players);
         }
 
         // GET: api/fantasy/players/5
         [HttpGet("players/{leagueId}/points")]
-        public async Task<ActionResult<List<FantasyPlayer>>> GetFantasyPlayersPoints(int? leagueId)
+        public async Task<ActionResult<List<FantasyPlayerPointTotals>>> GetFantasyPlayersPoints(int? leagueId)
         {
             if (leagueId == null)
             {
                 return BadRequest("Please provide a League ID to fetch fantasy player points of");
             }
 
-            var players = await _service.GetPlayersTotalFantasyPointsByLeagueAsync(leagueId.Value);
-            return Ok(players);
+            var fantasyPlayerPoints = await _service.FantasyPlayerPointsByLeagueAsync(leagueId.Value);
+            var playerTotals = _service.AggregateFantasyPlayerPoints(fantasyPlayerPoints).ToList();
+            return Ok(playerTotals);
+        }
+
+        // GET: api/fantasy/players/5/top10
+        [Authorize]
+        [HttpGet("players/{leagueId}/top10")]
+        public async Task<IActionResult> GetTop10FantasyPoints(int? leagueId)
+        {
+            if (!HttpContext.User.Identity.IsAuthenticated)
+            {
+                // Authorize should take care of this but just in case
+                return BadRequest("User not authenticated");
+            }
+
+            bool getAccountId = long.TryParse(HttpContext.User.Claims.Where(c => c.Type == ClaimTypes.NameIdentifier).FirstOrDefault().Value, out long userDiscordAccountId);
+
+            if (leagueId == null || !leagueId.HasValue)
+            {
+                return BadRequest("Please provide a League ID to fetch a draft of");
+            }
+
+            var fantasyPoints = await _service.FantasyPlayerPointsByLeagueAsync(leagueId.Value);
+            if (fantasyPoints.Count() == 0)
+            {
+                // League doesn't have fantasy players/points yet
+                return Ok(new { });
+            }
+
+            var top10Players = fantasyPoints.OrderByDescending(fp => fp.TotalMatchFantasyPoints).Take(10).ToList();
+
+            return Ok(top10Players);
         }
 
         // GET: api/fantasy/draft/5
@@ -56,13 +87,13 @@ namespace csharp_ef_webapi.Controllers
                 return BadRequest("Please provide a League ID to fetch a draft of");
             }
 
-            return Ok(await _service.GetUserFantasyDraftsByLeagueAsync(userDiscordAccountId, leagueId.Value));
+            return Ok(await _service.FantasyDraftsByUserLeagueAsync(userDiscordAccountId, leagueId.Value));
         }
 
         // GET: api/fantasy/draft/5/points
         [Authorize]
         [HttpGet("draft/{leagueId}/points")]
-        public async Task<IActionResult> GetUserDraftPoints(int? leagueId)
+        public async Task<IActionResult> GetUserDraftFantasyPoints(int? leagueId)
         {
             if (!HttpContext.User.Identity.IsAuthenticated)
             {
@@ -77,47 +108,23 @@ namespace csharp_ef_webapi.Controllers
                 return BadRequest("Please provide a League ID to fetch a draft of");
             }
 
-            var fantasyPoints = await _service.GetFantasyPlayerPointsAsync(leagueId.Value);
+            var fantasyPoints = await _service.FantasyPlayersByLeagueAsync(leagueId.Value);
             if (fantasyPoints.Count() == 0)
             {
                 // League doesn't have fantasy players/points yet
                 return Ok(new { });
             }
 
-            var userDraftWithPoints = await _service.GetUserTotalFantasyPointsByLeagueAsync(userDiscordAccountId, leagueId.Value);
-            if (userDraftWithPoints == null)
+            var fantasyPlayerPoints = await _service.FantasyPlayerPointsByUserLeagueAsync(userDiscordAccountId, leagueId.Value);
+            if (fantasyPlayerPoints == null)
             {
                 // User has no draft yet so return an empty okay
                 return Ok(new { });
             }
-            return Ok(userDraftWithPoints);
-        }
 
-        // GET: api/fantasy/5/top10
-        [Authorize]
-        [HttpGet("{leagueId}/top10")]
-        public async Task<IActionResult> GetTop10FantasyPoints(int? leagueId)
-        {
-            if (!HttpContext.User.Identity.IsAuthenticated)
-            {
-                // Authorize should take care of this but just in case
-                return BadRequest("User not authenticated");
-            }
+            var userDraftPoints = _service.AggregateFantasyDraftPoints(fantasyPlayerPoints);
 
-            bool getAccountId = long.TryParse(HttpContext.User.Claims.Where(c => c.Type == ClaimTypes.NameIdentifier).FirstOrDefault().Value, out long userDiscordAccountId);
-
-            if (leagueId == null || !leagueId.HasValue)
-            {
-                return BadRequest("Please provide a League ID to fetch a draft of");
-            }
-
-            var fantasyPoints = await _service.GetTopNTotalFantasyPointsByLeagueAsync(leagueId.Value, 10);
-            if (fantasyPoints.Count() == 0)
-            {
-                // League doesn't have fantasy players/points yet
-                return Ok(new { });
-            }
-            return Ok(fantasyPoints);
+            return Ok(userDraftPoints);
         }
 
         // POST: api/fantasy/draft
@@ -139,7 +146,7 @@ namespace csharp_ef_webapi.Controllers
                 return BadRequest("Could not retrieve user's discord ID");
             }
 
-            var existingUserDraft = await _service.GetUserFantasyDraftsByLeagueAsync(userDiscordAccountId, fantasyDraft.LeagueId);
+            var existingUserDraft = await _service.FantasyDraftsByUserLeagueAsync(userDiscordAccountId, fantasyDraft.LeagueId);
 
             var draftLockedDate = await _service.GetLeagueLockedDate(fantasyDraft.LeagueId);
             if (existingUserDraft.Count() > 0 && DateTime.UtcNow > draftLockedDate)
@@ -148,7 +155,14 @@ namespace csharp_ef_webapi.Controllers
                 return BadRequest("Draft is locked for this league");
             }
 
-            var fantasyDraftPostResponse = await _service.AddNewUserFantasyDraftAsync(userDiscordAccountId, fantasyDraft);
+            object fantasyDraftPostResponse = null;
+
+            // Fantasy Draft may be incomplete, so go through and add the IDs passed
+            await _service.ClearUserFantasyPlayersAsync(userDiscordAccountId, fantasyDraft.LeagueId);
+            for(int i=0;i<=4;i++)
+            {
+                fantasyDraftPostResponse = await _service.AddNewUserFantasyPlayerAsync(userDiscordAccountId, fantasyDraft.LeagueId, fantasyDraft.DraftPickPlayers[i].FantasyPlayerId, i+1);
+            }
 
             return CreatedAtAction(nameof(GetUserDraft), new { leagueId = fantasyDraft.LeagueId }, fantasyDraftPostResponse);
         }

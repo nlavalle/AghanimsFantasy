@@ -2,11 +2,11 @@
     <q-dialog class="alert-dialog">
         <q-card dark>
             <q-card-section>
-                <span class="text-h6">Success!</span>
+                <span class="text-h6">Error</span>
             </q-card-section>
 
             <q-card-section>
-                <p>Your Fantasy Draft was updated.</p>
+                <p>There was an issue updating the fantasy draft. Error details: {{ error }}</p>
             </q-card-section>
 
             <q-card-actions align="right">
@@ -17,6 +17,10 @@
 </template>
 <script>
 export default {
+    props: {
+        error: {
+        }
+    },
     emits: ['ok'],
     methods: {
         onOKClick() {

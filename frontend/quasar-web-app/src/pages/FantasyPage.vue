@@ -1,12 +1,14 @@
 <template>
   <div class="flex-container">
     <div v-if="authenticated" style="width:100%">
-      <div v-if="fantasyDraft.length > 0 && userDraftPoints">
-        <current-draft :FantasyDraft="fantasyDraft" :FantasyPoints="userDraftPoints" />
+      <div v-if="userDraftPoints">
+        <current-draft :FantasyPoints="userDraftPoints" />
       </div>
       <div v-if="updateDraftVisibility || updateDisabled" class="row">
         <q-space />
-        <q-btn class="btn-fantasy" :disabled="updateDisabled" @click="toggleUpdateDraft()">{{ updateDisabled ? "Draft Locked" : "Update Draft" }}</q-btn>
+        <q-btn class="btn-fantasy" :disabled="updateDisabled" @click="toggleUpdateDraft()">
+          {{ updateDisabled ? "Draft Locked" : "Update Draft" }}
+        </q-btn>
       </div>
       <div v-else class="row">
         <div class="row">
@@ -37,7 +39,8 @@
           <q-btn class="btn-fantasy" @click="saveDraft()">Save Draft</q-btn>
         </div>
       </div>
-      <AlertDialog v-model="showSuccessModal" />
+      <AlertDialog v-model="showSuccessModal" @ok="scrollAfterAlertDialog" />
+      <ErrorDialog v-model="showErrorModal" :error="errorDetails" @ok="scrollAfterAlertDialog" />
     </div>
     <div v-else class="text-white">
       Not Authenticated
@@ -52,6 +55,7 @@ import { useLeagueStore } from 'src/stores/league';
 import { localApiService } from 'src/services/localApiService';
 import SelectExpansionGroup from 'src/components/SelectExpansionGroup.vue';
 import AlertDialog from 'src/components/AlertDialog.vue'
+import ErrorDialog from 'src/components/ErrorDialog.vue';
 import CurrentDraft from 'src/components/fantasy/CurrentDraft.vue'
 
 export default {
@@ -59,6 +63,7 @@ export default {
   components: {
     SelectExpansionGroup,
     AlertDialog,
+    ErrorDialog,
     CurrentDraft
   },
   setup() {
@@ -78,23 +83,16 @@ export default {
     const draftedPlayerFive = ref(null);
 
     const showSuccessModal = ref(false);
+    const showErrorModal = ref(false);
+    const errorDetails = ref(null);
 
     // Define a computed property to generate a grouped list of players per team
     const fantasyTeamPlayers = computed(() => {
-      return Array.from(new Set(fantasyPlayers.value.map(opt => opt.team.name))).map(teamName => {
-        return {
-          label: teamName,
-          options: fantasyPlayers.value
-            .filter(opt => opt.team.name === teamName) // Filter team
-            .filter(opt => !selectedPlayerIds.value.some((sel) => sel == opt.id)) // Filter selected players
-            .map(player => (
-              {
-                id: player.id,
-                name: player.dotaAccount.name
-              }
-            )),
-        };
-      })
+      return fantasyPlayers.value.map(opt => ({
+        id: opt.id,
+        team: opt.team.name,
+        name: opt.dotaAccount.name
+      }));
     });
 
     const updateDisabled = computed(() => {
@@ -131,43 +129,49 @@ export default {
           .then((result) => {
             fantasyPlayers.value = result;
           });
-        localApiService.getFantasyDraft(leagueStore.selectedLeague.id)
-          .then((result) => {
-            fantasyDraft.value = result;
-            if (fantasyDraft.value.length > 0) {
-              draftedPlayerOne.value = {
-                id: fantasyDraft.value[0].players[0].id,
-                name: fantasyDraft.value[0].players[0].dotaAccount.name,
-                steamProfilePicture: fantasyDraft.value[0].players[0].dotaAccount.steamProfilePicture
-              }
-              draftedPlayerTwo.value = {
-                id: fantasyDraft.value[0].players[1].id,
-                name: fantasyDraft.value[0].players[1].dotaAccount.name,
-                steamProfilePicture: fantasyDraft.value[0].players[1].dotaAccount.steamProfilePicture
-              }
-              draftedPlayerThree.value = {
-                id: fantasyDraft.value[0].players[2].id,
-                name: fantasyDraft.value[0].players[2].dotaAccount.name,
-                steamProfilePicture: fantasyDraft.value[0].players[2].dotaAccount.steamProfilePicture
-              }
-              draftedPlayerFour.value = {
-                id: fantasyDraft.value[0].players[3].id,
-                name: fantasyDraft.value[0].players[3].dotaAccount.name,
-                steamProfilePicture: fantasyDraft.value[0].players[3].dotaAccount.steamProfilePicture
-              }
-              draftedPlayerFive.value = {
-                id: fantasyDraft.value[0].players[4].id,
-                name: fantasyDraft.value[0].players[4].dotaAccount.name,
-                steamProfilePicture: fantasyDraft.value[0].players[4].dotaAccount.steamProfilePicture
-              }
-            }
-          })
+        if (userDraftPoints.value.length > 0) {
+          draftedPlayerOne.value = {
+            id: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 1)[0]?.fantasyPlayer?.id,
+            name: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 1)[0]?.fantasyPlayer?.dotaAccount.name,
+            steamProfilePicture: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 1)[0]?.fantasyPlayer?.dotaAccount.steamProfilePicture,
+          }
+          draftedPlayerTwo.value = {
+            id: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 2)[0]?.fantasyPlayer?.id,
+            name: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 2)[0]?.fantasyPlayer?.dotaAccount.name,
+            steamProfilePicture: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 2)[0]?.fantasyPlayer?.dotaAccount.steamProfilePicture,
+          }
+          draftedPlayerThree.value = {
+            id: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 3)[0]?.fantasyPlayer?.id,
+            name: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 3)[0]?.fantasyPlayer?.dotaAccount.name,
+            steamProfilePicture: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 3)[0]?.fantasyPlayer?.dotaAccount.steamProfilePicture,
+          }
+          draftedPlayerFour.value = {
+            id: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 4)[0]?.fantasyPlayer?.id,
+            name: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 4)[0]?.fantasyPlayer?.dotaAccount.name,
+            steamProfilePicture: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 4)[0]?.fantasyPlayer?.dotaAccount.steamProfilePicture,
+          }
+          draftedPlayerFive.value = {
+            id: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 5)[0]?.fantasyPlayer?.id,
+            name: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 5)[0]?.fantasyPlayer?.dotaAccount.name,
+            steamProfilePicture: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 5)[0]?.fantasyPlayer?.dotaAccount.steamProfilePicture,
+          }
+        }
       }
     }
 
     const toggleUpdateDraft = () => {
       updateDraftVisibility.value = !updateDraftVisibility.value
     };
+
+    const scrollAfterAlertDialog = () => {
+      setTimeout(function () {
+        window.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: 'smooth'
+        });
+      }, 200);
+    }
 
     const saveDraft = async () => {
       await localApiService.saveFantasyDraft(
@@ -181,24 +185,48 @@ export default {
           draftedPlayerFive.value
         ]
       )
-      showSuccessModal.value = true;
-      fetchFantasyData();
-      localApiService.getUserDraftPoints(leagueStore.selectedLeague.id).then(result => userDraftPoints.value = result);
+        .then(() => {
+          showSuccessModal.value = true;
+          window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: 'smooth'
+          });
+          localApiService.getUserDraftPoints(leagueStore.selectedLeague.id).then(result => {
+            userDraftPoints.value = result;
+            fetchFantasyData();
+          });
+        })
+        .catch(error => {
+          errorDetails.value = error;
+          showErrorModal.value = true;
+          window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: 'smooth'
+          });
+        })
+
+
     };
 
     onMounted(() => {
-      fetchFantasyData();
       if (authStore.authenticated && leagueStore.selectedLeague) {
-        localApiService.getUserDraftPoints(leagueStore.selectedLeague.id).then(result => userDraftPoints.value = result);
+        localApiService.getUserDraftPoints(leagueStore.selectedLeague.id).then(result => {
+          userDraftPoints.value = result;
+          fetchFantasyData();
+        });
       }
 
     });
 
     watch(() => authStore.authenticated, (newValue) => {
       if (newValue) {
-        fetchFantasyData();
         if (authStore.authenticated && leagueStore.selectedLeague) {
-          localApiService.getUserDraftPoints(leagueStore.selectedLeague.id).then(result => userDraftPoints.value = result);
+          localApiService.getUserDraftPoints(leagueStore.selectedLeague.id).then(result => {
+            userDraftPoints.value = result;
+            fetchFantasyData();
+          });
         }
       }
     });
@@ -206,9 +234,11 @@ export default {
     watch(() => leagueStore.selectedLeague, (newValue) => {
       if (newValue) {
         clearSelectedPlayers(); // We don't want to persist any players in dropdowns
-        fetchFantasyData();
         if (authStore.authenticated && leagueStore.selectedLeague) {
-          localApiService.getUserDraftPoints(leagueStore.selectedLeague.id).then(result => userDraftPoints.value = result);
+          localApiService.getUserDraftPoints(leagueStore.selectedLeague.id).then(result => {
+            userDraftPoints.value = result;
+            fetchFantasyData();
+          });
         }
       }
     });
@@ -216,8 +246,8 @@ export default {
     return {
       authStore, fantasyDraft, fantasyPlayers, fantasyTeamPlayers, selectedFantasyPlayer, selectedPlayerIds,
       draftedPlayerOne, draftedPlayerTwo, draftedPlayerThree, draftedPlayerFour, draftedPlayerFive, userDraftPoints,
-      showSuccessModal, updateDraftVisibility, updateDisabled,
-      fetchFantasyData, saveDraft, toggleUpdateDraft, updateSelectedPlayers, clearSelectedPlayers
+      showSuccessModal, showErrorModal, errorDetails, updateDraftVisibility, updateDisabled,
+      fetchFantasyData, saveDraft, toggleUpdateDraft, updateSelectedPlayers, clearSelectedPlayers, scrollAfterAlertDialog
     };
   },
   computed: {

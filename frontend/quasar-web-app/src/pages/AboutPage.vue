@@ -6,8 +6,8 @@
           NADCL Fantasy Draft, click the fantasy tab to get started.
           <br />
           Points are calculated using the pattern below
-          following the TI fantasy scoring. Certain statistics require parsing the .dem replay files to measure, so they
-          won't be involved in the calculation until that is added to the API service that fetches match data.
+          following the TI fantasy scoring. Certain statistics require parsing the .dem replay files to measure, so the unavailable 
+          metrics won't be involved in the calculation until that is added to the API service that fetches match data (hopefully by Season 7).
         </p>
       </div>
     </div>
@@ -59,42 +59,42 @@ const statistics = [
   {
     name: "Tower Kill",
     value: "1",
-    available: "Requires Replay Parsing"
+    available: "No"
   },
   {
     name: "Roshan Kill",
     value: "1",
-    available: "Requires Replay Parsing"
+    available: "No"
   },
   {
     name: "Team Fight",
     value: "3",
-    available: "Requires Replay Parsing"
+    available: "No"
   },
   {
     name: "Wards Planted",
     value: "0.5",
-    available: "Requires Replay Parsing"
+    available: "No"
   },
   {
     name: "Camps Stacked",
     value: "0.5",
-    available: "Requires Replay Parsing"
+    available: "No"
   },
   {
     name: "Runes Grabbed",
     value: "0.25",
-    available: "Requires Replay Parsing"
+    available: "No"
   },
   {
     name: "First Blood",
     value: "4.0",
-    available: "Requires Replay Parsing"
+    available: "No"
   },
   {
     name: "Stuns",
     value: "0.05",
-    available: "Requires Replay Parsing"
+    available: "No"
   }
 ];
 const headers = [
@@ -124,6 +124,15 @@ const headers = [
   
   <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style>
+.about {
+  margin-top: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.score-table {
+  max-width: 375px;
+}
 .score-table th {
   background-color: #3a404d;
   color: white;

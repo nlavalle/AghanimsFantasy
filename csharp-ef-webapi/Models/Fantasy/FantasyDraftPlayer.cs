@@ -8,11 +8,10 @@ public class FantasyDraftPlayer
 {
     [Column("fantasy_draft_id")]
     public long FantasyDraftId { get; set; }
-    public FantasyDraft FantasyDraft { get; set; }
 
     [Column("fantasy_player_id")]
-    public long FantasyPlayerId { get; set; }
-    public FantasyPlayer FantasyPlayer { get; set; }
+    public long? FantasyPlayerId { get; set; }
+    public FantasyPlayer? FantasyPlayer { get; set; } = new FantasyPlayer();
 
     [Column("draft_order")]
     public int DraftOrder { get; set; }

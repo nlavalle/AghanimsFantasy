@@ -90,7 +90,7 @@ export default {
                 name: 'totalGoldPerMin',
                 label: 'GoldPerMin (pts)',
                 align: 'left',
-                field: row => row.totalGoldPerMin.toLocaleString() + ` (${row.totalGoldPerMinPoints.toLocaleString()})`,
+                field: row => row.avgGoldPerMin.toLocaleString() + ` (${row.totalGoldPerMinPoints.toLocaleString()})`,
                 format: val => `${val}`,
                 sortable: true
             },
@@ -98,7 +98,7 @@ export default {
                 name: 'totalXpPerMin',
                 label: 'XpPerMin (pts)',
                 align: 'left',
-                field: row => row.totalXpPerMin.toLocaleString() + ` (${row.totalXpPerMinPoints.toLocaleString()})`,
+                field: row => row.avgXpPerMin.toLocaleString() + ` (${row.totalXpPerMinPoints.toLocaleString()})`,
                 format: val => `${val}`,
                 sortable: true
             },
@@ -113,8 +113,9 @@ export default {
         ];
 
         onMounted(() => {
-            if (authStore.authenticated && leagueStore.selectedLeague) {
-                localApiService.getPlayerFantasyStats(leagueStore.selectedLeague.id).then(result => playerFantasyStats.value = result);
+            if (leagueStore.selectedLeague) {
+                localApiService.getPlayerFantasyStats(leagueStore.selectedLeague.id)
+                                .then(result => playerFantasyStats.value = result);
 
             }
         });
@@ -126,18 +127,11 @@ export default {
             }));
         })
 
-        watch(() => authStore.authenticated, (newValue) => {
-            if (newValue) {
-                if (authStore.authenticated && leagueStore.selectedLeague) {
-                    localApiService.getPlayerFantasyStats(leagueStore.selectedLeague.id).then(result => playerFantasyStats.value = result);
-                }
-            }
-        });
-
         watch(() => leagueStore.selectedLeague, (newValue) => {
             if (newValue) {
-                if (authStore.authenticated && leagueStore.selectedLeague) {
-                    localApiService.getPlayerFantasyStats(leagueStore.selectedLeague.id).then(result => playerFantasyStats.value = result);
+                if (leagueStore.selectedLeague) {
+                    localApiService.getPlayerFantasyStats(leagueStore.selectedLeague.id)
+                                    .then(result => playerFantasyStats.value = result);
                 }
             }
         });

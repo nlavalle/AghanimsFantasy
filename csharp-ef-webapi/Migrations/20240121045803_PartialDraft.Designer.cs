@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using csharp_ef_webapi.Data;
@@ -11,9 +12,10 @@ using csharp_ef_webapi.Data;
 namespace csharp_ef_webapi.Migrations
 {
     [DbContext(typeof(AghanimsFantasyContext))]
-    partial class AghanimsFantasyContextModelSnapshot : ModelSnapshot
+    [Migration("20240121045803_PartialDraft")]
+    partial class PartialDraft
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -148,6 +150,26 @@ namespace csharp_ef_webapi.Migrations
                     b.Property<DateTime?>("DraftLastUpdated")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("draft_last_updated");
+
+                    b.Property<long?>("DraftPickFive")
+                        .HasColumnType("bigint")
+                        .HasColumnName("draft_pick_five");
+
+                    b.Property<long?>("DraftPickFour")
+                        .HasColumnType("bigint")
+                        .HasColumnName("draft_pick_four");
+
+                    b.Property<long?>("DraftPickOne")
+                        .HasColumnType("bigint")
+                        .HasColumnName("draft_pick_one");
+
+                    b.Property<long?>("DraftPickThree")
+                        .HasColumnType("bigint")
+                        .HasColumnName("draft_pick_three");
+
+                    b.Property<long?>("DraftPickTwo")
+                        .HasColumnType("bigint")
+                        .HasColumnName("draft_pick_two");
 
                     b.Property<int>("LeagueId")
                         .HasColumnType("integer")

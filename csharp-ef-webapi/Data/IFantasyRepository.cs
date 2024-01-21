@@ -4,13 +4,14 @@ namespace csharp_ef_webapi.Data;
 public interface IFantasyRepository
 {
     // Fantasy Drafts
-    Task<IEnumerable<FantasyPlayer>> GetFantasyPlayersAsync(int? LeagueId);
-    Task<IEnumerable<object>> GetUserFantasyDraftsByLeagueAsync(long UserDiscordAccountId, int LeagueId);
-    Task<IEnumerable<FantasyPlayerPoints>> GetFantasyPlayerPointsAsync(int LeagueId);
-    Task<IEnumerable<object?>> GetPlayersTotalFantasyPointsByLeagueAsync(int LeagueId);
-    Task<object?> GetUserTotalFantasyPointsByLeagueAsync(long UserDiscordAccountId, int LeagueId);
-    Task<IEnumerable<object?>> GetTopNTotalFantasyPointsByLeagueAsync(int LeagueId, int Count);
-    Task<object?> AddNewUserFantasyDraftAsync(long UserDiscordAccountId, FantasyDraft FantasyDraft);
+    Task<IEnumerable<FantasyPlayer>> FantasyPlayersByLeagueAsync(int? LeagueId);
+    Task<IEnumerable<FantasyDraft>> FantasyDraftsByUserLeagueAsync(long UserDiscordAccountId, int LeagueId);
+    Task<IEnumerable<FantasyPlayerPoints>> FantasyPlayerPointsByLeagueAsync(int LeagueId);
+    Task<IEnumerable<FantasyPlayerPoints>> FantasyPlayerPointsByUserLeagueAsync(long UserDiscordAccountId, int LeagueId);
+    IEnumerable<FantasyPlayerPointTotals> AggregateFantasyPlayerPoints(IEnumerable<FantasyPlayerPoints> fantasyPlayerPoints);
+    IEnumerable<FantasyDraftPointTotals> AggregateFantasyDraftPoints(IEnumerable<FantasyPlayerPoints> fantasyPlayerPoints);
+    Task ClearUserFantasyPlayersAsync(long UserDiscordAccountId, int LeagueId);
+    Task<FantasyDraft> AddNewUserFantasyPlayerAsync(long UserDiscordAccountId, int LeagueId, long? FantasyPlayerId, int DraftOrder);
 
     // Leagues
     Task<League?> GetLeagueAsync(int LeagueId);
