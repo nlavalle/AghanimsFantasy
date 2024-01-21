@@ -53,10 +53,16 @@ public class FantasyRepository : IFantasyRepository
                     .Include(fdp => fdp.Team)
                     .Include(fdp => fdp.DotaAccount)
             .Join(
+                _dbContext.MatchDetails,
+                fp => fp.LeagueId,
+                md => md.LeagueId,
+                (fp, md) => new { FantasyPlayer = fp, MatchDetail = md }
+            )
+            .Join(
                 _dbContext.MatchDetailsPlayers,
-                fp => fp.DotaAccountId,
-                mdp => mdp.AccountId,
-                (fp, mdp) => new { FantasyPlayer = fp, MatchDetailPlayer = mdp }
+                fp => new { AccountId = fp.FantasyPlayer.DotaAccountId, MatchId = fp.MatchDetail.MatchId },
+                mdp =>  new { AccountId = mdp.AccountId, MatchId = mdp.MatchId }, 
+                (fp, mdp) => new { fp.FantasyPlayer, MatchDetailPlayer = mdp }
             )
             .Select(fdp => new FantasyPlayerPoints
             {
@@ -88,16 +94,22 @@ public class FantasyRepository : IFantasyRepository
                 (fdp, fp) => new { fdp.FantasyDraft, fdp.FantasyDraftPlayer, FantasyPlayer = fp }
             )
             .Join(
+                _dbContext.MatchDetails,
+                fp => fp.FantasyDraft.LeagueId,
+                md => md.LeagueId,
+                (fp, md) => new { fp.FantasyDraft, fp.FantasyDraftPlayer, fp.FantasyPlayer, MatchDetail = md }
+            )
+            .Join(
                 _dbContext.MatchDetailsPlayers,
-                fp => fp.FantasyPlayer.DotaAccountId,
-                mdp => mdp.AccountId,
-                (fp, mdp) => new { fp.FantasyDraft, fp.FantasyDraftPlayer, MatchDetailPlayer = mdp }
+                fp => new { AccountId = fp.FantasyPlayer.DotaAccountId, MatchId = fp.MatchDetail.MatchId },
+                mdp =>  new { AccountId = mdp.AccountId, MatchId = mdp.MatchId }, 
+                (fp, mdp) => new { fp.FantasyDraft, fp.FantasyDraftPlayer, fp.FantasyPlayer, MatchDetailPlayer = mdp }
             )
             .Select(fdp => new FantasyPlayerPoints
             {
                 FantasyDraft = fdp.FantasyDraft,
                 Match = fdp.MatchDetailPlayer,
-                FantasyPlayer = fdp.FantasyDraftPlayer.FantasyPlayer
+                FantasyPlayer = fdp.FantasyPlayer
             })
             .ToListAsync();
 

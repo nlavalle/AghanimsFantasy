@@ -1,6 +1,6 @@
 <template>
     <q-dialog class="alert-dialog">
-        <q-card dark>
+        <q-card>
             <q-card-section>
                 <span class="text-h6">Success!</span>
             </q-card-section>
