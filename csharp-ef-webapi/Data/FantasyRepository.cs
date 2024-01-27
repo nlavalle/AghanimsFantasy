@@ -138,9 +138,9 @@ public class FantasyRepository : IFantasyRepository
                     TotalAssistsPoints = group.Sum(result => result.AssistsPoints),
                     TotalLastHits = group.Sum(result => result.LastHits),
                     TotalLastHitsPoints = group.Sum(result => result.LastHitsPoints),
-                    AvgGoldPerMin = group.Average(result => result.GoldPerMin),
+                    AvgGoldPerMin = group.Where(result => result.Match != null).Select(result => result.GoldPerMin).DefaultIfEmpty().Average(),
                     TotalGoldPerMinPoints = group.Sum(result => result.GoldPerMinPoints),
-                    AvgXpPerMin = group.Average(result => result.XpPerMin),
+                    AvgXpPerMin = group.Where(result => result.Match != null).Select(result => result.XpPerMin).DefaultIfEmpty().Average(),
                     TotalXpPerMinPoints = group.Sum(result => result.XpPerMinPoints),
                     TotalMatchFantasyPoints = group.Sum(result => result.TotalMatchFantasyPoints)
                 })
