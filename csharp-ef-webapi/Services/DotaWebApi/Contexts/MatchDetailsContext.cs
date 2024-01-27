@@ -91,10 +91,8 @@ internal class MatchDetailsContext : DotaOperationContext
 
             }
         }
-        catch (Exception ex)
-        {
-            // Handle exceptions here
-            Console.WriteLine($"An error occurred: {ex.Message}");
+        catch (Exception ex) {
+            _logger.LogError($"An error occurred: {ex.Message}");
         }
     }
 

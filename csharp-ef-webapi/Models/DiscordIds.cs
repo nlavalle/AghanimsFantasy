@@ -17,6 +17,6 @@ public class DiscordIds
     public long AccountId { get; set; }
 
     [Column("discord_name")]
-    public string DiscordName { get; set; }
+    public string DiscordName { get; set; } = "";
 
 }

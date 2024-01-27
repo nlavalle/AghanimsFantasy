@@ -65,7 +65,7 @@ public class DotaWebApiService : BackgroundService
         Task[] tasks = new Task[4];
 
         tasks[0] = LoopOperation<HeroesContext>(TimeSpan.FromDays(1), stoppingToken);
-        tasks[1] = LoopOperation<LeagueHistoryContext>(TimeSpan.FromMinutes(30), stoppingToken);
+        tasks[1] = LoopOperation<LeagueHistoryContext>(TimeSpan.FromMinutes(5), stoppingToken);
         tasks[2] = LoopOperation<MatchDetailsContext>(TimeSpan.FromMinutes(5), stoppingToken);
         tasks[3] = LoopOperation<TeamsContext>(TimeSpan.FromDays(1), stoppingToken);
 

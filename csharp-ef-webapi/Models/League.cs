@@ -5,12 +5,24 @@ using System.ComponentModel.DataAnnotations.Schema;
 [Table("dota_leagues")]
 public class League
 {
+    [Column("id")]
+    public int Id { get; set; }
+
     [Column("league_id")]
-    public int id { get; set; }
+    public int LeagueId { get; set; }
+
     [Column("league_name")]
-    public string? name { get; set; }
+    public string? Name { get; set; }
+
     [Column("is_active")]
-    public bool isActive { get; set; }
+    public bool IsActive { get; set; }
+
     [Column("fantasy_draft_locked_date")]
-    public DateTime fantasyDraftLocked { get; set; }
+    public long FantasyDraftLocked { get; set; }
+
+    [Column("league_start_time")]
+    public long LeagueStartTime { get; set; }
+
+    [Column("league_end_time")]
+    public long LeagueEndTime { get; set; }
 }

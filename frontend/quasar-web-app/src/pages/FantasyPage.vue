@@ -115,7 +115,7 @@ export default {
 
     const updateDisabled = computed(() => {
       var currentDate = new Date();
-      var lockDate = new Date(leagueStore.selectedLeague?.fantasyDraftLocked ?? new Date());
+      var lockDate = new Date(leagueStore.selectedLeague?.fantasyDraftLocked * 1000 ?? new Date());
       return currentDate > lockDate;
     });
 

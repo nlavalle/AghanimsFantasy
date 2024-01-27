@@ -11,7 +11,7 @@ public class FantasyDraftPlayer
 
     [Column("fantasy_player_id")]
     public long? FantasyPlayerId { get; set; }
-    public FantasyPlayer? FantasyPlayer { get; set; } = new FantasyPlayer();
+    public FantasyPlayer FantasyPlayer { get; set; } = new FantasyPlayer();
 
     [Column("draft_order")]
     public int DraftOrder { get; set; }
