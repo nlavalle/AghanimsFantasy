@@ -1,7 +1,8 @@
 <template>
     <div class="league-container">
-        <q-select class="league-selector" dense filled dark v-model="selectedLeague" :options="leagueOptions" @update:model-value="updateSelectedLeague"
-            option-label="name" option-value="id" label="Select League" />
+        <q-select class="league-selector" dense filled dark v-model="selectedLeague" :options="leagueOptions"
+            @update:model-value="updateSelectedLeague" option-label="name" option-value="id" label="Select League"
+            color="nadcl-accent" />
     </div>
 </template>
 
@@ -37,10 +38,18 @@ export default {
 <style>
 .league-container {
     box-sizing: border-box;
-    border: 2px solid gray;
-    border-radius: 10px;
+    border: 1px solid var(--nadcl-white);
+    border-radius: 5px;
     margin: auto;
     align-items: center;
     height: 40px;
+}
+
+.league-selector {
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* max-width: 150px; */
 }
 </style>

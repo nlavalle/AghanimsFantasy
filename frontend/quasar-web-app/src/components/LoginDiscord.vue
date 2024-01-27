@@ -59,8 +59,7 @@ export default {
 <style>
 .login-container {
     box-sizing: border-box;
-    border: 2px solid gray;
-    border-radius: 10px;
+    border-radius: 5px;
     margin: auto;
     align-items: center;
 }
@@ -68,6 +67,7 @@ export default {
 .log-btn {
     margin: 2px;
     border-radius: 8px;
+    border: 1px solid var(--nadcl-white);
 }
 
 .welcome {

@@ -1,7 +1,7 @@
 <template>
-    <q-select ref="expandSelect" use-input filled input-debounce="500" :modelValue="modelValue"
-        @update:model-value="updateSelectedOption" :options="options" @filter="filterFn" option-label="name" dark
-        :label="selectLabel ?? ''" color="teal" clearable>
+    <q-select ref="expandSelect" class="draft-selector" use-input filled input-debounce="500" :modelValue="modelValue"
+        @update:model-value="updateSelectedOption" :options="options" @filter="filterFn" option-label="name"
+        :label="selectLabel ?? ''" color="nadcl-accent" clearable>
         <template v-slot:option="scope">
             <q-expansion-item expand-separator :default-opened="true" header-class="text-weight-bold"
                 :label="scope.opt.label">
@@ -82,21 +82,7 @@ export default {
 };
 </script>
 <style scoped>
-.login-container {
-    box-sizing: border-box;
-    border: 2px solid gray;
-    border-radius: 10px;
-    margin: auto;
-    align-items: center;
-}
-
-.log-btn {
-    margin: 2px;
-    border-radius: 8px;
-}
-
-.welcome {
-    color: white;
-    margin: 5px;
+.draft-selector {
+    background-color: var(--nadcl-main-3);
 }
 </style>

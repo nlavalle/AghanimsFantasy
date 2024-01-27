@@ -42,8 +42,10 @@
       <AlertDialog v-model="showSuccessModal" @ok="scrollAfterAlertDialog" />
       <ErrorDialog v-model="showErrorModal" :error="errorDetails" @ok="scrollAfterAlertDialog" />
     </div>
-    <div v-else class="text-white">
-      Not Authenticated
+    <div v-else class="row text-white">
+      <span class="not-authenticated">
+        Not Authenticated
+      </span>
     </div>
   </div>
 </template>
@@ -85,15 +87,6 @@ export default {
     const showSuccessModal = ref(false);
     const showErrorModal = ref(false);
     const errorDetails = ref(null);
-
-    // // Define a computed property to generate a grouped list of players per team
-    // const fantasyTeamPlayers = computed(() => {
-    //   return fantasyPlayers.value.map(opt => ({
-    //     id: opt.id,
-    //     team: opt.team.name,
-    //     name: opt.dotaAccount.name
-    //   }));
-    // });
 
     // Define a computed property to generate a grouped list of players per team
     const fantasyTeamPlayers = computed(() => {
@@ -282,14 +275,19 @@ export default {
   padding: 10px;
 }
 
+.not-authenticated {
+  margin: 20px;
+  font-size: 16px;
+}
+
 .draft-player {
   min-width: 250px;
   padding: 10px;
 }
 
 .btn-fantasy {
-  color: white;
-  background-color: #3a404d;
+  color: var(--nadcl-white);
+  background-color: var(--nadcl-main-2);
   margin: 10px;
 }
 

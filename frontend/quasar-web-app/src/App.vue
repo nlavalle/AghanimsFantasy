@@ -42,14 +42,21 @@ export default defineComponent({
 
 body {
   margin: 0;
-  background: radial-gradient(ellipse farthest-corner at center top, #373c4b 0%, #192038 100%);
-  /* background-color:#192038; */
+  /* background: radial-gradient(ellipse farthest-corner at center top, #373c4b 0%, #192038 100%); */
+  /* background-color: #192038; */
   color: #fff;
 }
 
 body.body--dark {
   margin: 0;
-  background: #192038
+  background: var(--nadcl-main-3);
 }
 
+/*---------------- Color Palette ----------------*/
+.text-nadcl-accent {
+  color: var(--nadcl-accent) !important;
+}
+.bg-nadcl-accent {
+  background: var(--nadcl-accent-dark) !important;
+}
 </style>

@@ -134,18 +134,19 @@ const headers = [
 
 .score-table {
   max-width: 375px;
+  border: 2px solid var(--nadcl-accent-dark);  
 }
 
 .score-table th {
-  background-color: #3a404d;
-  color: white;
+  background-color: var(--nadcl-accent-dark);
+  color: var(--nadcl-white);
   font-family: Arial, Helvetica, sans-serif;
   font-size: 18px;
 }
 
 .score-table tbody td {
-  /* background-color: #192038; */
-  color: white;
+  color: var(--nadcl-white);
+  background-color: var(--nadcl-main-4);
   font-family: Arial, Helvetica, sans-serif;
   font-size: 16px;
 }

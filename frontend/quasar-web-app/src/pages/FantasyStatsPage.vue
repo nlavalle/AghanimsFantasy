@@ -1,7 +1,7 @@
 <template>
     <div class="flex-container">
         <div class="row">
-            <q-table class="fantasy-stats-table" dark style="height: 800px" title="Fantasy Player Stats" :columns="columns"
+            <q-table class="fantasy-stats-table" title="Fantasy Player Stats" :columns="columns"
                 :rows="playerFantasyStatsIndexed" virtual-scroll :rows-per-page-options="[0]" />
         </div>
     </div>
@@ -35,7 +35,7 @@ export default {
                 align: 'left',
                 field: row => row.fantasyPlayer.dotaAccount.name,
                 format: val => `${val}`,
-                style: 'width: 300px',
+                style: 'width: 200px; max-width: 200px',
                 sortable: true
             },
             {
@@ -44,6 +44,7 @@ export default {
                 align: 'left',
                 field: row => row.fantasyPlayer.team.name,
                 format: val => `${val}`,
+                style: 'width: 150px; max-width: 150px',
                 sortable: true
             },
             {
@@ -51,56 +52,61 @@ export default {
                 label: 'Matches',
                 align: 'right',
                 field: row => row.totalMatches,
-                format: val => `${val}`,
                 sortable: true
             },
             {
                 name: 'totalKills',
                 label: 'Kills (pts)',
                 align: 'left',
-                field: row => row.totalKills + ` (${row.totalKillsPoints})`,
-                format: val => `${val}`,
-                sortable: true
+                field: row => row,
+                format: val => val.totalKills + ` (${val.totalKillsPoints.toFixed(1)})`,
+                sortable: true,
+                sort: (a, b) => a.totalKills - b.totalKills
             },
             {
                 name: 'totalDeaths',
                 label: 'Deaths (pts)',
                 align: 'left',
-                field: row => row.totalDeaths + ` (${row.totalDeathsPoints})`,
-                format: val => `${val}`,
-                sortable: true
+                field: row => row,
+                format: val => val.totalDeaths + ` (${val.totalDeathsPoints.toFixed(1)})`,
+                sortable: true,
+                sort: (a, b) => a.totalDeaths - b.totalDeaths
             },
             {
                 name: 'totalAssists',
                 label: 'Assists (pts)',
                 align: 'left',
-                field: row => row.totalAssists + ` (${row.totalAssistsPoints})`,
-                format: val => `${val}`,
-                sortable: true
+                field: row => row,
+                format: val => val.totalAssists + ` (${val.totalAssistsPoints.toFixed(1)})`,
+                sortable: true,
+                sort: (a, b) => a.totalAssists - b.totalAssists
             },
             {
                 name: 'totalLastHits',
                 label: 'LastHits (pts)',
                 align: 'left',
-                field: row => row.totalLastHits.toLocaleString() + ` (${row.totalLastHitsPoints.toLocaleString()})`,
-                format: val => `${val}`,
-                sortable: true
+                field: row => row,
+                format: val => val.totalLastHits.toLocaleString() + ` (${val.totalLastHitsPoints.toFixed(1).toLocaleString()})`,
+                sortable: true,
+                sort: (a, b) => a.totalLastHits - b.totalLastHits
             },
             {
                 name: 'totalGoldPerMin',
                 label: 'GoldPerMin (pts)',
                 align: 'left',
-                field: row => row.avgGoldPerMin.toLocaleString() + ` (${row.totalGoldPerMinPoints.toLocaleString()})`,
-                format: val => `${val}`,
-                sortable: true
+                field: row => row,
+                format: val => val.avgGoldPerMin.toLocaleString() + ` (${val.totalGoldPerMinPoints.toFixed(1).toLocaleString()})`,
+                sortable: true,
+                sort: (a, b) => a.avgGoldPerMin - b.avgGoldPerMin
             },
             {
                 name: 'totalXpPerMin',
                 label: 'XpPerMin (pts)',
                 align: 'left',
-                field: row => row.avgXpPerMin.toLocaleString() + ` (${row.totalXpPerMinPoints.toLocaleString()})`,
-                format: val => `${val}`,
-                sortable: true
+                field: row => row,
+                format: val => val.avgXpPerMin.toLocaleString() + ` (${val.totalXpPerMinPoints.toFixed(1).toLocaleString()})`,
+                sortable: true,
+                sort: (a, b) => a.avgXpPerMin - b.avgXpPerMin
             },
             {
                 name: 'totalPoints',
@@ -108,6 +114,8 @@ export default {
                 align: 'right',
                 field: row => row.totalMatchFantasyPoints,
                 format: val => `${val.toLocaleString()}`,
+                headerStyle: 'font-weight: bold',
+                style: 'font-weight: bold',
                 sortable: true
             },
         ];
@@ -183,6 +191,11 @@ export default {
 
 thead th tr {
     position: sticky;
+}
+
+.fantasy-stats-table {
+    width: 1400px;
+    height: 800px;
 }
 
 .left-fixed {
