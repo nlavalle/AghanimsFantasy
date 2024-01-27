@@ -84,6 +84,7 @@ export default defineComponent({
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   font-family: 'Merriweather', serif;
+  max-width: 300px;
 }
 
 .card-container q-img {

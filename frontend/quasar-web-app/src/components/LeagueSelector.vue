@@ -26,6 +26,11 @@ export default {
         localApiService.getLeagues()
             .then(result => {
                 this.leagueStore.setLeagues(result);
+                //default to most recent league
+                this.selectedLeague = this.leagueStore.activeLeagues.reduce((max, current) => {
+                    return current.id > max.id ? current : max;
+                }, this.leagueStore.activeLeagues[0]);
+                this.leagueStore.setSelectedLeague(this.selectedLeague);
             });
     },
     methods: {
