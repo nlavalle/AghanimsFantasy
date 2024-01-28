@@ -43,7 +43,6 @@ export default {
             if (!fantasyLeaderboard.value) {
                 return [];
             }
-            console.log(fantasyLeaderboard.value)
             return fantasyLeaderboard.value.map((leaderboard) => ({
                 id: leaderboard.fantasyDraft.id,
                 isTeam: leaderboard.isTeam,
