@@ -175,7 +175,7 @@ export const localApiService = {
             });
     },
     getTopTenDrafts(leagueId) {
-        return fetch(`${baseUrl}/fantasy/${leagueId}/top10`)
+        return fetch(`${baseUrl}/fantasy/players/${leagueId}/top10`)
             .then(function (response) {
                 if (!response.ok) {
                     throw response.status;

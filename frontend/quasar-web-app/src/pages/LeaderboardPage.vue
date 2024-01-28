@@ -1,7 +1,15 @@
 <template>
     <div class="flex-container">
-        <div class="row">
-            <leaderboard-component leaderboardTitle="Fantasy Leaderboard" headerValue="Total Fantasy Points" :boardData="fantasyLeaderboardData" />
+        <div v-if="authenticated" class="row text-white">
+            <div class="row justify-evenly">
+                <leaderboard-component class="leaderboardComponent" leaderboardTitle="Fantasy Leaderboard" headerName="Draft Player"
+                    headerValue="Points" :authenticatedUser="user" :boardData="fantasyLeaderboardData" />
+            </div>
+        </div>
+        <div v-else class="row text-white">
+            <span class="not-authenticated">
+                Not Authenticated
+            </span>
         </div>
     </div>
 </template>
@@ -31,24 +39,6 @@ export default {
             }
         });
 
-        // Define a computed property to generate a grouped list of players per team
-        const fantasyTeamPlayers = computed(() => {
-            return Array.from(new Set(fantasyPlayers.value.map(opt => opt.team.name))).map(teamName => {
-                return {
-                    label: teamName,
-                    options: fantasyPlayers.value
-                        .filter(opt => opt.team.name === teamName) // Filter team
-                        .filter(opt => !selectedPlayerIds.value.some((sel) => sel == opt.id)) // Filter selected players
-                        .map(player => (
-                            {
-                                id: player.id,
-                                name: player.dotaAccount.name
-                            }
-                        )),
-                };
-            })
-        });
-
         const fantasyLeaderboardData = computed(() => {
             if (!fantasyLeaderboard.value) {
                 return [];
@@ -56,7 +46,10 @@ export default {
             console.log(fantasyLeaderboard.value)
             return fantasyLeaderboard.value.map((leaderboard) => ({
                 id: leaderboard.fantasyDraft.id,
-                value: leaderboard.totalMatchFantasyPoints,
+                isTeam: leaderboard.isTeam,
+                teamId: leaderboard.teamId,
+                description: leaderboard.discordName,
+                value: leaderboard.draftTotalFantasyPoints,
             }));
         });
 
@@ -82,7 +75,11 @@ export default {
             fantasyLeaderboard,
             fantasyLeaderboardData
         }
-    }
+    },
+    computed: {
+        authenticated() { return this.authStore.authenticated; },
+        user() { return this.authStore.user ?? {}; }
+    },
 }
 </script>
   
@@ -100,6 +97,10 @@ export default {
 
 .left-fixed {
     flex: 0 0 300px;
+}
+
+.leaderboardComponent {
+    max-width: 700px;
 }
 
 .flex-container {

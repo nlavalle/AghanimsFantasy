@@ -3,17 +3,23 @@
         <h1>
             <trophy-svg /> {{ leaderboardTitle }}
         </h1>
-        <li class="flex-row" style="background-color: #474b53;">
+        <li class="flex-row leaderboard-header">
             <div class="row justify-evenly">
-                <span v-if="headerName" class="player-header">{{ headerName }}</span>
-                <span v-if="headerValue" class="player-header">{{ headerValue }}</span>
+                <span v-if="headerName" class="player-header-name">{{ headerName }}</span>
+                <span v-if="headerValue" class="player-header-value">{{ headerValue }}</span>
             </div>
         </li>
         <ol>
             <li class="flex-row" v-for="item in boardData" :key="item.id">
                 <div class="row justify-around">
-                    <span v-if="item.description" class="player-descriptors">{{ item.description }}</span>
-                    <span v-if="item.value" class="player-data">{{ item.value }}</span>
+                    <span v-if="item.description" class="player-descriptors"
+                        :style="{ fontWeight: item.description == authenticatedUser.name ? 'bold' : 'normal' }">
+                        <q-img v-if="item.isTeam" height="25px" width="25px" :src="getImageUrl(item.teamId)" />
+                        {{ item.description }}
+                    </span>
+                    <span v-if="item.value" class="player-data"
+                        :style="{ fontWeight: item.description == authenticatedUser.name ? 'bold' : 'normal' }">
+                        {{ item.value.toFixed(2).toLocaleString() }}</span>
                 </div>
             </li>
         </ol>
@@ -45,7 +51,17 @@ export default defineComponent({
             type: Array,
             required: true
         },
+        authenticatedUser: {
+            type: String,
+            required: false,
+        }
     },
+    methods: {
+        getImageUrl(teamId) {
+            if (teamId == 0) return null;
+            return new URL(`../assets/logos/teams_logo_${teamId}.png`, import.meta.url).toString();
+        }
+    }
 });
 </script>
 
@@ -83,7 +99,7 @@ export default defineComponent({
     width: 0 !important
 }
 
-div ::v-deep(.player-header) {
+div ::v-deep(.player-header-name) {
     font-family: Arial, Helvetica, sans-serif;
     font-style: normal;
     font-weight: 400;
@@ -94,7 +110,23 @@ div ::v-deep(.player-header) {
     margin-left: 40px;
     margin-right: 40px;
     color: white;
+    flex: 1 0;
 }
+
+div ::v-deep(.player-header-value) {
+    font-family: Arial, Helvetica, sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 18px;
+    text-align: center;
+    vertical-align: middle;
+    margin-top: 4px;
+    margin-left: 40px;
+    margin-right: 40px;
+    color: white;
+    flex: 0.5 1;
+}
+
 
 div ::v-deep(.player-descriptors) {
     font-family: Arial, Helvetica, sans-serif;
@@ -122,7 +154,9 @@ div ::v-deep(.ico-cup-reverse) {
 
 /*-------------------- Leaderboard --------------------*/
 .leaderboard {
-    background: linear-gradient(to bottom, #3a404d, #181c26);
+    /* background: linear-gradient(to bottom, #3a404d, #181c26); */
+    background-color: var(--nadcl-main-4);
+    border: 5px solid var(--nadcl-accent-dark);
     border-radius: 10px;
     box-shadow: 0 7px 30px rgba(62, 9, 11, .3);
     margin-bottom: 10px;
@@ -131,10 +165,16 @@ div ::v-deep(.ico-cup-reverse) {
     height: max-content;
 }
 
+.leaderboard-header {
+    background-color: var(--nadcl-accent-dark);
+    padding-bottom: 5px;
+    list-style: none;
+}
+
 .leaderboard h1 {
     font-size: 24px;
-    color: #e1e1e1;
-    padding: 12px 13px 18px;
+    color: var(--nadcl-white);
+    padding: 0px 13px 0px;
 }
 
 .leaderboard h1 svg {
@@ -147,6 +187,8 @@ div ::v-deep(.ico-cup-reverse) {
 }
 
 .leaderboard ol {
+    border-top: 5px solid var(--nadcl-main-3);
+    margin-top: 0px;
     counter-reset: leaderboard;
     list-style-type: none;
     padding: 0;
@@ -154,7 +196,7 @@ div ::v-deep(.ico-cup-reverse) {
 
 .leaderboard ol li {
     z-index: 1;
-    font-size: 20px;
+    font-size: 16px;
     font-family: Arial, Helvetica, sans-serif;
     counter-increment: leaderboard;
     padding: 12px 12px 12px 50px;
@@ -171,7 +213,7 @@ div ::v-deep(.ico-cup-reverse) {
     width: 25px;
     height: 25px;
     line-height: 25px;
-    color: #6492f3;
+    color: var(--gradient-purple-1);
     background: #fff;
     border-radius: 25px;
     text-align: center;
@@ -195,7 +237,6 @@ div ::v-deep(.ico-cup-reverse) {
     z-index: 1;
     bottom: -11px;
     left: -9px;
-    border-top: 10px solid #5a86e4;
     border-left: 10px solid transparent;
     transition: all 0.1s ease-in-out;
     opacity: 0;
@@ -225,56 +266,55 @@ div ::v-deep(.ico-cup-reverse) {
     left: 0;
     width: 100%;
     height: 100%;
-    background: #5a86e4;
     box-shadow: 0 3px 0 rgba(0, 0, 0, .08);
     transition: all 0.3s ease-in-out;
     opacity: 0;
 }
 
 .leaderboard ol li:nth-child(1) {
-    background: #84abff;
+    background: var(--gradient-purple-1);
 }
 
 .leaderboard ol li:nth-child(1)::after {
-    background: #84abff;
+    background: var(--gradient-purple-1);
 }
 
 .leaderboard ol li:nth-child(2) {
-    background: #739cf3;
+    background: var(--gradient-purple-2);
 }
 
 .leaderboard ol li:nth-child(2)::after {
-    background: #739cf3;
+    background: var(--gradient-purple-2);
     box-shadow: 0 2px 0 rgba(0, 0, 0, .08);
 }
 
 .leaderboard ol li:nth-child(2) span::before,
 .leaderboard ol li:nth-child(2) span::after {
-    border-top: 6px solid #739cf3;
+    border-top: 6px solid var(--gradient-purple-2);
     bottom: -7px;
 }
 
 .leaderboard ol li:nth-child(3) {
-    background: #5985e6;
+    background: var(--gradient-purple-3);
 }
 
 .leaderboard ol li:nth-child(3)::after {
-    background: #5985e6;
+    background: var(--gradient-purple-3);
     box-shadow: 0 1px 0 rgba(0, 0, 0, .11);
 }
 
 .leaderboard ol li:nth-child(3) span::before,
 .leaderboard ol li:nth-child(3) span::after {
-    border-top: 2px solid #5985e6;
+    border-top: 2px solid var(--gradient-purple-3);
     bottom: -3px;
 }
 
 .leaderboard ol li:nth-child(4) {
-    background: #4877dd;
+    background: var(--gradient-purple-4);
 }
 
 .leaderboard ol li:nth-child(4)::after {
-    background: #4877dd;
+    background: var(--gradient-purple-4);
     box-shadow: 0 -1px 0 rgba(0, 0, 0, .15);
 }
 
@@ -283,15 +323,15 @@ div ::v-deep(.ico-cup-reverse) {
     top: -7px;
     bottom: auto;
     border-top: none;
-    border-bottom: 6px solid #4877dd;
+    border-bottom: 6px solid var(--gradient-purple-4);
 }
 
 .leaderboard ol li:nth-child(n+5) {
-    background: #3366d3;
+    background: var(--gradient-purple-5);
 }
 
 .leaderboard ol li:nth-child(n+5)::after {
-    background: #3366d3;
+    background: var(--gradient-purple-5);
     box-shadow: 0 -1px 0 rgba(0, 0, 0, .15);
 }
 
@@ -300,16 +340,16 @@ div ::v-deep(.ico-cup-reverse) {
     top: -7px;
     bottom: auto;
     border-top: none;
-    border-bottom: 6px solid #3366d3;
+    border-bottom: 6px solid var(--gradient-purple-5);
 }
 
 .leaderboard ol li:nth-last-child(1) {
-    background: #2459ca;
+    background: var(--gradient-purple-8);
     border-radius: 0 0 10px 10px;
 }
 
 .leaderboard ol li:nth-last-child(1)::after {
-    background: #2459ca;
+    background: var(--gradient-purple-8);
     box-shadow: 0 -2.5px 0 rgba(0, 0, 0, .12);
     border-radius: 0 0 10px 10px;
 }
@@ -319,6 +359,6 @@ div ::v-deep(.ico-cup-reverse) {
     top: -9px;
     bottom: auto;
     border-top: none;
-    border-bottom: 8px solid #2459ca;
+    border-bottom: 8px solid var(--gradient-purple-8);
 }
 </style>

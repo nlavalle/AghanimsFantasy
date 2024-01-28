@@ -77,7 +77,52 @@ public class FantasyRepository : IFantasyRepository
         return fantasyPlayerMatches;
     }
 
-    public async Task<IEnumerable<FantasyPlayerPoints>> FantasyPlayerPointsByUserLeagueAsync(long UserDiscordAccountId, int LeagueId)
+    public async Task<IEnumerable<FantasyPlayerPoints>> FantasyDraftPointsByLeagueAsync(int LeagueId)
+    {
+        _logger.LogInformation($"Fetching Fantasy Points for LeagueID: {LeagueId}");
+        List<FantasyPlayerPoints> fantasyPlayerMatches = await _dbContext.FantasyDrafts
+            .Where(fd => fd.LeagueId == LeagueId)
+            .Include(fd => fd.DraftPickPlayers)
+            .Join(
+                _dbContext.FantasyDraftPlayers,
+                fd => fd.Id,
+                fdp => fdp.FantasyDraftId,
+                (fd, fdp) => new { FantasyDraft = fd, FantasyDraftPlayer = fdp }
+            )
+            .Join(
+                _dbContext.FantasyPlayers,
+                fdp => fdp.FantasyDraftPlayer.FantasyPlayerId,
+                fp => fp.Id,
+                (fdp, fp) => new { fdp.FantasyDraft, fdp.FantasyDraftPlayer, FantasyPlayer = fp }
+            )
+            .Join(
+                _dbContext.Leagues,
+                fp => fp.FantasyDraft.LeagueId,
+                lg => lg.Id,
+                (fp, lg) => new { League = lg, fp.FantasyDraft, fp.FantasyDraftPlayer, fp.FantasyPlayer }
+            )
+            //Left join matches in case league hasn't started
+            .SelectMany(
+                md => _dbContext.MatchDetails.Where(
+                    mdl => mdl.LeagueId == md.League.LeagueId && mdl.StartTime >= md.League.LeagueStartTime && mdl.StartTime <= md.League.LeagueEndTime
+                ),
+                (fp, md) => new { fp.League, fp.FantasyDraft, fp.FantasyDraftPlayer, fp.FantasyPlayer, MatchDetail = md }
+            )
+            .SelectMany(
+                group => _dbContext.MatchDetailsPlayers.Where(mdp => mdp.MatchId == group.MatchDetail.MatchId && mdp.AccountId == group.FantasyPlayer.DotaAccountId),
+                (fdp, mdp) => new FantasyPlayerPoints
+                {
+                    FantasyDraft = fdp.FantasyDraft,
+                    Match = mdp,
+                    FantasyPlayer = fdp.FantasyPlayer
+                })
+            .ToListAsync();
+
+
+        return fantasyPlayerMatches;
+    }
+
+    public async Task<IEnumerable<FantasyPlayerPoints>> FantasyDraftPointsByUserLeagueAsync(long UserDiscordAccountId, int LeagueId)
     {
         _logger.LogInformation($"Fetching Fantasy Points for LeagueID: {LeagueId}");
         List<FantasyPlayerPoints> fantasyPlayerMatches = await _dbContext.FantasyDrafts
@@ -105,11 +150,11 @@ public class FantasyRepository : IFantasyRepository
             .SelectMany(
                 md => _dbContext.MatchDetails.Where(
                     mdl => mdl.LeagueId == md.League.LeagueId && mdl.StartTime >= md.League.LeagueStartTime && mdl.StartTime <= md.League.LeagueEndTime
-                ).DefaultIfEmpty(),
+                ),
                 (fp, md) => new { fp.League, fp.FantasyDraft, fp.FantasyDraftPlayer, fp.FantasyPlayer, MatchDetail = md }
             )
             .SelectMany(
-                group => _dbContext.MatchDetailsPlayers.Where(mdp => mdp.MatchId == group.MatchDetail.MatchId && mdp.AccountId == group.FantasyPlayer.DotaAccountId).DefaultIfEmpty(),
+                group => _dbContext.MatchDetailsPlayers.Where(mdp => mdp.MatchId == group.MatchDetail.MatchId && mdp.AccountId == group.FantasyPlayer.DotaAccountId),
                 (fdp, mdp) => new FantasyPlayerPoints
                 {
                     FantasyDraft = fdp.FantasyDraft,
@@ -150,7 +195,12 @@ public class FantasyRepository : IFantasyRepository
 
     public IEnumerable<FantasyDraftPointTotals> AggregateFantasyDraftPoints(IEnumerable<FantasyPlayerPoints> fantasyPlayerPoints)
     {
-        List<FantasyPlayerPointTotals> playerTotals = AggregateFantasyPlayerPoints(fantasyPlayerPoints).ToList();
+        var distinctPlayers = fantasyPlayerPoints
+                .GroupBy(fp => new { fp.FantasyPlayer, fp.Match })
+                .Select(group => group.First())
+                .ToList();
+
+        List<FantasyPlayerPointTotals> playerTotals = AggregateFantasyPlayerPoints(distinctPlayers).ToList();
 
         return fantasyPlayerPoints
                 .GroupBy(fp => fp.FantasyDraft)
@@ -158,6 +208,13 @@ public class FantasyRepository : IFantasyRepository
                 .Select(fdp => new FantasyDraftPointTotals
                 {
                     FantasyDraft = fdp,
+                    IsTeam = _dbContext.Teams.Select(t => t.Id).Any(t => t == fdp.DiscordAccountId),
+                    TeamId =  _dbContext.Teams.Select(t => t.Id).Any(t => t == fdp.DiscordAccountId) ?
+                        _dbContext.Teams.FirstOrDefault(t => t.Id == fdp.DiscordAccountId)?.Id ?? -1 :
+                        null,
+                    DiscordName = _dbContext.Teams.Select(t => t.Id).Any(t => t == fdp.DiscordAccountId) ?
+                        _dbContext.Teams.FirstOrDefault(t => t.Id == fdp.DiscordAccountId)?.Name ?? "Unknown Team" :
+                        _dbContext.DiscordIds.FirstOrDefault(d => d.DiscordId == fdp.DiscordAccountId)?.DiscordName ?? "Unknown User",
                     DraftPickOnePoints =
                         playerTotals.Find(pt =>
                             pt.FantasyPlayer.Id == fdp.DraftPickPlayers

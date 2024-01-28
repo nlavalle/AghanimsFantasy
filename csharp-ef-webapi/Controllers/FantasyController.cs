@@ -57,16 +57,60 @@ namespace csharp_ef_webapi.Controllers
                 return BadRequest("Please provide a League ID to fetch a draft of");
             }
 
-            var fantasyPoints = await _service.FantasyPlayerPointsByLeagueAsync(leagueId.Value);
+            var fantasyPoints = await _service.FantasyDraftPointsByLeagueAsync(leagueId.Value);
+
             if (fantasyPoints.Count() == 0)
             {
                 // League doesn't have fantasy players/points yet
                 return Ok(new { });
             }
 
-            var top10Players = fantasyPoints.OrderByDescending(fp => fp.TotalMatchFantasyPoints).Take(10).ToList();
+            var fantasyPointsAggregated = _service.AggregateFantasyDraftPoints(fantasyPoints);
 
-            return Ok(top10Players);
+            var fantasyTeams = await _service.GetTeamsAsync();
+
+            var top10Players = fantasyPointsAggregated.Where(fp => !fp.IsTeam).OrderByDescending(fp => fp.DraftTotalFantasyPoints).Take(10).ToList();
+
+            // We want the user included even if they're not top 10
+            if (!top10Players.Any(tp => tp.FantasyDraft.DiscordAccountId == userDiscordAccountId))
+            {
+                var currentPlayer = fantasyPointsAggregated.Where(fp => fp.FantasyDraft.DiscordAccountId == userDiscordAccountId).FirstOrDefault();
+                if (currentPlayer != null)
+                {
+                    top10Players.Add(currentPlayer);
+                }
+            }
+
+            var teamsScores = fantasyPointsAggregated.Where(fp => fp.IsTeam).OrderByDescending(fp => fp.DraftTotalFantasyPoints).ToList();
+
+            var unionedLeaderboard = top10Players.Union(teamsScores);
+
+            unionedLeaderboard = unionedLeaderboard.Select(
+                lb => new FantasyDraftPointTotals
+                {
+                    //We're doing this to mask the DiscordAccountId
+                    FantasyDraft = new FantasyDraft
+                    {
+                        Id = lb.FantasyDraft.Id,
+                        DraftCreated = lb.FantasyDraft.DraftCreated,
+                        DraftLastUpdated = lb.FantasyDraft.DraftLastUpdated,
+                        LeagueId = lb.FantasyDraft.LeagueId,
+                        DraftPickPlayers = lb.FantasyDraft.DraftPickPlayers
+                    },
+                    DiscordName = lb.DiscordName,
+                    IsTeam = lb.IsTeam,
+                    TeamId = lb.TeamId,
+                    DraftPickOnePoints = lb.DraftPickOnePoints,
+                    DraftPickTwoPoints = lb.DraftPickTwoPoints,
+                    DraftPickThreePoints = lb.DraftPickThreePoints,
+                    DraftPickFourPoints = lb.DraftPickFourPoints,
+                    DraftPickFivePoints = lb.DraftPickFivePoints
+                }
+            )
+            .OrderByDescending(fp => fp.DraftTotalFantasyPoints)
+            .ToList();
+
+            return Ok(unionedLeaderboard);
         }
 
         // GET: api/fantasy/draft/5
@@ -115,7 +159,7 @@ namespace csharp_ef_webapi.Controllers
                 return Ok(new { });
             }
 
-            var fantasyPlayerPoints = await _service.FantasyPlayerPointsByUserLeagueAsync(userDiscordAccountId, leagueId.Value);
+            var fantasyPlayerPoints = await _service.FantasyDraftPointsByUserLeagueAsync(userDiscordAccountId, leagueId.Value);
             if (fantasyPlayerPoints == null)
             {
                 // User has no draft yet so return an empty okay
@@ -159,9 +203,9 @@ namespace csharp_ef_webapi.Controllers
 
             // Fantasy Draft may be incomplete, so go through and add the IDs passed
             await _service.ClearUserFantasyPlayersAsync(userDiscordAccountId, fantasyDraft.LeagueId);
-            for(int i=0;i<=4;i++)
+            for (int i = 0; i <= 4; i++)
             {
-                fantasyDraftPostResponse = await _service.AddNewUserFantasyPlayerAsync(userDiscordAccountId, fantasyDraft.LeagueId, fantasyDraft.DraftPickPlayers[i].FantasyPlayerId, i+1);
+                fantasyDraftPostResponse = await _service.AddNewUserFantasyPlayerAsync(userDiscordAccountId, fantasyDraft.LeagueId, fantasyDraft.DraftPickPlayers[i].FantasyPlayerId, i + 1);
             }
 
             return CreatedAtAction(nameof(GetUserDraft), new { leagueId = fantasyDraft.LeagueId }, fantasyDraftPostResponse);

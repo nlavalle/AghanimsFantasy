@@ -7,7 +7,8 @@ public interface IFantasyRepository
     Task<IEnumerable<FantasyPlayer>> FantasyPlayersByLeagueAsync(int? LeagueId);
     Task<IEnumerable<FantasyDraft>> FantasyDraftsByUserLeagueAsync(long UserDiscordAccountId, int LeagueId);
     Task<IEnumerable<FantasyPlayerPoints>> FantasyPlayerPointsByLeagueAsync(int LeagueId);
-    Task<IEnumerable<FantasyPlayerPoints>> FantasyPlayerPointsByUserLeagueAsync(long UserDiscordAccountId, int LeagueId);
+    Task<IEnumerable<FantasyPlayerPoints>> FantasyDraftPointsByLeagueAsync(int LeagueId);
+    Task<IEnumerable<FantasyPlayerPoints>> FantasyDraftPointsByUserLeagueAsync(long UserDiscordAccountId, int LeagueId);
     IEnumerable<FantasyPlayerPointTotals> AggregateFantasyPlayerPoints(IEnumerable<FantasyPlayerPoints> fantasyPlayerPoints);
     IEnumerable<FantasyDraftPointTotals> AggregateFantasyDraftPoints(IEnumerable<FantasyPlayerPoints> fantasyPlayerPoints);
     Task ClearUserFantasyPlayersAsync(long UserDiscordAccountId, int LeagueId);

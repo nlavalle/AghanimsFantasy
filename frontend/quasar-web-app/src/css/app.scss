@@ -10,9 +10,21 @@
   --nadcl-main-3: #1B263B;
   --nadcl-main-4: #0D1B2A;
   --nadcl-blue-1: #192038;
+
+  --gradient-purple-1: #7A0045;
+  --gradient-purple-2: #7A0058;
+  --gradient-purple-3: #7A0066;
+  --gradient-purple-4: #7A007A;
+  --gradient-purple-5: #68007A;
+  --gradient-purple-6: #5E007A;
+  --gradient-purple-7: #52007A;
+  --gradient-purple-8: #45007A;
+  --gradient-purple-9:  #35007A; 
+  --gradient-purple-10: #16007A;
 }
 
-.q-select__focus-target, .q-select__autocomplete-input {
-    width: 1px;
-    height: 1px;
-  }
+.q-select__focus-target,
+.q-select__autocomplete-input {
+  width: 1px;
+  height: 1px;
+}

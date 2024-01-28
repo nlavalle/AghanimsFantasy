@@ -14,8 +14,8 @@
       </div>
     </div>
     <div class="row justify-evenly">
-      <q-table table-class="score-table" :columns="headers" :rows="statistics" dense hide-pagination separator="vertical"
-        :rows-per-page-options="[0]" />
+      <q-table class="about-table" table-header-class="about-table-header" table-class="about-table-body" :columns="headers" :rows="statistics" dense
+        hide-pagination separator="vertical" :rows-per-page-options="[0]" />
     </div>
   </div>
 </template>
@@ -132,40 +132,22 @@ const headers = [
   margin-right: 10px;
 }
 
-.score-table {
+.about-table {
   max-width: 375px;
-  border: 2px solid var(--nadcl-accent-dark);  
+  border: 2px solid var(--nadcl-accent-dark);
 }
 
-.score-table th {
+.about-table-header th {
   background-color: var(--nadcl-accent-dark);
   color: var(--nadcl-white);
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 18px;
-}
-
-.score-table tbody td {
-  color: var(--nadcl-white);
-  background-color: var(--nadcl-main-4);
   font-family: Arial, Helvetica, sans-serif;
   font-size: 16px;
 }
 
-h3 {
-  margin: 40px 0 0;
-}
-
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-
-a {
-  color: #42b983;
+.about-table-body tbody tr td {
+  color: var(--nadcl-white);
+  background-color: var(--nadcl-main-4);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
 }
 </style>

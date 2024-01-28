@@ -4,6 +4,9 @@ namespace csharp_ef_webapi.Models;
 public class FantasyDraftPointTotals
 {
     public FantasyDraft FantasyDraft { get; set; } = new FantasyDraft();
+    public bool IsTeam { get; set; }
+    public long? TeamId { get; set; }
+    public string DiscordName { get; set; } = "";
     public decimal DraftPickOnePoints { get; set; }
     public decimal DraftPickTwoPoints { get; set; }
     public decimal DraftPickThreePoints { get; set; }
