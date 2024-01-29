@@ -116,6 +116,7 @@ public class FantasyRepository : IFantasyRepository
                     Match = mdp,
                     FantasyPlayer = fdp.FantasyPlayer
                 })
+            .Distinct()
             .ToListAsync();
 
 
@@ -161,6 +162,7 @@ public class FantasyRepository : IFantasyRepository
                     Match = mdp ?? new MatchDetailsPlayer(),
                     FantasyPlayer = fdp.FantasyPlayer
                 })
+            .Distinct()
             .ToListAsync();
 
 
