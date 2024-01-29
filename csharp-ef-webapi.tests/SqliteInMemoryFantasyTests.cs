@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace csharp_ef_webapi.UnitTests.Data;
 
-public class SqliteInMemoryMatchTests : IDisposable
+public class SqliteInMemoryFantasyTests : IDisposable
 {
     // private readonly ILogger<FantasyRepository> loggerMock = new Mock<ILogger<FantasyRepository>>();
     private readonly DbConnection _connection;
@@ -15,7 +15,7 @@ public class SqliteInMemoryMatchTests : IDisposable
 
 
     #region ConstructorAndDispose
-    public SqliteInMemoryMatchTests()
+    public SqliteInMemoryFantasyTests()
     {
         // Create and open a connection. This creates the SQLite in-memory database, which will persist until the connection is closed
         // at the end of the test (see Dispose below).
@@ -308,6 +308,58 @@ public class SqliteInMemoryMatchTests : IDisposable
             }
         );
 
+        context.FantasyPlayers.AddRange(
+            new FantasyPlayer
+            {
+                Id = 1,
+                LeagueId = 1,
+                DotaAccountId = 1,
+                TeamId = 1,
+                DotaAccount = new Account(),
+                Team = new Team()
+            },
+            new FantasyPlayer
+            {
+                Id = 2,
+                LeagueId = 1,
+                DotaAccountId = 2,
+                TeamId = 2,
+                DotaAccount = new Account(),
+                Team = new Team()
+            },
+            new FantasyPlayer
+            {
+                Id = 3,
+                LeagueId = 2,
+                DotaAccountId = 3,
+                TeamId = 3,
+                DotaAccount = new Account(),
+                Team = new Team()
+            }
+        );
+
+        context.SaveChanges();
+
+        // Fantasy draft with existing data
+
+        var fantasyDraft = new FantasyDraft
+        {
+            Id = 1,
+            DiscordAccountId = 1,
+            DraftCreated = DateTime.UtcNow,
+            DraftLastUpdated = DateTime.UtcNow,
+            LeagueId = 1,
+            DraftPickPlayers = new List<FantasyDraftPlayer>()
+        };
+
+        fantasyDraft.DraftPickPlayers.Add(
+            new FantasyDraftPlayer() { FantasyPlayer = context.FantasyPlayers.First(fp => fp.Id == 1) ?? new FantasyPlayer(), DraftOrder = 1 }
+        );
+
+        context.FantasyDrafts.AddRange(
+            fantasyDraft
+        );
+
         context.SaveChanges();
     }
 
@@ -316,102 +368,111 @@ public class SqliteInMemoryMatchTests : IDisposable
     public void Dispose() => _connection.Dispose();
     #endregion
 
-    #region Matches
+    #region Fantasy
     [Fact]
-    public async void GetLeagueMatches()
+    public async void GetLeagueFantasyPlayers()
     {
         using var context = CreateContext();
         var loggerMock = new Mock<ILogger<FantasyRepository>>();
         var repository = new FantasyRepository(loggerMock.Object, context);
 
-        var matchHistories = await repository.GetMatchHistoryAsync(1);
-        Assert.Equal(2, matchHistories.Count());
-        Assert.IsAssignableFrom<IEnumerable<MatchHistory>>(matchHistories);
+        var fantasyPlayers = await repository.FantasyPlayersByLeagueAsync(1);
+        Assert.Equal(2, fantasyPlayers.Count());
+        Assert.IsAssignableFrom<IEnumerable<FantasyPlayer>>(fantasyPlayers);
     }
 
     [Fact]
-    public async void GetSingleMatch()
+    public async void GetAllLeagueFantasyPlayers()
     {
         using var context = CreateContext();
         var loggerMock = new Mock<ILogger<FantasyRepository>>();
         var repository = new FantasyRepository(loggerMock.Object, context);
 
-        var matchDetail = await repository.GetMatchDetailAsync(1, 1);
-        Assert.NotNull(matchDetail);
-        Assert.Equal(1, matchDetail.MatchId);
-        Assert.IsAssignableFrom<MatchDetail>(matchDetail);
+        var fantasyPlayers = await repository.FantasyPlayersByLeagueAsync(null);
+        Assert.Equal(3, fantasyPlayers.Count());
+        Assert.IsAssignableFrom<IEnumerable<FantasyPlayer>>(fantasyPlayers);
     }
 
     [Fact]
-    public async void GetUnknownMatch()
+    public async void GetEmptyLeagueFantasyPlayers()
     {
         using var context = CreateContext();
         var loggerMock = new Mock<ILogger<FantasyRepository>>();
         var repository = new FantasyRepository(loggerMock.Object, context);
 
-        var matchDetail = await repository.GetMatchDetailAsync(1, 5);
-        Assert.Null(matchDetail);
+        var fantasyPlayers = await repository.FantasyPlayersByLeagueAsync(3);
+        Assert.Empty(fantasyPlayers);
     }
 
     [Fact]
-    public async void GetOutdatedMatch()
+    public async void GetFantasyPlayerPointsLeague()
     {
         using var context = CreateContext();
         var loggerMock = new Mock<ILogger<FantasyRepository>>();
         var repository = new FantasyRepository(loggerMock.Object, context);
 
-        var matchDetail = await repository.GetMatchDetailAsync(2, 4);
-        // Match Detail 4 exists but is older than league start time
-        Assert.Null(matchDetail);
+        var fantasyPlayerPoints = await repository.FantasyPlayerPointsByLeagueAsync(1);
+        // This is going to be 2 fantasy players, and 2 null rows with the left join so 0's show if there were no matches
+        Assert.Equal(4, fantasyPlayerPoints.Count());
+        Assert.Equal(2, fantasyPlayerPoints.Where(fpp => fpp.Match != null).Count());
+        Assert.Equal(2, fantasyPlayerPoints.Where(fpp => fpp.Match == null).Count());
+        Assert.IsAssignableFrom<IEnumerable<FantasyPlayerPoints>>(fantasyPlayerPoints);
     }
 
     [Fact]
-    public async void GetMatchDetails()
+    public async void GetFantasyPlayerPointsEmptyLeague()
     {
         using var context = CreateContext();
         var loggerMock = new Mock<ILogger<FantasyRepository>>();
         var repository = new FantasyRepository(loggerMock.Object, context);
 
-        var matchDetails = await repository.GetMatchDetailsAsync(1);
-        Assert.Equal(2, matchDetails.Count());
-        Assert.IsAssignableFrom<IEnumerable<MatchDetail>>(matchDetails);
+        var fantasyPlayerPoints = await repository.FantasyPlayerPointsByLeagueAsync(4);
+
+        Assert.Empty(fantasyPlayerPoints);
     }
 
     [Fact]
-    public async void GetEmptyLeagueMatchDetails()
+    public async void GetFantasyDraftsByUserLeague()
     {
         using var context = CreateContext();
         var loggerMock = new Mock<ILogger<FantasyRepository>>();
         var repository = new FantasyRepository(loggerMock.Object, context);
 
-        var matchDetails = await repository.GetMatchDetailsAsync(3);
-        Assert.Empty(matchDetails);
+        var fantasyPlayerPoints = await repository.FantasyDraftsByUserLeagueAsync(1, 1);
+
+        Assert.Single(fantasyPlayerPoints);
     }
 
-
     [Fact]
-    public async void GetMatchDetailPlayers()
+    public async void GetFantasyDraftsEmptyLeague()
     {
         using var context = CreateContext();
         var loggerMock = new Mock<ILogger<FantasyRepository>>();
         var repository = new FantasyRepository(loggerMock.Object, context);
 
-        var matchDetailPlayers = await repository.GetMatchDetailPlayersByLeagueAsync(1);
-        Assert.Equal(2, matchDetailPlayers.Count());
-        Assert.IsAssignableFrom<IEnumerable<MatchDetailsPlayer>>(matchDetailPlayers);
+        var fantasyPlayerPoints = await repository.FantasyDraftsByUserLeagueAsync(1, 4);
+
+        Assert.Empty(fantasyPlayerPoints);
     }
 
     [Fact]
-    public async void GetMatchDetailPlayersAllLeagues()
+    public async void GetFantasyDraftsUnknownUser()
     {
         using var context = CreateContext();
         var loggerMock = new Mock<ILogger<FantasyRepository>>();
         var repository = new FantasyRepository(loggerMock.Object, context);
 
-        var matchDetailPlayers = await repository.GetMatchDetailPlayersByLeagueAsync(null);
-        Assert.Equal(2, matchDetailPlayers.Count());
-        Assert.IsAssignableFrom<IEnumerable<MatchDetailsPlayer>>(matchDetailPlayers);
+        var fantasyPlayerPoints = await repository.FantasyDraftsByUserLeagueAsync(2, 1);
+
+        Assert.Empty(fantasyPlayerPoints);
     }
+
+    // Task<IEnumerable<FantasyPlayerPoints>> FantasyDraftPointsByLeagueAsync(int LeagueId);
+    // Task<IEnumerable<FantasyPlayerPoints>> FantasyDraftPointsByUserLeagueAsync(long UserDiscordAccountId, int LeagueId);
+    // IEnumerable<FantasyPlayerPointTotals> AggregateFantasyPlayerPoints(IEnumerable<FantasyPlayerPoints> fantasyPlayerPoints);
+    // IEnumerable<FantasyDraftPointTotals> AggregateFantasyDraftPoints(IEnumerable<FantasyPlayerPoints> fantasyPlayerPoints);
+    // Task ClearUserFantasyPlayersAsync(long UserDiscordAccountId, int LeagueId);
+    // Task<FantasyDraft> AddNewUserFantasyPlayerAsync(long UserDiscordAccountId, int LeagueId, long? FantasyPlayerId, int DraftOrder);
 
     #endregion
 }
