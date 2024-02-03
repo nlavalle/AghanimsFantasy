@@ -74,7 +74,11 @@ builder.Services
         options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         options.DefaultChallengeScheme = "OAuth";
     })
-    .AddCookie()
+    .AddCookie(options =>
+    {
+        options.ExpireTimeSpan = TimeSpan.FromDays(10);
+        options.Cookie.MaxAge = TimeSpan.FromDays(10);
+    })
     .AddOAuth("OAuth", options =>
     {
         options.ClientId = Environment.GetEnvironmentVariable("DISCORD_APP_ID") ?? "";
