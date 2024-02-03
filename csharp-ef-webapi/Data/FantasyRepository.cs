@@ -116,8 +116,10 @@ public class FantasyRepository : IFantasyRepository
                     Match = mdp,
                     FantasyPlayer = fdp.FantasyPlayer
                 })
-            .Distinct()
             .ToListAsync();
+
+        // For some reason this thing shits itself if the distinct is done in the previous query?
+        fantasyPlayerMatches = fantasyPlayerMatches.Distinct().ToList();
 
 
         return fantasyPlayerMatches;
@@ -162,9 +164,10 @@ public class FantasyRepository : IFantasyRepository
                     Match = mdp ?? new MatchDetailsPlayer(),
                     FantasyPlayer = fdp.FantasyPlayer
                 })
-            .Distinct()
             .ToListAsync();
 
+        // For some reason this thing shits itself if the distinct is done in the previous query?
+        fantasyPlayerMatches = fantasyPlayerMatches.Distinct().ToList();
 
         return fantasyPlayerMatches;
     }
