@@ -21,20 +21,5 @@ public class FantasyDraft
 
     [Column("draft_last_updated")]
     public DateTime? DraftLastUpdated { get; set; }
-
-    [Column("draft_pick_one")]
-    public long DraftPickOne { get; set; }
-
-    [Column("draft_pick_two")]
-    public long DraftPickTwo { get; set; }
-
-    [Column("draft_pick_three")]
-    public long DraftPickThree { get; set; }
-
-    [Column("draft_pick_four")]
-    public long DraftPickFour { get; set; }
-
-    [Column("draft_pick_five")]
-    public long DraftPickFive { get; set; }
     public List<FantasyDraftPlayer> DraftPickPlayers { get; set; } = new List<FantasyDraftPlayer>();
 }

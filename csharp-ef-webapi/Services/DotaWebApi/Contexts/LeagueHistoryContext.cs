@@ -32,9 +32,10 @@ internal class LeagueHistoryContext : DotaOperationContext
 
     protected override async Task OperateAsync(CancellationToken cancellationToken)
     {
+        try{
         Dictionary<string, string> query = new Dictionary<string, string>();
 
-        var leagues = _dbContext.Leagues.Where(l => l.isActive).ToArray();
+        var leagues = _dbContext.Leagues.Where(l => l.IsActive).Select(l => l.LeagueId).Distinct().ToArray();
         var length = leagues.Length;
 
         // Knowing the length triggers a lot of stuff
@@ -47,7 +48,7 @@ internal class LeagueHistoryContext : DotaOperationContext
         {
             var league = leagues[i];
 
-            tasks[i] = GetMatchHistoryAsync(league.id, cancellationToken);
+            tasks[i] = GetMatchHistoryAsync(league, cancellationToken);
         }
 
         await Task.WhenAll(tasks);
@@ -89,6 +90,10 @@ internal class LeagueHistoryContext : DotaOperationContext
         // TODO: await _apiService.StartOperation<MatchDetailsContext>(cancellationToken, true);
 
         _logger.LogInformation($"League Match History fetch done");
+        }
+        catch (Exception ex) {
+            _logger.LogError($"An error occurred: {ex.Message}");
+        }
     }
 
     private async Task GetMatchHistoryAsync(int leagueId, CancellationToken cancellationToken)

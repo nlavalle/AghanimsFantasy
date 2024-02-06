@@ -6,14 +6,16 @@
           NADCL Fantasy Draft, click the fantasy tab to get started.
           <br />
           Points are calculated using the pattern below
-          following the TI fantasy scoring. Certain statistics require parsing the .dem replay files to measure, so they
-          won't be involved in the calculation until that is added to the API service that fetches match data.
+          following the TI fantasy scoring. Certain statistics require parsing the .dem replay files to measure, so the
+          unavailable
+          metrics won't be involved in the calculation until that is added to the API service that fetches match data
+          (hopefully by Season 7).
         </p>
       </div>
     </div>
     <div class="row justify-evenly">
-      <q-table table-class="score-table" :columns="headers" :rows="statistics" dense hide-pagination separator="vertical"
-        :rows-per-page-options="[0]" />
+      <q-table class="about-table" table-header-class="about-table-header" table-class="about-table-body" :columns="headers" :rows="statistics" dense
+        hide-pagination separator="vertical" :rows-per-page-options="[0]" />
     </div>
   </div>
 </template>
@@ -59,42 +61,42 @@ const statistics = [
   {
     name: "Tower Kill",
     value: "1",
-    available: "Requires Replay Parsing"
+    available: "No"
   },
   {
     name: "Roshan Kill",
     value: "1",
-    available: "Requires Replay Parsing"
+    available: "No"
   },
   {
     name: "Team Fight",
     value: "3",
-    available: "Requires Replay Parsing"
+    available: "No"
   },
   {
     name: "Wards Planted",
     value: "0.5",
-    available: "Requires Replay Parsing"
+    available: "No"
   },
   {
     name: "Camps Stacked",
     value: "0.5",
-    available: "Requires Replay Parsing"
+    available: "No"
   },
   {
     name: "Runes Grabbed",
     value: "0.25",
-    available: "Requires Replay Parsing"
+    available: "No"
   },
   {
     name: "First Blood",
     value: "4.0",
-    available: "Requires Replay Parsing"
+    available: "No"
   },
   {
     name: "Stuns",
     value: "0.05",
-    available: "Requires Replay Parsing"
+    available: "No"
   }
 ];
 const headers = [
@@ -124,35 +126,28 @@ const headers = [
   
   <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style>
-.score-table th {
-  background-color: #3a404d;
-  color: white;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 18px;
+.about {
+  margin-top: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
 }
 
-.score-table tbody td {
-  background-color: #192038;
-  color: white;
+.about-table {
+  max-width: 375px;
+  border: 2px solid var(--nadcl-accent-dark);
+}
+
+.about-table-header th {
+  background-color: var(--nadcl-accent-dark);
+  color: var(--nadcl-white);
   font-family: Arial, Helvetica, sans-serif;
   font-size: 16px;
 }
 
-h3 {
-  margin: 40px 0 0;
-}
-
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-
-a {
-  color: #42b983;
+.about-table-body tbody tr td {
+  color: var(--nadcl-white);
+  background-color: var(--nadcl-main-4);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
 }
 </style>

@@ -8,6 +8,6 @@ public class Feederboard
 {
     public int Rank { get; set; }
     public int Deaths { get; set; }
-    public string DiscordName { get; set; }
+    public string DiscordName { get; set; } = "";
 
 }

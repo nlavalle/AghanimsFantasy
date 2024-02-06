@@ -1,7 +1,10 @@
 <template>
   <q-card class="card-container">
     <q-card-section class="draft-image">
-      <q-img :src="getImageUrl()" />
+      <div class="flex-container">
+        <q-img height="115px" width="38%" :src="playerImageSrc" />
+        <q-img height="115px" width="62%" :src="getImageUrl()" />
+      </div>
     </q-card-section>
     <q-card-section class="draft-header">
       <div>
@@ -13,7 +16,7 @@
     </q-card-section>
     <q-card-section class="draft-body">
       <div class="draft-body-main">
-        {{ fantasyPoints }}
+        {{ fantasyPoints.toFixed(2) }}
       </div>
       <div class="draft-body-details">
         Fantasy Points
@@ -54,15 +57,19 @@ export default defineComponent({
       type: String,
       required: true
     },
-    imageSrc: {
+    playerImageSrc: {
+      type: String,
+      required: false
+    },
+    teamImageSrc: {
       type: Number,
       required: false
     },
   },
   methods: {
     getImageUrl() {
-      if(this.imageSrc == 0) return null;
-      return new URL(`../../assets/logos/teams_logo_${this.imageSrc}.png`, import.meta.url).toString();
+      if (this.teamImageSrc == 0) return null;
+      return new URL(`../../assets/logos/teams_logo_${this.teamImageSrc}.png`, import.meta.url).toString();
     }
   }
 });
@@ -72,8 +79,12 @@ export default defineComponent({
 .card-container {
   margin: 20px;
   border-radius: 8px;
+  background-color: var(--nadcl-blue-1);
+  border: 5px solid var(--nadcl-accent-dark);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  font-family: 'Merriweather', serif;
+  max-width: 300px;
 }
 
 .card-container q-img {
@@ -82,14 +93,13 @@ export default defineComponent({
 }
 
 .draft-image {
-  background-color: #3a404d;
   padding: 0px;
 }
 
 .draft-header {
-  font-size: 1.5rem;
+  font-size: 20px;
   font-weight: bold;
-  background-color: #3a404d;
+  
   color: #fff;
   padding: 16px;
   border-top-left-radius: 8px;
@@ -98,16 +108,23 @@ export default defineComponent({
 
 .draft-body {
   padding: 16px;
+  background: linear-gradient(to bottom, var(--nadcl-accent-dark), var(--nadcl-blue-1));
+  border-top: 3px solid var(--nadcl-accent-dark);
 }
 
 .draft-body-main {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #333;
 }
 
 .draft-body-details {
   margin-top: 8px;
-  color: #555;
 }
+
+.flex-container {
+  display: flex;
+  flex-flow: row wrap;
+  max-width: 100%;
+}
+
 </style>

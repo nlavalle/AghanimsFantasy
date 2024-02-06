@@ -1,11 +1,12 @@
 <template>
-    <q-select ref="expandSelect" filled :modelValue="modelValue" @update:model-value="updateSelectedOption"
-        :options="selectOptions" option-label="name" dark :label="selectLabel ?? ''" color="teal" clearable>
+    <q-select ref="expandSelect" class="draft-selector" use-input filled input-debounce="500" :modelValue="modelValue"
+        @update:model-value="updateSelectedOption" :options="options" @filter="filterFn" option-label="name"
+        :label="selectLabel ?? ''" color="nadcl-accent" clearable>
         <template v-slot:option="scope">
-            <q-expansion-item expand-separator :default-opened="hasChild(scope)" header-class="text-weight-bold"
+            <q-expansion-item expand-separator :default-opened="true" header-class="text-weight-bold"
                 :label="scope.opt.label">
                 <template v-for="child in scope.opt.options" :key="child.label">
-                    <q-item clickable @click="changeOption(child)" :class="{ 'bg-light-blue-10': modelValue === child }">
+                    <q-item clickable @click="changeOption(child)">
                         <q-item-section>
                             <q-item-label class="q-ml-md">{{ child.name }}</q-item-label>
                         </q-item-section>
@@ -14,9 +15,14 @@
             </q-expansion-item>
         </template>
     </q-select>
+    <!-- <q-select ref="expandSelect" use-input filled input-debounce="500" :modelValue="modelValue"
+        @update:model-value="updateSelectedOption" :options="options" remove-selected @filter="filterFn" option-label="name" :label="selectLabel ?? ''"
+        color="teal" clearable/> -->
 </template>
 
 <script>
+import { ref } from 'vue';
+
 export default {
     name: 'SelectExpansionGroup',
     props: {
@@ -36,12 +42,35 @@ export default {
             required: true,
         },
     },
+    setup(props) {
+        const options = ref([])
+
+        return {
+            options,
+
+            // filterFn(val, update) {
+            //     const filterCriteria = val.toLowerCase()
+            //     update(() => {
+            //         options.value = props.selectOptions.filter(option => option.name.toLowerCase().includes(filterCriteria))
+            //     })
+            // }
+            filterFn(val, update) {
+                const filterCriteria = val.toLowerCase()
+                update(() => {
+                    options.value = props.selectOptions.map(team => {
+                        return {
+                            label: team.label,
+                            options: team.options.filter(option => option.name.toLowerCase().includes(filterCriteria))
+                        }
+                    })
+                })
+            }
+        }
+    },
     emits: ['update:modelValue'],
     methods: {
-        hasChild(scope) {
-            return scope.opt.options.some(c => c === this.modelValue)
-        },
         changeOption(option) {
+            this.$refs.expandSelect.updateInputValue('', true);
             this.$emit('update:modelValue', option);
             this.$refs.expandSelect.hidePopup(); // v-close-popup on the q-item freaks out with the dropdown options changing so we need to call it here
         },
@@ -52,22 +81,8 @@ export default {
     }
 };
 </script>
-<style>
-.login-container {
-    box-sizing: border-box;
-    border: 2px solid gray;
-    border-radius: 10px;
-    margin: auto;
-    align-items: center;
-}
-
-.log-btn {
-    margin: 2px;
-    border-radius: 8px;
-}
-
-.welcome {
-    color: white;
-    margin: 5px;
+<style scoped>
+.draft-selector {
+    background-color: var(--nadcl-main-3);
 }
 </style>

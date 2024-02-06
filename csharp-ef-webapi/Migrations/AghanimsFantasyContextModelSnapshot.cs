@@ -149,26 +149,6 @@ namespace csharp_ef_webapi.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("draft_last_updated");
 
-                    b.Property<long>("DraftPickFive")
-                        .HasColumnType("bigint")
-                        .HasColumnName("draft_pick_five");
-
-                    b.Property<long>("DraftPickFour")
-                        .HasColumnType("bigint")
-                        .HasColumnName("draft_pick_four");
-
-                    b.Property<long>("DraftPickOne")
-                        .HasColumnType("bigint")
-                        .HasColumnName("draft_pick_one");
-
-                    b.Property<long>("DraftPickThree")
-                        .HasColumnType("bigint")
-                        .HasColumnName("draft_pick_three");
-
-                    b.Property<long>("DraftPickTwo")
-                        .HasColumnType("bigint")
-                        .HasColumnName("draft_pick_two");
-
                     b.Property<int>("LeagueId")
                         .HasColumnType("integer")
                         .HasColumnName("league_id");
@@ -180,14 +160,17 @@ namespace csharp_ef_webapi.Migrations
 
             modelBuilder.Entity("csharp_ef_webapi.Models.FantasyDraftPlayer", b =>
                 {
-                    b.Property<long>("FantasyPlayerId")
-                        .HasColumnType("bigint");
+                    b.Property<long?>("FantasyPlayerId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("fantasy_player_id");
 
                     b.Property<long>("FantasyDraftId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("fantasy_draft_id");
 
                     b.Property<int>("DraftOrder")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("draft_order");
 
                     b.HasKey("FantasyPlayerId", "FantasyDraftId");
 
@@ -246,26 +229,38 @@ namespace csharp_ef_webapi.Migrations
 
             modelBuilder.Entity("csharp_ef_webapi.Models.League", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("league_id");
+                        .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("fantasyDraftLocked")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long>("FantasyDraftLocked")
+                        .HasColumnType("bigint")
                         .HasColumnName("fantasy_draft_locked_date");
 
-                    b.Property<bool>("isActive")
+                    b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");
 
-                    b.Property<string>("name")
+                    b.Property<long>("LeagueEndTime")
+                        .HasColumnType("bigint")
+                        .HasColumnName("league_end_time");
+
+                    b.Property<int>("LeagueId")
+                        .HasColumnType("integer")
+                        .HasColumnName("league_id");
+
+                    b.Property<long>("LeagueStartTime")
+                        .HasColumnType("bigint")
+                        .HasColumnName("league_start_time");
+
+                    b.Property<string>("Name")
                         .HasColumnType("text")
                         .HasColumnName("league_name");
 
-                    b.HasKey("id");
+                    b.HasKey("Id");
 
                     b.ToTable("dota_leagues", "nadcl");
                 });
@@ -946,7 +941,7 @@ namespace csharp_ef_webapi.Migrations
 
             modelBuilder.Entity("csharp_ef_webapi.Models.FantasyDraftPlayer", b =>
                 {
-                    b.HasOne("csharp_ef_webapi.Models.FantasyDraft", "FantasyDraft")
+                    b.HasOne("csharp_ef_webapi.Models.FantasyDraft", null)
                         .WithMany("DraftPickPlayers")
                         .HasForeignKey("FantasyDraftId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -956,8 +951,6 @@ namespace csharp_ef_webapi.Migrations
                         .WithMany()
                         .HasForeignKey("FantasyPlayerId")
                         .IsRequired();
-
-                    b.Navigation("FantasyDraft");
 
                     b.Navigation("FantasyPlayer");
                 });

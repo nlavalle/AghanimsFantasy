@@ -30,6 +30,13 @@ public class MatchDetail
     [Column("start_time")]
     [JsonProperty("start_time")]
     public long StartTime { get; set; }
+    public DateTime StartTimeFormatted 
+    {
+        get
+        {
+            return DateTimeOffset.FromUnixTimeSeconds(StartTime).DateTime;
+        }
+    }
 
     [Column("match_seq_num")]
     [JsonProperty("match_seq_num")]

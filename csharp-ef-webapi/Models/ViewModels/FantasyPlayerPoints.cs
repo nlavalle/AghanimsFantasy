@@ -9,13 +9,14 @@ public class FantasyPlayerPoints
     private const decimal LastHitsValue = 0.003M;
     private const decimal GoldPerMinValue = 0.002M;
     private const decimal XpPerMinValue = 0.002M;
+    public FantasyDraft FantasyDraft {get;set; } = new FantasyDraft();
     public FantasyPlayer FantasyPlayer { get; set; } = new FantasyPlayer();
-    public MatchDetailsPlayer Match { get; set; } = new MatchDetailsPlayer();
+    public MatchDetailsPlayer? Match { get; set; } = new MatchDetailsPlayer();
     public int Kills
     {
         get
         {
-            return Match.Kills ?? 0;
+            return Match?.Kills ?? 0;
         }
     }
     public decimal KillsPoints
@@ -30,7 +31,7 @@ public class FantasyPlayerPoints
     {
         get
         {
-            return Match.Deaths ?? 0;
+            return Match?.Deaths ?? 0;
         }
     }
     public decimal DeathsPoints
@@ -45,7 +46,7 @@ public class FantasyPlayerPoints
     {
         get
         {
-            return Match.Assists ?? 0;
+            return Match?.Assists ?? 0;
         }
     }
     public decimal AssistsPoints
@@ -60,7 +61,7 @@ public class FantasyPlayerPoints
     {
         get
         {
-            return Match.LastHits ?? 0;
+            return Match?.LastHits ?? 0;
         }
     }
     public decimal LastHitsPoints
@@ -75,7 +76,7 @@ public class FantasyPlayerPoints
     {
         get
         {
-            return Match.GoldPerMin ?? 0;
+            return Match?.GoldPerMin ?? 0;
         }
     }
     public decimal GoldPerMinPoints
@@ -90,7 +91,7 @@ public class FantasyPlayerPoints
     {
         get
         {
-            return Match.XpPerMin ?? 0;
+            return Match?.XpPerMin ?? 0;
         }
     }
     public decimal XpPerMinPoints

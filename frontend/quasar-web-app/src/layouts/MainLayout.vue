@@ -2,7 +2,7 @@
   <q-layout>
     <q-header elevated class="header text-white" height-hint="40">
       <q-toolbar>
-        <LeagueSelector class="league-selector" />
+        <LeagueSelector :class="{ 'league-selector-wide': isWideScreen, 'league-selector-narrow': !isWideScreen }" />
 
         <q-toolbar-title v-if="isWideScreen" class="title">
           <q-avatar>
@@ -17,13 +17,15 @@
         </q-toolbar-title>
 
         <q-space />
-        <LoginDiscord />
+        <LoginDiscord class="login-discord" />
       </q-toolbar>
       <q-separator color="white" />
       <q-tabs align="left">
         <q-route-tab to="/about" label="About" />
         <!-- <q-route-tab to="/league" label="Leagues" /> -->
         <q-route-tab to="/fantasy" label="Fantasy" />
+        <q-route-tab to="/stats" label="Stats" />
+        <q-route-tab to="/leaderboard" label="Leaderboard" />
       </q-tabs>
     </q-header>
 
@@ -57,12 +59,22 @@ export default defineComponent({
   border: 1px solid red;
 }
 
-.league-selector {
-  min-width: 180px;
+.login-discord {
+  max-width: 150px;
+}
+
+.league-selector-wide {
+  min-width: 120px;
+  max-width: 300px;
+}
+
+.league-selector-narrow {
+  min-width: 120px;
+  max-width: 150px;
 }
 
 .header {
-  background-color: #3a404d;
+  background-color: var(--nadcl-main-4);
   /* z-index: 9000; */
 }
 

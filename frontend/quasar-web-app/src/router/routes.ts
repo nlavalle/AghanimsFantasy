@@ -20,6 +20,18 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
+    path: '/stats',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [{ path: '', component: () => import('pages/FantasyStatsPage.vue') }],
+  },
+
+  {
+    path: '/leaderboard',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [{ path: '', component: () => import('pages/LeaderboardPage.vue') }],
+  },
+
+  {
     path: '/fantasy',
     component: () => import('layouts/MainLayout.vue'),
     children: [{ path: '', component: () => import('pages/FantasyPage.vue') }],
