@@ -54,7 +54,7 @@ builder.Services.AddDbContext<AghanimsFantasyContext>(
     options =>
     {
         var conn_string = builder.Configuration.GetConnectionString("AghanimsFantasyDatabase");
-        conn_string = conn_string.Replace("{SQL_HOST}", Environment.GetEnvironmentVariable("SQL_HOST"));
+        conn_string = conn_string?.Replace("{SQL_HOST}", Environment.GetEnvironmentVariable("SQL_HOST")) ?? "Host=localhost;Port=5432;Database=postgres;";
         conn_string = conn_string.Replace("{SQL_USER}", Environment.GetEnvironmentVariable("SQL_USER"));
         conn_string = conn_string.Replace("{SQL_PASSWORD}", Environment.GetEnvironmentVariable("SQL_PASSWORD"));
         options.UseNpgsql(conn_string);

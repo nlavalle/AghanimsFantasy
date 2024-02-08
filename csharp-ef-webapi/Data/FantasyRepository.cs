@@ -65,7 +65,7 @@ public class FantasyRepository : IFantasyRepository
                 (fp, md) => new { fp.League, fp.FantasyPlayer, MatchDetail = md }
             )
             .SelectMany(
-                group => _dbContext.MatchDetailsPlayers.Where(mdp => mdp.MatchId == group.MatchDetail.MatchId && mdp.AccountId == group.FantasyPlayer.DotaAccountId).DefaultIfEmpty(),
+                group => _dbContext.MatchDetailsPlayers.Where(mdp => group.MatchDetail != null && mdp.MatchId == group.MatchDetail.MatchId && mdp.AccountId == group.FantasyPlayer.DotaAccountId).DefaultIfEmpty(),
                 (fdp, mdp) => new FantasyPlayerPoints
                 {
                     FantasyDraft = new FantasyDraft(),

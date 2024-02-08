@@ -26,8 +26,8 @@ public class DotaWebApiService : BackgroundService
         _configuration = configuration;
         _serviceProvider = serviceProvider;
 
-        _baseApiUrl = _configuration.GetSection("DotaWebApi").GetValue<string>("BaseUrl");
-        _econApiUrl = _configuration.GetSection("DotaWebApi").GetValue<string>("EconUrl");
+        _baseApiUrl = _configuration.GetSection("DotaWebApi").GetValue<string>("BaseUrl") ?? throw new Exception("Dota Web API - Base URL not set");
+        _econApiUrl = _configuration.GetSection("DotaWebApi").GetValue<string>("EconUrl") ?? throw new Exception("Dota Web API - Econ URL not set");
         _steamKey = Environment.GetEnvironmentVariable("STEAM_KEY") ?? "";
 
         _httpClient = httpClient;
