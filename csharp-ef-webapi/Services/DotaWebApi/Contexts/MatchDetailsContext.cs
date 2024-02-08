@@ -101,7 +101,7 @@ internal class MatchDetailsContext : DotaOperationContext
         UriBuilder uriBuilder = new UriBuilder(_config.BaseUri);
         uriBuilder.AppendPath(AppendedApiPath);
 
-        Dictionary<string, string> query = new Dictionary<string, string>(_config.BaseQuery);
+        Dictionary<string, string> query = new Dictionary<string, string>(_config.ConfigSettings);
         query["match_id"] = matchId.ToString();
 
         uriBuilder.SetQuery(query);

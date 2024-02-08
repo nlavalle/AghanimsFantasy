@@ -76,7 +76,7 @@ internal class TeamsContext : DotaOperationContext
         UriBuilder uriBuilder = new UriBuilder(_config.BaseUri);
         uriBuilder.AppendPath(AppendedApiPath);
 
-        Dictionary<string, string> query = new Dictionary<string, string>(_config.BaseQuery);
+        Dictionary<string, string> query = new Dictionary<string, string>(_config.ConfigSettings);
         query["start_at_team_id"] = teamId.ToString();
         query["teams_requested"] = "1";
 

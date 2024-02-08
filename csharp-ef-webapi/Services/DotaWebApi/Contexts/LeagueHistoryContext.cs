@@ -101,7 +101,7 @@ internal class LeagueHistoryContext : DotaOperationContext
         UriBuilder uriBuilder = new UriBuilder(_config.BaseUri);
         uriBuilder.AppendPath(AppendedApiPath);
 
-        Dictionary<string, string> query = new Dictionary<string, string>(_config.BaseQuery);
+        Dictionary<string, string> query = new Dictionary<string, string>(_config.ConfigSettings);
         query["league_id"] = leagueId.ToString();
         query["matches_requested"] = "100";
 

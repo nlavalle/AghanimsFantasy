@@ -7,7 +7,6 @@ public class DotaWebApiService : BackgroundService
     private readonly string _baseApiUrl;
     private readonly string _econApiUrl;
     private readonly string _steamKey;
-    private readonly HttpClient _httpClient;
     private TaskCompletionSource _tcsReadyForRequests;
     private readonly ILogger<DotaWebApiService> _logger;
     internal CancellationToken StoppingToken { get; private set; }
@@ -17,7 +16,7 @@ public class DotaWebApiService : BackgroundService
     IServiceProvider _serviceProvider;
     Dictionary<Type, object> _launchers;
 
-    public DotaWebApiService(ILogger<DotaWebApiService> logger, IConfiguration configuration, IServiceProvider serviceProvider, HttpClient httpClient)
+    public DotaWebApiService(ILogger<DotaWebApiService> logger, IConfiguration configuration, IServiceProvider serviceProvider)
     {
         _tcsReadyForRequests = new TaskCompletionSource();
         _launchers = new Dictionary<Type, object>();
@@ -30,8 +29,7 @@ public class DotaWebApiService : BackgroundService
         _econApiUrl = _configuration.GetSection("DotaWebApi").GetValue<string>("EconUrl") ?? throw new Exception("Dota Web API - Econ URL not set");
         _steamKey = Environment.GetEnvironmentVariable("STEAM_KEY") ?? "";
 
-        _httpClient = httpClient;
-        _logger.LogInformation("Dota WebApi Service started");
+        _logger.LogInformation("Dota WebApi Service constructed");
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -62,14 +60,13 @@ public class DotaWebApiService : BackgroundService
         _tcsReadyForRequests.SetResult();
         _logger.LogInformation("Dota WebApi Service started");
 
-        Task[] tasks = new Task[4];
-
-        tasks[0] = LoopOperation<HeroesContext>(TimeSpan.FromDays(1), stoppingToken);
-        tasks[1] = LoopOperation<LeagueHistoryContext>(TimeSpan.FromMinutes(5), stoppingToken);
-        tasks[2] = LoopOperation<MatchDetailsContext>(TimeSpan.FromMinutes(5), stoppingToken);
-        tasks[3] = LoopOperation<TeamsContext>(TimeSpan.FromDays(1), stoppingToken);
-
-
+        Task[] tasks =
+        [
+            LoopOperation<HeroesContext>(TimeSpan.FromDays(1), stoppingToken),
+            LoopOperation<LeagueHistoryContext>(TimeSpan.FromMinutes(5), stoppingToken),
+            LoopOperation<MatchDetailsContext>(TimeSpan.FromMinutes(5), stoppingToken),
+            LoopOperation<TeamsContext>(TimeSpan.FromDays(1), stoppingToken),
+        ];
         await Task.WhenAll(tasks);
     }
 
@@ -90,7 +87,7 @@ public class DotaWebApiService : BackgroundService
     {
         Debug.Assert(!_tcsReadyForRequests.Task.IsCompleted);
 
-        _launchers.Add(typeof(T), new DotaOperationLauncher<T>(_serviceProvider, cooldown, baseApiUri, baseQuery, RateLimiter, StoppingToken));
+        _launchers.Add(typeof(T), new DotaWebApiOperationLauncher<T>(_serviceProvider, cooldown, baseApiUri, baseQuery, RateLimiter, StoppingToken));
     }
 
     private async Task LoopOperation<T>(TimeSpan delay, CancellationToken cancellationToken) where T : DotaOperationContext
@@ -131,13 +128,13 @@ public class DotaWebApiService : BackgroundService
         }
     }
 
-    private bool TryGetLauncher<T>([NotNullWhen(true)] out DotaOperationLauncher<T>? launcher) where T : DotaOperationContext
+    private bool TryGetLauncher<T>([NotNullWhen(true)] out DotaWebApiOperationLauncher<T>? launcher) where T : DotaOperationContext
     {
         Debug.Assert(_tcsReadyForRequests.Task.IsCompleted);
 
         if (_launchers.TryGetValue(typeof(T), out var value))
         {
-            launcher = (DotaOperationLauncher<T>)value;
+            launcher = (DotaWebApiOperationLauncher<T>)value;
             return true;
         }
 

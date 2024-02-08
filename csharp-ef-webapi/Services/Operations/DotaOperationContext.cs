@@ -139,17 +139,29 @@ internal abstract class DotaOperationContext : IDisposable
 
     public sealed class Config
     {
-        private readonly Dictionary<string, string> _baseQuery;
+        private readonly Dictionary<string, string> _configSettings;
 
-        public IEnumerable<KeyValuePair<string, string>> BaseQuery => _baseQuery;
+        public IEnumerable<KeyValuePair<string, string>> ConfigSettings => _configSettings;
         public Uri BaseUri { get; }
         public RateLimiter RateLimiter { get; }
         public CancellationToken StoppingToken { get; }
 
-        public Config(Uri baseUri, Dictionary<string, string> baseQuery, RateLimiter rateLimiter, CancellationToken stoppingToken)
+        //Web API Service Configs with URI/Base Queries
+        public Config(Uri baseUri, Dictionary<string, string> configSettings, RateLimiter rateLimiter, CancellationToken stoppingToken)
         {
             BaseUri = baseUri;
-            _baseQuery = baseQuery;
+            _configSettings = configSettings;
+            RateLimiter = rateLimiter;
+            StoppingToken = stoppingToken;
+        }
+
+        //Steam Client Configs
+        public Config(Dictionary<string, string> configSettings, RateLimiter rateLimiter, CancellationToken stoppingToken)
+        {
+            // Defaults
+            BaseUri = new Uri("", UriKind.RelativeOrAbsolute);
+            _configSettings = configSettings;
+
             RateLimiter = rateLimiter;
             StoppingToken = stoppingToken;
         }
