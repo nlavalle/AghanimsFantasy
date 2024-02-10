@@ -130,6 +130,9 @@ builder.Services.AddHostedService<DotaSteamClientService>();
 // Add FantasyRepository to be used by controllers
 builder.Services.AddScoped<FantasyRepository>();
 
+// Add Scoped Dota Client to be called for Dota Client Background Service
+builder.Services.AddScoped<DotaClient>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -17,12 +17,12 @@ internal class DotaSteamClientOperationLauncher<T> where T : DotaOperationContex
     private readonly object _lockObject = new object();
     private T? _currentOperation;
 
-    public DotaSteamClientOperationLauncher(IServiceProvider serviceProvider, TimeSpan coolDown, Dictionary<string, string> clientSettings, RateLimiter rateLimiter, CancellationToken stoppingToken)
+    public DotaSteamClientOperationLauncher(IServiceProvider serviceProvider, TimeSpan coolDown, RateLimiter rateLimiter, CancellationToken stoppingToken)
     {
         _serviceProvider = serviceProvider;
         CoolDownTicks = coolDown.Ticks;
 
-        _contextConfig = new DotaOperationContext.Config(clientSettings, rateLimiter, stoppingToken);
+        _contextConfig = new DotaOperationContext.Config(rateLimiter, stoppingToken);
     }
 
     public T GetInstance(bool overrideCooldown = false)

@@ -156,11 +156,11 @@ internal abstract class DotaOperationContext : IDisposable
         }
 
         //Steam Client Configs
-        public Config(Dictionary<string, string> configSettings, RateLimiter rateLimiter, CancellationToken stoppingToken)
+        public Config(RateLimiter rateLimiter, CancellationToken stoppingToken)
         {
             // Defaults
             BaseUri = new Uri("", UriKind.RelativeOrAbsolute);
-            _configSettings = configSettings;
+            _configSettings = new Dictionary<string, string>();
 
             RateLimiter = rateLimiter;
             StoppingToken = stoppingToken;

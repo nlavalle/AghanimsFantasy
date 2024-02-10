@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using csharp_ef_webapi.Models;
+using SteamKit2.GC.Dota.Internal;
 
 namespace csharp_ef_webapi.Data;
 public class AghanimsFantasyContext : DbContext
@@ -36,10 +37,22 @@ public class AghanimsFantasyContext : DbContext
     public DbSet<FantasyPlayer> FantasyPlayers { get; set; }
     public DbSet<FantasyDraftPlayer> FantasyDraftPlayers { get; set; }
 
+    #region DotaClient
+    public DbSet<CMsgDOTAMatch> CMsgDOTAMatches {get;set;}
+    #endregion
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("nadcl");
         modelBuilder.Entity<BalanceLedger>().ToTable("balance_ledger", "nadcl");
+
+        modelBuilder.Entity<CMsgDOTAMatch>().ToTable("gc_dota_matches", "nadcl");
+        modelBuilder.Entity<CMsgDOTAMatch>().HasKey(gcm => gcm.match_id);
+        modelBuilder.Entity<CMsgDOTAMatch>().Ignore(gcm => gcm.custom_game_data);
+        modelBuilder.Entity<CMsgDOTAMatch>().Ignore(gcm => gcm.players);
+        modelBuilder.Entity<CMsgDOTAMatch>().Ignore(gcm => gcm.picks_bans);
+        modelBuilder.Entity<CMsgDOTAMatch>().Ignore(gcm => gcm.broadcaster_channels);
+        modelBuilder.Entity<CMsgDOTAMatch>().Ignore(gcm => gcm.coaches);
 
         modelBuilder.Entity<PlayerMatchDetails>()
             .HasKey(pmd => new { pmd.MatchId, pmd.PlayerSlot });

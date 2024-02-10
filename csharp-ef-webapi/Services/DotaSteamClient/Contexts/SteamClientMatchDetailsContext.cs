@@ -1,85 +1,80 @@
+using System.Collections.Immutable;
 using csharp_ef_webapi.Data;
-using csharp_ef_webapi.Models;
-using DotaMatchRequest;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using SteamKit2.GC.Dota.Internal;
 
 namespace csharp_ef_webapi.Services;
 internal class SteamClientMatchDetailsContext : DotaOperationContext
 {
-    private static readonly string AppendedApiPath = "GetHeroes/v1";
-    // private readonly DotaWebApiService _apiService;
     private readonly AghanimsFantasyContext _dbContext;
     private readonly ILogger<SteamClientMatchDetailsContext> _logger;
+    private readonly DotaClient _dotaClient;
+    // Status values
+    private int _remainingMatches = 0;
+    private int _startedMatches = 0;
+    private int _totalMatches = 0;
 
     public SteamClientMatchDetailsContext(ILogger<SteamClientMatchDetailsContext> logger, IServiceScope scope, Config config)
         : base(scope, config)
     {
         _dbContext = scope.ServiceProvider.GetRequiredService<AghanimsFantasyContext>();
         _logger = logger;
+        _dotaClient = scope.ServiceProvider.GetRequiredService<DotaClient>();
     }
 
     protected override async Task OperateAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation($"Steam Client Fetching Match Details");
+        try
+        {
+            if (_dotaClient.IsReady())
+            {
+                // Dota client should be disconnected when task starts, stop it if something is in limbo
+                _dotaClient.Disconnect();
+            }
 
-        ulong matchId = 7566780127;
+            _dotaClient.Connect();
+            // Waiting for the initial client connection to steam/dota
+            _dotaClient.Wait();
 
-        var dotaClient = new DotaClient(
-            _config.ConfigSettings.FirstOrDefault(kv => kv.Key == "user").Value,
-            _config.ConfigSettings.FirstOrDefault(kv => kv.Key == "password").Value,
-            matchId
-        );
-        dotaClient.Connect();
-        dotaClient.Wait();
-        _logger.LogInformation($"Match details received, replay_salt: {dotaClient.Match.replay_salt}");
+            // Find all the match histories without match detail rows and add tasks to fetch them all
+            ImmutableSortedSet<ulong> knownMatchHistories = _dbContext.MatchHistory.Select(x => (ulong)x.MatchId).ToImmutableSortedSet();
+            ImmutableSortedSet<ulong> knownMatchDetails = _dbContext.CMsgDOTAMatches.Select(x => x.match_id).ToImmutableSortedSet();
 
-        // List<Hero> heroes = new List<Hero>();
-        // heroes = await GetHeroesAsync(cancellationToken);
+            List<ulong> matchesWithoutDetails = knownMatchHistories.Except(knownMatchDetails).ToList();
 
-        // foreach (Hero hero in heroes)
-        // {
-        //     if (_dbContext.Heroes.FirstOrDefault(h => h.Id == hero.Id) == null)
-        //     {
-        //         _dbContext.Heroes.Add(hero);
-        //     }
-        //     else
-        //     {
-        //         Hero updateHero = _dbContext.Heroes.First(h => h.Id == hero.Id);
-        //         updateHero.Name = hero.Name;
-        //         _dbContext.Heroes.Update(updateHero);
-        //     }
-        // }
-        await _dbContext.SaveChangesAsync();
+            if (matchesWithoutDetails.Count() > 0)
+            {
+                var length = matchesWithoutDetails.Count;
 
-        _logger.LogInformation($"Steam Client Match Details fetch done");
+                // Knowing the length triggers a lot of stuff
+                _totalMatches = length;
+                Volatile.Write(ref _remainingMatches, length);
+                _logger.LogInformation($"Fetching {matchesWithoutDetails.Count()} new match details.");
+
+                for (int i = 0; i < length; i++)
+                {
+                    var matchId = matchesWithoutDetails[i];
+
+                    var matchDetails = _dotaClient.RequestMatchDetails(matchId);
+
+                    if (matchDetails != null)
+                    {
+                        _dbContext.CMsgDOTAMatches.Add(matchDetails);
+                    }
+                }
+
+                await _dbContext.SaveChangesAsync();
+
+                _logger.LogInformation($"Steam Client Match Details fetch done");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"An error occurred: {ex.Message}");
+        }
+        finally
+        {
+            // Close connection between jobs so we don't get into weird game coordinator downtime issues
+            _dotaClient.Disconnect();
+        }
     }
-
-    // private async Task<List<Hero>> GetHeroesAsync(CancellationToken cancellationToken)
-    // {
-    //     UriBuilder uriBuilder = new UriBuilder(_config.BaseUri);
-    //     uriBuilder.AppendPath(AppendedApiPath);
-
-    //     Dictionary<string, string> query = new Dictionary<string, string>(_config.BaseQuery);
-
-    //     uriBuilder.SetQuery(query);
-
-    //     HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);
-
-    //     await WaitNextTaskScheduleAsync(cancellationToken);
-
-    //     HttpResponseMessage response = await _httpClient.SendAsync(httpRequest);
-    //     _logger.LogInformation($"Request submitted at {DateTime.Now.Ticks}");
-    //     response.EnsureSuccessStatusCode();
-
-    //     JToken responseRawJToken = JToken.Parse(await response.Content.ReadAsStringAsync());
-
-    //     // Read and deserialize the matches from the json response
-    //     JToken responseObject = responseRawJToken["result"] ?? "{}";
-    //     JToken heroesJson = responseObject["heroes"] ?? "[]";
-
-    //     List<Hero> heroesResponse = JsonConvert.DeserializeObject<List<Hero>>(heroesJson.ToString()) ?? new List<Hero>();
-
-    //     return heroesResponse;
-    // }
 }

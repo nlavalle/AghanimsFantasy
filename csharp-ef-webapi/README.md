@@ -21,6 +21,11 @@ Create a model of what you need then
 We don't apply the ef database update right now because the database existed a long time before EF, and we don't want to blow up the whole thing rerunning all of the migrations
 `dotnet ef migrations script OldMigration NewMigration > ./Migrations/migration_up_NewMigration.sql`
 
+### Removing migrations
+The env variables in the connection strings will probably mess up the `dotnet ef migrations remove` command.
+First export the Local `export ASPNETCORE_ENVIRONMENT=Local`
+Make sure `appsettings.Local.json` is defined then the command is:
+`dotnet ef migrations remove --configuration Local`
 
 ### Depedencies
 This project makes use of the SteamKit library from: https://github.com/SteamRE/SteamKit

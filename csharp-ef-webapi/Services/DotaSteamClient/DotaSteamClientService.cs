@@ -4,28 +4,21 @@ using System.Diagnostics.CodeAnalysis;
 namespace csharp_ef_webapi.Services;
 public class DotaSteamClientService : BackgroundService
 {
-    private readonly string _steamClientUser;
-    private readonly string _steamClientPassword;
     private TaskCompletionSource _tcsReadyForRequests;
     private readonly ILogger<DotaWebApiService> _logger;
     internal CancellationToken StoppingToken { get; private set; }
     internal RateLimiter RateLimiter { get; } = new RateLimiter(_delayBetweenRequests);
     private const long _delayBetweenRequests = 10_000_000; // Constant for ticks in a second
-    IConfiguration _configuration;
     IServiceProvider _serviceProvider;
     Dictionary<Type, object> _launchers;
 
-    public DotaSteamClientService(ILogger<DotaWebApiService> logger, IConfiguration configuration, IServiceProvider serviceProvider)
+    public DotaSteamClientService(ILogger<DotaWebApiService> logger, IServiceProvider serviceProvider)
     {
         _tcsReadyForRequests = new TaskCompletionSource();
         _launchers = new Dictionary<Type, object>();
 
         _logger = logger;
-        _configuration = configuration;
         _serviceProvider = serviceProvider;
-
-        _steamClientUser = Environment.GetEnvironmentVariable("STEAM_CLIENT_USER") ?? "";
-        _steamClientPassword = Environment.GetEnvironmentVariable("STEAM_CLIENT_PASSWORD") ?? "";
 
         _logger.LogInformation("Dota Steam Client Service constructed");
     }
@@ -35,22 +28,10 @@ public class DotaSteamClientService : BackgroundService
         StoppingToken = stoppingToken;
 
         // Build our Launchers
-
-        // Build the common steam client settings
-        // All API calls use a steam user/password, if possible
-        var steamClientSettings = new Dictionary<string, string>();
-        if (_steamClientUser != null && _steamClientPassword != null)
-        {
-            steamClientSettings["user"] = _steamClientUser;
-            steamClientSettings["password"] = _steamClientPassword;
-        }
-
+        
         var commonCooldown = TimeSpan.FromMinutes(1);
 
-        CreateLauncher<SteamClientMatchDetailsContext>(commonCooldown, steamClientSettings);
-        // CreateLauncher<LeagueHistoryContext>(commonCooldown, baseApiUri, baseQuery);
-        // CreateLauncher<MatchDetailsContext>(commonCooldown, baseApiUri, baseQuery);
-        // CreateLauncher<TeamsContext>(commonCooldown, baseApiUri, baseQuery);
+        CreateLauncher<SteamClientMatchDetailsContext>(commonCooldown);
 
         // Ready
         _tcsReadyForRequests.SetResult();
@@ -58,32 +39,29 @@ public class DotaSteamClientService : BackgroundService
 
         Task[] tasks =
         [
-            LoopOperation<SteamClientMatchDetailsContext>(TimeSpan.FromMinutes(5), stoppingToken),
-            // LoopOperation<LeagueHistoryContext>(TimeSpan.FromMinutes(5), stoppingToken),
-            // LoopOperation<MatchDetailsContext>(TimeSpan.FromMinutes(5), stoppingToken),
-            // LoopOperation<TeamsContext>(TimeSpan.FromDays(1), stoppingToken),
+            LoopOperation<SteamClientMatchDetailsContext>(TimeSpan.FromMinutes(10), stoppingToken)
         ];
         await Task.WhenAll(tasks);
     }
 
-//     //     internal async Task StartOperation<T>(CancellationToken cancellationToken, bool ignoreCooldown = false) where T : DotaOperationContext
-//     //     {
-//     //         await _tcsReadyForRequests.Task;
+    //     //     internal async Task StartOperation<T>(CancellationToken cancellationToken, bool ignoreCooldown = false) where T : DotaOperationContext
+    //     //     {
+    //     //         await _tcsReadyForRequests.Task;
 
-//     //         if (!TryGetLauncher<T>(out var launcher))
-//     //         {
-//     //             // TODO: Specify
-//     //             throw new InvalidOperationException();
-//     //         }
+    //     //         if (!TryGetLauncher<T>(out var launcher))
+    //     //         {
+    //     //             // TODO: Specify
+    //     //             throw new InvalidOperationException();
+    //     //         }
 
-//     //         await launcher.StartOperation(cancellationToken, ignoreCooldown);
-//     //     }
+    //     //         await launcher.StartOperation(cancellationToken, ignoreCooldown);
+    //     //     }
 
-    private void CreateLauncher<T>(TimeSpan cooldown, Dictionary<string, string> configSettings) where T : DotaOperationContext
+    private void CreateLauncher<T>(TimeSpan cooldown) where T : DotaOperationContext
     {
         Debug.Assert(!_tcsReadyForRequests.Task.IsCompleted);
 
-        _launchers.Add(typeof(T), new DotaSteamClientOperationLauncher<T>(_serviceProvider, cooldown, configSettings, RateLimiter, StoppingToken));
+        _launchers.Add(typeof(T), new DotaSteamClientOperationLauncher<T>(_serviceProvider, cooldown, RateLimiter, StoppingToken));
     }
 
     private async Task LoopOperation<T>(TimeSpan delay, CancellationToken cancellationToken) where T : DotaOperationContext
