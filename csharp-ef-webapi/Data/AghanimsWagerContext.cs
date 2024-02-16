@@ -96,6 +96,10 @@ public class AghanimsFantasyContext : DbContext
             .WithOne(fp => fp.FantasyLeague)
             .HasForeignKey(fp => fp.FantasyLeagueId);
 
+        modelBuilder.Entity<FantasyDraft>()
+            .Navigation(fd => fd.DraftPickPlayers)
+            .AutoInclude();
+
         modelBuilder.Entity<MatchHistory>()
             .HasMany(mh => mh.Players)
             .WithOne()
@@ -133,6 +137,14 @@ public class AghanimsFantasyContext : DbContext
             .HasOne(fp => fp.DotaAccount)
             .WithMany()
             .HasForeignKey(fp => fp.DotaAccountId);
+
+        modelBuilder.Entity<FantasyPlayer>()
+            .Navigation(fp => fp.Team)
+            .AutoInclude();
+
+        modelBuilder.Entity<FantasyPlayer>()
+            .Navigation(fp => fp.DotaAccount)
+            .AutoInclude();
 
         modelBuilder.Entity<FantasyDraftPlayer>()
             .HasKey(fdp => new { fdp.FantasyPlayerId, fdp.FantasyDraftId });

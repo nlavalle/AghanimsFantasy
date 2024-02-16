@@ -17,6 +17,13 @@ namespace csharp_ef_webapi.Controllers
             _service = service;
         }
 
+        // GET: api/fantasy/leagues
+        [HttpGet("leagues")]
+        public async Task<ActionResult<IEnumerable<FantasyLeague>>> GetFantasyLeagues(bool? is_active = null)
+        {
+            return Ok(await _service.GetFantasyLeaguesAsync(is_active));
+        }
+
         // GET: api/fantasy/players/5
         [HttpGet("players/{leagueId}")]
         public async Task<ActionResult<List<FantasyPlayer>>> GetFantasyPlayers(int? leagueId)
@@ -25,7 +32,7 @@ namespace csharp_ef_webapi.Controllers
             return Ok(players);
         }
 
-        // GET: api/fantasy/players/5
+        // GET: api/fantasy/players/5/points
         [HttpGet("players/{leagueId}/points")]
         public async Task<ActionResult<List<FantasyPlayerPointTotals>>> GetFantasyPlayersPoints(int? leagueId)
         {
