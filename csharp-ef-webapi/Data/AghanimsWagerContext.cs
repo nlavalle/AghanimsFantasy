@@ -33,12 +33,23 @@ public class AghanimsFantasyContext : DbContext
     public DbSet<Account> Accounts { get; set; }
     public DbSet<Hero> Heroes { get; set; }
     public DbSet<Team> Teams { get; set; }
+
+    #region Fantasy
+    public DbSet<FantasyLeague> FantasyLeagues { get; set; }
     public DbSet<FantasyDraft> FantasyDrafts { get; set; }
     public DbSet<FantasyPlayer> FantasyPlayers { get; set; }
     public DbSet<FantasyDraftPlayer> FantasyDraftPlayers { get; set; }
+    #endregion
 
     #region DotaClient
-    public DbSet<CMsgDOTAMatch> CMsgDOTAMatches {get;set;}
+    public DbSet<CMsgDOTAMatch> GcDotaMatches { get; set; }
+    public DbSet<GcMatchMetadata> GcMatchMetadata { get; set; }
+    public DbSet<GcMatchMetadataItemPurchase> GcMatchMetadataItemPurchases { get; set; }
+    public DbSet<GcMatchMetadataPlayer> GcMatchMetadataPlayers { get; set; }
+    public DbSet<GcMatchMetadataPlayerKill> GcMatchMetadataPlayerKills { get; set; }
+    public DbSet<GcMatchMetadataTeam> GcMatchMetadataTeams { get; set; }
+    public DbSet<GcMatchMetadataTip> GcMatchMetadataTips { get; set; }
+
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -60,6 +71,31 @@ public class AghanimsFantasyContext : DbContext
         modelBuilder.Entity<Bromance>()
             .HasKey(b => new { b.bro1Name, b.bro2Name });
 
+        modelBuilder.Entity<League>()
+            .HasMany(l => l.MatchDetails)
+            .WithOne(md => md.League)
+            .HasForeignKey(md => md.LeagueId);
+
+        modelBuilder.Entity<League>()
+            .HasMany(l => l.MatchHistories)
+            .WithOne()
+            .HasForeignKey(mh => mh.LeagueId);
+
+        modelBuilder.Entity<League>()
+            .HasMany(l => l.FantasyLeagues)
+            .WithOne()
+            .HasForeignKey(fl => fl.LeagueId);
+
+        modelBuilder.Entity<FantasyLeague>()
+            .HasMany(fl => fl.FantasyDrafts)
+            .WithOne()
+            .HasForeignKey(fd => fd.FantasyLeagueId);
+
+        modelBuilder.Entity<FantasyLeague>()
+            .HasMany(fl => fl.FantasyPlayers)
+            .WithOne(fp => fp.FantasyLeague)
+            .HasForeignKey(fp => fp.FantasyLeagueId);
+
         modelBuilder.Entity<MatchHistory>()
             .HasMany(mh => mh.Players)
             .WithOne()
@@ -74,6 +110,12 @@ public class AghanimsFantasyContext : DbContext
             .HasMany(md => md.Players)
             .WithOne()
             .HasForeignKey(p => p.MatchId);
+
+        modelBuilder.Entity<MatchDetail>()
+            .HasOne(md => md.MatchMetadata)
+            .WithOne(md => md.MatchDetail)
+            .HasForeignKey<GcMatchMetadata>(mmd => mmd.MatchId)
+            .IsRequired();
 
         modelBuilder.Entity<MatchDetailsPlayer>()
             .HasMany(mdp => mdp.AbilityUpgrades)

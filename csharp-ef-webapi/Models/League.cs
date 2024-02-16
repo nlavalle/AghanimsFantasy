@@ -1,28 +1,21 @@
 namespace csharp_ef_webapi.Models;
 
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 [Table("dota_leagues")]
 public class League
 {
+    [Key]
     [Column("id")]
     public int Id { get; set; }
-
-    [Column("league_id")]
-    public int LeagueId { get; set; }
 
     [Column("league_name")]
     public string? Name { get; set; }
 
     [Column("is_active")]
     public bool IsActive { get; set; }
-
-    [Column("fantasy_draft_locked_date")]
-    public long FantasyDraftLocked { get; set; }
-
-    [Column("league_start_time")]
-    public long LeagueStartTime { get; set; }
-
-    [Column("league_end_time")]
-    public long LeagueEndTime { get; set; }
+    public List<MatchHistory> MatchHistories { get; set; } = new List<MatchHistory>();
+    public List<MatchDetail> MatchDetails { get; set; } = new List<MatchDetail>();
+    public List<FantasyLeague> FantasyLeagues { get; set; } = new List<FantasyLeague>();
 }

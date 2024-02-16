@@ -35,7 +35,7 @@ internal class LeagueHistoryContext : DotaOperationContext
         try{
         Dictionary<string, string> query = new Dictionary<string, string>();
 
-        var leagues = _dbContext.Leagues.Where(l => l.IsActive).Select(l => l.LeagueId).Distinct().ToArray();
+        var leagues = _dbContext.Leagues.Where(l => l.IsActive).Select(l => l.Id).Distinct().ToArray();
         var length = leagues.Length;
 
         // Knowing the length triggers a lot of stuff

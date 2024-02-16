@@ -52,13 +52,6 @@ class DotaClient
         callbackMgr.Subscribe<SteamClient.ConnectedCallback>(OnConnected);
         callbackMgr.Subscribe<SteamUser.LoggedOnCallback>(OnLoggedOn);
         callbackMgr.Subscribe<SteamGameCoordinator.MessageCallback>(OnGCMessage);
-
-        // CDOTAMatchMetadataFile message;
-        // using (var file = File.OpenRead("/home/gloom_tenacity/Downloads/7566780127_2116971605.meta"))
-        // {
-        //     message = Serializer.Deserialize<CDOTAMatchMetadataFile>(file);
-        //     var playerData = message.metadata.teams[0].players[0];
-        // }
     }
 
 

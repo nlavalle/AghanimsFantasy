@@ -40,301 +40,341 @@ public class SqliteInMemoryFantasyTests : IDisposable
             // viewCommand.ExecuteNonQuery();
         }
 
+        Team team = new Team {
+            Id = 1
+        };
+
+        context.Teams.Add(team);
+
+        context.SaveChanges();
+
         context.Leagues.AddRange(
             new League
             {
-                Id = 1,
-                LeagueId = 1,
+                Id = 100,
                 Name = "test league 1",
                 IsActive = true,
-                FantasyDraftLocked = new DateTimeOffset(new DateTime(2024, 1, 1)).ToUnixTimeSeconds(),
-                LeagueStartTime = new DateTimeOffset(new DateTime(2024, 1, 1)).ToUnixTimeSeconds(),
-                LeagueEndTime = new DateTimeOffset(new DateTime(2024, 12, 31)).ToUnixTimeSeconds()
+                FantasyLeagues = new List<FantasyLeague>
+                {
+                    new FantasyLeague
+                    {
+                        Id = 1,
+                        LeagueId = 100,
+                        Name = "test league 100",
+                        IsActive = true,
+                        FantasyDraftLocked = new DateTimeOffset(new DateTime(2024, 1, 1)).ToUnixTimeSeconds(),
+                        LeagueStartTime = new DateTimeOffset(new DateTime(2024, 1, 1)).ToUnixTimeSeconds(),
+                        LeagueEndTime = new DateTimeOffset(new DateTime(2024, 12, 31)).ToUnixTimeSeconds(),
+                        FantasyPlayers = new List<FantasyPlayer>
+                        {
+                            new FantasyPlayer
+                            {
+                                Id = 1,
+                                DotaAccount = new Account {
+                                    Id = 1,
+                                },
+                                Team = new Team {
+                                    Id = 10
+                                },
+                            },
+                            new FantasyPlayer
+                            {
+                                Id = 2,
+                                DotaAccount = new Account {
+                                    Id = 2,
+                                },
+                                Team = new Team {
+                                    Id = 11
+                                }
+                            },
+                            new FantasyPlayer
+                            {
+                                Id = 3,
+                                DotaAccount = new Account {
+                                    Id = 3,
+                                },
+                                Team = new Team {
+                                    Id = 12
+                                }
+                            },
+                        }
+                    },
+                },
+                MatchHistories = [
+                    new MatchHistory
+                    {
+                        MatchId = 1,
+                        LeagueId = 100,
+                        DireTeamId = 2,
+                        RadiantTeamId = 3,
+                        LobbyType = 0,
+                        MatchSeqNum = 0,
+                        StartTime = new DateTimeOffset(new DateTime(2024, 1, 1)).ToUnixTimeSeconds(),
+                        SeriesId = 0,
+                        SeriesType = 0,
+                        Players = new List<MatchHistoryPlayer>()
+                    },
+                    new MatchHistory
+                    {
+                        MatchId = 2,
+                        LeagueId = 100,
+                        DireTeamId = 2,
+                        RadiantTeamId = 3,
+                        LobbyType = 0,
+                        MatchSeqNum = 0,
+                        StartTime = new DateTimeOffset(new DateTime(2024, 1, 1)).ToUnixTimeSeconds(),
+                        SeriesId = 0,
+                        SeriesType = 0,
+                        Players = new List<MatchHistoryPlayer>()
+                    },
+                ],
+                MatchDetails = [
+                    new MatchDetail
+                    {
+                        MatchId = 1,
+                        BarracksStatusDire = 0,
+                        BarracksStatusRadiant = 0,
+                        Cluster = 0,
+                        DireScore = 0,
+                        Duration = 0,
+                        Engine = 0,
+                        FirstBloodTime = 0,
+                        Flags = 0,
+                        GameMode = 0,
+                        HumanPlayers = 10,
+                        LeagueId = 100,
+                        LobbyType = 0,
+                        MatchSeqNum = 0,
+                        PicksBans = new List<MatchDetailsPicksBans>(),
+                        Players = [
+                            new MatchDetailsPlayer
+                            {
+                                Id = 1,
+                                MatchId = 1,
+                                AccountId = 1,
+                                AbilityUpgrades = new List<MatchDetailsPlayersAbilityUpgrade>(),
+                                AghanimsScepter = 0,
+                                AghanimsShard = 0,
+                                Assists = 0,
+                                Backpack0 = 0,
+                                Backpack1 = 0,
+                                Backpack2 = 0,
+                                Deaths = 0,
+                                Denies = 0,
+                                Gold = 0,
+                                GoldPerMin = 0,
+                                GoldSpent = 0,
+                                HeroDamage = 0,
+                                HeroHealing = 0,
+                                HeroId = 0,
+                                Item0 = 0,
+                                Item1 = 0,
+                                Item2 = 0,
+                                Item3 = 0,
+                                Item4 = 0,
+                                Item5 = 0,
+                                ItemNeutral = 0,
+                                Kills = 0,
+                                LastHits = 0,
+                                LeaverStatus = 0,
+                                Level = 0,
+                                Moonshard = 0,
+                                Networth = 0,
+                                PlayerSlot = 0,
+                                ScaledHeroDamage = 0,
+                                ScaledHeroHealing = 0,
+                                ScaledTowerDamage = 0,
+                                TeamNumber = 0,
+                                TeamSlot = 0,
+                                TowerDamage = 0,
+                                XpPerMin = 0
+                            },
+                            new MatchDetailsPlayer
+                            {
+                                Id = 2,
+                                MatchId = 1,
+                                AccountId = 2,
+                                AbilityUpgrades = new List<MatchDetailsPlayersAbilityUpgrade>(),
+                                AghanimsScepter = 0,
+                                AghanimsShard = 0,
+                                Assists = 0,
+                                Backpack0 = 0,
+                                Backpack1 = 0,
+                                Backpack2 = 0,
+                                Deaths = 0,
+                                Denies = 0,
+                                Gold = 0,
+                                GoldPerMin = 0,
+                                GoldSpent = 0,
+                                HeroDamage = 0,
+                                HeroHealing = 0,
+                                HeroId = 0,
+                                Item0 = 0,
+                                Item1 = 0,
+                                Item2 = 0,
+                                Item3 = 0,
+                                Item4 = 0,
+                                Item5 = 0,
+                                ItemNeutral = 0,
+                                Kills = 0,
+                                LastHits = 0,
+                                LeaverStatus = 0,
+                                Level = 0,
+                                Moonshard = 0,
+                                Networth = 0,
+                                PlayerSlot = 0,
+                                ScaledHeroDamage = 0,
+                                ScaledHeroHealing = 0,
+                                ScaledTowerDamage = 0,
+                                TeamNumber = 0,
+                                TeamSlot = 0,
+                                TowerDamage = 0,
+                                XpPerMin = 0
+                            }
+                        ],
+                        PreGameDuration = 0,
+                        RadiantScore = 0,
+                        RadiantWin = true,
+                        StartTime = new DateTimeOffset(new DateTime(2024, 1, 1)).ToUnixTimeSeconds(),
+                        TowerStatusDire = 0,
+                        TowerStatusRadiant = 0
+                    },
+                    new MatchDetail
+                    {
+                        MatchId = 2,
+                        BarracksStatusDire = 0,
+                        BarracksStatusRadiant = 0,
+                        Cluster = 0,
+                        DireScore = 0,
+                        Duration = 0,
+                        Engine = 0,
+                        FirstBloodTime = 0,
+                        Flags = 0,
+                        GameMode = 0,
+                        HumanPlayers = 10,
+                        LeagueId = 100,
+                        LobbyType = 0,
+                        MatchSeqNum = 0,
+                        PicksBans = new List<MatchDetailsPicksBans>(),
+                        Players = new List<MatchDetailsPlayer>(),
+                        PreGameDuration = 0,
+                        RadiantScore = 0,
+                        RadiantWin = true,
+                        StartTime = new DateTimeOffset(new DateTime(2024, 1, 1)).ToUnixTimeSeconds(),
+                        TowerStatusDire = 0,
+                        TowerStatusRadiant = 0
+                    },
+                ]
             },
             new League
             {
-                Id = 2,
-                LeagueId = 2,
+                Id = 200,
                 Name = "test league 2",
                 IsActive = false,
-                FantasyDraftLocked = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds(),
-                LeagueStartTime = new DateTimeOffset(new DateTime(2024, 1, 1)).ToUnixTimeSeconds(),
-                LeagueEndTime = new DateTimeOffset(new DateTime(2024, 12, 31)).ToUnixTimeSeconds()
-            }
-        );
-
-        context.MatchHistory.AddRange(
-            new MatchHistory
-            {
-                MatchId = 1,
-                LeagueId = 1,
-                DireTeamId = 2,
-                RadiantTeamId = 3,
-                LobbyType = 0,
-                MatchSeqNum = 0,
-                StartTime = new DateTimeOffset(new DateTime(2024, 1, 1)).ToUnixTimeSeconds(),
-                SeriesId = 0,
-                SeriesType = 0,
-                Players = new List<MatchHistoryPlayer>()
-            },
-            new MatchHistory
-            {
-                MatchId = 2,
-                LeagueId = 1,
-                DireTeamId = 2,
-                RadiantTeamId = 3,
-                LobbyType = 0,
-                MatchSeqNum = 0,
-                StartTime = new DateTimeOffset(new DateTime(2024, 1, 1)).ToUnixTimeSeconds(),
-                SeriesId = 0,
-                SeriesType = 0,
-                Players = new List<MatchHistoryPlayer>()
-            },
-            new MatchHistory
-            {
-                MatchId = 3,
-                LeagueId = 2,
-                DireTeamId = 2,
-                RadiantTeamId = 3,
-                LobbyType = 0,
-                MatchSeqNum = 0,
-                StartTime = new DateTimeOffset(new DateTime(2024, 1, 1)).ToUnixTimeSeconds(),
-                SeriesId = 0,
-                SeriesType = 0,
-                Players = new List<MatchHistoryPlayer>()
-            },
-            new MatchHistory
-            {
-                MatchId = 4,
-                LeagueId = 2,
-                DireTeamId = 2,
-                RadiantTeamId = 3,
-                LobbyType = 0,
-                MatchSeqNum = 0,
-                StartTime = new DateTimeOffset(new DateTime(2023, 1, 1)).ToUnixTimeSeconds(),
-                SeriesId = 0,
-                SeriesType = 0,
-                Players = new List<MatchHistoryPlayer>()
-            }
-        );
-
-        context.MatchDetails.AddRange(
-            new MatchDetail
-            {
-                MatchId = 1,
-                BarracksStatusDire = 0,
-                BarracksStatusRadiant = 0,
-                Cluster = 0,
-                DireScore = 0,
-                Duration = 0,
-                Engine = 0,
-                FirstBloodTime = 0,
-                Flags = 0,
-                GameMode = 0,
-                HumanPlayers = 10,
-                LeagueId = 1,
-                LobbyType = 0,
-                MatchSeqNum = 0,
-                PicksBans = new List<MatchDetailsPicksBans>(),
-                Players = new List<MatchDetailsPlayer>(),
-                PreGameDuration = 0,
-                RadiantScore = 0,
-                RadiantWin = true,
-                StartTime = new DateTimeOffset(new DateTime(2024, 1, 1)).ToUnixTimeSeconds(),
-                TowerStatusDire = 0,
-                TowerStatusRadiant = 0
-            },
-            new MatchDetail
-            {
-                MatchId = 2,
-                BarracksStatusDire = 0,
-                BarracksStatusRadiant = 0,
-                Cluster = 0,
-                DireScore = 0,
-                Duration = 0,
-                Engine = 0,
-                FirstBloodTime = 0,
-                Flags = 0,
-                GameMode = 0,
-                HumanPlayers = 10,
-                LeagueId = 1,
-                LobbyType = 0,
-                MatchSeqNum = 0,
-                PicksBans = new List<MatchDetailsPicksBans>(),
-                Players = new List<MatchDetailsPlayer>(),
-                PreGameDuration = 0,
-                RadiantScore = 0,
-                RadiantWin = true,
-                StartTime = new DateTimeOffset(new DateTime(2024, 1, 1)).ToUnixTimeSeconds(),
-                TowerStatusDire = 0,
-                TowerStatusRadiant = 0
-            },
-            new MatchDetail
-            {
-                MatchId = 3,
-                BarracksStatusDire = 0,
-                BarracksStatusRadiant = 0,
-                Cluster = 0,
-                DireScore = 0,
-                Duration = 0,
-                Engine = 0,
-                FirstBloodTime = 0,
-                Flags = 0,
-                GameMode = 0,
-                HumanPlayers = 10,
-                LeagueId = 2,
-                LobbyType = 0,
-                MatchSeqNum = 0,
-                PicksBans = new List<MatchDetailsPicksBans>(),
-                Players = new List<MatchDetailsPlayer>(),
-                PreGameDuration = 0,
-                RadiantScore = 0,
-                RadiantWin = true,
-                StartTime = new DateTimeOffset(new DateTime(2024, 1, 1)).ToUnixTimeSeconds(),
-                TowerStatusDire = 0,
-                TowerStatusRadiant = 0
-            },
-            new MatchDetail
-            {
-                MatchId = 4,
-                BarracksStatusDire = 0,
-                BarracksStatusRadiant = 0,
-                Cluster = 0,
-                DireScore = 0,
-                Duration = 0,
-                Engine = 0,
-                FirstBloodTime = 0,
-                Flags = 0,
-                GameMode = 0,
-                HumanPlayers = 10,
-                LeagueId = 2,
-                LobbyType = 0,
-                MatchSeqNum = 0,
-                PicksBans = new List<MatchDetailsPicksBans>(),
-                Players = new List<MatchDetailsPlayer>(),
-                PreGameDuration = 0,
-                RadiantScore = 0,
-                RadiantWin = true,
-                StartTime = new DateTimeOffset(new DateTime(2023, 1, 1)).ToUnixTimeSeconds(),
-                TowerStatusDire = 0,
-                TowerStatusRadiant = 0
-            }
-        );
-
-        context.MatchDetailsPlayers.AddRange(
-            new MatchDetailsPlayer
-            {
-                Id = 1,
-                MatchId = 1,
-                AccountId = 1,
-                AbilityUpgrades = new List<MatchDetailsPlayersAbilityUpgrade>(),
-                AghanimsScepter = 0,
-                AghanimsShard = 0,
-                Assists = 0,
-                Backpack0 = 0,
-                Backpack1 = 0,
-                Backpack2 = 0,
-                Deaths = 0,
-                Denies = 0,
-                Gold = 0,
-                GoldPerMin = 0,
-                GoldSpent = 0,
-                HeroDamage = 0,
-                HeroHealing = 0,
-                HeroId = 0,
-                Item0 = 0,
-                Item1 = 0,
-                Item2 = 0,
-                Item3 = 0,
-                Item4 = 0,
-                Item5 = 0,
-                ItemNeutral = 0,
-                Kills = 0,
-                LastHits = 0,
-                LeaverStatus = 0,
-                Level = 0,
-                Moonshard = 0,
-                Networth = 0,
-                PlayerSlot = 0,
-                ScaledHeroDamage = 0,
-                ScaledHeroHealing = 0,
-                ScaledTowerDamage = 0,
-                TeamNumber = 0,
-                TeamSlot = 0,
-                TowerDamage = 0,
-                XpPerMin = 0
-            },
-            new MatchDetailsPlayer
-            {
-                Id = 2,
-                MatchId = 1,
-                AccountId = 2,
-                AbilityUpgrades = new List<MatchDetailsPlayersAbilityUpgrade>(),
-                AghanimsScepter = 0,
-                AghanimsShard = 0,
-                Assists = 0,
-                Backpack0 = 0,
-                Backpack1 = 0,
-                Backpack2 = 0,
-                Deaths = 0,
-                Denies = 0,
-                Gold = 0,
-                GoldPerMin = 0,
-                GoldSpent = 0,
-                HeroDamage = 0,
-                HeroHealing = 0,
-                HeroId = 0,
-                Item0 = 0,
-                Item1 = 0,
-                Item2 = 0,
-                Item3 = 0,
-                Item4 = 0,
-                Item5 = 0,
-                ItemNeutral = 0,
-                Kills = 0,
-                LastHits = 0,
-                LeaverStatus = 0,
-                Level = 0,
-                Moonshard = 0,
-                Networth = 0,
-                PlayerSlot = 0,
-                ScaledHeroDamage = 0,
-                ScaledHeroHealing = 0,
-                ScaledTowerDamage = 0,
-                TeamNumber = 0,
-                TeamSlot = 0,
-                TowerDamage = 0,
-                XpPerMin = 0
-            }
-        );
-
-        context.FantasyPlayers.AddRange(
-            new FantasyPlayer
-            {
-                Id = 1,
-                LeagueId = 1,
-                DotaAccountId = 1,
-                TeamId = 1,
-                DotaAccount = new Account(),
-                Team = new Team()
-            },
-            new FantasyPlayer
-            {
-                Id = 2,
-                LeagueId = 1,
-                DotaAccountId = 2,
-                TeamId = 2,
-                DotaAccount = new Account(),
-                Team = new Team()
-            },
-            new FantasyPlayer
-            {
-                Id = 3,
-                LeagueId = 2,
-                DotaAccountId = 3,
-                TeamId = 3,
-                DotaAccount = new Account(),
-                Team = new Team()
+                FantasyLeagues = [
+                    new FantasyLeague
+                    {
+                        Id = 2,
+                        LeagueId = 200,
+                        Name = "test league 2",
+                        IsActive = false,
+                        FantasyDraftLocked = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds(),
+                        LeagueStartTime = new DateTimeOffset(new DateTime(2024, 1, 1)).ToUnixTimeSeconds(),
+                        LeagueEndTime = new DateTimeOffset(new DateTime(2024, 12, 31)).ToUnixTimeSeconds(),
+                        FantasyPlayers = [
+                            new FantasyPlayer
+                            {
+                                Id = 4,
+                                DotaAccount = new Account {
+                                    Id = 4,
+                                },
+                                Team = new Team {
+                                    Id = 13
+                                }
+                            }
+                        ]
+                    }
+                ],
+                MatchHistories = [
+                    new MatchHistory
+                    {
+                        MatchId = 3,
+                        LeagueId = 2,
+                        DireTeamId = 2,
+                        RadiantTeamId = 3,
+                        LobbyType = 0,
+                        MatchSeqNum = 0,
+                        StartTime = new DateTimeOffset(new DateTime(2024, 1, 1)).ToUnixTimeSeconds(),
+                        SeriesId = 0,
+                        SeriesType = 0,
+                        Players = new List<MatchHistoryPlayer>()
+                    },
+                    new MatchHistory
+                    {
+                        MatchId = 4,
+                        LeagueId = 2,
+                        DireTeamId = 2,
+                        RadiantTeamId = 3,
+                        LobbyType = 0,
+                        MatchSeqNum = 0,
+                        StartTime = new DateTimeOffset(new DateTime(2023, 1, 1)).ToUnixTimeSeconds(),
+                        SeriesId = 0,
+                        SeriesType = 0,
+                        Players = new List<MatchHistoryPlayer>()
+                    }
+                ],
+                MatchDetails = [
+                    new MatchDetail
+                    {
+                        MatchId = 3,
+                        BarracksStatusDire = 0,
+                        BarracksStatusRadiant = 0,
+                        Cluster = 0,
+                        DireScore = 0,
+                        Duration = 0,
+                        Engine = 0,
+                        FirstBloodTime = 0,
+                        Flags = 0,
+                        GameMode = 0,
+                        HumanPlayers = 10,
+                        LeagueId = 2,
+                        LobbyType = 0,
+                        MatchSeqNum = 0,
+                        PicksBans = new List<MatchDetailsPicksBans>(),
+                        Players = new List<MatchDetailsPlayer>(),
+                        PreGameDuration = 0,
+                        RadiantScore = 0,
+                        RadiantWin = true,
+                        StartTime = new DateTimeOffset(new DateTime(2024, 1, 1)).ToUnixTimeSeconds(),
+                        TowerStatusDire = 0,
+                        TowerStatusRadiant = 0
+                    },
+                    new MatchDetail
+                    {
+                        MatchId = 4,
+                        BarracksStatusDire = 0,
+                        BarracksStatusRadiant = 0,
+                        Cluster = 0,
+                        DireScore = 0,
+                        Duration = 0,
+                        Engine = 0,
+                        FirstBloodTime = 0,
+                        Flags = 0,
+                        GameMode = 0,
+                        HumanPlayers = 10,
+                        LeagueId = 2,
+                        LobbyType = 0,
+                        MatchSeqNum = 0,
+                        PicksBans = new List<MatchDetailsPicksBans>(),
+                        Players = new List<MatchDetailsPlayer>(),
+                        PreGameDuration = 0,
+                        RadiantScore = 0,
+                        RadiantWin = true,
+                        StartTime = new DateTimeOffset(new DateTime(2023, 1, 1)).ToUnixTimeSeconds(),
+                        TowerStatusDire = 0,
+                        TowerStatusRadiant = 0
+                    }
+                ]
             }
         );
 
@@ -348,7 +388,7 @@ public class SqliteInMemoryFantasyTests : IDisposable
             DiscordAccountId = 1,
             DraftCreated = DateTime.UtcNow,
             DraftLastUpdated = DateTime.UtcNow,
-            LeagueId = 1,
+            FantasyLeagueId = 1,
             DraftPickPlayers = new List<FantasyDraftPlayer>()
         };
 
@@ -376,8 +416,8 @@ public class SqliteInMemoryFantasyTests : IDisposable
         var loggerMock = new Mock<ILogger<FantasyRepository>>();
         var repository = new FantasyRepository(loggerMock.Object, context);
 
-        var fantasyPlayers = await repository.FantasyPlayersByLeagueAsync(1);
-        Assert.Equal(2, fantasyPlayers.Count());
+        var fantasyPlayers = await repository.FantasyPlayersByFantasyLeagueAsync(1);
+        Assert.Equal(3, fantasyPlayers.Count());
         Assert.IsAssignableFrom<IEnumerable<FantasyPlayer>>(fantasyPlayers);
     }
 
@@ -388,8 +428,8 @@ public class SqliteInMemoryFantasyTests : IDisposable
         var loggerMock = new Mock<ILogger<FantasyRepository>>();
         var repository = new FantasyRepository(loggerMock.Object, context);
 
-        var fantasyPlayers = await repository.FantasyPlayersByLeagueAsync(null);
-        Assert.Equal(3, fantasyPlayers.Count());
+        var fantasyPlayers = await repository.FantasyPlayersByFantasyLeagueAsync(null);
+        Assert.Equal(4, fantasyPlayers.Count());
         Assert.IsAssignableFrom<IEnumerable<FantasyPlayer>>(fantasyPlayers);
     }
 
@@ -400,7 +440,7 @@ public class SqliteInMemoryFantasyTests : IDisposable
         var loggerMock = new Mock<ILogger<FantasyRepository>>();
         var repository = new FantasyRepository(loggerMock.Object, context);
 
-        var fantasyPlayers = await repository.FantasyPlayersByLeagueAsync(3);
+        var fantasyPlayers = await repository.FantasyPlayersByFantasyLeagueAsync(3);
         Assert.Empty(fantasyPlayers);
     }
 
@@ -411,11 +451,11 @@ public class SqliteInMemoryFantasyTests : IDisposable
         var loggerMock = new Mock<ILogger<FantasyRepository>>();
         var repository = new FantasyRepository(loggerMock.Object, context);
 
-        var fantasyPlayerPoints = await repository.FantasyPlayerPointsByLeagueAsync(1);
-        // This is going to be 2 fantasy players, and 2 null rows with the left join so 0's show if there were no matches
-        Assert.Equal(4, fantasyPlayerPoints.Count());
+        var fantasyPlayerPoints = await repository.FantasyPlayerPointsByFantasyLeagueAsync(1);
+        // This is going to be 3 fantasy players, and 3 null rows with the left join so 0's show if there were no matches
+        Assert.Equal(3, fantasyPlayerPoints.Count());
         Assert.Equal(2, fantasyPlayerPoints.Where(fpp => fpp.Match != null).Count());
-        Assert.Equal(2, fantasyPlayerPoints.Where(fpp => fpp.Match == null).Count());
+        Assert.Single(fantasyPlayerPoints.Where(fpp => fpp.Match == null));
         Assert.IsAssignableFrom<IEnumerable<FantasyPlayerPoints>>(fantasyPlayerPoints);
     }
 
@@ -426,7 +466,7 @@ public class SqliteInMemoryFantasyTests : IDisposable
         var loggerMock = new Mock<ILogger<FantasyRepository>>();
         var repository = new FantasyRepository(loggerMock.Object, context);
 
-        var fantasyPlayerPoints = await repository.FantasyPlayerPointsByLeagueAsync(4);
+        var fantasyPlayerPoints = await repository.FantasyPlayerPointsByFantasyLeagueAsync(4);
 
         Assert.Empty(fantasyPlayerPoints);
     }

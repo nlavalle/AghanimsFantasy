@@ -37,7 +37,7 @@ internal class MatchDetailsContext : DotaOperationContext
             ImmutableSortedSet<long> knownMatchHistories = _dbContext.MatchHistory.Select(x => x.MatchId).ToImmutableSortedSet();
             ImmutableSortedSet<long> knownMatchDetails = _dbContext.MatchDetails.Select(x => x.MatchId).ToImmutableSortedSet();
 
-            List<long> matchesWithoutDetails = knownMatchHistories.Except(knownMatchDetails).ToList();
+            List<long> matchesWithoutDetails = knownMatchHistories.Except(knownMatchDetails).Take(50).ToList();
 
             if (matchesWithoutDetails.Count() > 0)
             {

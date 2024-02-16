@@ -44,6 +44,21 @@ public class SqliteInMemoryLeagueTests : IDisposable
             new League
             {
                 Id = 1,
+                Name = "test league 1",
+                IsActive = true
+            },
+            new League
+            {
+                Id = 2,
+                Name = "test league 2",
+                IsActive = false
+            }
+        );
+
+        context.FantasyLeagues.AddRange(
+            new FantasyLeague
+            {
+                Id = 1,
                 LeagueId = 1,
                 Name = "test league 1",
                 IsActive = true,
@@ -51,7 +66,7 @@ public class SqliteInMemoryLeagueTests : IDisposable
                 LeagueStartTime = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds(),
                 LeagueEndTime = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds()
             },
-            new League
+            new FantasyLeague
             {
                 Id = 2,
                 LeagueId = 2,
@@ -62,6 +77,7 @@ public class SqliteInMemoryLeagueTests : IDisposable
                 LeagueEndTime = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds()
             }
         );
+
         context.SaveChanges();
     }
 

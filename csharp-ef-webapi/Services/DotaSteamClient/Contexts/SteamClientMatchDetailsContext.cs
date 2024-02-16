@@ -8,10 +8,6 @@ internal class SteamClientMatchDetailsContext : DotaOperationContext
     private readonly AghanimsFantasyContext _dbContext;
     private readonly ILogger<SteamClientMatchDetailsContext> _logger;
     private readonly DotaClient _dotaClient;
-    // Status values
-    private int _remainingMatches = 0;
-    private int _startedMatches = 0;
-    private int _totalMatches = 0;
 
     public SteamClientMatchDetailsContext(ILogger<SteamClientMatchDetailsContext> logger, IServiceScope scope, Config config)
         : base(scope, config)
@@ -37,7 +33,7 @@ internal class SteamClientMatchDetailsContext : DotaOperationContext
 
             // Find all the match histories without match detail rows and add tasks to fetch them all
             ImmutableSortedSet<ulong> knownMatchHistories = _dbContext.MatchHistory.Select(x => (ulong)x.MatchId).ToImmutableSortedSet();
-            ImmutableSortedSet<ulong> knownMatchDetails = _dbContext.CMsgDOTAMatches.Select(x => x.match_id).ToImmutableSortedSet();
+            ImmutableSortedSet<ulong> knownMatchDetails = _dbContext.GcDotaMatches.Where(dm => dm.replay_state == CMsgDOTAMatch.ReplayState.REPLAY_AVAILABLE).Select(x => x.match_id).ToImmutableSortedSet();
 
             List<ulong> matchesWithoutDetails = knownMatchHistories.Except(knownMatchDetails).ToList();
 
@@ -45,9 +41,6 @@ internal class SteamClientMatchDetailsContext : DotaOperationContext
             {
                 var length = matchesWithoutDetails.Count;
 
-                // Knowing the length triggers a lot of stuff
-                _totalMatches = length;
-                Volatile.Write(ref _remainingMatches, length);
                 _logger.LogInformation($"Fetching {matchesWithoutDetails.Count()} new match details.");
 
                 for (int i = 0; i < length; i++)
@@ -58,7 +51,15 @@ internal class SteamClientMatchDetailsContext : DotaOperationContext
 
                     if (matchDetails != null)
                     {
-                        _dbContext.CMsgDOTAMatches.Add(matchDetails);
+                        if (_dbContext.GcDotaMatches.Any(gdm => gdm.match_id == matchDetails.match_id))
+                        {
+                            _dbContext.GcDotaMatches.Update(matchDetails);
+                        }
+                        else
+                        {
+                            _dbContext.GcDotaMatches.Add(matchDetails);
+                        }
+
                     }
                 }
 

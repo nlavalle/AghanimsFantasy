@@ -1,5 +1,6 @@
 using csharp_ef_webapi.Models;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Versioning;
 
 namespace csharp_ef_webapi.Data;
 
@@ -19,157 +20,169 @@ public class FantasyRepository : IFantasyRepository
     }
 
     #region Fantasy
-    public async Task<IEnumerable<FantasyPlayer>> FantasyPlayersByLeagueAsync(int? LeagueId)
+    public async Task<IEnumerable<FantasyPlayer>> FantasyPlayersByFantasyLeagueAsync(int? FantasyLeagueId)
     {
-        _logger.LogInformation($"Fetching Fantasy Players LeagueID: {LeagueId}");
-        return await _dbContext.FantasyPlayers
-                            .Where(fp => fp.LeagueId == LeagueId || LeagueId == null)
-                            .Include(fp => fp.Team)
-                            .Include(fp => fp.DotaAccount)
-                            .OrderBy(fp => fp.Team.Name)
-                                .ThenBy(fp => fp.DotaAccount.Name)
-                            .ToListAsync();
+        _logger.LogInformation($"Fetching Fantasy Players Fantasy League Id: {FantasyLeagueId}");
+
+        var fantasyPlayerLeagueQuery = _dbContext.FantasyPlayers
+            .Include(fp => fp.Team)
+            .Include(fp => fp.DotaAccount)
+            .Where(fp => fp.FantasyLeagueId == FantasyLeagueId || FantasyLeagueId == null)
+            .OrderBy(fp => fp.Team.Name)
+                .ThenBy(fp => fp.DotaAccount.Name);
+
+        _logger.LogInformation($"Fantasy Players by Fantasy League Query: {fantasyPlayerLeagueQuery.ToQueryString()}");
+
+        return await fantasyPlayerLeagueQuery.ToListAsync();
     }
 
-    public async Task<IEnumerable<FantasyDraft>> FantasyDraftsByUserLeagueAsync(long UserDiscordAccountId, int LeagueId)
+    public async Task<IEnumerable<FantasyDraft>> FantasyDraftsByUserLeagueAsync(long UserDiscordAccountId, int FantasyLeagueId)
     {
-        _logger.LogInformation($"Fetching User {UserDiscordAccountId} Fantasy Draft for LeagueID: {LeagueId}");
-        return await _dbContext.FantasyDrafts
-                            .Where(fd => fd.LeagueId == LeagueId && fd.DiscordAccountId == UserDiscordAccountId)
-                            .Include(fd => fd.DraftPickPlayers)
-                                .ThenInclude(fp => fp.FantasyPlayer)
-                                .ThenInclude(fp => fp.Team)
-                            .Include(fd => fd.DraftPickPlayers)
-                                .ThenInclude(fp => fp.FantasyPlayer)
-                                .ThenInclude(fp => fp.DotaAccount)
-                            .ToListAsync();
-    }
+        _logger.LogInformation($"Fetching User {UserDiscordAccountId} Fantasy Draft for Fantasy League Id: {FantasyLeagueId}");
 
-    public async Task<IEnumerable<FantasyPlayerPoints>> FantasyPlayerPointsByLeagueAsync(int LeagueId)
-    {
-        _logger.LogInformation($"Fetching Fantasy Points for LeagueID: {LeagueId}");
-        List<FantasyPlayerPoints> fantasyPlayerMatches = await _dbContext.FantasyPlayers
-            .Where(fdp => fdp.LeagueId == LeagueId)
-                    .Include(fdp => fdp.Team)
-                    .Include(fdp => fdp.DotaAccount)
-            .Join(
-                _dbContext.Leagues,
-                fp => fp.LeagueId,
-                lg => lg.Id,
-                (fp, lg) => new { League = lg, FantasyPlayer = fp }
-            )
-            .SelectMany(
-                md => _dbContext.MatchDetails.Where(
-                    mdl => mdl.LeagueId == md.League.LeagueId && mdl.StartTime >= md.League.LeagueStartTime && mdl.StartTime <= md.League.LeagueEndTime
-                ).DefaultIfEmpty(),
-                (fp, md) => new { fp.League, fp.FantasyPlayer, MatchDetail = md }
-            )
-            .SelectMany(
-                group => _dbContext.MatchDetailsPlayers.Where(mdp => group.MatchDetail != null && mdp.MatchId == group.MatchDetail.MatchId && mdp.AccountId == group.FantasyPlayer.DotaAccountId).DefaultIfEmpty(),
-                (fdp, mdp) => new FantasyPlayerPoints
-                {
-                    FantasyDraft = new FantasyDraft(),
-                    Match = mdp,
-                    FantasyPlayer = fdp.FantasyPlayer
-                })
-            .ToListAsync();
-
-        return fantasyPlayerMatches;
-    }
-
-    public async Task<IEnumerable<FantasyPlayerPoints>> FantasyDraftPointsByLeagueAsync(int LeagueId)
-    {
-        _logger.LogInformation($"Fetching Fantasy Points for LeagueID: {LeagueId}");
-        List<FantasyPlayerPoints> fantasyPlayerMatches = await _dbContext.FantasyDrafts
-            .Where(fd => fd.LeagueId == LeagueId)
+        var fantasyDraftsUserQuery = _dbContext.FantasyDrafts
+            .Where(fd => fd.FantasyLeagueId == FantasyLeagueId && fd.DiscordAccountId == UserDiscordAccountId)
             .Include(fd => fd.DraftPickPlayers)
-            .Join(
-                _dbContext.FantasyDraftPlayers,
-                fd => fd.Id,
-                fdp => fdp.FantasyDraftId,
-                (fd, fdp) => new { FantasyDraft = fd, FantasyDraftPlayer = fdp }
-            )
-            .Join(
-                _dbContext.FantasyPlayers,
-                fdp => fdp.FantasyDraftPlayer.FantasyPlayerId,
-                fp => fp.Id,
-                (fdp, fp) => new { fdp.FantasyDraft, fdp.FantasyDraftPlayer, FantasyPlayer = fp }
-            )
-            .Join(
-                _dbContext.Leagues,
-                fp => fp.FantasyDraft.LeagueId,
-                lg => lg.Id,
-                (fp, lg) => new { League = lg, fp.FantasyDraft, fp.FantasyDraftPlayer, fp.FantasyPlayer }
-            )
-            //Left join matches in case league hasn't started
-            .SelectMany(
-                md => _dbContext.MatchDetails.Where(
-                    mdl => mdl.LeagueId == md.League.LeagueId && mdl.StartTime >= md.League.LeagueStartTime && mdl.StartTime <= md.League.LeagueEndTime
-                ),
-                (fp, md) => new { fp.League, fp.FantasyDraft, fp.FantasyDraftPlayer, fp.FantasyPlayer, MatchDetail = md }
-            )
-            .SelectMany(
-                group => _dbContext.MatchDetailsPlayers.Where(mdp => mdp.MatchId == group.MatchDetail.MatchId && mdp.AccountId == group.FantasyPlayer.DotaAccountId),
-                (fdp, mdp) => new FantasyPlayerPoints
-                {
-                    FantasyDraft = fdp.FantasyDraft,
-                    Match = mdp,
-                    FantasyPlayer = fdp.FantasyPlayer
-                })
-            .ToListAsync();
+                .ThenInclude(fp => fp.FantasyPlayer)
+                .ThenInclude(fp => fp.Team)
+            .Include(fd => fd.DraftPickPlayers)
+                .ThenInclude(fp => fp.FantasyPlayer)
+                .ThenInclude(fp => fp.DotaAccount);
 
-        // For some reason this thing shits itself if the distinct is done in the previous query?
-        fantasyPlayerMatches = fantasyPlayerMatches.Distinct().ToList();
+        _logger.LogInformation($"Fantasy Drafts by User and Fantasy League Query: {fantasyDraftsUserQuery.ToQueryString()}");
 
-
-        return fantasyPlayerMatches;
+        return await fantasyDraftsUserQuery.ToListAsync();
     }
 
-    public async Task<IEnumerable<FantasyPlayerPoints>> FantasyDraftPointsByUserLeagueAsync(long UserDiscordAccountId, int LeagueId)
+    public async Task<IEnumerable<FantasyPlayerPoints>> FantasyPlayerPointsByFantasyLeagueAsync(int FantasyLeagueId)
     {
-        _logger.LogInformation($"Fetching Fantasy Points for LeagueID: {LeagueId}");
-        List<FantasyPlayerPoints> fantasyPlayerMatches = await _dbContext.FantasyDrafts
-            .Where(fd => fd.LeagueId == LeagueId && fd.DiscordAccountId == UserDiscordAccountId)
-            .Include(fd => fd.DraftPickPlayers)
-            .Join(
-                _dbContext.FantasyDraftPlayers,
-                fd => fd.Id,
-                fdp => fdp.FantasyDraftId,
-                (fd, fdp) => new { FantasyDraft = fd, FantasyDraftPlayer = fdp }
-            )
-            .Join(
-                _dbContext.FantasyPlayers,
-                fdp => fdp.FantasyDraftPlayer.FantasyPlayerId,
-                fp => fp.Id,
-                (fdp, fp) => new { fdp.FantasyDraft, fdp.FantasyDraftPlayer, FantasyPlayer = fp }
-            )
-            .Join(
-                _dbContext.Leagues,
-                fp => fp.FantasyDraft.LeagueId,
-                lg => lg.Id,
-                (fp, lg) => new { League = lg, fp.FantasyDraft, fp.FantasyDraftPlayer, fp.FantasyPlayer }
-            )
-            //Left join matches in case league hasn't started
+        _logger.LogInformation($"Fetching Fantasy Points for Fantasy League Id: {FantasyLeagueId}");
+
+        var fantasyPlayerPointsByLeagueQuery = _dbContext.Leagues
             .SelectMany(
-                md => _dbContext.MatchDetails.Where(
-                    mdl => mdl.LeagueId == md.League.LeagueId && mdl.StartTime >= md.League.LeagueStartTime && mdl.StartTime <= md.League.LeagueEndTime
-                ),
-                (fp, md) => new { fp.League, fp.FantasyDraft, fp.FantasyDraftPlayer, fp.FantasyPlayer, MatchDetail = md }
+                l => l.FantasyLeagues,
+                (left, right) => new { League = left, FantasyLeague = right })
+            .SelectMany(
+                l => l.FantasyLeague.FantasyPlayers,
+                (left, right) => new { League = left.League, FantasyLeague = left.FantasyLeague, FantasyPlayer = right }
+            )
+            // LEFT JOIN
+            .SelectMany(
+                fdp => fdp.League.MatchDetails
+                    .SelectMany(md => md.Players,
+                        (left, right) => new { MatchDetail = left, MatchDetailPlayer = right }
+                    )
+                    .Where(md => md.MatchDetailPlayer.AccountId == fdp.FantasyPlayer.DotaAccountId &&
+                        md.MatchDetail.StartTime >= fdp.FantasyLeague.LeagueStartTime && 
+                        md.MatchDetail.StartTime <= fdp.FantasyLeague.LeagueEndTime)
+                    .DefaultIfEmpty(),
+                (left, right) => new { 
+                    FantasyLeague = left.FantasyLeague, 
+                    FantasyPlayer = left.FantasyPlayer, 
+                    MatchInfo = right
+                }
+            )
+            .Where(fdp => fdp.FantasyLeague.Id == FantasyLeagueId)
+            // .Where(mdp => mdp.AccountId == fdp.FantasyPlayer.DotaAccountId)
+            .Distinct()
+            .Select(fpm => new FantasyPlayerPoints
+            {
+                FantasyDraft = new FantasyDraft(),
+                Match = fpm.MatchInfo != null ? fpm.MatchInfo.MatchDetailPlayer : null,
+                FantasyPlayer = fpm.FantasyPlayer
+            });
+
+        _logger.LogInformation($"Match Details Query: {fantasyPlayerPointsByLeagueQuery.ToQueryString()}");
+
+        return await fantasyPlayerPointsByLeagueQuery.ToListAsync();
+    }
+
+    public async Task<IEnumerable<FantasyPlayerPoints>> FantasyDraftPointsByFantasyLeagueAsync(int FantasyLeagueId)
+    {
+        _logger.LogInformation($"Fetching Fantasy Points for Fantasy League Id: {FantasyLeagueId}");
+
+        var fantasyDraftPointsByLeagueQuery = _dbContext.Leagues
+            .SelectMany(
+                l => l.FantasyLeagues,
+                (left, right) => new { League = left, FantasyLeague = right })
+            .SelectMany(
+                l => l.FantasyLeague.FantasyDrafts,
+                (left, right) => new { League = left.League, FantasyLeague = left.FantasyLeague, FantasyDraft = right }
             )
             .SelectMany(
-                group => _dbContext.MatchDetailsPlayers.Where(mdp => mdp.MatchId == group.MatchDetail.MatchId && mdp.AccountId == group.FantasyPlayer.DotaAccountId),
-                (fdp, mdp) => new FantasyPlayerPoints
-                {
+                l => l.FantasyDraft.DraftPickPlayers,
+                (left, right) => new { League = left.League, FantasyLeague = left.FantasyLeague, FantasyDraft = left.FantasyDraft, DraftPick = right, FantasyPlayer = right.FantasyPlayer }
+            )
+            // LEFT JOIN
+            .SelectMany(
+                fdp => fdp.League.MatchDetails
+                    .SelectMany(md => md.Players,
+                        (left, right) => new { MatchDetail = left, MatchDetailPlayer = right }
+                    )
+                    .DefaultIfEmpty(),
+                (left, right) => new { FantasyLeague = left.FantasyLeague, FantasyDraft = left.FantasyDraft, FantasyPlayer = left.FantasyPlayer, MatchInfo = right }
+            )
+            .Include(fdp => fdp.FantasyPlayer.Team)
+            .Include(fdp => fdp.FantasyPlayer.DotaAccount)
+            .Where(fdp => fdp.FantasyLeague.Id == FantasyLeagueId)
+            .Where(fpm => fpm.MatchInfo != null && fpm.MatchInfo.MatchDetail.StartTime >= fpm.FantasyLeague.LeagueStartTime && fpm.MatchInfo.MatchDetail.StartTime <= fpm.FantasyLeague.LeagueEndTime)
+            .Where(fpm => fpm.MatchInfo != null && fpm.MatchInfo.MatchDetailPlayer.AccountId == fpm.FantasyPlayer.DotaAccountId)
+            .Distinct()
+            .Select(
+                fdp => new FantasyPlayerPoints{
                     FantasyDraft = fdp.FantasyDraft,
-                    Match = mdp ?? new MatchDetailsPlayer(),
+                    Match = fdp.MatchInfo != null ? fdp.MatchInfo.MatchDetailPlayer : null,
                     FantasyPlayer = fdp.FantasyPlayer
-                })
-            .ToListAsync();
+                }
+            );
 
-        // For some reason this thing shits itself if the distinct is done in the previous query?
-        fantasyPlayerMatches = fantasyPlayerMatches.Distinct().ToList();
+        _logger.LogDebug($"Fantasy Draft Points by Fantasy League Query: {fantasyDraftPointsByLeagueQuery.ToQueryString()}");
 
-        return fantasyPlayerMatches;
+        return await fantasyDraftPointsByLeagueQuery.ToListAsync();
+    }
+
+    public async Task<IEnumerable<FantasyPlayerPoints>> FantasyDraftPointsByUserLeagueAsync(long UserDiscordAccountId, int FantasyLeagueId)
+    {
+        _logger.LogInformation($"Fetching Fantasy Points for LeagueID: {FantasyLeagueId}");
+
+        var fantasyDraftPointsByUserLeagueQuery = _dbContext.Leagues
+            .SelectMany(
+                l => l.FantasyLeagues,
+                (left, right) => new { League = left, FantasyLeague = right })
+            .SelectMany(
+                l => l.FantasyLeague.FantasyDrafts,
+                (left, right) => new { League = left.League, FantasyLeague = left.FantasyLeague, FantasyDraft = right }
+            )
+            .SelectMany(
+                l => l.FantasyDraft.DraftPickPlayers,
+                (left, right) => new { League = left.League, FantasyLeague = left.FantasyLeague, FantasyDraft = left.FantasyDraft, DraftPick = right, FantasyPlayer = right.FantasyPlayer }
+            )
+            // LEFT JOIN
+            .SelectMany(
+                fdp => fdp.League.MatchDetails
+                    .SelectMany(md => md.Players,
+                        (left, right) => new { MatchDetail = left, MatchDetailPlayer = right }
+                    )
+                    .DefaultIfEmpty(),
+                (left, right) => new { FantasyLeague = left.FantasyLeague, FantasyDraft = left.FantasyDraft, FantasyPlayer = left.FantasyPlayer, MatchInfo = right }
+            )
+            .Include(fdp => fdp.FantasyPlayer.Team)
+            .Include(fdp => fdp.FantasyPlayer.DotaAccount)
+            .Where(fdp => fdp.FantasyLeague.Id == FantasyLeagueId && fdp.FantasyDraft.DiscordAccountId == UserDiscordAccountId)
+            .Where(fpm => fpm.MatchInfo != null && fpm.MatchInfo.MatchDetail.StartTime >= fpm.FantasyLeague.LeagueStartTime && fpm.MatchInfo.MatchDetail.StartTime <= fpm.FantasyLeague.LeagueEndTime)
+            .Where(fpm => fpm.MatchInfo != null && fpm.MatchInfo.MatchDetailPlayer.AccountId == fpm.FantasyPlayer.DotaAccountId)
+            .Distinct()
+            .Select(
+                fdp => new FantasyPlayerPoints{
+                    FantasyDraft = fdp.FantasyDraft,
+                    Match = fdp.MatchInfo != null ? fdp.MatchInfo.MatchDetailPlayer : null,
+                    FantasyPlayer = fdp.FantasyPlayer
+                }
+            );
+
+        _logger.LogDebug($"Fantasy Draft Points by Fantasy User League: {fantasyDraftPointsByUserLeagueQuery.ToQueryString()}");
+
+        return await fantasyDraftPointsByUserLeagueQuery.ToListAsync();
     }
 
     public IEnumerable<FantasyPlayerPointTotals> AggregateFantasyPlayerPoints(IEnumerable<FantasyPlayerPoints> fantasyPlayerPoints)
@@ -214,7 +227,7 @@ public class FantasyRepository : IFantasyRepository
                 {
                     FantasyDraft = fdp,
                     IsTeam = _dbContext.Teams.Select(t => t.Id).Any(t => t == fdp.DiscordAccountId),
-                    TeamId =  _dbContext.Teams.Select(t => t.Id).Any(t => t == fdp.DiscordAccountId) ?
+                    TeamId = _dbContext.Teams.Select(t => t.Id).Any(t => t == fdp.DiscordAccountId) ?
                         _dbContext.Teams.FirstOrDefault(t => t.Id == fdp.DiscordAccountId)?.Id ?? -1 :
                         null,
                     DiscordName = _dbContext.Teams.Select(t => t.Id).Any(t => t == fdp.DiscordAccountId) ?
@@ -260,17 +273,20 @@ public class FantasyRepository : IFantasyRepository
                 .ToList();
     }
 
-    public async Task<DateTime> GetLeagueLockedDate(int LeagueId)
+    public async Task<DateTime> GetLeagueLockedDate(int FantasyLeagueId)
     {
-        _logger.LogInformation($"Fetching Draft Locked Date for LeagueID: {LeagueId}");
+        _logger.LogInformation($"Fetching Draft Locked Date for Fantasy League Id: {FantasyLeagueId}");
         return DateTimeOffset.FromUnixTimeSeconds(
-                await _dbContext.Leagues.Where(l => l.Id == LeagueId).Select(l => l.FantasyDraftLocked).FirstOrDefaultAsync()
+                await _dbContext.FantasyLeagues.Where(l => l.Id == FantasyLeagueId).Select(l => l.FantasyDraftLocked).FirstOrDefaultAsync()
             ).DateTime;
     }
 
-    public async Task ClearUserFantasyPlayersAsync(long UserDiscordAccountId, int LeagueId)
+    public async Task ClearUserFantasyPlayersAsync(long UserDiscordAccountId, int FantasyLeagueId)
     {
-        var updateDraft = await _dbContext.FantasyDrafts.Include(fd => fd.DraftPickPlayers).Where(fd => fd.LeagueId == LeagueId && fd.DiscordAccountId == UserDiscordAccountId).FirstOrDefaultAsync();
+        var updateDraft = await _dbContext.FantasyDrafts
+            .Include(fd => fd.DraftPickPlayers)
+            .Where(fd => fd.FantasyLeagueId == FantasyLeagueId && fd.DiscordAccountId == UserDiscordAccountId)
+            .FirstOrDefaultAsync();
 
         if (updateDraft == null)
         {
@@ -284,7 +300,7 @@ public class FantasyRepository : IFantasyRepository
         return;
     }
 
-    public async Task<FantasyDraft> AddNewUserFantasyPlayerAsync(long UserDiscordAccountId, int LeagueId, long? FantasyPlayerId, int DraftOrder)
+    public async Task<FantasyDraft> AddNewUserFantasyPlayerAsync(long UserDiscordAccountId, int FantasyLeagueId, long? FantasyPlayerId, int DraftOrder)
     {
         // We will receive a 0 if the user wants to clear the draft pick, so we can avoid nulls
         if (DraftOrder > 5 || DraftOrder < 1)
@@ -292,7 +308,10 @@ public class FantasyRepository : IFantasyRepository
             throw new Exception("Invalid Draft Order, must be between 1 to 5");
         }
 
-        var updateDraft = await _dbContext.FantasyDrafts.Include(fd => fd.DraftPickPlayers).Where(fd => fd.LeagueId == LeagueId && fd.DiscordAccountId == UserDiscordAccountId).FirstOrDefaultAsync();
+        var updateDraft = await _dbContext.FantasyDrafts
+            .Include(fd => fd.DraftPickPlayers)
+            .Where(fd => fd.FantasyLeagueId == FantasyLeagueId && fd.DiscordAccountId == UserDiscordAccountId)
+            .FirstOrDefaultAsync();
 
         if (updateDraft == null)
         {
@@ -300,7 +319,7 @@ public class FantasyRepository : IFantasyRepository
             updateDraft = new FantasyDraft
             {
                 DiscordAccountId = UserDiscordAccountId,
-                LeagueId = LeagueId,
+                FantasyLeagueId = FantasyLeagueId,
                 DraftCreated = DateTime.UtcNow,
             };
             _dbContext.FantasyDrafts.Add(updateDraft);
@@ -353,6 +372,7 @@ public class FantasyRepository : IFantasyRepository
     public async Task<IEnumerable<League>> GetLeaguesAsync(bool? IsActive)
     {
         _logger.LogInformation($"Fetching All Leagues");
+
         return await _dbContext.Leagues
                 .Where(l => IsActive == null || l.IsActive == IsActive)
                 .ToListAsync();
@@ -361,51 +381,32 @@ public class FantasyRepository : IFantasyRepository
     public async Task<League?> GetLeagueAsync(int LeagueId)
     {
         _logger.LogInformation($"Fetching Single League {LeagueId}");
+
         return await _dbContext.Leagues.FindAsync(LeagueId);
     }
 
-    public async Task<IEnumerable<MatchHistory>> GetMatchHistoryAsync(int LeagueId)
+    public async Task<IEnumerable<MatchHistory>> GetMatchHistoryByFantasyLeagueAsync(int FantasyLeagueId)
     {
-        _logger.LogInformation($"Getting Match History for League {LeagueId}");
-        var leagueStartTime = _dbContext.Leagues.Find(LeagueId)?.LeagueStartTime ?? 0;
-        var leagueEndTime = _dbContext.Leagues.Find(LeagueId)?.LeagueEndTime ?? 0;
-        return await _dbContext.MatchHistory
-            .Where(mh => mh.LeagueId == LeagueId &&
-                    mh.StartTime >= leagueStartTime &&
-                    mh.StartTime <= leagueEndTime)
-            .Include(mh => mh.Players)
-            .ToListAsync();
-    }
+        _logger.LogInformation($"Getting Match History for Fantasy League Id: {FantasyLeagueId}");
 
-    public async Task<IEnumerable<MatchDetail>> GetMatchDetailsAsync(int LeagueId)
-    {
-        _logger.LogInformation($"Getting Match Details for League {LeagueId}");
-        var league = _dbContext.Leagues.Find(LeagueId);
-        var leagueId = league?.LeagueId ?? 0;
-        var leagueStartTime = league?.LeagueStartTime ?? 0;
-        var leagueEndTime = league?.LeagueEndTime ?? 0;
-        return await _dbContext.MatchDetails
-            .Where(md => md.LeagueId == leagueId &&
-                    md.StartTime >= leagueStartTime &&
-                    md.StartTime <= leagueEndTime)
-            .Include(md => md.PicksBans)
-            .ToListAsync();
-    }
+        var matchHistoryQuery = _dbContext.Leagues
+            .SelectMany(
+                l => l.MatchHistories,
+                (left, right) => new { League = left, MatchHistory = right }
+            )
+            .SelectMany(
+                l => l.League.FantasyLeagues,
+                (left, right) => new { League = left.League, MatchHistory = left.MatchHistory, FantasyLeague = right }
+            )
+            .Where(l => l.FantasyLeague.Id == FantasyLeagueId &&
+                    l.MatchHistory.StartTime >= l.FantasyLeague.LeagueStartTime &&
+                    l.MatchHistory.StartTime <= l.FantasyLeague.LeagueEndTime)
+            .Select(l => l.MatchHistory)
+            .Include(mh => mh.Players);
 
-    public async Task<MatchDetail?> GetMatchDetailAsync(int LeagueId, long MatchId)
-    {
-        _logger.LogInformation($"Getting Match Detail for Match: {MatchId} League: {LeagueId}");
-        var league = _dbContext.Leagues.Find(LeagueId);
-        var leagueId = league?.LeagueId ?? 0;
-        var leagueStartTime = league?.LeagueStartTime ?? 0;
-        var leagueEndTime = league?.LeagueEndTime ?? 0;
-        return await _dbContext.MatchDetails
-                .Where(md => md.LeagueId == leagueId && md.MatchId == MatchId &&
-                    md.StartTime >= leagueStartTime &&
-                    md.StartTime <= leagueEndTime)
-                .Include(md => md.PicksBans)
-                .Include(md => md.Players).ThenInclude(p => p.AbilityUpgrades)
-                .FirstOrDefaultAsync();
+        _logger.LogInformation($"Match History SQL Query: {matchHistoryQuery.ToQueryString()}");
+
+        return await matchHistoryQuery.ToListAsync();
     }
     #endregion League
 
@@ -413,20 +414,166 @@ public class FantasyRepository : IFantasyRepository
     public async Task<IEnumerable<MatchDetailsPlayer>> GetMatchDetailPlayersByLeagueAsync(int? LeagueId)
     {
         _logger.LogInformation($"Getting Match Details Players for League ID: {LeagueId}");
-        var league = _dbContext.Leagues.Find(LeagueId);
-        var leagueId = league?.LeagueId ?? 0;
-        var leagueStartTime = league?.LeagueStartTime ?? 0;
-        var leagueEndTime = league?.LeagueEndTime ?? 0;
-        return await _dbContext.MatchDetails
-                .Where(md =>
-                    (md.LeagueId == leagueId &&
-                    md.StartTime >= leagueStartTime &&
-                    md.StartTime <= leagueEndTime)
-                    || LeagueId == null)
-                .SelectMany(md => md.Players)
-                .Where(p => p.LeaverStatus != 1) // Filter out games players left (typically false starts)
-                .ToListAsync();
+
+        var matchDetailPlayerLeagueQuery = QueryLeagueMatchDetails(LeagueId)
+            .SelectMany(md => md.Players)
+            .Where(p => p.LeaverStatus != 1); // Filter out games players left (typically false starts)
+
+        return await matchDetailPlayerLeagueQuery.ToListAsync();
     }
+
+    public async Task<IEnumerable<MatchDetail>> GetMatchDetailsByFantasyLeagueAsync(int FantasyLeagueId)
+    {
+        _logger.LogInformation($"Getting Match Details for Fantasy League {FantasyLeagueId}");
+
+        var leagueMatchDetailsQuery = QueryFantasyLeagueMatchDetails(FantasyLeagueId)
+            .Include(md => md.PicksBans);
+
+        return await leagueMatchDetailsQuery.ToListAsync();
+    }
+
+    public async Task<MatchDetail?> GetMatchDetailAsync(long MatchId)
+    {
+        _logger.LogInformation($"Getting Match Detail for Match: {MatchId}");
+
+        var matchDetailsQuery = _dbContext.MatchDetails
+                .Where(md => md.MatchId == MatchId)
+                .Include(md => md.PicksBans)
+                .Include(md => md.Players).ThenInclude(p => p.AbilityUpgrades);
+
+        _logger.LogInformation($"Get Match Detail Query: {matchDetailsQuery.ToQueryString()}");
+
+        return await matchDetailsQuery.FirstOrDefaultAsync();
+    }
+
+    public async Task<IEnumerable<GcMatchMetadata>> GetLeagueMetadataAsync(int LeagueId)
+    {
+        _logger.LogInformation($"Getting Match Metadata for League {LeagueId}");
+
+        var leagueMetadataQuery = QueryLeagueMatchDetails(LeagueId)
+            .Where(md => md.MatchMetadata != null)
+            .Select(l => l.MatchMetadata ?? new GcMatchMetadata())
+            .Include(md => md.Teams)
+                .ThenInclude(mdt => mdt.Players)
+                .ThenInclude(mdp => mdp.Kills)
+            .Include(md => md.MatchTips)
+            .OrderByDescending(md => md.MatchId);
+
+        _logger.LogInformation($"Match Metadata SQL Query: {leagueMetadataQuery.ToQueryString()}");
+
+        return await leagueMetadataQuery.ToListAsync();
+    }
+
+    public async Task<IEnumerable<GcMatchMetadata>> GetLeagueMetadataAsync(int LeagueId, int Skip = 0, int Take = 50)
+    {
+        _logger.LogInformation($"Getting Match Metadata for League {LeagueId}");
+
+        var leagueMetadataQuery = QueryLeagueMatchDetails(LeagueId)
+            .Where(md => md.MatchMetadata != null)
+            .Select(l => l.MatchMetadata ?? new GcMatchMetadata())
+            .Include(md => md.Teams)
+                .ThenInclude(mdt => mdt.Players)
+                .ThenInclude(mdp => mdp.Kills)
+            .Include(md => md.MatchTips)
+            .OrderByDescending(md => md.MatchId)
+            .Skip(Skip)
+            .Take(Take);
+
+        _logger.LogInformation($"Match Metadata SQL Query: {leagueMetadataQuery.ToQueryString()}");
+
+        return await leagueMetadataQuery.ToListAsync();
+    }
+
+    public async Task<IEnumerable<GcMatchMetadata>> GetFantasyLeagueMetadataAsync(int FantasyLeagueId)
+    {
+        _logger.LogInformation($"Getting Match Metadata for Fantasy League {FantasyLeagueId}");
+
+        var fantasyLeagueMetadataQuery = QueryFantasyLeagueMatchDetails(FantasyLeagueId)
+            .Where(md => md.MatchMetadata != null)
+            .Select(l => l.MatchMetadata ?? new GcMatchMetadata())
+            .Include(md => md.Teams)
+                .ThenInclude(mdt => mdt.Players)
+                .ThenInclude(mdp => mdp.Kills)
+            .Include(md => md.MatchTips)
+            .OrderByDescending(md => md.MatchId);
+
+        _logger.LogInformation($"Match Metadata SQL Query: {fantasyLeagueMetadataQuery.ToQueryString()}");
+
+        return await fantasyLeagueMetadataQuery.ToListAsync();
+    }
+
+    public async Task<IEnumerable<GcMatchMetadata>> GetFantasyLeagueMetadataAsync(int FantasyLeagueId, int Skip = 0, int Take = 50)
+    {
+        _logger.LogInformation($"Getting Match Metadata for Fantasy League {FantasyLeagueId}");
+
+        var fantasyLeagueMetadataQuery = QueryFantasyLeagueMatchDetails(FantasyLeagueId)
+            .Where(md => md.MatchMetadata != null)
+            .Select(md => md.MatchMetadata ?? new GcMatchMetadata()) // This should never be null but using it to suppress warning
+            .Include(md => md.Teams)
+                .ThenInclude(mdt => mdt.Players)
+                .ThenInclude(mdp => mdp.Kills)
+            .Include(md => md.MatchTips)
+            .OrderByDescending(md => md.MatchId)
+            .Skip(Skip)
+            .Take(Take);
+
+        _logger.LogInformation($"Match Metadata SQL Query: {fantasyLeagueMetadataQuery.ToQueryString()}");
+
+        return await fantasyLeagueMetadataQuery.ToListAsync();
+    }
+
+    public async Task<GcMatchMetadata?> GetMatchMetadataAsync(long MatchId)
+    {
+        _logger.LogInformation($"Getting Match Metadata for Match: {MatchId}");
+
+        var matchMetadataQuery = _dbContext.GcMatchMetadata
+                .Where(md => md.MatchId == MatchId)
+                .Include(md => md.Teams)
+                    .ThenInclude(mdt => mdt.Players)
+                    .ThenInclude(mdp => mdp.Kills)
+                .Include(md => md.MatchTips);
+
+        _logger.LogDebug($"Match Metadata Query: {matchMetadataQuery.ToQueryString()}");
+
+        return await matchMetadataQuery.FirstOrDefaultAsync();
+    }
+
+    private IQueryable<MatchDetail> QueryLeagueMatchDetails(int? LeagueId)
+    {
+        // This logic is awkward so I'd rather do it all once here and return a Queryable
+        var leagueMatchesQuery = _dbContext.Leagues
+            .SelectMany(
+                l => l.MatchDetails,
+                (left, right) => new { League = left, MatchDetail = right }
+            )
+            .Where(l => l.League.Id == LeagueId || LeagueId == null)
+            .Select(l => l.MatchDetail);
+
+        return leagueMatchesQuery;
+    }
+
+    private IQueryable<MatchDetail> QueryFantasyLeagueMatchDetails(int FantasyLeagueId)
+    {
+        // This logic is awkward so I'd rather do it all once here and return a Queryable
+        var fantasyLeagueMatchesQuery = _dbContext.Leagues
+            .SelectMany(
+                l => l.FantasyLeagues,
+                (left, right) => new { League = left, FantasyLeague = right }
+            )
+            .SelectMany(
+                l => l.League.MatchDetails,
+                (left, right) => new { left.League, left.FantasyLeague, MatchDetail = right }
+            )
+            .Where(l => l.FantasyLeague.Id == FantasyLeagueId)
+            .Where(l =>
+                l.MatchDetail.StartTime >= l.FantasyLeague.LeagueStartTime &&
+                l.MatchDetail.StartTime <= l.FantasyLeague.LeagueEndTime
+            )
+            .Select(l => l.MatchDetail);
+
+        return fantasyLeagueMatchesQuery;
+    }
+
     #endregion Match
 
     #region Player

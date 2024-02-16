@@ -30,7 +30,7 @@ public class MatchDetail
     [Column("start_time")]
     [JsonProperty("start_time")]
     public long StartTime { get; set; }
-    public DateTime StartTimeFormatted 
+    public DateTime StartTimeFormatted
     {
         get
         {
@@ -77,6 +77,7 @@ public class MatchDetail
     [Column("league_id")]
     [JsonProperty("leagueid")]
     public int LeagueId { get; set; }
+    public League League { get; set; } = new League();
 
     [Column("game_mode")]
     [JsonProperty("game_mode")]
@@ -100,5 +101,6 @@ public class MatchDetail
 
     [JsonProperty("picks_bans")]
     public List<MatchDetailsPicksBans> PicksBans { get; set; } = new List<MatchDetailsPicksBans>();
+    public GcMatchMetadata? MatchMetadata { get; set; }
 
 }
