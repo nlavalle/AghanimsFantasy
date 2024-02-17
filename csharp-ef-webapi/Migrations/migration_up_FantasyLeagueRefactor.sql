@@ -85,9 +85,11 @@ where fantasy_league_id not in (select id from nadcl.dota_fantasy_leagues);
 select *
 from nadcl.dota_fantasy_leagues;
 
-update nadcl.dota_fantasy_players
-set fantasy_league_id = 3
-where fantasy_league_id not in (select id from nadcl.dota_fantasy_leagues);
+update nadcl.dota_fantasy_players as a
+set fantasy_league_id = b.league_id
+from nadcl.dota_fantasy_players_backup b
+where a.id = b.id;
+	on a.id = b.id;
 
 -- delete
 -- from nadcl.dota_fantasy_players
