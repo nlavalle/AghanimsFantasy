@@ -155,6 +155,35 @@ public class AghanimsFantasyContext : DbContext
             .HasPrincipalKey(fp => fp.Id)
             .HasForeignKey(fdp => fdp.FantasyPlayerId)
             .OnDelete(DeleteBehavior.ClientSetNull);
+
+        #region Metadata
+
+        modelBuilder.Entity<GcMatchMetadata>()
+            .HasMany(m => m.Teams)
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<GcMatchMetadata>()
+            .HasMany(m => m.MatchTips)
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<GcMatchMetadataTeam>()
+            .HasMany(t => t.Players)
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<GcMatchMetadataPlayer>()
+            .HasMany(t => t.Items)
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<GcMatchMetadataPlayer>()
+            .HasMany(t => t.Kills)
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
+
+        #endregion
     }
 
     public class StringArrayValueConverter : ValueConverter<string[], string>
