@@ -35,7 +35,7 @@ internal class SteamClientMatchDetailsContext : DotaOperationContext
             ImmutableSortedSet<ulong> knownMatchHistories = _dbContext.MatchHistory.Select(x => (ulong)x.MatchId).ToImmutableSortedSet();
             ImmutableSortedSet<ulong> knownMatchDetails = _dbContext.GcDotaMatches.Where(dm => dm.replay_state == CMsgDOTAMatch.ReplayState.REPLAY_AVAILABLE).Select(x => x.match_id).ToImmutableSortedSet();
 
-            List<ulong> matchesWithoutDetails = knownMatchHistories.Except(knownMatchDetails).ToList();
+            List<ulong> matchesWithoutDetails = knownMatchHistories.Except(knownMatchDetails).Take(50).ToList();
 
             if (matchesWithoutDetails.Count() > 0)
             {
