@@ -3,6 +3,7 @@ using System.Diagnostics;
 using csharp_ef_webapi.Data;
 using csharp_ef_webapi.Models;
 using ICSharpCode.SharpZipLib.BZip2;
+using Microsoft.EntityFrameworkCore;
 using ProtoBuf;
 using SteamKit2.GC.Dota.Internal;
 
@@ -35,8 +36,15 @@ internal class MatchMetadataContext : DotaOperationContext
         {
             // Find all the match histories without match detail rows and add tasks to fetch them all
             // Take 50 at a time since this runs every 5 minutes, no reason to blast it all at once
-            List<CMsgDOTAMatch> matchesWithoutDetails = _dbContext.GcDotaMatches.Where(gcdm => gcdm.replay_state == CMsgDOTAMatch.ReplayState.REPLAY_AVAILABLE &&
-                !_dbContext.GcMatchMetadata.Any(gcmm => (ulong)gcmm.MatchId == gcdm.match_id)).Take(50).ToList();
+            List<CMsgDOTAMatch> matchesWithoutDetails = _dbContext.GcDotaMatches
+                .Where(gcdm => gcdm.replay_state == CMsgDOTAMatch.ReplayState.REPLAY_AVAILABLE &&
+                    !_dbContext.GcMatchMetadata.Any(gcmm => (ulong)gcmm.MatchId == gcdm.match_id))
+                .Take(50)
+                .ToList();
+
+            List<MatchDetail> allMatchDetails = await _dbContext.MatchDetails
+                .Where(md => matchesWithoutDetails.Select(mwd => (long)mwd.match_id).Contains(md.MatchId))
+                .ToListAsync();
 
             if (matchesWithoutDetails.Count() > 0)
             {
@@ -62,6 +70,8 @@ internal class MatchMetadataContext : DotaOperationContext
 
                 foreach (GcMatchMetadata matchDetail in _matches)
                 {
+                    matchDetail.MatchDetail = allMatchDetails.FirstOrDefault(md => md.MatchId == matchDetail.MatchId) ?? 
+                            throw new Exception("MatchMetadataContext - Match belongs to unknown MatchDetail");
                     _dbContext.GcMatchMetadata.Add(matchDetail);
                 }
                 await _dbContext.SaveChangesAsync();

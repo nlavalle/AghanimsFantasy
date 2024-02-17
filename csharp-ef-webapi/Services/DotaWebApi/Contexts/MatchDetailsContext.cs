@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using csharp_ef_webapi.Data;
 using csharp_ef_webapi.Models;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -36,6 +37,7 @@ internal class MatchDetailsContext : DotaOperationContext
             // Find all the match histories without match detail rows and add tasks to fetch them all
             ImmutableSortedSet<long> knownMatchHistories = _dbContext.MatchHistory.Select(x => x.MatchId).ToImmutableSortedSet();
             ImmutableSortedSet<long> knownMatchDetails = _dbContext.MatchDetails.Select(x => x.MatchId).ToImmutableSortedSet();
+            List<League> allLeagues = await _dbContext.Leagues.ToListAsync();
 
             List<long> matchesWithoutDetails = knownMatchHistories.Except(knownMatchDetails).Take(50).ToList();
 
@@ -65,6 +67,8 @@ internal class MatchDetailsContext : DotaOperationContext
                 {
                     if (!knownMatchDetails.Contains(matchDetail.MatchId))
                     {
+                        matchDetail.League = allLeagues.FirstOrDefault(l => l.Id == matchDetail.LeagueId) ?? 
+                            throw new Exception("MatchDetailsContext - Match belongs to unknown League");
                         // Set PicksBans Match IDs since it's not in json
                         foreach (MatchDetailsPicksBans picksBans in matchDetail.PicksBans)
                         {
