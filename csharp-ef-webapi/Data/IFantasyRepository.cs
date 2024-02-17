@@ -3,31 +3,31 @@ using csharp_ef_webapi.Models;
 namespace csharp_ef_webapi.Data;
 public interface IFantasyRepository
 {
-    // // Fantasy Drafts
-    // Task<IEnumerable<FantasyPlayer>> FantasyPlayersByFantasyLeagueAsync(int? FantasyLeagueId);
-    // Task<IEnumerable<FantasyDraft>> FantasyDraftsByUserLeagueAsync(long UserDiscordAccountId, int LeagueId);
-    // Task<IEnumerable<FantasyPlayerPoints>> FantasyPlayerPointsByLeagueAsync(int LeagueId);
-    // Task<IEnumerable<FantasyPlayerPoints>> FantasyDraftPointsByLeagueAsync(int LeagueId);
-    // Task<IEnumerable<FantasyPlayerPoints>> FantasyDraftPointsByUserLeagueAsync(long UserDiscordAccountId, int LeagueId);
-    // IEnumerable<FantasyPlayerPointTotals> AggregateFantasyPlayerPoints(IEnumerable<FantasyPlayerPoints> fantasyPlayerPoints);
-    // IEnumerable<FantasyDraftPointTotals> AggregateFantasyDraftPoints(IEnumerable<FantasyPlayerPoints> fantasyPlayerPoints);
-    // Task ClearUserFantasyPlayersAsync(long UserDiscordAccountId, int LeagueId);
-    // Task<FantasyDraft> AddNewUserFantasyPlayerAsync(long UserDiscordAccountId, int LeagueId, long? FantasyPlayerId, int DraftOrder);
+    // Fantasy Drafts
+    Task<IEnumerable<FantasyPlayer>> FantasyPlayersByFantasyLeagueAsync(int? FantasyLeagueId);
+    Task<IEnumerable<FantasyDraft>> FantasyDraftsByUserLeagueAsync(long UserDiscordAccountId, int LeagueId);
+    Task<IEnumerable<FantasyPlayerPoints>> FantasyPlayerPointsByFantasyLeagueAsync(int LeagueId);
+    Task<IEnumerable<FantasyPlayerPoints>> FantasyDraftPointsByFantasyLeagueAsync(int LeagueId);
+    Task<IEnumerable<FantasyPlayerPoints>> FantasyDraftPointsByUserLeagueAsync(long UserDiscordAccountId, int LeagueId);
+    IEnumerable<FantasyPlayerPointTotals> AggregateFantasyPlayerPoints(IEnumerable<FantasyPlayerPoints> fantasyPlayerPoints);
+    IEnumerable<FantasyDraftPointTotals> AggregateFantasyDraftPoints(IEnumerable<FantasyPlayerPoints> fantasyPlayerPoints);
+    Task ClearUserFantasyPlayersAsync(long UserDiscordAccountId, int LeagueId);
+    Task<FantasyDraft> AddNewUserFantasyPlayerAsync(long UserDiscordAccountId, int LeagueId, long? FantasyPlayerId, int DraftOrder);
 
-    // // Leagues
-    // Task<League?> GetLeagueAsync(int LeagueId);
-    // Task<IEnumerable<League>> GetLeaguesAsync(bool? IsActive);
-    // Task<DateTime> GetLeagueLockedDate(int LeagueId);
+    // Leagues
+    Task<League?> GetLeagueAsync(int LeagueId);
+    Task<IEnumerable<League>> GetLeaguesAsync(bool? IsActive);
+    Task<DateTime> GetLeagueLockedDate(int LeagueId);
 
-    // // Matches
-    // Task<IEnumerable<MatchHistory>> GetMatchHistoryAsync(int LeagueId);
-    // Task<MatchDetail?> GetMatchDetailAsync(long MatchId);
-    // Task<IEnumerable<MatchDetailsPlayer>> GetMatchDetailPlayersByLeagueAsync(int? LeagueId);
-    // Task<IEnumerable<GcMatchMetadata>> GetLeagueMetadataAsync(int LeagueId);
-    // Task<IEnumerable<GcMatchMetadata>> GetLeagueMetadataAsync(int LeagueId, int Skip, int Take);
-    // Task<IEnumerable<GcMatchMetadata>> GetFantasyLeagueMetadataAsync(int FantasyLeagueId);
-    // Task<IEnumerable<GcMatchMetadata>> GetFantasyLeagueMetadataAsync(int FantasyLeagueId, int Skip, int Take);
-    // Task<GcMatchMetadata?> GetMatchMetadataAsync(long MatchId);
+    // Matches
+    Task<IEnumerable<MatchHistory>> GetMatchHistoryByFantasyLeagueAsync(int LeagueId);
+    Task<MatchDetail?> GetMatchDetailAsync(long MatchId);
+    Task<IEnumerable<MatchDetailsPlayer>> GetMatchDetailPlayersByLeagueAsync(int? LeagueId);
+    Task<IEnumerable<GcMatchMetadata>> GetLeagueMetadataAsync(int LeagueId);
+    Task<IEnumerable<GcMatchMetadata>> GetLeagueMetadataAsync(int LeagueId, int Skip, int Take);
+    Task<IEnumerable<GcMatchMetadata>> GetFantasyLeagueMetadataAsync(int FantasyLeagueId);
+    Task<IEnumerable<GcMatchMetadata>> GetFantasyLeagueMetadataAsync(int FantasyLeagueId, int Skip, int Take);
+    Task<GcMatchMetadata?> GetMatchMetadataAsync(long MatchId);
 
     // Players
     Task<IEnumerable<Account>> GetPlayerAccounts();
