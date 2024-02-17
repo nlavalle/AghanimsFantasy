@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using csharp_ef_webapi.Models;
 using csharp_ef_webapi.Data;
+using csharp_ef_webapi.Utilities;
 
 namespace csharp_ef_webapi.Controllers
 {
@@ -38,10 +39,10 @@ namespace csharp_ef_webapi.Controllers
 
         // GET: api/League/5/Match/History
         [HttpGet("{leagueId}/match/history")]
-        public async Task<ActionResult<IEnumerable<MatchHistory>>> GetLeagueMatchHistory(int leagueId)
+        public async Task<ActionResult<IEnumerable<MatchHistory>>> GetLeagueMatchHistory(int fantasyLeagueId)
         {
 
-            var matches = await _service.GetMatchHistoryAsync(leagueId);
+            var matches = await _service.GetMatchHistoryByFantasyLeagueAsync(fantasyLeagueId);
 
             if (matches == null || matches.Count() == 0)
             {
@@ -53,9 +54,9 @@ namespace csharp_ef_webapi.Controllers
 
         // GET: api/League/5/Match/Details
         [HttpGet("{leagueId}/match/details")]
-        public async Task<ActionResult<List<MatchDetail>>> GetLeagueMatchDetails(int leagueId)
+        public async Task<ActionResult<List<MatchDetail>>> GetLeagueMatchDetails(int fantasyLeagueId)
         {
-            var matches = await _service.GetMatchDetailsAsync(leagueId);
+            var matches = await _service.GetMatchDetailsByFantasyLeagueAsync(fantasyLeagueId);
 
             if (matches == null || matches.Count() == 0)
             {
@@ -69,7 +70,7 @@ namespace csharp_ef_webapi.Controllers
         [HttpGet("{leagueId}/match/{matchId}/details")]
         public async Task<ActionResult<MatchDetail>> GetLeagueMatchIdDetails(int leagueId, long matchId)
         {
-            var matches = await _service.GetMatchDetailAsync(leagueId, matchId);
+            var matches = await _service.GetMatchDetailAsync(matchId);
 
             if (matches == null)
             {
@@ -77,6 +78,28 @@ namespace csharp_ef_webapi.Controllers
             }
 
             return Ok(matches);
+        }
+
+        // GET: api/League/5/Match/Metadata
+        [HttpGet("{leagueId}/match/metadata")]
+        public async Task<ActionResult<List<GcMatchMetadata>>> GetLeagueMatchMetadata(int leagueId, int pageIndex = 1, int pageSize = 50)
+        {
+            // Limit pageSize max
+            if (pageSize > 100) { pageSize = 100; }
+
+            var matches = await _service.GetLeagueMetadataAsync(leagueId);
+
+            if (matches == null || matches.Count() == 0)
+            {
+                return NotFound();
+            }
+
+            // Order matches so most recent show up first, we'll typically want to get highlights from the most recent
+            matches = matches.OrderByDescending(m => m.MatchId);
+
+            var paginatedMatches = PaginatedList<GcMatchMetadata>.Create(matches, pageIndex, pageSize);
+
+            return Ok(paginatedMatches);
         }
 
         // // PUT: api/League/5

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using csharp_ef_webapi.Data;
@@ -12,9 +13,11 @@ using csharp_ef_webapi.Data;
 namespace csharp_ef_webapi.Migrations
 {
     [DbContext(typeof(AghanimsFantasyContext))]
-    partial class AghanimsFantasyContextModelSnapshot : ModelSnapshot
+    [Migration("20240216062618_FantasyLeagueRefactor")]
+    partial class FantasyLeagueRefactor
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1507,40 +1510,35 @@ namespace csharp_ef_webapi.Migrations
                 {
                     b.HasOne("csharp_ef_webapi.Models.GcMatchMetadataPlayer", null)
                         .WithMany("Items")
-                        .HasForeignKey("GcMatchMetadataPlayerId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("GcMatchMetadataPlayerId");
                 });
 
             modelBuilder.Entity("csharp_ef_webapi.Models.GcMatchMetadataPlayer", b =>
                 {
                     b.HasOne("csharp_ef_webapi.Models.GcMatchMetadataTeam", null)
                         .WithMany("Players")
-                        .HasForeignKey("GcMatchMetadataTeamId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("GcMatchMetadataTeamId");
                 });
 
             modelBuilder.Entity("csharp_ef_webapi.Models.GcMatchMetadataPlayerKill", b =>
                 {
                     b.HasOne("csharp_ef_webapi.Models.GcMatchMetadataPlayer", null)
                         .WithMany("Kills")
-                        .HasForeignKey("GcMatchMetadataPlayerId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("GcMatchMetadataPlayerId");
                 });
 
             modelBuilder.Entity("csharp_ef_webapi.Models.GcMatchMetadataTeam", b =>
                 {
                     b.HasOne("csharp_ef_webapi.Models.GcMatchMetadata", null)
                         .WithMany("Teams")
-                        .HasForeignKey("GcMatchMetadataId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("GcMatchMetadataId");
                 });
 
             modelBuilder.Entity("csharp_ef_webapi.Models.GcMatchMetadataTip", b =>
                 {
                     b.HasOne("csharp_ef_webapi.Models.GcMatchMetadata", null)
                         .WithMany("MatchTips")
-                        .HasForeignKey("GcMatchMetadataId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("GcMatchMetadataId");
                 });
 
             modelBuilder.Entity("csharp_ef_webapi.Models.MatchDetail", b =>

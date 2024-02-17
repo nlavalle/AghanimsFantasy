@@ -12,8 +12,9 @@ public class FantasyPlayer
     [JsonIgnore]
     public long Id { get; set; }
 
-    [Column("league_id")]
-    public long LeagueId { get; set; }
+    [Column("fantasy_league_id")]
+    public int FantasyLeagueId { get; set; }
+    public FantasyLeague FantasyLeague { get; set; } = new FantasyLeague();
 
     [Column("team_id")]
     public long TeamId { get; set; }

@@ -35,7 +35,7 @@ internal class LeagueHistoryContext : DotaOperationContext
         try{
         Dictionary<string, string> query = new Dictionary<string, string>();
 
-        var leagues = _dbContext.Leagues.Where(l => l.IsActive).Select(l => l.LeagueId).Distinct().ToArray();
+        var leagues = _dbContext.Leagues.Where(l => l.IsActive).Select(l => l.Id).Distinct().ToArray();
         var length = leagues.Length;
 
         // Knowing the length triggers a lot of stuff
@@ -101,7 +101,7 @@ internal class LeagueHistoryContext : DotaOperationContext
         UriBuilder uriBuilder = new UriBuilder(_config.BaseUri);
         uriBuilder.AppendPath(AppendedApiPath);
 
-        Dictionary<string, string> query = new Dictionary<string, string>(_config.BaseQuery);
+        Dictionary<string, string> query = new Dictionary<string, string>(_config.ConfigSettings);
         query["league_id"] = leagueId.ToString();
         query["matches_requested"] = "100";
 

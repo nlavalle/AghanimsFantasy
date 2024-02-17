@@ -54,7 +54,7 @@ builder.Services.AddDbContext<AghanimsFantasyContext>(
     options =>
     {
         var conn_string = builder.Configuration.GetConnectionString("AghanimsFantasyDatabase");
-        conn_string = conn_string.Replace("{SQL_HOST}", Environment.GetEnvironmentVariable("SQL_HOST"));
+        conn_string = conn_string?.Replace("{SQL_HOST}", Environment.GetEnvironmentVariable("SQL_HOST")) ?? "Host=localhost;Port=5432;Database=postgres;";
         conn_string = conn_string.Replace("{SQL_USER}", Environment.GetEnvironmentVariable("SQL_USER"));
         conn_string = conn_string.Replace("{SQL_PASSWORD}", Environment.GetEnvironmentVariable("SQL_PASSWORD"));
         options.UseNpgsql(conn_string);
@@ -123,11 +123,15 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add WebApi Service
+// Add WebApi and Steam Client Services
 builder.Services.AddHostedService<DotaWebApiService>();
+builder.Services.AddHostedService<DotaSteamClientService>();
 
 // Add FantasyRepository to be used by controllers
 builder.Services.AddScoped<FantasyRepository>();
+
+// Add Scoped Dota Client to be called for Dota Client Background Service
+builder.Services.AddScoped<DotaClient>();
 
 var app = builder.Build();
 

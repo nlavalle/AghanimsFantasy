@@ -4,7 +4,7 @@ namespace csharp_ef_webapi.Services;
 // It creates and passes the scope that the context needs to do DI
 // It also ensures that only one context of its type is ever run concurrently from the launcher
 // It provides no guarantees that more than one launcher will exist (the API service does this)
-internal class DotaOperationLauncher<T> where T : DotaOperationContext
+internal class DotaSteamClientOperationLauncher<T> where T : DotaOperationContext
 {
     // Dependencies
     private readonly IServiceProvider _serviceProvider;
@@ -17,12 +17,12 @@ internal class DotaOperationLauncher<T> where T : DotaOperationContext
     private readonly object _lockObject = new object();
     private T? _currentOperation;
 
-    public DotaOperationLauncher(IServiceProvider serviceProvider, TimeSpan coolDown, Uri baseUri, Dictionary<string, string> baseQuery, RateLimiter rateLimiter, CancellationToken stoppingToken)
+    public DotaSteamClientOperationLauncher(IServiceProvider serviceProvider, TimeSpan coolDown, RateLimiter rateLimiter, CancellationToken stoppingToken)
     {
         _serviceProvider = serviceProvider;
         CoolDownTicks = coolDown.Ticks;
 
-        _contextConfig = new DotaOperationContext.Config(baseUri, baseQuery, rateLimiter, stoppingToken);
+        _contextConfig = new DotaOperationContext.Config(rateLimiter, stoppingToken);
     }
 
     public T GetInstance(bool overrideCooldown = false)

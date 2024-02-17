@@ -21,5 +21,19 @@ namespace csharp_ef_webapi.Controllers
         {
             return Ok(await _service.GetMatchDetailPlayersByLeagueAsync(leagueId));
         }
+
+        // GET: api/Match/5/Metadata
+        [HttpGet("{matchId}/metadata")]
+        public async Task<ActionResult<GcMatchMetadata>> GetLeagueMatchIdMetadata(long matchId)
+        {
+            var match = await _service.GetMatchMetadataAsync(matchId);
+
+            if (match == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(match);
+        }
     }
 }

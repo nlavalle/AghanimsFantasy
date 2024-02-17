@@ -4,7 +4,7 @@ const baseUrl = '/api';
 
 export const localApiService = {
     getLeagues() {
-        return fetch(`${baseUrl}/league`)
+        return fetch(`${baseUrl}/fantasy/leagues`)
             .then(function (response) {
                 if (!response.ok) {
                     throw response.status;

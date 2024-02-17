@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using csharp_ef_webapi.Models;
+using SteamKit2.GC.Dota.Internal;
 
 namespace csharp_ef_webapi.Data;
 public class AghanimsFantasyContext : DbContext
@@ -32,20 +33,72 @@ public class AghanimsFantasyContext : DbContext
     public DbSet<Account> Accounts { get; set; }
     public DbSet<Hero> Heroes { get; set; }
     public DbSet<Team> Teams { get; set; }
+
+    #region Fantasy
+    public DbSet<FantasyLeague> FantasyLeagues { get; set; }
     public DbSet<FantasyDraft> FantasyDrafts { get; set; }
     public DbSet<FantasyPlayer> FantasyPlayers { get; set; }
     public DbSet<FantasyDraftPlayer> FantasyDraftPlayers { get; set; }
+    #endregion
+
+    #region DotaClient
+    public DbSet<CMsgDOTAMatch> GcDotaMatches { get; set; }
+    public DbSet<GcMatchMetadata> GcMatchMetadata { get; set; }
+    public DbSet<GcMatchMetadataItemPurchase> GcMatchMetadataItemPurchases { get; set; }
+    public DbSet<GcMatchMetadataPlayer> GcMatchMetadataPlayers { get; set; }
+    public DbSet<GcMatchMetadataPlayerKill> GcMatchMetadataPlayerKills { get; set; }
+    public DbSet<GcMatchMetadataTeam> GcMatchMetadataTeams { get; set; }
+    public DbSet<GcMatchMetadataTip> GcMatchMetadataTips { get; set; }
+
+    #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("nadcl");
         modelBuilder.Entity<BalanceLedger>().ToTable("balance_ledger", "nadcl");
 
+        modelBuilder.Entity<CMsgDOTAMatch>().ToTable("gc_dota_matches", "nadcl");
+        modelBuilder.Entity<CMsgDOTAMatch>().HasKey(gcm => gcm.match_id);
+        modelBuilder.Entity<CMsgDOTAMatch>().Ignore(gcm => gcm.custom_game_data);
+        modelBuilder.Entity<CMsgDOTAMatch>().Ignore(gcm => gcm.players);
+        modelBuilder.Entity<CMsgDOTAMatch>().Ignore(gcm => gcm.picks_bans);
+        modelBuilder.Entity<CMsgDOTAMatch>().Ignore(gcm => gcm.broadcaster_channels);
+        modelBuilder.Entity<CMsgDOTAMatch>().Ignore(gcm => gcm.coaches);
+
         modelBuilder.Entity<PlayerMatchDetails>()
             .HasKey(pmd => new { pmd.MatchId, pmd.PlayerSlot });
 
         modelBuilder.Entity<Bromance>()
             .HasKey(b => new { b.bro1Name, b.bro2Name });
+
+        modelBuilder.Entity<League>()
+            .HasMany(l => l.MatchDetails)
+            .WithOne(md => md.League)
+            .HasForeignKey(md => md.LeagueId);
+
+        modelBuilder.Entity<League>()
+            .HasMany(l => l.MatchHistories)
+            .WithOne()
+            .HasForeignKey(mh => mh.LeagueId);
+
+        modelBuilder.Entity<League>()
+            .HasMany(l => l.FantasyLeagues)
+            .WithOne()
+            .HasForeignKey(fl => fl.LeagueId);
+
+        modelBuilder.Entity<FantasyLeague>()
+            .HasMany(fl => fl.FantasyDrafts)
+            .WithOne()
+            .HasForeignKey(fd => fd.FantasyLeagueId);
+
+        modelBuilder.Entity<FantasyLeague>()
+            .HasMany(fl => fl.FantasyPlayers)
+            .WithOne(fp => fp.FantasyLeague)
+            .HasForeignKey(fp => fp.FantasyLeagueId);
+
+        modelBuilder.Entity<FantasyDraft>()
+            .Navigation(fd => fd.DraftPickPlayers)
+            .AutoInclude();
 
         modelBuilder.Entity<MatchHistory>()
             .HasMany(mh => mh.Players)
@@ -61,6 +114,12 @@ public class AghanimsFantasyContext : DbContext
             .HasMany(md => md.Players)
             .WithOne()
             .HasForeignKey(p => p.MatchId);
+
+        modelBuilder.Entity<MatchDetail>()
+            .HasOne(md => md.MatchMetadata)
+            .WithOne(md => md.MatchDetail)
+            .HasForeignKey<GcMatchMetadata>(mmd => mmd.MatchId)
+            .IsRequired();
 
         modelBuilder.Entity<MatchDetailsPlayer>()
             .HasMany(mdp => mdp.AbilityUpgrades)
@@ -79,6 +138,14 @@ public class AghanimsFantasyContext : DbContext
             .WithMany()
             .HasForeignKey(fp => fp.DotaAccountId);
 
+        modelBuilder.Entity<FantasyPlayer>()
+            .Navigation(fp => fp.Team)
+            .AutoInclude();
+
+        modelBuilder.Entity<FantasyPlayer>()
+            .Navigation(fp => fp.DotaAccount)
+            .AutoInclude();
+
         modelBuilder.Entity<FantasyDraftPlayer>()
             .HasKey(fdp => new { fdp.FantasyPlayerId, fdp.FantasyDraftId });
 
@@ -88,6 +155,35 @@ public class AghanimsFantasyContext : DbContext
             .HasPrincipalKey(fp => fp.Id)
             .HasForeignKey(fdp => fdp.FantasyPlayerId)
             .OnDelete(DeleteBehavior.ClientSetNull);
+
+        #region Metadata
+
+        modelBuilder.Entity<GcMatchMetadata>()
+            .HasMany(m => m.Teams)
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<GcMatchMetadata>()
+            .HasMany(m => m.MatchTips)
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<GcMatchMetadataTeam>()
+            .HasMany(t => t.Players)
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<GcMatchMetadataPlayer>()
+            .HasMany(t => t.Items)
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<GcMatchMetadataPlayer>()
+            .HasMany(t => t.Kills)
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
+
+        #endregion
     }
 
     public class StringArrayValueConverter : ValueConverter<string[], string>
