@@ -6,13 +6,13 @@
 
         <q-toolbar-title v-if="isWideScreen" class="title">
           <q-avatar>
-            <img src="~assets/BannerAvatar.png">
+            <q-img src="~assets/BannerAvatar.png" height="38px" width="38px"/>
           </q-avatar>
           Aghanim's Fantasy
         </q-toolbar-title>
         <q-toolbar-title v-else class="title">
           <q-avatar>
-            <img src="~assets/BannerAvatar.png">
+            <q-img src="~assets/BannerAvatar.png" height="38px" width="38px"/>
           </q-avatar>
         </q-toolbar-title>
 

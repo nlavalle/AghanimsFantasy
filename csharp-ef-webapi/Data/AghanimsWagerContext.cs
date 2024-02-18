@@ -168,10 +168,26 @@ public class AghanimsFantasyContext : DbContext
             .WithOne()
             .OnDelete(DeleteBehavior.Cascade);
 
+        modelBuilder.Entity<GcMatchMetadata>()
+            .Navigation(md => md.Teams)
+            .AutoInclude();
+
+        modelBuilder.Entity<GcMatchMetadata>()
+            .Navigation(md => md.MatchTips)
+            .AutoInclude();
+
+        modelBuilder.Entity<GcMatchMetadata>()
+            .Navigation(md => md.MatchDetail)
+            .AutoInclude();
+
         modelBuilder.Entity<GcMatchMetadataTeam>()
             .HasMany(t => t.Players)
             .WithOne()
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<GcMatchMetadataTeam>()
+            .Navigation(mdt => mdt.Players)
+            .AutoInclude();
 
         modelBuilder.Entity<GcMatchMetadataPlayer>()
             .HasMany(t => t.Items)

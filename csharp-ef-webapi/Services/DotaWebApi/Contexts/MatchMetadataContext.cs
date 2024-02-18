@@ -42,10 +42,6 @@ internal class MatchMetadataContext : DotaOperationContext
                 .Take(50)
                 .ToList();
 
-            List<MatchDetail> allMatchDetails = await _dbContext.MatchDetails
-                .Where(md => matchesWithoutDetails.Select(mwd => (long)mwd.match_id).Contains(md.MatchId))
-                .ToListAsync();
-
             if (matchesWithoutDetails.Count() > 0)
             {
                 var length = matchesWithoutDetails.Count;
@@ -70,8 +66,6 @@ internal class MatchMetadataContext : DotaOperationContext
 
                 foreach (GcMatchMetadata matchDetail in _matches)
                 {
-                    matchDetail.MatchDetail = allMatchDetails.FirstOrDefault(md => md.MatchId == matchDetail.MatchId) ?? 
-                            throw new Exception("MatchMetadataContext - Match belongs to unknown MatchDetail");
                     _dbContext.GcMatchMetadata.Add(matchDetail);
                 }
                 await _dbContext.SaveChangesAsync();
