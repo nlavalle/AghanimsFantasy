@@ -46,6 +46,39 @@ namespace csharp_ef_webapi.Controllers
             return Ok(playerTotals);
         }
 
+        // // GET: api/fantasy/players/5/match/metadata
+        // [HttpGet("players/{leagueId}/match/metadata")]
+        // public async Task<ActionResult<List<GcMatchMetadata>>> GetFantasyLeagueMatchMetadata(int fantasyLeagueId)
+        // {
+        //     var matches = await _service.GetFantasyLeagueMetadataAsync(fantasyLeagueId);
+
+        //     if (matches == null || matches.Count() == 0)
+        //     {
+        //         return NotFound();
+        //     }
+
+        //     // Order matches so most recent show up first, we'll typically want to get highlights from the most recent
+        //     matches = matches.OrderByDescending(m => m.MatchId);
+
+        //     return Ok(matches);
+        // }
+
+        // GET: api/fantasy/league/5/metadata
+        [HttpGet("league/{fantasyLeagueId}/metadata")]
+        public async Task<ActionResult<List<MetadataSummary>>> GetFantasyLeagueMatchMetadata(int fantasyLeagueId)
+        {
+            var matchSummary = await _service.AggregateMetadataAsync(fantasyLeagueId);
+
+            if (matchSummary == null || matchSummary.Count() == 0)
+            {
+                return NotFound();
+            }
+
+            matchSummary = matchSummary.OrderBy(m => m.Player.DotaAccount.Name);
+
+            return Ok(matchSummary);
+        }
+
         // GET: api/fantasy/players/5/top10
         [Authorize]
         [HttpGet("players/{leagueId}/top10")]

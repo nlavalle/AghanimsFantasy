@@ -174,6 +174,23 @@ export const localApiService = {
                 throw error;
             });
     },
+    getFantasyLeagueMetadataStats(leagueId) {
+        return fetch(`${baseUrl}/fantasy/league/${leagueId}/metadata`)
+            .then(function (response) {
+                if (!response.ok) {
+                    throw response.status;
+                } else {
+                    return response.json();
+                }
+            }.bind(this))
+            .then(function (data) {
+                return data;
+            }.bind(this))
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                throw error;
+            });
+    },
     getTopTenDrafts(leagueId) {
         return fetch(`${baseUrl}/fantasy/players/${leagueId}/top10`)
             .then(function (response) {

@@ -1,5 +1,9 @@
+using System.Text.RegularExpressions;
 using csharp_ef_webapi.Models;
+using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
+using SteamKit2;
 
 namespace csharp_ef_webapi.Data;
 
@@ -287,7 +291,87 @@ public class FantasyRepository : IFantasyRepository
                       })
                       .OrderByDescending(fdp => fdp.DraftTotalFantasyPoints)
                       .ToList();
+    }
 
+    public async Task<IEnumerable<MetadataSummary>> AggregateMetadataAsync(int FantasyLeagueId)
+    {
+        _logger.LogInformation($"Fetching Aggregate Metadata for Fantasy League Id: {FantasyLeagueId}");
+
+        var metadataQuery = QueryFantasyLeagueMatchDetails(FantasyLeagueId)
+                .Where(md => md.MatchMetadata != null)
+                //Matchdetail joins
+                .SelectMany(mm => mm.Players,
+                    (left, right) => new { MatchDetail = left, MatchDetailPlayer = right }
+                )
+                //Metadata joins
+                .SelectMany(mm => mm.MatchDetail.MatchMetadata.Teams
+                    .SelectMany(mmt => mmt.Players)
+                    .Where(mmp => mmp.PlayerSlot == mm.MatchDetailPlayer.PlayerSlot),
+                    (left, right) => new { MatchDetailPlayer = left.MatchDetailPlayer, MatchMetadataPlayer = right }
+                )
+                .SelectMany(mm => _dbContext.FantasyPlayers
+                    .Where(fp => fp.FantasyLeagueId == FantasyLeagueId && fp.DotaAccountId == mm.MatchDetailPlayer.AccountId),
+                    (left, right) => new { MatchMetadataPlayer = left.MatchMetadataPlayer, MatchDetailPlayer = left.MatchDetailPlayer, FantasyPlayer = right }
+                )
+                .Where(fpm => fpm.MatchMetadataPlayer.PlayerSlot == fpm.MatchDetailPlayer.PlayerSlot)
+                .Distinct()
+                .GroupBy(fpm => fpm.FantasyPlayer);
+
+        _logger.LogInformation($"Fantasy Metadata Query: {metadataQuery.ToQueryString()}");
+
+        var metadataQueryList = await metadataQuery.ToListAsync();
+
+        // When we do the select to new MetadataSummary before resolving the group list it destroys the includes, not sure why
+
+        var aggregateMetadataQuery = metadataQueryList
+                .Select(
+                    final => new MetadataSummary
+                    {
+                        Player = final.Key,
+                        MatchDetailsPlayers = new MatchDetailsPlayer
+                        {
+                            Kills = final.Sum(result => result.MatchDetailPlayer.Kills),
+                            Deaths = final.Sum(result => result.MatchDetailPlayer.Deaths),
+                            Assists = final.Sum(result => result.MatchDetailPlayer.Assists),
+                            LastHits = final.Sum(result => result.MatchDetailPlayer.LastHits),
+                            Denies = final.Sum(result => result.MatchDetailPlayer.Denies),
+                            GoldPerMin = (int?)final.Average(result => result.MatchDetailPlayer.GoldPerMin),
+                            XpPerMin = (int?)final.Average(result => result.MatchDetailPlayer.XpPerMin),
+                            Networth = final.Sum(result => result.MatchDetailPlayer.Networth),
+                            HeroDamage = final.Sum(result => result.MatchDetailPlayer.HeroDamage),
+                            TowerDamage = final.Sum(result => result.MatchDetailPlayer.TowerDamage),
+                            HeroHealing = final.Sum(result => result.MatchDetailPlayer.HeroHealing),
+                            Gold = final.Sum(result => result.MatchDetailPlayer.Gold),
+                            ScaledHeroDamage = final.Sum(result => result.MatchDetailPlayer.ScaledHeroDamage),
+                            ScaledTowerDamage = final.Sum(result => result.MatchDetailPlayer.ScaledTowerDamage),
+                            ScaledHeroHealing = final.Sum(result => result.MatchDetailPlayer.ScaledHeroHealing)
+                        },
+                        MetadataPlayer = new GcMatchMetadataPlayer
+                        {
+                            WinStreak = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.WinStreak),
+                            BestWinStreak = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.BestWinStreak),
+                            FightScore = final.Sum(result => result.MatchMetadataPlayer.FightScore),
+                            FarmScore = final.Sum(result => result.MatchMetadataPlayer.FarmScore),
+                            SupportScore = final.Sum(result => result.MatchMetadataPlayer.SupportScore),
+                            PushScore = final.Sum(result => result.MatchMetadataPlayer.PushScore),
+                            HeroXp = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.HeroXp),
+                            CampsStacked = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.CampsStacked),
+                            Rampages = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.Rampages),
+                            TripleKills = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.TripleKills),
+                            AegisSnatched = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.AegisSnatched),
+                            RapiersPurchased = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.RapiersPurchased),
+                            CouriersKilled = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.CouriersKilled),
+                            NetworthRank = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.NetworthRank),
+                            SupportGoldSpent = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.SupportGoldSpent),
+                            ObserverWardsPlaced = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.ObserverWardsPlaced),
+                            SentryWardsPlaced = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.SentryWardsPlaced),
+                            WardsDewarded = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.WardsDewarded),
+                            StunDuration = final.Sum(result => result.MatchMetadataPlayer.StunDuration),
+                        }
+                    }
+                );
+
+        return aggregateMetadataQuery.ToList();
     }
 
     public async Task<DateTime> GetLeagueLockedDate(int FantasyLeagueId)
@@ -471,10 +555,6 @@ public class FantasyRepository : IFantasyRepository
         var leagueMetadataQuery = QueryLeagueMatchDetails(LeagueId)
             .Where(md => md.MatchMetadata != null)
             .Select(l => l.MatchMetadata ?? new GcMatchMetadata())
-            .Include(md => md.Teams)
-                .ThenInclude(mdt => mdt.Players)
-                .ThenInclude(mdp => mdp.Kills)
-            .Include(md => md.MatchTips)
             .OrderByDescending(md => md.MatchId);
 
         _logger.LogInformation($"Match Metadata SQL Query: {leagueMetadataQuery.ToQueryString()}");
@@ -489,10 +569,6 @@ public class FantasyRepository : IFantasyRepository
         var leagueMetadataQuery = QueryLeagueMatchDetails(LeagueId)
             .Where(md => md.MatchMetadata != null)
             .Select(l => l.MatchMetadata ?? new GcMatchMetadata())
-            .Include(md => md.Teams)
-                .ThenInclude(mdt => mdt.Players)
-                .ThenInclude(mdp => mdp.Kills)
-            .Include(md => md.MatchTips)
             .OrderByDescending(md => md.MatchId)
             .Skip(Skip)
             .Take(Take);
@@ -508,11 +584,7 @@ public class FantasyRepository : IFantasyRepository
 
         var fantasyLeagueMetadataQuery = QueryFantasyLeagueMatchDetails(FantasyLeagueId)
             .Where(md => md.MatchMetadata != null)
-            .Select(l => l.MatchMetadata ?? new GcMatchMetadata())
-            .Include(md => md.Teams)
-                .ThenInclude(mdt => mdt.Players)
-                .ThenInclude(mdp => mdp.Kills)
-            .Include(md => md.MatchTips)
+            .Select(l => l.MatchMetadata)
             .OrderByDescending(md => md.MatchId);
 
         _logger.LogInformation($"Match Metadata SQL Query: {fantasyLeagueMetadataQuery.ToQueryString()}");
@@ -527,10 +599,6 @@ public class FantasyRepository : IFantasyRepository
         var fantasyLeagueMetadataQuery = QueryFantasyLeagueMatchDetails(FantasyLeagueId)
             .Where(md => md.MatchMetadata != null)
             .Select(md => md.MatchMetadata ?? new GcMatchMetadata()) // This should never be null but using it to suppress warning
-            .Include(md => md.Teams)
-                .ThenInclude(mdt => mdt.Players)
-                .ThenInclude(mdp => mdp.Kills)
-            .Include(md => md.MatchTips)
             .OrderByDescending(md => md.MatchId)
             .Skip(Skip)
             .Take(Take);
@@ -545,11 +613,7 @@ public class FantasyRepository : IFantasyRepository
         _logger.LogInformation($"Getting Match Metadata for Match: {MatchId}");
 
         var matchMetadataQuery = _dbContext.GcMatchMetadata
-                .Where(md => md.MatchId == MatchId)
-                .Include(md => md.Teams)
-                    .ThenInclude(mdt => mdt.Players)
-                    .ThenInclude(mdp => mdp.Kills)
-                .Include(md => md.MatchTips);
+                .Where(md => md.MatchId == MatchId);
 
         _logger.LogInformation($"Match Metadata Query: {matchMetadataQuery.ToQueryString()}");
 
@@ -617,7 +681,7 @@ public class FantasyRepository : IFantasyRepository
     public async Task<IEnumerable<Hero>> GetHeroesAsync()
     {
         _logger.LogInformation($"Getting Heroes loaded into DB");
-        
+
         return await _dbContext.Heroes.ToListAsync();
     }
 
