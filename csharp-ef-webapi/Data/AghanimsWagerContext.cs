@@ -199,14 +199,6 @@ public class AghanimsFantasyContext : DbContext
             .WithOne()
             .OnDelete(DeleteBehavior.Cascade);
 
-        modelBuilder.Entity<GcMatchMetadataPlayer>()
-            .Navigation(mdp => mdp.Items)
-            .AutoInclude();
-
-        modelBuilder.Entity<GcMatchMetadataPlayer>()
-            .Navigation(mdp => mdp.Kills)
-            .AutoInclude();
-
         #endregion
     }
 

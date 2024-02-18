@@ -297,24 +297,38 @@ public class FantasyRepository : IFantasyRepository
     {
         _logger.LogInformation($"Fetching Aggregate Metadata for Fantasy League Id: {FantasyLeagueId}");
 
-        var metadataQuery = QueryFantasyLeagueMatchDetails(FantasyLeagueId)
-                .Where(md => md.MatchMetadata != null)
+        var metadataQuery = _dbContext.Leagues
+                .SelectMany(
+                    l => l.FantasyLeagues,
+                    (left, right) => new { League = left, FantasyLeague = right }
+                )
+                .SelectMany(
+                    l => l.League.MatchDetails,
+                    (left, right) => new { left.League, left.FantasyLeague, MatchDetail = right }
+                )              
                 //Matchdetail joins
-                .SelectMany(mm => mm.Players,
-                    (left, right) => new { MatchDetail = left, MatchDetailPlayer = right }
+                .SelectMany(mm => mm.MatchDetail.Players,
+                    (left, right) => new { left.FantasyLeague, MatchDetail = left.MatchDetail, MatchDetailPlayer = right }
                 )
                 //Metadata joins
-                .SelectMany(mm => mm.MatchDetail.MatchMetadata.Teams
-                    .SelectMany(mmt => mmt.Players)
-                    .Where(mmp => mmp.PlayerSlot == mm.MatchDetailPlayer.PlayerSlot),
-                    (left, right) => new { MatchDetailPlayer = left.MatchDetailPlayer, MatchMetadataPlayer = right }
+                .SelectMany(mm => mm.MatchDetail.MatchMetadata.Teams,
+                    (left, right) => new { left.FantasyLeague, MatchDetail = left.MatchDetail, MatchDetailPlayer = left.MatchDetailPlayer, MatchMetadataTeam = right }
                 )
-                .SelectMany(mm => _dbContext.FantasyPlayers
-                    .Where(fp => fp.FantasyLeagueId == FantasyLeagueId && fp.DotaAccountId == mm.MatchDetailPlayer.AccountId),
-                    (left, right) => new { MatchMetadataPlayer = left.MatchMetadataPlayer, MatchDetailPlayer = left.MatchDetailPlayer, FantasyPlayer = right }
+                .SelectMany(mm => mm.MatchMetadataTeam.Players,
+                    (left, right) => new { left.FantasyLeague, MatchDetail = left.MatchDetail, MatchDetailPlayer = left.MatchDetailPlayer, MatchMetadataPlayer = right }
                 )
-                .Where(fpm => fpm.MatchMetadataPlayer.PlayerSlot == fpm.MatchDetailPlayer.PlayerSlot)
-                .Distinct()
+                .SelectMany(mm => mm.FantasyLeague.FantasyPlayers
+                    .Where(fp => fp.DotaAccountId == mm.MatchDetailPlayer.AccountId),
+                    (left, right) => new { left.FantasyLeague, MatchDetail = left.MatchDetail, MatchMetadataPlayer = left.MatchMetadataPlayer, MatchDetailPlayer = left.MatchDetailPlayer, FantasyPlayer = right }
+                )
+                .Where(l => l.FantasyLeague.Id == FantasyLeagueId)
+                .Where(l =>
+                    l.MatchDetail.StartTime >= l.FantasyLeague.LeagueStartTime &&
+                    l.MatchDetail.StartTime <= l.FantasyLeague.LeagueEndTime
+                )
+                .Where(mp => mp.MatchMetadataPlayer.PlayerSlot == mp.MatchDetailPlayer.PlayerSlot)
+                .OrderBy(m => m.MatchDetail.MatchId)
+                .ThenBy(m => m.FantasyPlayer.Id)
                 .GroupBy(fpm => fpm.FantasyPlayer);
 
         _logger.LogInformation($"Fantasy Metadata Query: {metadataQuery.ToQueryString()}");
@@ -327,7 +341,16 @@ public class FantasyRepository : IFantasyRepository
                 .Select(
                     final => new MetadataSummary
                     {
-                        Player = final.Key,
+                        Player = new FantasyPlayer {
+                            DotaAccount = final.Key.DotaAccount,
+                            DotaAccountId = final.Key.DotaAccountId,
+                            FantasyLeague = new FantasyLeague(), // Need to omit this to avoid circular reference
+                            FantasyLeagueId = final.Key.FantasyLeagueId,
+                            Id = final.Key.Id,
+                            Team = final.Key.Team,
+                            TeamId = final.Key.TeamId,
+
+                        },
                         MatchDetailsPlayers = new MatchDetailsPlayer
                         {
                             Kills = final.Sum(result => result.MatchDetailPlayer.Kills),
