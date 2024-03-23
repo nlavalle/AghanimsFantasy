@@ -111,9 +111,9 @@
                             </template>
                         </q-table>
                     </div>
-                    <q-footer class="q-pa-sm compare-footer">
+                    <!-- <q-footer class="q-pa-sm compare-footer">
                         <q-btn flat style="background: var(--nadcl-main-2)" label="Compare" />
-                    </q-footer>
+                    </q-footer> -->
                 </q-tab-panel>
                 <q-tab-panel class="collapse-transition" name="league" style="padding: 0px">
                     <div class="row">
@@ -157,7 +157,7 @@
                                         <div class="row" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
                                             <div v-if="this.isDesktop" class="col" style="max-width:65px">
                                                 <q-img height="60px" width="60px"
-                                                    :src="props.row.player.dotaAccount.playerPicture" />
+                                                    :src="props.row.player.dotaAccount.steamProfilePicture" />
                                             </div>
                                             <div class="col">
                                                 <div style="white-space:normal">
