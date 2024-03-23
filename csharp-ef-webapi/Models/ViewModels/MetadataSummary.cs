@@ -4,43 +4,74 @@ namespace csharp_ef_webapi.Models;
 public class MetadataSummary
 {
     public FantasyPlayer Player { get; set; } = null!;
-    public MatchDetailsPlayer MatchDetailsPlayers { get; set; } = null!;
-    public GcMatchMetadataPlayer MetadataPlayer { get; set; } = null!;
+    public int? MatchesPlayed {get;set;}
     // Match Details
-    public int? Kills { get { return MatchDetailsPlayers.Kills; } }
-    public int? Deaths { get { return MatchDetailsPlayers.Deaths; } }
-    public int? Assists { get { return MatchDetailsPlayers.Assists; } }
-    public int? LastHits { get { return MatchDetailsPlayers.LastHits; } }
-    public int? Denies { get { return MatchDetailsPlayers.Denies; } }
-    public int? GoldPerMin { get { return MatchDetailsPlayers.GoldPerMin; } }
-    public int? XpPerMin { get { return MatchDetailsPlayers.XpPerMin; } }
-    public long? Networth { get { return MatchDetailsPlayers.Networth; } }
-    public int? HeroDamage { get { return MatchDetailsPlayers.HeroDamage; } }
-    public int? TowerDamage { get { return MatchDetailsPlayers.TowerDamage; } }
-    public int? HeroHealing { get { return MatchDetailsPlayers.HeroHealing; } }
-    public int? Gold { get { return MatchDetailsPlayers.Gold; } }
-    public int? ScaledHeroDamage { get { return MatchDetailsPlayers.ScaledHeroDamage; } }
-    public int? ScaledTowerDamage { get { return MatchDetailsPlayers.ScaledTowerDamage; } }
-    public int? ScaledHeroHealing { get { return MatchDetailsPlayers.ScaledHeroHealing; } }
+    public int? Kills { get; set; }
+    public double? KillsAverage { get; set; }
+    public int? Deaths { get; set; }
+    public double? DeathsAverage { get; set; }
+    public int? Assists { get; set; }
+    public double? AssistsAverage { get; set; }
+    public int? LastHits { get; set; }
+    public double? LastHitsAverage { get; set; }
+    public int? Denies { get; set; }
+    public double? DeniesAverage { get; set; }
+    public int? GoldPerMin { get; set; }
+    public double? GoldPerMinAverage { get; set; }
+    public int? XpPerMin { get; set; }
+    public double? XpPerMinAverage { get; set; }
+    public long? Networth { get; set; }
+    public double? NetworthAverage { get; set; }
+    public int? HeroDamage { get; set; }
+    public double? HeroDamageAverage { get; set; }
+    public int? TowerDamage { get; set; }
+    public double? TowerDamageAverage { get; set; }
+    public int? HeroHealing { get; set; }
+    public double? HeroHealingAverage { get; set; }
+    public int? Gold { get; set; }
+    public double? GoldAverage { get; set; }
+    public int? ScaledHeroDamage { get; set; }
+    public double? ScaledHeroDamageAverage { get; set; }
+    public int? ScaledTowerDamage { get; set; }
+    public double? ScaledTowerDamageAverage { get; set; }
+    public int? ScaledHeroHealing { get; set; }
+    public double? ScaledHeroHealingAverage { get; set; }
 
     // Match Metadata
-    public uint WinStreak { get { return MetadataPlayer.WinStreak; } }
-    public uint BestWinStreak { get { return MetadataPlayer.BestWinStreak; } }
-    public float FightScore { get { return MetadataPlayer.FightScore; } }
-    public float FarmScore { get { return MetadataPlayer.FarmScore; } }
-    public float SupportScore { get { return MetadataPlayer.SupportScore; } }
-    public float PushScore { get { return MetadataPlayer.PushScore; } }
-    public uint HeroXp { get { return MetadataPlayer.HeroXp; } }
-    public uint CampsStacked { get { return MetadataPlayer.CampsStacked; } }
-    public uint Rampages { get { return MetadataPlayer.Rampages; } }
-    public uint TripleKills { get { return MetadataPlayer.TripleKills; } }
-    public uint AegisSnatched { get { return MetadataPlayer.AegisSnatched; } }
-    public uint RapiersPurchased { get { return MetadataPlayer.RapiersPurchased; } }
-    public uint CouriersKilled { get { return MetadataPlayer.CouriersKilled; } }
-    public uint NetworthRank { get { return MetadataPlayer.NetworthRank; } }
-    public uint SupportGoldSpent { get { return MetadataPlayer.SupportGoldSpent; } }
-    public uint ObserverWardsPlaced { get { return MetadataPlayer.ObserverWardsPlaced; } }
-    public uint SentryWardsPlaced { get { return MetadataPlayer.SentryWardsPlaced; } }
-    public uint WardsDewarded { get { return MetadataPlayer.WardsDewarded; } }
-    public float StunDuration { get { return MetadataPlayer.StunDuration; } }
+    public uint WinStreak { get; set; }
+    public uint BestWinStreak { get; set; }
+    public float FightScore { get; set; }
+    public double? FightScoreAverage { get; set; }
+    public float FarmScore { get; set; }
+    public double? FarmScoreAverage { get; set; }
+    public float SupportScore { get; set; }
+    public double? SupportScoreAverage { get; set; }
+    public float PushScore { get; set; }
+    public double? PushScoreAverage { get; set; }
+    public uint HeroXp { get; set; }
+    public double? HeroXpAverage { get; set; }
+    public uint CampsStacked { get; set; }
+    public double? CampsStackedAverage { get; set; }
+    public uint Rampages { get; set; }
+    public double? RampagesAverage { get; set; }
+    public uint TripleKills { get; set; }
+    public double? TripleKillsAverage { get; set; }
+    public uint AegisSnatched { get; set; }
+    public double? AegisSnatchedAverage { get; set; }
+    public uint RapiersPurchased { get; set; }
+    public double? RapiersPurchasedAverage { get; set; }
+    public uint CouriersKilled { get; set; }
+    public double? CouriersKilledAverage { get; set; }
+    public uint NetworthRank { get; set; }
+    public double? NetworthRankAverage { get; set; }
+    public uint SupportGoldSpent { get; set; }
+    public double? SupportGoldSpentAverage { get; set; }
+    public uint ObserverWardsPlaced { get; set; }
+    public double? ObserverWardsPlacedAverage { get; set; }
+    public uint SentryWardsPlaced { get; set; }
+    public double? SentryWardsPlacedAverage { get; set; }
+    public uint WardsDewarded { get; set; }
+    public double? WardsDewardedAverage { get; set; }
+    public float StunDuration { get; set; }
+    public double? StunDurationAverage { get; set; }
 }

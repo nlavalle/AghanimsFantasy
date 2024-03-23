@@ -3,10 +3,10 @@
     <div class="row justify-evenly">
       <div class="col col-4-grow">
         <p class="text-white">
-          NADCL Fantasy Draft, click the fantasy tab to get started.
+          Dota 2 Fantasy Draft, click the fantasy tab to get started.
           <br />
-          Points are calculated using the pattern below
-          following the TI fantasy scoring. Certain statistics require parsing the .dem replay files to measure, so the
+          Points are calculated using the pattern below trying to 
+          follow the TI fantasy scoring. Certain statistics require parsing the .dem replay files to measure, so the
           unavailable
           metrics won't be involved in the calculation until that is added to the API service that fetches match data
           (hopefully by Season 7).

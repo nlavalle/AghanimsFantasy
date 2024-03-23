@@ -25,6 +25,7 @@ public class FantasyLeague
 
     [Column("league_end_time")]
     public long LeagueEndTime { get; set; }
+    public FantasyLeagueWeight FantasyLeagueWeight { get; set; } = new FantasyLeagueWeight();
     public List<FantasyDraft> FantasyDrafts { get; set; } = new List<FantasyDraft>();
     public List<FantasyPlayer> FantasyPlayers { get; set; } = new List<FantasyPlayer>();
 }

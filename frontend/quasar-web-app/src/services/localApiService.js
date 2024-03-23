@@ -208,6 +208,23 @@ export const localApiService = {
                 throw error;
             });
     },
+    getHighlights(leagueId, numberOfHighlights) {
+        return fetch(`${baseUrl}/fantasy/${leagueId}/highlights/${numberOfHighlights}`)
+            .then(function (response) {
+                if (!response.ok) {
+                    throw response.status;
+                } else {
+                    return response.json();
+                }
+            }.bind(this))
+            .then(function (data) {
+                return data;
+            }.bind(this))
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                throw error;
+            });
+    },
     saveFantasyDraft(
         user,
         league,

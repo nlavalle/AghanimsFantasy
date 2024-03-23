@@ -1,9 +1,6 @@
-using System.Text.RegularExpressions;
 using csharp_ef_webapi.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
-using SteamKit2;
 
 namespace csharp_ef_webapi.Data;
 
@@ -78,131 +75,78 @@ public class FantasyRepository : IFantasyRepository
     {
         _logger.LogInformation($"Fetching Fantasy Points for Fantasy League Id: {FantasyLeagueId}");
 
-        var fantasyPlayerPointsByLeagueQuery = _dbContext.Leagues
-            .SelectMany(
-                l => l.FantasyLeagues,
-                (left, right) => new { League = left, FantasyLeague = right })
-            .SelectMany(
-                l => l.FantasyLeague.FantasyPlayers,
-                (left, right) => new { League = left.League, FantasyLeague = left.FantasyLeague, FantasyPlayer = right }
-            )
-            // LEFT JOIN
-            .SelectMany(
-                fdp => fdp.League.MatchDetails
-                    .SelectMany(md => md.Players,
-                        (left, right) => new { MatchDetail = left, MatchDetailPlayer = right }
-                    )
-                    .Where(md => md.MatchDetailPlayer.AccountId == fdp.FantasyPlayer.DotaAccountId &&
-                        md.MatchDetail.StartTime >= fdp.FantasyLeague.LeagueStartTime &&
-                        md.MatchDetail.StartTime <= fdp.FantasyLeague.LeagueEndTime)
-                    .DefaultIfEmpty(),
-                (left, right) => new
-                {
-                    FantasyLeague = left.FantasyLeague,
-                    FantasyPlayer = left.FantasyPlayer,
-                    MatchInfo = right
-                }
-            )
-            .Where(fdp => fdp.FantasyLeague.Id == FantasyLeagueId)
-            .Distinct()
-            .Select(fpm => new FantasyPlayerPoints
-            {
-                FantasyDraft = new FantasyDraft(),
-                Match = fpm.MatchInfo != null ? fpm.MatchInfo.MatchDetailPlayer : null,
-                FantasyPlayer = fpm.FantasyPlayer
-            });
+        var fantasyPlayerPointsByLeagueQuery = _dbContext.FantasyPlayerPointsView
+            .Include(fppv => fppv.FantasyPlayer)
+            .Include(fppv => fppv.Match)
+            .Where(fpp => fpp.FantasyLeagueId == FantasyLeagueId);
 
         _logger.LogInformation($"Match Details Query: {fantasyPlayerPointsByLeagueQuery.ToQueryString()}");
 
         return await fantasyPlayerPointsByLeagueQuery.ToListAsync();
     }
 
-    public async Task<IEnumerable<FantasyPlayerPoints>> FantasyDraftPointsByFantasyLeagueAsync(int FantasyLeagueId)
+    public async Task<IEnumerable<FantasyDraftPointTotals>> FantasyDraftPointsByFantasyLeagueAsync(int FantasyLeagueId)
     {
         _logger.LogInformation($"Fetching Fantasy Points for Fantasy League Id: {FantasyLeagueId}");
 
-        var fantasyDraftPointsByLeagueQuery = _dbContext.Leagues
-            .SelectMany(
-                l => l.FantasyLeagues,
-                (left, right) => new { League = left, FantasyLeague = right })
-            .SelectMany(
-                l => l.FantasyLeague.FantasyDrafts,
-                (left, right) => new { League = left.League, FantasyLeague = left.FantasyLeague, FantasyDraft = right }
-            )
-            .SelectMany(
-                l => l.FantasyDraft.DraftPickPlayers,
-                (left, right) => new { League = left.League, FantasyLeague = left.FantasyLeague, FantasyDraft = left.FantasyDraft, DraftPick = right, FantasyPlayer = right.FantasyPlayer }
-            )
-            // LEFT JOIN
-            .SelectMany(
-                fdp => fdp.League.MatchDetails
-                    .SelectMany(md => md.Players,
-                        (left, right) => new { MatchDetail = left, MatchDetailPlayer = right }
-                    )
-                    .Where(md => md.MatchDetailPlayer.AccountId == fdp.FantasyPlayer.DotaAccountId &&
-                        md.MatchDetail.StartTime >= fdp.FantasyLeague.LeagueStartTime &&
-                        md.MatchDetail.StartTime <= fdp.FantasyLeague.LeagueEndTime)
-                    .DefaultIfEmpty(),
-                (left, right) => new { FantasyLeague = left.FantasyLeague, FantasyDraft = left.FantasyDraft, FantasyPlayer = left.FantasyPlayer, MatchInfo = right }
-            )
-            .Where(fdp => fdp.FantasyLeague.Id == FantasyLeagueId)
-            .Distinct()
-            .Select(
-                fdp => new FantasyPlayerPoints
-                {
-                    FantasyDraft = fdp.FantasyDraft,
-                    Match = fdp.MatchInfo != null ? fdp.MatchInfo.MatchDetailPlayer : null,
-                    FantasyPlayer = fdp.FantasyPlayer
-                }
-            );
+        var fantasyPlayerPoints = await FantasyPlayerPointsByFantasyLeagueAsync(FantasyLeagueId);
+        var playerTotals = AggregateFantasyPlayerPoints(fantasyPlayerPoints).ToList();
 
-        _logger.LogInformation($"Fantasy Draft Points by Fantasy League Query: {fantasyDraftPointsByLeagueQuery.ToQueryString()}");
+        var fantasyDraftPointsByLeagueQuery = await _dbContext.FantasyDrafts
+            .Where(fl => fl.FantasyLeagueId == FantasyLeagueId)
+            .ToListAsync();
 
-        return await fantasyDraftPointsByLeagueQuery.ToListAsync();
+        var fantasyDraftPoints = fantasyDraftPointsByLeagueQuery
+            .Select(fd => new FantasyDraftPointTotals
+            {
+                FantasyDraft = fd,
+                IsTeam = _dbContext.Teams.Select(t => t.Id).Any(t => t == fd.DiscordAccountId),
+                TeamId = _dbContext.Teams.Select(t => t.Id).Any(t => t == fd.DiscordAccountId) ?
+                    _dbContext.Teams.FirstOrDefault(t => t.Id == fd.DiscordAccountId)?.Id ?? -1 :
+                    null,
+                DiscordName = _dbContext.Teams.Select(t => t.Id).Any(t => t == fd.DiscordAccountId) ?
+                    _dbContext.Teams.FirstOrDefault(t => t.Id == fd.DiscordAccountId)?.Name ?? "Unknown Team" :
+                    _dbContext.DiscordIds.FirstOrDefault(d => d.DiscordId == fd.DiscordAccountId)?.DiscordName ?? "Unknown User",
+                FantasyPlayerPoints = playerTotals.Where(pt => fd.DraftPickPlayers.Select(dpp => dpp.FantasyPlayerId).Contains(pt.FantasyPlayer.Id)).ToList()
+            })
+            .ToList()
+            ;
+
+        return fantasyDraftPoints;
     }
 
-    public async Task<IEnumerable<FantasyPlayerPoints>> FantasyDraftPointsByUserLeagueAsync(long UserDiscordAccountId, int FantasyLeagueId)
+    public async Task<FantasyDraftPointTotals?> FantasyDraftPointsByUserLeagueAsync(long UserDiscordAccountId, int FantasyLeagueId)
     {
         _logger.LogInformation($"Fetching Fantasy Points for LeagueID: {FantasyLeagueId}");
 
-        var fantasyDraftPointsByUserLeagueQuery = _dbContext.Leagues
-            .SelectMany(
-                l => l.FantasyLeagues,
-                (left, right) => new { League = left, FantasyLeague = right })
-            .SelectMany(
-                l => l.FantasyLeague.FantasyDrafts,
-                (left, right) => new { League = left.League, FantasyLeague = left.FantasyLeague, FantasyDraft = right }
-            )
-            .SelectMany(
-                l => l.FantasyDraft.DraftPickPlayers,
-                (left, right) => new { League = left.League, FantasyLeague = left.FantasyLeague, FantasyDraft = left.FantasyDraft, DraftPick = right, FantasyPlayer = right.FantasyPlayer }
-            )
-            // LEFT JOIN
-            .SelectMany(
-                fdp => fdp.League.MatchDetails
-                    .SelectMany(md => md.Players,
-                        (left, right) => new { MatchDetail = left, MatchDetailPlayer = right }
-                    )
-                    .Where(md => md.MatchDetailPlayer.AccountId == fdp.FantasyPlayer.DotaAccountId &&
-                        md.MatchDetail.StartTime >= fdp.FantasyLeague.LeagueStartTime &&
-                        md.MatchDetail.StartTime <= fdp.FantasyLeague.LeagueEndTime)
-                    .DefaultIfEmpty(),
-                (left, right) => new { FantasyLeague = left.FantasyLeague, FantasyDraft = left.FantasyDraft, FantasyPlayer = left.FantasyPlayer, MatchInfo = right }
-            )
-            .Where(fdp => fdp.FantasyLeague.Id == FantasyLeagueId && fdp.FantasyDraft.DiscordAccountId == UserDiscordAccountId)
-            .Distinct()
-            .Select(
-                fdp => new FantasyPlayerPoints
-                {
-                    FantasyDraft = fdp.FantasyDraft,
-                    Match = fdp.MatchInfo != null ? fdp.MatchInfo.MatchDetailPlayer : null,
-                    FantasyPlayer = fdp.FantasyPlayer
-                }
-            );
+        var fantasyPlayerPoints = await FantasyPlayerPointsByFantasyLeagueAsync(FantasyLeagueId);
+        var playerTotals = AggregateFantasyPlayerPoints(fantasyPlayerPoints).ToList();
 
-        _logger.LogInformation($"Fantasy Draft Points by Fantasy User League: {fantasyDraftPointsByUserLeagueQuery.ToQueryString()}");
+        var fantasyDraftPointsByUserLeague = await _dbContext.FantasyDrafts
+            .Where(fd => fd.FantasyLeagueId == FantasyLeagueId && fd.DiscordAccountId == UserDiscordAccountId)
+            .FirstOrDefaultAsync();
 
-        return await fantasyDraftPointsByUserLeagueQuery.ToListAsync();
+        if (fantasyDraftPointsByUserLeague == null)
+        {
+            return null;
+        }
+        else
+        {
+            var fantasyDraftPoints = new FantasyDraftPointTotals
+            {
+                FantasyDraft = fantasyDraftPointsByUserLeague,
+                IsTeam = _dbContext.Teams.Select(t => t.Id).Any(t => t == fantasyDraftPointsByUserLeague.DiscordAccountId),
+                TeamId = _dbContext.Teams.Select(t => t.Id).Any(t => t == fantasyDraftPointsByUserLeague.DiscordAccountId) ?
+                        _dbContext.Teams.FirstOrDefault(t => t.Id == fantasyDraftPointsByUserLeague.DiscordAccountId)?.Id ?? -1 :
+                        null,
+                DiscordName = _dbContext.Teams.Select(t => t.Id).Any(t => t == fantasyDraftPointsByUserLeague.DiscordAccountId) ?
+                        _dbContext.Teams.FirstOrDefault(t => t.Id == fantasyDraftPointsByUserLeague.DiscordAccountId)?.Name ?? "Unknown Team" :
+                        _dbContext.DiscordIds.FirstOrDefault(d => d.DiscordId == fantasyDraftPointsByUserLeague.DiscordAccountId)?.DiscordName ?? "Unknown User",
+                FantasyPlayerPoints = playerTotals.Where(pt => fantasyDraftPointsByUserLeague.DraftPickPlayers.Select(dpp => dpp.FantasyPlayerId).Contains(pt.FantasyPlayer.Id)).ToList()
+            };
+
+            return fantasyDraftPoints;
+        }
     }
 
     public IEnumerable<FantasyPlayerPointTotals> AggregateFantasyPlayerPoints(IEnumerable<FantasyPlayerPoints> fantasyPlayerPoints)
@@ -213,84 +157,22 @@ public class FantasyRepository : IFantasyRepository
                 {
                     FantasyPlayer = group.Key,
                     TotalMatches = group.Where(g => g.Match != null).Count(),
-                    TotalKills = group.Sum(result => result.Kills),
-                    TotalKillsPoints = group.Sum(result => result.KillsPoints),
-                    TotalDeaths = group.Sum(result => result.Deaths),
-                    TotalDeathsPoints = group.Sum(result => result.DeathsPoints),
-                    TotalAssists = group.Sum(result => result.Assists),
-                    TotalAssistsPoints = group.Sum(result => result.AssistsPoints),
-                    TotalLastHits = group.Sum(result => result.LastHits),
-                    TotalLastHitsPoints = group.Sum(result => result.LastHitsPoints),
-                    AvgGoldPerMin = group.Where(result => result.Match != null).Select(result => result.GoldPerMin).DefaultIfEmpty().Average(),
-                    TotalGoldPerMinPoints = group.Sum(result => result.GoldPerMinPoints),
-                    AvgXpPerMin = group.Where(result => result.Match != null).Select(result => result.XpPerMin).DefaultIfEmpty().Average(),
-                    TotalXpPerMinPoints = group.Sum(result => result.XpPerMinPoints),
-                    TotalMatchFantasyPoints = group.Sum(result => result.TotalMatchFantasyPoints)
+                    TotalKills = group.Sum(result => result.Kills ?? 0),
+                    TotalKillsPoints = group.Sum(result => result.KillsPoints ?? 0),
+                    TotalDeaths = group.Sum(result => result.Deaths ?? 0),
+                    TotalDeathsPoints = group.Sum(result => result.DeathsPoints ?? 0),
+                    TotalAssists = group.Sum(result => result.Assists ?? 0),
+                    TotalAssistsPoints = group.Sum(result => result.AssistsPoints ?? 0),
+                    TotalLastHits = group.Sum(result => result.LastHits ?? 0),
+                    TotalLastHitsPoints = group.Sum(result => result.LastHitsPoints ?? 0),
+                    AvgGoldPerMin = group.Where(result => result.Match != null).Select(result => result.GoldPerMin ?? 0).DefaultIfEmpty().Average(),
+                    TotalGoldPerMinPoints = group.Sum(result => result.GoldPerMinPoints ?? 0),
+                    AvgXpPerMin = group.Where(result => result.Match != null).Select(result => result.XpPerMin ?? 0).DefaultIfEmpty().Average(),
+                    TotalXpPerMinPoints = group.Sum(result => result.XpPerMinPoints ?? 0),
+                    TotalMatchFantasyPoints = group.Sum(result => result.TotalMatchFantasyPoints ?? 0)
                 })
                 .OrderByDescending(fdp => fdp.TotalMatchFantasyPoints)
                 .ToList();
-    }
-
-    public IEnumerable<FantasyDraftPointTotals> AggregateFantasyDraftPoints(IEnumerable<FantasyPlayerPoints> fantasyPlayerPoints)
-    {
-        var distinctPlayers = fantasyPlayerPoints
-                .GroupBy(fp => new { fp.FantasyPlayer, fp.Match })
-                .Select(group => group.First())
-                .ToList();
-
-        List<FantasyPlayerPointTotals> playerTotals = AggregateFantasyPlayerPoints(distinctPlayers).ToList();
-
-        return fantasyPlayerPoints
-                      .GroupBy(fp => fp.FantasyDraft)
-                      .Select(group => group.Key)
-                      .Select(fdp => new FantasyDraftPointTotals
-                      {
-                          FantasyDraft = fdp,
-                          IsTeam = _dbContext.Teams.Select(t => t.Id).Any(t => t == fdp.DiscordAccountId),
-                          TeamId = _dbContext.Teams.Select(t => t.Id).Any(t => t == fdp.DiscordAccountId) ?
-                              _dbContext.Teams.FirstOrDefault(t => t.Id == fdp.DiscordAccountId)?.Id ?? -1 :
-                              null,
-                          DiscordName = _dbContext.Teams.Select(t => t.Id).Any(t => t == fdp.DiscordAccountId) ?
-                              _dbContext.Teams.FirstOrDefault(t => t.Id == fdp.DiscordAccountId)?.Name ?? "Unknown Team" :
-                              _dbContext.DiscordIds.FirstOrDefault(d => d.DiscordId == fdp.DiscordAccountId)?.DiscordName ?? "Unknown User",
-                          DraftPickOnePoints =
-                              playerTotals.Find(pt =>
-                                  pt.FantasyPlayer.Id == fdp.DraftPickPlayers
-                                                          .Where(dpp => dpp.DraftOrder == 1)
-                                                          .Select(dpp => dpp.FantasyPlayerId)
-                                                          .FirstOrDefault(0)
-                                              )?.TotalMatchFantasyPoints ?? 0M,
-                          DraftPickTwoPoints =
-                              playerTotals.Find(pt =>
-                                  pt.FantasyPlayer.Id == fdp.DraftPickPlayers
-                                                          .Where(dpp => dpp.DraftOrder == 2)
-                                                          .Select(dpp => dpp.FantasyPlayerId)
-                                                          .FirstOrDefault(0)
-                                              )?.TotalMatchFantasyPoints ?? 0M,
-                          DraftPickThreePoints =
-                              playerTotals.Find(pt =>
-                                  pt.FantasyPlayer.Id == fdp.DraftPickPlayers
-                                                          .Where(dpp => dpp.DraftOrder == 3)
-                                                          .Select(dpp => dpp.FantasyPlayerId)
-                                                          .FirstOrDefault(0)
-                                              )?.TotalMatchFantasyPoints ?? 0M,
-                          DraftPickFourPoints =
-                              playerTotals.Find(pt =>
-                                  pt.FantasyPlayer.Id == fdp.DraftPickPlayers
-                                                          .Where(dpp => dpp.DraftOrder == 4)
-                                                          .Select(dpp => dpp.FantasyPlayerId)
-                                                          .FirstOrDefault(0)
-                                              )?.TotalMatchFantasyPoints ?? 0M,
-                          DraftPickFivePoints =
-                              playerTotals.Find(pt =>
-                                  pt.FantasyPlayer.Id == fdp.DraftPickPlayers
-                                                          .Where(dpp => dpp.DraftOrder == 5)
-                                                          .Select(dpp => dpp.FantasyPlayerId)
-                                                          .FirstOrDefault(0)
-                                              )?.TotalMatchFantasyPoints ?? 0M,
-                      })
-                      .OrderByDescending(fdp => fdp.DraftTotalFantasyPoints)
-                      .ToList();
     }
 
     public async Task<IEnumerable<MetadataSummary>> AggregateMetadataAsync(int FantasyLeagueId)
@@ -305,15 +187,17 @@ public class FantasyRepository : IFantasyRepository
                 .SelectMany(
                     l => l.League.MatchDetails,
                     (left, right) => new { left.League, left.FantasyLeague, MatchDetail = right }
-                )              
+                )
                 //Matchdetail joins
                 .SelectMany(mm => mm.MatchDetail.Players,
                     (left, right) => new { left.FantasyLeague, MatchDetail = left.MatchDetail, MatchDetailPlayer = right }
                 )
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                 //Metadata joins
                 .SelectMany(mm => mm.MatchDetail.MatchMetadata.Teams,
                     (left, right) => new { left.FantasyLeague, MatchDetail = left.MatchDetail, MatchDetailPlayer = left.MatchDetailPlayer, MatchMetadataTeam = right }
                 )
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
                 .SelectMany(mm => mm.MatchMetadataTeam.Players,
                     (left, right) => new { left.FantasyLeague, MatchDetail = left.MatchDetail, MatchDetailPlayer = left.MatchDetailPlayer, MatchMetadataPlayer = right }
                 )
@@ -341,7 +225,8 @@ public class FantasyRepository : IFantasyRepository
                 .Select(
                     final => new MetadataSummary
                     {
-                        Player = new FantasyPlayer {
+                        Player = new FantasyPlayer
+                        {
                             DotaAccount = final.Key.DotaAccount,
                             DotaAccountId = final.Key.DotaAccountId,
                             FantasyLeague = new FantasyLeague(), // Need to omit this to avoid circular reference
@@ -351,46 +236,75 @@ public class FantasyRepository : IFantasyRepository
                             TeamId = final.Key.TeamId,
 
                         },
-                        MatchDetailsPlayers = new MatchDetailsPlayer
-                        {
-                            Kills = final.Sum(result => result.MatchDetailPlayer.Kills),
-                            Deaths = final.Sum(result => result.MatchDetailPlayer.Deaths),
-                            Assists = final.Sum(result => result.MatchDetailPlayer.Assists),
-                            LastHits = final.Sum(result => result.MatchDetailPlayer.LastHits),
-                            Denies = final.Sum(result => result.MatchDetailPlayer.Denies),
-                            GoldPerMin = (int?)final.Average(result => result.MatchDetailPlayer.GoldPerMin),
-                            XpPerMin = (int?)final.Average(result => result.MatchDetailPlayer.XpPerMin),
-                            Networth = final.Sum(result => result.MatchDetailPlayer.Networth),
-                            HeroDamage = final.Sum(result => result.MatchDetailPlayer.HeroDamage),
-                            TowerDamage = final.Sum(result => result.MatchDetailPlayer.TowerDamage),
-                            HeroHealing = final.Sum(result => result.MatchDetailPlayer.HeroHealing),
-                            Gold = final.Sum(result => result.MatchDetailPlayer.Gold),
-                            ScaledHeroDamage = final.Sum(result => result.MatchDetailPlayer.ScaledHeroDamage),
-                            ScaledTowerDamage = final.Sum(result => result.MatchDetailPlayer.ScaledTowerDamage),
-                            ScaledHeroHealing = final.Sum(result => result.MatchDetailPlayer.ScaledHeroHealing)
-                        },
-                        MetadataPlayer = new GcMatchMetadataPlayer
-                        {
-                            WinStreak = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.WinStreak),
-                            BestWinStreak = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.BestWinStreak),
-                            FightScore = final.Sum(result => result.MatchMetadataPlayer.FightScore),
-                            FarmScore = final.Sum(result => result.MatchMetadataPlayer.FarmScore),
-                            SupportScore = final.Sum(result => result.MatchMetadataPlayer.SupportScore),
-                            PushScore = final.Sum(result => result.MatchMetadataPlayer.PushScore),
-                            HeroXp = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.HeroXp),
-                            CampsStacked = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.CampsStacked),
-                            Rampages = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.Rampages),
-                            TripleKills = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.TripleKills),
-                            AegisSnatched = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.AegisSnatched),
-                            RapiersPurchased = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.RapiersPurchased),
-                            CouriersKilled = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.CouriersKilled),
-                            NetworthRank = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.NetworthRank),
-                            SupportGoldSpent = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.SupportGoldSpent),
-                            ObserverWardsPlaced = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.ObserverWardsPlaced),
-                            SentryWardsPlaced = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.SentryWardsPlaced),
-                            WardsDewarded = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.WardsDewarded),
-                            StunDuration = final.Sum(result => result.MatchMetadataPlayer.StunDuration),
-                        }
+                        MatchesPlayed = final.Count(),
+                        // Match Details
+                        Kills = final.Sum(result => result.MatchDetailPlayer.Kills),
+                        KillsAverage = final.Average(result => result.MatchDetailPlayer.Kills),
+                        Deaths = final.Sum(result => result.MatchDetailPlayer.Deaths),
+                        DeathsAverage = final.Average(result => result.MatchDetailPlayer.Deaths),
+                        Assists = final.Sum(result => result.MatchDetailPlayer.Assists),
+                        AssistsAverage = final.Average(result => result.MatchDetailPlayer.Assists),
+                        LastHits = final.Sum(result => result.MatchDetailPlayer.LastHits),
+                        LastHitsAverage = final.Average(result => result.MatchDetailPlayer.LastHits),
+                        Denies = final.Sum(result => result.MatchDetailPlayer.Denies),
+                        DeniesAverage = final.Average(result => result.MatchDetailPlayer.Denies),
+                        GoldPerMin = (int?)final.Average(result => result.MatchDetailPlayer.GoldPerMin),
+                        GoldPerMinAverage = (int?)final.Average(result => result.MatchDetailPlayer.GoldPerMin),
+                        XpPerMin = (int?)final.Average(result => result.MatchDetailPlayer.XpPerMin),
+                        XpPerMinAverage = (int?)final.Average(result => result.MatchDetailPlayer.XpPerMin),
+                        Networth = final.Sum(result => result.MatchDetailPlayer.Networth),
+                        NetworthAverage = final.Average(result => result.MatchDetailPlayer.Networth),
+                        HeroDamage = final.Sum(result => result.MatchDetailPlayer.HeroDamage),
+                        HeroDamageAverage = final.Average(result => result.MatchDetailPlayer.HeroDamage),
+                        TowerDamage = final.Sum(result => result.MatchDetailPlayer.TowerDamage),
+                        TowerDamageAverage = final.Average(result => result.MatchDetailPlayer.TowerDamage),
+                        HeroHealing = final.Sum(result => result.MatchDetailPlayer.HeroHealing),
+                        HeroHealingAverage = final.Average(result => result.MatchDetailPlayer.HeroHealing),
+                        Gold = final.Sum(result => result.MatchDetailPlayer.Gold),
+                        GoldAverage = final.Average(result => result.MatchDetailPlayer.Gold),
+                        ScaledHeroDamage = final.Sum(result => result.MatchDetailPlayer.ScaledHeroDamage),
+                        ScaledHeroDamageAverage = final.Average(result => result.MatchDetailPlayer.ScaledHeroDamage),
+                        ScaledTowerDamage = final.Sum(result => result.MatchDetailPlayer.ScaledTowerDamage),
+                        ScaledTowerDamageAverage = final.Average(result => result.MatchDetailPlayer.ScaledTowerDamage),
+                        ScaledHeroHealing = final.Sum(result => result.MatchDetailPlayer.ScaledHeroHealing),
+                        ScaledHeroHealingAverage = final.Average(result => result.MatchDetailPlayer.ScaledHeroHealing),
+                        // Metadata Player
+                        WinStreak = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.WinStreak),
+                        BestWinStreak = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.BestWinStreak),
+                        FightScore = final.Sum(result => result.MatchMetadataPlayer.FightScore),
+                        FarmScore = final.Sum(result => result.MatchMetadataPlayer.FarmScore),
+                        SupportScore = final.Sum(result => result.MatchMetadataPlayer.SupportScore),
+                        PushScore = final.Sum(result => result.MatchMetadataPlayer.PushScore),
+                        HeroXp = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.HeroXp),
+                        CampsStacked = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.CampsStacked),
+                        Rampages = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.Rampages),
+                        TripleKills = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.TripleKills),
+                        AegisSnatched = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.AegisSnatched),
+                        RapiersPurchased = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.RapiersPurchased),
+                        CouriersKilled = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.CouriersKilled),
+                        NetworthRank = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.NetworthRank),
+                        SupportGoldSpent = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.SupportGoldSpent),
+                        ObserverWardsPlaced = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.ObserverWardsPlaced),
+                        SentryWardsPlaced = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.SentryWardsPlaced),
+                        WardsDewarded = (uint)final.Sum(result => (int)result.MatchMetadataPlayer.WardsDewarded),
+                        StunDuration = final.Sum(result => result.MatchMetadataPlayer.StunDuration),
+                        FightScoreAverage = final.Average(result => result.MatchMetadataPlayer.FightScore),
+                        FarmScoreAverage = final.Average(result => result.MatchMetadataPlayer.FarmScore),
+                        SupportScoreAverage = final.Average(result => result.MatchMetadataPlayer.SupportScore),
+                        PushScoreAverage = final.Average(result => result.MatchMetadataPlayer.PushScore),
+                        HeroXpAverage = final.Average(result => (int)result.MatchMetadataPlayer.HeroXp),
+                        CampsStackedAverage = final.Average(result => (int)result.MatchMetadataPlayer.CampsStacked),
+                        RampagesAverage = final.Average(result => (int)result.MatchMetadataPlayer.Rampages),
+                        TripleKillsAverage = final.Average(result => (int)result.MatchMetadataPlayer.TripleKills),
+                        AegisSnatchedAverage = final.Average(result => (int)result.MatchMetadataPlayer.AegisSnatched),
+                        RapiersPurchasedAverage = final.Average(result => (int)result.MatchMetadataPlayer.RapiersPurchased),
+                        CouriersKilledAverage = final.Average(result => (int)result.MatchMetadataPlayer.CouriersKilled),
+                        NetworthRankAverage = final.Average(result => (int)result.MatchMetadataPlayer.NetworthRank),
+                        SupportGoldSpentAverage = final.Average(result => (int)result.MatchMetadataPlayer.SupportGoldSpent),
+                        ObserverWardsPlacedAverage = final.Average(result => (int)result.MatchMetadataPlayer.ObserverWardsPlaced),
+                        SentryWardsPlacedAverage = final.Average(result => (int)result.MatchMetadataPlayer.SentryWardsPlaced),
+                        WardsDewardedAverage = final.Average(result => (int)result.MatchMetadataPlayer.WardsDewarded),
+                        StunDurationAverage = final.Average(result => result.MatchMetadataPlayer.StunDuration)
                     }
                 );
 
@@ -605,14 +519,16 @@ public class FantasyRepository : IFantasyRepository
     {
         _logger.LogInformation($"Getting Match Metadata for Fantasy League {FantasyLeagueId}");
 
-        var fantasyLeagueMetadataQuery = QueryFantasyLeagueMatchDetails(FantasyLeagueId)
+        var fantasyLeagueMetadataQuery = await QueryFantasyLeagueMatchDetails(FantasyLeagueId)
             .Where(md => md.MatchMetadata != null)
-            .Select(l => l.MatchMetadata)
-            .OrderByDescending(md => md.MatchId);
+            .OrderByDescending(md => md.MatchId)
+            .ToListAsync();
 
-        _logger.LogInformation($"Match Metadata SQL Query: {fantasyLeagueMetadataQuery.ToQueryString()}");
+        var filtered = fantasyLeagueMetadataQuery            
+            .Select(l => l.MatchMetadata ?? new GcMatchMetadata())
+            .ToList();
 
-        return await fantasyLeagueMetadataQuery.ToListAsync();
+        return filtered;
     }
 
     public async Task<IEnumerable<GcMatchMetadata>> GetFantasyLeagueMetadataAsync(int FantasyLeagueId, int Skip = 0, int Take = 50)
@@ -641,6 +557,21 @@ public class FantasyRepository : IFantasyRepository
         _logger.LogInformation($"Match Metadata Query: {matchMetadataQuery.ToQueryString()}");
 
         return await matchMetadataQuery.FirstOrDefaultAsync();
+    }
+
+    public async Task<IEnumerable<MatchHighlights>> GetLastNMatchHighlights(int FantasyLeagueId, int MatchCount)
+    {
+        _logger.LogInformation($"Getting {MatchCount} Match Highlights for Fantasy League ID: {FantasyLeagueId}");
+
+        var matchHighlightsQuery = _dbContext.MatchHighlightsView
+                .Include(mhv => mhv.FantasyPlayer)
+                .Where(mhv => mhv.FantasyLeagueId == FantasyLeagueId)
+                .OrderByDescending(mhv => mhv.StartTime)
+                .Take(MatchCount);
+
+        _logger.LogInformation($"Match Highlights Query: {matchHighlightsQuery.ToQueryString()}");
+
+        return await matchHighlightsQuery.ToListAsync();
     }
 
     private IQueryable<MatchDetail> QueryLeagueMatchDetails(int? LeagueId)

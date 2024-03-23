@@ -111,15 +111,22 @@
                             </template>
                         </q-table>
                     </div>
+                    <!-- <q-footer class="q-pa-sm compare-footer">
+                        <q-btn flat style="background: var(--nadcl-main-2)" label="Compare" />
+                    </q-footer> -->
                 </q-tab-panel>
-                <q-tab-panel name="league" style="padding: 0px">
+                <q-tab-panel class="collapse-transition" name="league" style="padding: 0px">
                     <div class="row">
-                        <div style="width:55%; max-width:300px; padding:10px">
+                        <div style="width:55%;max-width:300px; padding:10px;">
                             <q-input v-model="leagueFilter" debounce="500" color="red-13" label="Search" dense outlined>
                                 <template v-slot:append>
                                     <q-icon name="search" />
                                 </template>
                             </q-input>
+                        </div>
+                        <div style="display:flex;align-items: center;">
+                            <q-btn v-if="selectedLeaguePlayer.length > 0" flat icon="highlight_off" size="14px"
+                                padding="md xs" @click="clearSelectedLeaguePlayers" />
                         </div>
                     </div>
                     <div class="row">
@@ -131,142 +138,247 @@
                             <q-tab name="damageHealing" label="Dmg/Heal" />
                         </q-tabs>
                     </div>
-                    <div class="row">
+                    <div class="row" id="leagueTable">
                         <q-table class="league-stats-table" dense :columns="displayedLeagueColumns"
-                            :rows="fantasyLeagueMetadataStatsIndexed" virtual-scroll :rows-per-page-options="[0]"
-                            separator="vertical" style="width:100%">
-                            <template v-slot:body-cell-leaguePlayer="props">
-                                <q-td :props="props">
-                                    <div class="row">
-                                        <div v-if="this.isDesktop" class="col" style="max-width:65px">
-                                            <q-img height="60px" width="60px" :src="props.value.playerPicture" />
-                                        </div>
-                                        <div class="col">
-                                            <div style="white-space:normal">
-                                                <b>{{ props.value.playerName }}</b>
-                                                <br>
-                                                {{ props.value.teamName }}
+                            :rows="fantasyLeagueMetadataStatsIndexed" virtual-scroll
+                            :rows-per-page-options="[0, 5, 10, 15, 25, 50]" separator="vertical" style="width:100%"
+                            selection="multiple" v-model:selected="selectedLeaguePlayer" :row-key="row => row.player.id"
+                            :pagination="leaguePagination">
+                            <template v-slot:header="props">
+                                <q-tr :props="props">
+                                    <q-th v-for="col in props.cols" :key="col.name" :props="props">
+                                        {{ col.label }}
+                                    </q-th>
+                                </q-tr>
+                            </template>
+                            <template v-slot:body="props">
+                                <q-tr :props="props" @click="selectLeagueRow(props.row)">
+                                    <q-td key="leaguePlayer" :props="props">
+                                        <div class="row" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            <div v-if="this.isDesktop" class="col" style="max-width:65px">
+                                                <q-img height="60px" width="60px"
+                                                    :src="props.row.player.dotaAccount.steamProfilePicture" />
+                                            </div>
+                                            <div class="col">
+                                                <div style="white-space:normal">
+                                                    <b>{{ props.row.player.dotaAccount.name }}</b>
+                                                    <br>
+                                                    {{ props.row.player.team.name }}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </q-td>
-                            </template>
-                            <template v-slot:body-cell-totalKills="props">
-                                <q-td :props="props">
-                                    <div style="white-space:normal">
-                                        {{ props.value.kills }}
-                                    </div>
-                                </q-td>
-                            </template>
-                            <template v-slot:body-cell-totalDeaths="props">
-                                <q-td :props="props">
-                                    <div style="white-space:normal">
-                                        {{ props.value.deaths }}
-                                    </div>
-                                </q-td>
-                            </template>
-                            <template v-slot:body-cell-totalAssists="props">
-                                <q-td :props="props">
-                                    <div style="white-space:normal">
-                                        {{ props.value.assists }}
-                                    </div>
-                                </q-td>
-                            </template>
-                            <template v-slot:body-cell-totalLastHits="props">
-                                <q-td :props="props">
-                                    <div style="white-space:normal">
-                                        {{ props.value.lastHits }}
-                                    </div>
-                                </q-td>
-                            </template>
-                            <template v-slot:body-cell-totalDenies="props">
-                                <q-td :props="props">
-                                    <div style="white-space:normal">
-                                        {{ props.value.denies }}
-                                    </div>
-                                </q-td>
-                            </template>
-                            <template v-slot:body-cell-totalGoldPerMin="props">
-                                <q-td :props="props">
-                                    <div style="white-space:normal">
-                                        {{ props.value.goldPerMin }}
-                                    </div>
-                                </q-td>
-                            </template>
-                            <template v-slot:body-cell-totalXpPerMin="props">
-                                <q-td :props="props">
-                                    <div style="white-space:normal">
-                                        {{ props.value.xpPerMin }}
-                                    </div>
-                                </q-td>
-                            </template>
-                            <template v-slot:body-cell-totalSupportGoldSpent="props">
-                                <q-td :props="props">
-                                    <div style="white-space:normal">
-                                        <span :style="{fontSize: isDesktop ? '1em' : '0.85em'}">
-                                            {{ props.value.supportGoldSpent.toLocaleString() }}
-                                        </span>
-                                    </div>
-                                </q-td>
-                            </template>
-                            <template v-slot:body-cell-totalObsPlaced="props">
-                                <q-td :props="props">
-                                    <div style="white-space:normal">
-                                        {{ props.value.observerWardsPlaced }}
-                                    </div>
-                                </q-td>
-                            </template>
-                            <template v-slot:body-cell-totalSentriesPlaced="props">
-                                <q-td :props="props">
-                                    <div style="white-space:normal">
-                                        {{ props.value.sentryWardsPlaced }}
-                                    </div>
-                                </q-td>
-                            </template>
-                            <template v-slot:body-cell-totalWardsDewarded="props">
-                                <q-td :props="props">
-                                    <div style="white-space:normal">
-                                        {{ props.value.wardsDewarded }}
-                                    </div>
-                                </q-td>
-                            </template>
-                            <template v-slot:body-cell-totalCampsStacked="props">
-                                <q-td :props="props">
-                                    <div style="white-space:normal">
-                                        {{ props.value.campsStacked }}
-                                    </div>
-                                </q-td>
-                            </template>
-                            <template v-slot:body-cell-totalHeroDamage="props">
-                                <q-td :props="props">
-                                    <div style="white-space:normal">
-                                        {{ props.value.heroDamage.toLocaleString() }}
-                                    </div>
-                                </q-td>
-                            </template>
-                            <template v-slot:body-cell-totalTowerDamage="props">
-                                <q-td :props="props">
-                                    <div style="white-space:normal">
-                                        {{ props.value.towerDamage.toLocaleString() }}
-                                    </div>
-                                </q-td>
-                            </template>
-                            <template v-slot:body-cell-totalHeroHealing="props">
-                                <q-td :props="props">
-                                    <div style="white-space:normal">
-                                        {{ props.value.heroHealing.toLocaleString() }}
-                                    </div>
-                                </q-td>
-                            </template>
-                            <template v-slot:body-cell-totalStunDuration="props">
-                                <q-td :props="props">
-                                    <div style="white-space:normal">
-                                        {{ props.value.stunDuration.toFixed(1).toLocaleString() }}
-                                    </div>
-                                </q-td>
+                                    </q-td>
+                                    <q-td key="totalKills" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ props.row.kills }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalDeaths" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ props.row.deaths }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalAssists" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ props.row.assists }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalLastHits" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ props.row.lastHits }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalDenies" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ props.row.denies }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalGoldPerMin" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ props.row.goldPerMin }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalXpPerMin" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ props.row.xpPerMin }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalSupportGoldSpent" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ (props.row.supportGoldSpent / 1000 ?? 0).toFixed(1) + 'k' }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalObsPlaced" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ props.row.observerWardsPlaced ?? 0 }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalSentriesPlaced" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ props.row.sentryWardsPlaced ?? 0 }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalWardsDewarded" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ props.row.wardsDewarded ?? 0 }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalCampsStacked" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ props.row.campsStacked ?? 0 }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalHeroDamage" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ (props.row.heroDamage ?? 0).toLocaleString() }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalTowerDamage" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ (props.row.towerDamage ?? 0).toLocaleString() }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalHeroHealing" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ (props.row.heroHealing ?? 0).toLocaleString() }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalStunDuration" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ (props.row.stunDuration ?? 0).toFixed(1).toLocaleString() }}
+                                        </div>
+                                    </q-td>
+                                </q-tr>
                             </template>
                         </q-table>
                     </div>
+                    <div class="row collapsed" id="leagueCompareTable">
+                        <q-table class="league-stats-table" dense :columns="displayedLeagueColumns"
+                            :rows="compareLeaguePlayers" virtual-scroll separator="vertical" style="width:100%"
+                            selection="multiple" v-model:selected="selectedLeaguePlayer" :row-key="row => row.player.id">
+                            <template v-slot:header="props">
+                                <q-tr :props="props">
+                                    <q-th v-for="col in props.cols" :key="col.name" :props="props">
+                                        {{ col.label }}
+                                    </q-th>
+                                </q-tr>
+                            </template>
+                            <template v-slot:body="props">
+                                <q-tr :props="props" @click="selectLeagueRow(props.row)">
+                                    <q-td key="leaguePlayer" :props="props">
+                                        <div class="row" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            <div v-if="this.isDesktop" class="col" style="max-width:65px">
+                                                <q-img height="60px" width="60px"
+                                                    :src="props.row.player.dotaAccount.playerPicture" />
+                                            </div>
+                                            <div class="col">
+                                                <div style="white-space:normal">
+                                                    <b>{{ props.row.player.dotaAccount.name }}</b>
+                                                    <br>
+                                                    {{ props.row.player.team.name }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalKills" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ leagueCompareTab == 'avg' ? props.row.killsAverage.toFixed(1) :
+                                                props.row.kills }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalDeaths" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ leagueCompareTab == 'avg' ? props.row.deathsAverage.toFixed(1) :
+                                                props.row.deaths }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalAssists" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ leagueCompareTab == 'avg' ? props.row.assistsAverage.toFixed(1) :
+                                                props.row.assists }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalLastHits" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ leagueCompareTab == 'avg' ? props.row.lastHitsAverage.toFixed(1) :
+                                                props.row.lastHits }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalDenies" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ leagueCompareTab == 'avg' ? props.row.deniesAverage.toFixed(1) : props.row.denies }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalGoldPerMin" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ leagueCompareTab == 'avg' ? props.row.goldPerMinAverage.toFixed(1) : props.row.goldPerMin }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalXpPerMin" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ leagueCompareTab == 'avg' ? props.row.xpPerMinAverage.toFixed(1) : props.row.xpPerMin }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalSupportGoldSpent" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ leagueCompareTab == 'avg' ? props.row.supportGoldSpentAverage.toFixed(1) : (props.row.supportGoldSpent / 1000 ?? 0).toFixed(1) + 'k' }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalObsPlaced" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ leagueCompareTab == 'avg' ? props.row.observerWardsPlacedAverage.toFixed(1) :props.row.observerWardsPlaced ?? 0 }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalSentriesPlaced" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ leagueCompareTab == 'avg' ? props.row.sentryWardsPlacedAverage.toFixed(1) :props.row.sentryWardsPlaced ?? 0 }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalWardsDewarded" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ leagueCompareTab == 'avg' ? props.row.wardsDewardedAverage.toFixed(1) :props.row.wardsDewarded ?? 0 }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalCampsStacked" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ leagueCompareTab == 'avg' ? props.row.campsStackedAverage.toFixed(1) :props.row.campsStacked ?? 0 }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalHeroDamage" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ leagueCompareTab == 'avg' ? props.row.heroDamageAverage.toFixed(1) :(props.row.heroDamage ?? 0).toLocaleString() }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalTowerDamage" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ leagueCompareTab == 'avg' ? props.row.towerDamageAverage.toFixed(1) :(props.row.towerDamage ?? 0).toLocaleString() }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalHeroHealing" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ leagueCompareTab == 'avg' ? props.row.heroHealingAverage.toFixed(1) :(props.row.heroHealing ?? 0).toLocaleString() }}
+                                        </div>
+                                    </q-td>
+                                    <q-td key="totalStunDuration" :props="props">
+                                        <div style="white-space:normal" :style="{ fontSize: isDesktop ? '1em' : '0.90em' }">
+                                            {{ leagueCompareTab == 'avg' ? props.row.stunDurationAverage.toFixed(1) :(props.row.stunDuration ?? 0).toFixed(1).toLocaleString() }}
+                                        </div>
+                                    </q-td>
+                                </q-tr>
+                            </template>
+                        </q-table>
+                    </div>
+                    <q-footer v-if="selectedLeaguePlayer.length == 2 || compareOn" class="q-pa-sm compare-footer">
+                        <div style="display:flex;">
+                            <q-tabs v-if="compareOn" v-model="leagueCompareTab" dense class="text-grey-5"
+                                active-color="grey-1" indicator-color="red-13" style="margin-bottom:5px">
+                                <q-tab name="avg" label="AVG" />
+                                <q-tab name="sum" label="TOTAL" />
+                            </q-tabs>
+                            <q-btn flat style="width:100%;background: var(--nadcl-main-2)" @click="CompareLeaguePlayers"
+                                :label="compareOn ? 'Back' : 'Compare'" />
+                        </div>
+                    </q-footer>
                 </q-tab-panel>
             </q-tab-panels>
         </div>
@@ -289,7 +401,15 @@ export default {
         const fantasyTab = ref('kda');
         const fantasyFilter = ref('');
         const leagueTab = ref('kda');
+        const leagueCompareTab = ref('avg');
         const leagueFilter = ref('');
+        const compareOn = ref(false);
+        const leaguePagination = ref({
+            sortBy: 'desc',
+            descending: false,
+            page: 1,
+            rowsPerPage: 15
+        })
         const isDesktop = ref(window.outerWidth >= 600);
 
         const showFantasyFilters = ref(false);
@@ -419,18 +539,12 @@ export default {
                 name: 'leaguePlayer',
                 label: 'Player/Team',
                 align: 'left',
-                field: row => {
-                    return {
-                        playerName: row.player.dotaAccount.name,
-                        playerPicture: row.player.dotaAccount.steamProfilePicture,
-                        teamName: row.player.team.name
-                    };
-                },
+                field: row => row.player.dotaAccount.name.toLowerCase(),
                 style: 'width: 400px',
                 sortable: true,
                 sort: (a, b) => {
-                    if (a.playerName > b.playerName) return 1;
-                    if (a.playerName < b.playerName) return -1;
+                    if (a > b) return 1;
+                    if (a < b) return -1;
                 }
             },
         ];
@@ -439,37 +553,25 @@ export default {
                 name: 'totalKills',
                 label: isDesktop.value ? 'Kills' : 'K',
                 align: 'left',
-                field: row => {
-                    return {
-                        kills: row.matchDetailsPlayers.kills,
-                    };
-                },
+                field: row => row.kills,
                 sortable: true,
-                sort: (a, b) => a.kills - b.kills
+                sort: (a, b) => a - b
             },
             {
                 name: 'totalDeaths',
                 label: isDesktop.value ? 'Deaths' : 'D',
                 align: 'left',
-                field: row => {
-                    return {
-                        deaths: row.matchDetailsPlayers.deaths,
-                    };
-                },
+                field: row => row.deaths,
                 sortable: true,
-                sort: (a, b) => a.deaths - b.deaths
+                sort: (a, b) => a - b
             },
             {
                 name: 'totalAssists',
                 label: isDesktop.value ? 'Assists' : 'A',
                 align: 'left',
-                field: row => {
-                    return {
-                        assists: row.matchDetailsPlayers.assists,
-                    };
-                },
+                field: row => row.assists,
                 sortable: true,
-                sort: (a, b) => a.assists - b.assists
+                sort: (a, b) => a - b
             },
         ];
         const farmLeagueColumns = [
@@ -477,49 +579,33 @@ export default {
                 name: 'totalLastHits',
                 label: isDesktop.value ? 'Last Hits' : 'LH',
                 align: 'left',
-                field: row => {
-                    return {
-                        lastHits: row.matchDetailsPlayers.lastHits,
-                    };
-                },
+                field: row => row.lastHits,
                 sortable: true,
-                sort: (a, b) => a.lastHits - b.lastHits
+                sort: (a, b) => a - b
             },
             {
                 name: 'totalDenies',
                 label: isDesktop.value ? 'Denies' : 'DN',
                 align: 'left',
-                field: row => {
-                    return {
-                        denies: row.matchDetailsPlayers.denies,
-                    };
-                },
+                field: row => row.denies,
                 sortable: true,
-                sort: (a, b) => a.denies - b.denies
+                sort: (a, b) => a - b
             },
             {
                 name: 'totalGoldPerMin',
                 label: isDesktop.value ? 'Avg GPM' : 'G',
                 align: 'left',
-                field: row => {
-                    return {
-                        goldPerMin: row.matchDetailsPlayers.goldPerMin,
-                    };
-                },
+                field: row => row.goldPerMin,
                 sortable: true,
-                sort: (a, b) => a.goldPerMin - b.goldPerMin
+                sort: (a, b) => a - b
             },
             {
                 name: 'totalXpPerMin',
                 label: isDesktop.value ? 'Avg XPM' : 'XP',
                 align: 'left',
-                field: row => {
-                    return {
-                        xpPerMin: row.matchDetailsPlayers.xpPerMin
-                    };
-                },
+                field: row => row.xpPerMin,
                 sortable: true,
-                sort: (a, b) => a.xpPerMin - b.xpPerMin
+                sort: (a, b) => a - b
             },
         ];
         const supportLeagueColumns = [
@@ -539,25 +625,17 @@ export default {
                 name: 'totalObsPlaced',
                 label: isDesktop.value ? 'Obs Placed' : 'OB',
                 align: 'left',
-                field: row => {
-                    return {
-                        observerWardsPlaced: row.metadataPlayer?.observerWardsPlaced ?? 0,
-                    };
-                },
+                field: row => row.observerWardsPlaced ?? 0,
                 sortable: true,
-                sort: (a, b) => a.observerWardsPlaced - b.observerWardsPlaced
+                sort: (a, b) => a - b
             },
             {
                 name: 'totalSentriesPlaced',
                 label: isDesktop.value ? 'Sentires Placed' : 'SN',
                 align: 'left',
-                field: row => {
-                    return {
-                        sentryWardsPlaced: row.metadataPlayer?.sentryWardsPlaced ?? 0,
-                    };
-                },
+                field: row => row.sentryWardsPlaced ?? 0,
                 sortable: true,
-                sort: (a, b) => a.sentryWardsPlaced - b.sentryWardsPlaced
+                sort: (a, b) => a - b
             },
             {
                 name: 'totalWardsDewarded',
@@ -575,13 +653,9 @@ export default {
                 name: 'totalCampsStacked',
                 label: isDesktop.value ? 'Camps Stacked' : 'C',
                 align: 'left',
-                field: row => {
-                    return {
-                        campsStacked: row.metadataPlayer?.campsStacked ?? 0
-                    };
-                },
+                field: row => row.campsStacked ?? 0,
                 sortable: true,
-                sort: (a, b) => a.campsStacked - b.campsStacked
+                sort: (a, b) => a - b
             },
         ];
         const damageHealingLeagueColumns = [
@@ -589,53 +663,39 @@ export default {
                 name: 'totalHeroDamage',
                 label: isDesktop.value ? 'Hero Dmg' : 'HD',
                 align: 'left',
-                field: row => {
-                    return {
-                        heroDamage: row.matchDetailsPlayers?.heroDamage ?? 0,
-                    };
-                },
+                field: row => row.heroDamage ?? 0,
                 sortable: true,
-                sort: (a, b) => a.heroDamage - b.heroDamage
+                sort: (a, b) => a - b
             },
             {
                 name: 'totalTowerDamage',
                 label: isDesktop.value ? 'Tower Dmg' : 'TD',
                 align: 'left',
-                field: row => {
-                    return {
-                        towerDamage: row.matchDetailsPlayers?.towerDamage ?? 0,
-                    };
-                },
+                field: row => row.towerDamage ?? 0,
                 sortable: true,
-                sort: (a, b) => a.towerDamage - b.towerDamage
+                sort: (a, b) => a - b
             },
             {
                 name: 'totalHeroHealing',
                 label: isDesktop.value ? 'Hero Healing' : 'HH',
                 align: 'left',
-                field: row => {
-                    return {
-                        heroHealing: row.matchDetailsPlayers?.heroHealing ?? 0,
-                    };
-                },
+                field: row => row.heroHealing ?? 0,
                 sortable: true,
-                sort: (a, b) => a.sentryWardsPlaced - b.sentryWardsPlaced
+                sort: (a, b) => a - b
             },
             {
                 name: 'totalStunDuration',
                 label: isDesktop.value ? 'Stun Dur.' : 'SD',
                 align: 'left',
-                field: row => {
-                    return {
-                        stunDuration: row.metadataPlayer?.stunDuration ?? 0
-                    };
-                },
+                field: row => row.stunDuration ?? 0,
                 sortable: true,
-                sort: (a, b) => a.stunDuration - b.stunDuration
+                sort: (a, b) => a - b
             },
         ];
 
         const selectedFantasyColumns = ref(commonFantasyColumns.map(column => column.name));
+        const selectedLeaguePlayer = ref([]);
+        const compareLeaguePlayers = ref([]);
 
         onMounted(() => {
             if (leagueStore.selectedLeague) {
@@ -655,6 +715,33 @@ export default {
                 .map(val => stringifyNested(val))
                 .join(' ');
         };
+
+        const selectLeagueRow = (selectedRow) => {
+            const index = selectedLeaguePlayer.value.findIndex(row => row.player === selectedRow.player);
+
+            if (index !== -1) {
+                selectedLeaguePlayer.value.splice(index, 1);
+            } else {
+                if (selectedLeaguePlayer.value.length < 2) {
+                    selectedLeaguePlayer.value.push(selectedRow);
+                }
+            }
+        };
+
+        const clearSelectedLeaguePlayers = () => {
+            selectedLeaguePlayer.value = [];
+        };
+
+        const CompareLeaguePlayers = () => {
+            compareOn.value = !compareOn.value;
+            var leagueTable = document.getElementById('leagueTable');
+            leagueTable.classList.toggle("collapsed");
+
+            var leagueCompareTable = document.getElementById('leagueCompareTable');
+            leagueCompareTable.classList.toggle("collapsed");
+            compareLeaguePlayers.value = [...selectedLeaguePlayer.value];
+            clearSelectedLeaguePlayers();
+        }
 
         const playerFantasyStatsIndexed = computed(() => {
             return playerFantasyStats.value
@@ -694,11 +781,19 @@ export default {
             fantasyTab,
             fantasyFilter,
             leagueTab,
+            leagueCompareTab,
             leagueFilter,
+            compareOn,
+            leaguePagination,
             playerFantasyStats,
             playerFantasyStatsIndexed,
             fantasyLeagueMetadataStats,
             fantasyLeagueMetadataStatsIndexed,
+            selectedLeaguePlayer,
+            compareLeaguePlayers,
+            selectLeagueRow,
+            CompareLeaguePlayers,
+            clearSelectedLeaguePlayers,
             selectedFantasyColumns,
             commonFantasyColumns,
             kdaFantasyColumns,
@@ -789,10 +884,13 @@ thead th tr {
     position: sticky;
 }
 
-/* .fantasy-stats-table {
-    width: 1400px;
-    height: 800px;
-} */
+.compare-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--nadcl-main-2);
+}
 
 .left-fixed {
     flex: 0 0 300px;
@@ -819,4 +917,13 @@ thead th tr {
 .column .flex-break {
     width: 0 !important
 }
-</style>
+
+.collapse-transition {
+    transition: height 1s ease;
+    overflow: hidden;
+    height: 100%;
+}
+
+.collapsed {
+    height: 0px;
+}</style>

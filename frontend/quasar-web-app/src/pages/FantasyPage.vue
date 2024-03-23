@@ -109,7 +109,8 @@ export default {
     const updateDisabled = computed(() => {
       var currentDate = new Date();
       var lockDate = new Date(leagueStore.selectedLeague?.fantasyDraftLocked * 1000 ?? new Date());
-      return currentDate > lockDate && userDraftPoints.value.length > 0;
+      //return currentDate > lockDate && userDraftPoints.value != {}; // TODO: Rethink logic on people who draft late
+      return currentDate > lockDate;
     });
 
     const updateSelectedPlayers = () => {
@@ -140,31 +141,31 @@ export default {
           .then((result) => {
             fantasyPlayers.value = result;
           });
-        if (userDraftPoints.value.length > 0) {
+        if (userDraftPoints.value.fantasyDraftPlayers.length > 0) {
           draftedPlayerOne.value = {
-            id: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 1)[0]?.fantasyPlayer?.id,
-            name: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 1)[0]?.fantasyPlayer?.dotaAccount.name,
-            steamProfilePicture: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 1)[0]?.fantasyPlayer?.dotaAccount.steamProfilePicture,
+            id: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 1)[0]?.fantasyPlayer?.id,
+            name: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 1)[0]?.fantasyPlayer?.dotaAccount.name,
+            steamProfilePicture: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 1)[0]?.fantasyPlayer?.dotaAccount.steamProfilePicture,
           }
           draftedPlayerTwo.value = {
-            id: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 2)[0]?.fantasyPlayer?.id,
-            name: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 2)[0]?.fantasyPlayer?.dotaAccount.name,
-            steamProfilePicture: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 2)[0]?.fantasyPlayer?.dotaAccount.steamProfilePicture,
+            id: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 2)[0]?.fantasyPlayer?.id,
+            name: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 2)[0]?.fantasyPlayer?.dotaAccount.name,
+            steamProfilePicture: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 2)[0]?.fantasyPlayer?.dotaAccount.steamProfilePicture,
           }
           draftedPlayerThree.value = {
-            id: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 3)[0]?.fantasyPlayer?.id,
-            name: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 3)[0]?.fantasyPlayer?.dotaAccount.name,
-            steamProfilePicture: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 3)[0]?.fantasyPlayer?.dotaAccount.steamProfilePicture,
+            id: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 3)[0]?.fantasyPlayer?.id,
+            name: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 3)[0]?.fantasyPlayer?.dotaAccount.name,
+            steamProfilePicture: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 3)[0]?.fantasyPlayer?.dotaAccount.steamProfilePicture,
           }
           draftedPlayerFour.value = {
-            id: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 4)[0]?.fantasyPlayer?.id,
-            name: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 4)[0]?.fantasyPlayer?.dotaAccount.name,
-            steamProfilePicture: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 4)[0]?.fantasyPlayer?.dotaAccount.steamProfilePicture,
+            id: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 4)[0]?.fantasyPlayer?.id,
+            name: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 4)[0]?.fantasyPlayer?.dotaAccount.name,
+            steamProfilePicture: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 4)[0]?.fantasyPlayer?.dotaAccount.steamProfilePicture,
           }
           draftedPlayerFive.value = {
-            id: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 5)[0]?.fantasyPlayer?.id,
-            name: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 5)[0]?.fantasyPlayer?.dotaAccount.name,
-            steamProfilePicture: userDraftPoints.value[0].fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 5)[0]?.fantasyPlayer?.dotaAccount.steamProfilePicture,
+            id: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 5)[0]?.fantasyPlayer?.id,
+            name: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 5)[0]?.fantasyPlayer?.dotaAccount.name,
+            steamProfilePicture: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 5)[0]?.fantasyPlayer?.dotaAccount.steamProfilePicture,
           }
         }
       }

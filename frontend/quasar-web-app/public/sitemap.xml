@@ -45,12 +45,23 @@
   </url>
 
   <url>
-    <loc>https://www.aghanimsfantasy.comm/about</loc>
+    <loc>https://www.aghanimsfantasy.com/highlights</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://aghanimsfantasy.com/highlights</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://www.aghanimsfantasy.com/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://aghanimsfantasy.comm/about</loc>
+    <loc>https://aghanimsfantasy.com/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>

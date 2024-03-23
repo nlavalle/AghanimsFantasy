@@ -6,6 +6,7 @@ Work in progress, goal is to have a fantasy league setup primarily for the NADCL
 This project depends on two things:
 1. A valid Steam API Key to make background calls to dota looking for league games and match details. You can request for a steamkey here: https://steamcommunity.com/dev/apikey
 2. A discord bot client ID/secret, full information on creating a bot can be found here: https://discord.com/developers/docs/getting-started
+3. A valid Steam account to log in and talk to the game coordinator, this is needed for replay parsing that we can't get via the API.
 
 #### SSL Certificates
 You'll need to create certificates with dev-certs so that the localhost will work on https
@@ -25,3 +26,6 @@ Fill in the secrets for the `postgres.env-example` and `webapi.env-example` and 
 `docker-compose up postgres webapi spa`
 
 The intent for the docker compose is that if you want to work on the webapi, you can do a `docker-compose up postgres` and plug into the local postgres endpoint debugging webapi locally. And the equivalent for working with spa you can do `docker-compose up postgres webapi` then go into the quasar frontend and run `quasar dev` and hit your local endpoint.
+
+### Depedencies
+This project makes use of the SteamKit library from: https://github.com/SteamRE/SteamKit
