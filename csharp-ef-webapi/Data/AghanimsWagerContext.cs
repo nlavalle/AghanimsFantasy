@@ -24,21 +24,27 @@ public class AghanimsFantasyContext : DbContext
     public DbSet<BetStreak> BetStreaks { get; set; }
     public DbSet<MatchStreak> MatchStreaks { get; set; }
     public DbSet<League> Leagues { get; set; }
-    public DbSet<MatchHistory> MatchHistory { get; set; }
-    public DbSet<MatchHistoryPlayer> MatchHistoryPlayers { get; set; }
-    public DbSet<MatchDetail> MatchDetails { get; set; }
-    public DbSet<MatchDetailsPicksBans> MatchDetailsPicksBans { get; set; }
-    public DbSet<MatchDetailsPlayer> MatchDetailsPlayers { get; set; }
-    public DbSet<MatchDetailsPlayersAbilityUpgrade> MatchDetailsPlayersAbilityUpgrades { get; set; }
     public DbSet<Account> Accounts { get; set; }
     public DbSet<Hero> Heroes { get; set; }
     public DbSet<Team> Teams { get; set; }
 
     #region Fantasy
     public DbSet<FantasyLeague> FantasyLeagues { get; set; }
+    public DbSet<FantasyLeagueWeight> FantasyLeagueWeights { get; set; }
     public DbSet<FantasyDraft> FantasyDrafts { get; set; }
     public DbSet<FantasyPlayer> FantasyPlayers { get; set; }
     public DbSet<FantasyDraftPlayer> FantasyDraftPlayers { get; set; }
+    public DbSet<FantasyPlayerPoints> FantasyPlayerPointsView { get; set; }
+    #endregion
+
+    #region Match
+    public DbSet<MatchHistory> MatchHistory { get; set; }
+    public DbSet<MatchHistoryPlayer> MatchHistoryPlayers { get; set; }
+    public DbSet<MatchDetail> MatchDetails { get; set; }
+    public DbSet<MatchDetailsPicksBans> MatchDetailsPicksBans { get; set; }
+    public DbSet<MatchDetailsPlayer> MatchDetailsPlayers { get; set; }
+    public DbSet<MatchDetailsPlayersAbilityUpgrade> MatchDetailsPlayersAbilityUpgrades { get; set; }
+    public DbSet<MatchHighlights> MatchHighlightsView { get; set; }
     #endregion
 
     #region DotaClient
@@ -96,9 +102,21 @@ public class AghanimsFantasyContext : DbContext
             .WithOne(fp => fp.FantasyLeague)
             .HasForeignKey(fp => fp.FantasyLeagueId);
 
+        modelBuilder.Entity<FantasyLeague>()
+            .HasOne(fl => fl.FantasyLeagueWeight)
+            .WithOne()
+            .HasForeignKey<FantasyLeagueWeight>(flw => flw.FantasyLeagueId)
+            .IsRequired();
+
         modelBuilder.Entity<FantasyDraft>()
             .Navigation(fd => fd.DraftPickPlayers)
             .AutoInclude();
+
+        modelBuilder.Entity<FantasyPlayerPoints>().ToView("fantasy_player_points", "nadcl")
+            .HasNoKey();
+
+        modelBuilder.Entity<MatchHighlights>().ToView("match_highlights", "nadcl")
+            .HasNoKey();
 
         modelBuilder.Entity<MatchHistory>()
             .HasMany(mh => mh.Players)

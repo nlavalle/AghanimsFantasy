@@ -32,12 +32,53 @@ public class SqliteInMemoryFantasyTests : IDisposable
 
         if (context.Database.EnsureCreated())
         {
-            // using var viewCommand = context.Database.GetDbConnection().CreateCommand();
-            // viewCommand.CommandText = @"
-            // CREATE VIEW AllResources AS
-            // SELECT Url
-            // FROM Blogs;";
-            // viewCommand.ExecuteNonQuery();
+            using var viewCommand = context.Database.GetDbConnection().CreateCommand();
+            viewCommand.CommandText = @"
+            create view fantasy_player_points as
+            select distinct
+                dfl.id as fantasy_league_id,
+                dfp.id as fantasy_player_id,
+                dmdp.id as match_details_player_id,
+                dmdp.kills as kills,
+                dmdp.kills * dflw.kills_weight as kills_points,
+                dmdp.deaths as deaths,
+                dmdp.deaths * dflw.deaths_weight as deaths_points,
+                dmdp.assists as assists,
+                dmdp.assists * dflw.assists_weight as assists_points,
+                dmdp.last_hits as last_hits,
+                dmdp.last_hits * dflw.last_hits_weight as last_hits_points,
+                dmdp.gold_per_min as gold_per_min,
+                dmdp.gold_per_min * dflw.gold_per_min_weight as gold_per_min_points,
+                dmdp.xp_per_min as xp_per_min,
+                dmdp.xp_per_min * dflw.xp_per_min_weight as xp_per_min_points,
+                (
+                    dmdp.kills * dflw.kills_weight +
+                    dmdp.deaths * dflw.deaths_weight + 
+                    dmdp.assists * dflw.assists_weight + 
+                    dmdp.last_hits * dflw.last_hits_weight +
+                    dmdp.gold_per_min * dflw.gold_per_min_weight + 
+                    dmdp.xp_per_min * dflw.xp_per_min_weight
+                ) as total_match_fantasy_points	
+            from dota_fantasy_leagues dfl
+                join dota_fantasy_league_weights dflw 
+                    on dfl.id = dflw.fantasy_league_id 
+                join dota_fantasy_players dfp
+                    on dfl.id = dfp.fantasy_league_id
+                left join dota_match_details dmd 
+                    on dfl.league_id = dmd.league_id
+                        and dfl.league_start_time <= dmd.start_time 
+                        and dfl.league_end_time >= dmd.start_time
+                left join dota_match_details_players dmdp 
+                    on dmd.match_id = dmdp.match_id and dmdp.account_id = dfp.dota_account_id
+                left join dota_gc_match_metadata dgmm 
+                    on dmd.match_id = dgmm.match_id
+                left join dota_gc_match_metadata_team dgmmt 
+                    on dgmmt.""GcMatchMetadataId"" = dgmm.id
+                left join dota_gc_match_metadata_player dgmmp 
+                    on dgmmp.""GcMatchMetadataTeamId"" = dgmmt.id 
+                        and dgmmp.player_slot = dmdp.player_slot
+            ;";
+            viewCommand.ExecuteNonQuery();
         }
 
         Team team = new Team {
@@ -97,6 +138,16 @@ public class SqliteInMemoryFantasyTests : IDisposable
                                     Id = 12
                                 }
                             },
+                        },
+                        FantasyLeagueWeight = new FantasyLeagueWeight
+                        {
+                            FantasyLeagueId = 1,
+                            KillsWeight = 0.03M,
+                            DeathsWeight = -0.03M,
+                            AssistsWeight = 0.15M,
+                            LastHitsWeight = 0.003M,
+                            GoldPerMinWeight = 0.002M,
+                            XpPerMinWeight = 0.002M
                         }
                     },
                 },
@@ -237,7 +288,20 @@ public class SqliteInMemoryFantasyTests : IDisposable
                         RadiantWin = true,
                         StartTime = new DateTimeOffset(new DateTime(2024, 1, 1)).ToUnixTimeSeconds(),
                         TowerStatusDire = 0,
-                        TowerStatusRadiant = 0
+                        TowerStatusRadiant = 0,
+                        MatchMetadata = new GcMatchMetadata {
+                            Id = 10,
+                            MatchId = 1,
+                            Teams = [
+                                new GcMatchMetadataTeam {
+                                    Players = [
+                                        new GcMatchMetadataPlayer {
+                                            Id = 100
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
                     },
                     new MatchDetail
                     {
@@ -262,7 +326,20 @@ public class SqliteInMemoryFantasyTests : IDisposable
                         RadiantWin = true,
                         StartTime = new DateTimeOffset(new DateTime(2024, 1, 1)).ToUnixTimeSeconds(),
                         TowerStatusDire = 0,
-                        TowerStatusRadiant = 0
+                        TowerStatusRadiant = 0,
+                        MatchMetadata = new GcMatchMetadata {
+                            Id = 20,
+                            MatchId = 2,
+                            Teams = [
+                                new GcMatchMetadataTeam {
+                                    Players = [
+                                        new GcMatchMetadataPlayer {
+                                            Id = 200
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
                     },
                 ]
             },
@@ -452,10 +529,11 @@ public class SqliteInMemoryFantasyTests : IDisposable
         var repository = new FantasyRepository(loggerMock.Object, context);
 
         var fantasyPlayerPoints = await repository.FantasyPlayerPointsByFantasyLeagueAsync(1);
-        // This is going to be 3 fantasy players, and 3 null rows with the left join so 0's show if there were no matches
-        Assert.Equal(3, fantasyPlayerPoints.Count());
+        // We want to return fantasy player points even if rows are null, so this should have 2 players with a match
+        //  and all 3 players should return a null row for scenarios when a new league has no games yet
         Assert.Equal(2, fantasyPlayerPoints.Where(fpp => fpp.Match != null).Count());
-        Assert.Single(fantasyPlayerPoints.Where(fpp => fpp.Match == null));
+        Assert.Equal(3, fantasyPlayerPoints.Where(fpp => fpp.Match == null).Count());
+        Assert.Equal(5, fantasyPlayerPoints.Count());
         Assert.IsAssignableFrom<IEnumerable<FantasyPlayerPoints>>(fantasyPlayerPoints);
     }
 

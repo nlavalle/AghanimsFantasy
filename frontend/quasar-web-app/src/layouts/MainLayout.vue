@@ -26,6 +26,7 @@
         <q-route-tab to="/fantasy" label="Fantasy" />
         <q-route-tab to="/stats" label="Stats" />
         <q-route-tab to="/leaderboard" label="Leaderboard" />
+        <q-route-tab to="/highlights" label="Highlights" />
       </q-tabs>
     </q-header>
 

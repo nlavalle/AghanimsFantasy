@@ -1,112 +1,42 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace csharp_ef_webapi.Models;
 
-// This is a view model and isn't saved in the db (in case we change the scoring)
+// This is a view model and read-only
 public class FantasyPlayerPoints
 {
-    private const decimal KillsValue = 0.3M;
-    private const decimal DeathsValue = -0.3M;
-    private const decimal AssistsValue = 0.15M;
-    private const decimal LastHitsValue = 0.003M;
-    private const decimal GoldPerMinValue = 0.002M;
-    private const decimal XpPerMinValue = 0.002M;
-    public FantasyDraft FantasyDraft {get;set; } = new FantasyDraft();
-    public FantasyPlayer FantasyPlayer { get; set; } = new FantasyPlayer();
-    public MatchDetailsPlayer? Match { get; set; } = new MatchDetailsPlayer();
-    public int Kills
-    {
-        get
-        {
-            return Match?.Kills ?? 0;
-        }
-    }
-    public decimal KillsPoints
-    {
-        get
-        {
-            return Kills * KillsValue;
-        }
-    }
-
-    public int Deaths
-    {
-        get
-        {
-            return Match?.Deaths ?? 0;
-        }
-    }
-    public decimal DeathsPoints
-    {
-        get
-        {
-            return Deaths * DeathsValue;
-        }
-    }
-
-    public int Assists
-    {
-        get
-        {
-            return Match?.Assists ?? 0;
-        }
-    }
-    public decimal AssistsPoints
-    {
-        get
-        {
-            return Assists * AssistsValue;
-        }
-    }
-
-    public int LastHits
-    {
-        get
-        {
-            return Match?.LastHits ?? 0;
-        }
-    }
-    public decimal LastHitsPoints
-    {
-        get
-        {
-            return LastHits * LastHitsValue;
-        }
-    }
-
-    public int GoldPerMin
-    {
-        get
-        {
-            return Match?.GoldPerMin ?? 0;
-        }
-    }
-    public decimal GoldPerMinPoints
-    {
-        get
-        {
-            return GoldPerMin * GoldPerMinValue;
-        }
-    }
-
-    public int XpPerMin
-    {
-        get
-        {
-            return Match?.XpPerMin ?? 0;
-        }
-    }
-    public decimal XpPerMinPoints
-    {
-        get
-        {
-            return XpPerMin * XpPerMinValue;
-        }
-    }
-
-    public decimal TotalMatchFantasyPoints
-    {
-        get
-        {
-            return KillsPoints + DeathsPoints + AssistsPoints + LastHitsPoints + GoldPerMinPoints + XpPerMinPoints;
-        }
-    }
+    [Column("fantasy_league_id")]
+    public int FantasyLeagueId { get; set; }
+    [Column("fantasy_player_id")]
+    public long FantasyPlayerId { get; set; }
+    public FantasyPlayer FantasyPlayer { get; set; } = null!;
+    [Column("match_details_player_id")]
+    public int? MatchDetailsPlayerId { get; set; }
+    public MatchDetailsPlayer? Match { get; set; }
+    [Column("kills")]
+    public int? Kills { get; set; }
+    [Column("kills_points")]
+    public decimal? KillsPoints { get; set; }
+    [Column("deaths")]
+    public int? Deaths { get; set; }
+    [Column("deaths_points")]
+    public decimal? DeathsPoints { get; set; }
+    [Column("assists")]
+    public int? Assists { get; set; }
+    [Column("assists_points")]
+    public decimal? AssistsPoints { get; set; }
+    [Column("last_hits")]
+    public int? LastHits { get; set; }
+    [Column("last_hits_points")]
+    public decimal? LastHitsPoints { get; set; }
+    [Column("gold_per_min")]
+    public int? GoldPerMin { get; set; }
+    [Column("gold_per_min_points")]
+    public decimal? GoldPerMinPoints { get; set; }
+    [Column("xp_per_min")]
+    public int? XpPerMin { get; set; }
+    [Column("xp_per_min_points")]
+    public decimal? XpPerMinPoints { get; set; }
+    [Column("total_match_fantasy_points")]
+    public decimal? TotalMatchFantasyPoints { get; set; }
 }

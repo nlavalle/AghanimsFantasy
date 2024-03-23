@@ -105,23 +105,21 @@ namespace csharp_ef_webapi.Controllers
                 return Ok(new { });
             }
 
-            var fantasyPointsAggregated = _service.AggregateFantasyDraftPoints(fantasyPoints);
-
             var fantasyTeams = await _service.GetTeamsAsync();
 
-            var top10Players = fantasyPointsAggregated.Where(fp => !fp.IsTeam).OrderByDescending(fp => fp.DraftTotalFantasyPoints).Take(10).ToList();
+            var top10Players = fantasyPoints.Where(fp => !fp.IsTeam).OrderByDescending(fp => fp.DraftTotalFantasyPoints).Take(10).ToList();
 
             // We want the user included even if they're not top 10
             if (!top10Players.Any(tp => tp.FantasyDraft.DiscordAccountId == userDiscordAccountId))
             {
-                var currentPlayer = fantasyPointsAggregated.Where(fp => fp.FantasyDraft.DiscordAccountId == userDiscordAccountId).FirstOrDefault();
+                var currentPlayer = fantasyPoints.Where(fp => fp.FantasyDraft.DiscordAccountId == userDiscordAccountId).FirstOrDefault();
                 if (currentPlayer != null)
                 {
                     top10Players.Add(currentPlayer);
                 }
             }
 
-            var teamsScores = fantasyPointsAggregated.Where(fp => fp.IsTeam).OrderByDescending(fp => fp.DraftTotalFantasyPoints).ToList();
+            var teamsScores = fantasyPoints.Where(fp => fp.IsTeam).OrderByDescending(fp => fp.DraftTotalFantasyPoints).ToList();
 
             var unionedLeaderboard = top10Players.Union(teamsScores);
 
@@ -140,17 +138,27 @@ namespace csharp_ef_webapi.Controllers
                     DiscordName = lb.DiscordName,
                     IsTeam = lb.IsTeam,
                     TeamId = lb.TeamId,
-                    DraftPickOnePoints = lb.DraftPickOnePoints,
-                    DraftPickTwoPoints = lb.DraftPickTwoPoints,
-                    DraftPickThreePoints = lb.DraftPickThreePoints,
-                    DraftPickFourPoints = lb.DraftPickFourPoints,
-                    DraftPickFivePoints = lb.DraftPickFivePoints
+                    FantasyPlayerPoints = lb.FantasyPlayerPoints
                 }
             )
             .OrderByDescending(fp => fp.DraftTotalFantasyPoints)
             .ToList();
 
             return Ok(unionedLeaderboard);
+        }
+
+        // GET: api/fantasy/5/highlights/3
+        [HttpGet("{fantasyLeagueId}/highlights/{matchCount}")]
+        public async Task<ActionResult<List<GcMatchMetadata>>> GetMatchHighlights(int fantasyLeagueId, int matchCount)
+        {
+            var matchHighlights = await _service.GetLastNMatchHighlights(fantasyLeagueId, matchCount);
+
+            if (matchHighlights == null || matchHighlights.Count() == 0)
+            {
+                return NotFound();
+            }
+
+            return Ok(matchHighlights);
         }
 
         // GET: api/fantasy/draft/5
@@ -199,14 +207,12 @@ namespace csharp_ef_webapi.Controllers
                 return Ok(new { });
             }
 
-            var fantasyPlayerPoints = await _service.FantasyDraftPointsByUserLeagueAsync(userDiscordAccountId, leagueId.Value);
-            if (fantasyPlayerPoints == null)
+            var userDraftPoints = await _service.FantasyDraftPointsByUserLeagueAsync(userDiscordAccountId, leagueId.Value);
+            if (userDraftPoints == null)
             {
                 // User has no draft yet so return an empty okay
                 return Ok(new { });
             }
-
-            var userDraftPoints = _service.AggregateFantasyDraftPoints(fantasyPlayerPoints);
 
             return Ok(userDraftPoints);
         }

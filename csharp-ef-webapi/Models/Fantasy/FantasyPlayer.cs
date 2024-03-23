@@ -14,7 +14,7 @@ public class FantasyPlayer
 
     [Column("fantasy_league_id")]
     public int FantasyLeagueId { get; set; }
-    public FantasyLeague FantasyLeague { get; set; } = new FantasyLeague();
+    public FantasyLeague FantasyLeague { get; set; } = null!;
 
     [Column("team_id")]
     public long TeamId { get; set; }
@@ -22,6 +22,6 @@ public class FantasyPlayer
 
     [Column("dota_account_id")]
     public long DotaAccountId { get; set; }
-    public Account DotaAccount { get; set; } = new Account();
+    public Account DotaAccount { get; set; } = null!;
 
 }

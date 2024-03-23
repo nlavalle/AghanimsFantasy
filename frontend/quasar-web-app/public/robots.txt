@@ -2,6 +2,7 @@ User-agent: *
 Allow: /about
 Allow: /fantasy
 Allow: /leaderboard
+Allow: /highlights
 Allow: /stats
 Disallow: /api/
 

@@ -26,3 +26,6 @@ Fill in the secrets for the `postgres.env-example` and `webapi.env-example` and 
 `docker-compose up postgres webapi spa`
 
 The intent for the docker compose is that if you want to work on the webapi, you can do a `docker-compose up postgres` and plug into the local postgres endpoint debugging webapi locally. And the equivalent for working with spa you can do `docker-compose up postgres webapi` then go into the quasar frontend and run `quasar dev` and hit your local endpoint.
+
+### Depedencies
+This project makes use of the SteamKit library from: https://github.com/SteamRE/SteamKit
