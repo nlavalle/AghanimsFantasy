@@ -39,4 +39,7 @@ public interface IFantasyRepository
 
     // Heroes
     Task<IEnumerable<Hero>> GetHeroesAsync();
+    
+    // Discord
+    Task<DiscordIds?> GetDiscordIdAsync(long GetDiscordId);
 }
