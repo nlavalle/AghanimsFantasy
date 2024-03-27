@@ -52,7 +52,7 @@ export default defineComponent({
             required: true
         },
         authenticatedUser: {
-            type: String,
+            type: Object,
             required: false,
         }
     },

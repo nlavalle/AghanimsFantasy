@@ -141,7 +141,7 @@ export default {
           .then((result) => {
             fantasyPlayers.value = result;
           });
-        if (userDraftPoints.value.fantasyDraftPlayers.length > 0) {
+        if (userDraftPoints.value.fantasyDraftPlayers && userDraftPoints.value.fantasyDraftPlayers.length > 0) {
           draftedPlayerOne.value = {
             id: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 1)[0]?.fantasyPlayer?.id,
             name: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 1)[0]?.fantasyPlayer?.dotaAccount.name,

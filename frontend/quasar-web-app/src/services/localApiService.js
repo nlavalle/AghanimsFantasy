@@ -240,7 +240,7 @@ export const localApiService = {
         //     draftPickFive: draftPickArray[4]?.id ?? 0,
         // }
         var updateRequest = {
-            LeagueId: league.id,
+            FantasyLeagueId: league.id,
             DisordAccountId: user.id,
             DraftPickPlayers: [
                 {

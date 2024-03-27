@@ -40,7 +40,7 @@ export default {
         });
 
         const fantasyLeaderboardData = computed(() => {
-            if (!fantasyLeaderboard.value) {
+            if (!fantasyLeaderboard.value || Object.keys(fantasyLeaderboard.value).length === 0) {
                 return [];
             }
             return fantasyLeaderboard.value.map((leaderboard) => ({
