@@ -72,7 +72,7 @@ namespace csharp_ef_webapi.Controllers
         {
             var matchSummary = await _service.AggregateMetadataAsync(fantasyLeagueId);
 
-            if (matchSummary == null || matchSummary.Count() == 0)
+            if (matchSummary == null)
             {
                 return NotFound();
             }
@@ -156,7 +156,7 @@ namespace csharp_ef_webapi.Controllers
         {
             var matchHighlights = await _service.GetLastNMatchHighlights(fantasyLeagueId, matchCount);
 
-            if (matchHighlights == null || matchHighlights.Count() == 0)
+            if (matchHighlights == null)
             {
                 return NotFound();
             }
