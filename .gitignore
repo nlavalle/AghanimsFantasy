@@ -6,3 +6,4 @@ csharp-ef-webapi/aghanims-fantasy-webapi.tar
 environments/development/*.env
 frontend/prod-nginx.conf
 csharp-ef-webapi/appsettings.Local.json
+frontend/quasar-web-app/public/logos/
