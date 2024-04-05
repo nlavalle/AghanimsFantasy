@@ -59,7 +59,7 @@ export default defineComponent({
     methods: {
         getImageUrl(teamId) {
             if (teamId == 0) return null;
-            return new URL(`../assets/logos/teams_logo_${teamId}.png`, import.meta.url).toString();
+            return `logos/teams_logo_${teamId}.png`
         }
     }
 });

@@ -86,11 +86,6 @@ export default defineComponent({
                 },
             ];
         }
-    },
-    methods: {
-        getTeamLogo(player) {
-            return `~assets/logos/teams_logo_${player.teamId}.png`;
-        },
     }
 });
 </script>
