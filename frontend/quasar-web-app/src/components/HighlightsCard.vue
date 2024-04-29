@@ -89,7 +89,7 @@ export default defineComponent({
   methods: {
     getTeamImageUrl() {
       if (this.highlight.fantasyPlayer.team.id == 0) return null;
-      return new URL(`../assets/logos/teams_logo_${this.highlight.fantasyPlayer.team.id}.png`, import.meta.url).toString();
+      return `logos/teams_logo_${this.highlight.fantasyPlayer.team.id}.png`
     }
   }
 });

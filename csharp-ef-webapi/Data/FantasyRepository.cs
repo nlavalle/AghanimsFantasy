@@ -640,4 +640,13 @@ public class FantasyRepository : IFantasyRepository
     }
 
     #endregion Hero
+
+    #region Discord
+    public async Task<DiscordIds?> GetDiscordIdAsync(long GetDiscordId)
+    {
+        _logger.LogInformation($"Getting Discord User {GetDiscordId}");
+
+        return await _dbContext.DiscordIds.Where(di => di.DiscordId == GetDiscordId).FirstOrDefaultAsync();
+    }
+    #endregion Discord
 }

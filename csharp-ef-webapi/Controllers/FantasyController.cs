@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using csharp_ef_webapi.Data;
 using csharp_ef_webapi.Models;
+using csharp_ef_webapi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,9 +13,11 @@ namespace csharp_ef_webapi.Controllers
     public class FantasyController : ControllerBase
     {
         private readonly FantasyRepository _service;
-        public FantasyController(FantasyRepository service)
+        private readonly DiscordWebApiService _discordService;
+        public FantasyController(FantasyRepository service, DiscordWebApiService discordService)
         {
             _service = service;
+            _discordService = discordService;
         }
 
         // GET: api/fantasy/leagues
@@ -69,7 +72,7 @@ namespace csharp_ef_webapi.Controllers
         {
             var matchSummary = await _service.AggregateMetadataAsync(fantasyLeagueId);
 
-            if (matchSummary == null || matchSummary.Count() == 0)
+            if (matchSummary == null)
             {
                 return NotFound();
             }
@@ -153,7 +156,7 @@ namespace csharp_ef_webapi.Controllers
         {
             var matchHighlights = await _service.GetLastNMatchHighlights(fantasyLeagueId, matchCount);
 
-            if (matchHighlights == null || matchHighlights.Count() == 0)
+            if (matchHighlights == null)
             {
                 return NotFound();
             }
@@ -234,6 +237,13 @@ namespace csharp_ef_webapi.Controllers
             if (!getAccountId)
             {
                 return BadRequest("Could not retrieve user's discord ID");
+            }
+
+            var existingDiscordUser = await _service.GetDiscordIdAsync(userDiscordAccountId);
+            if (existingDiscordUser == null)
+            {
+                // New discord user, run call to look them up
+                await _discordService.GetDiscordByIdAsync(userDiscordAccountId);
             }
 
             var existingUserDraft = await _service.FantasyDraftsByUserLeagueAsync(userDiscordAccountId, fantasyDraft.FantasyLeagueId);

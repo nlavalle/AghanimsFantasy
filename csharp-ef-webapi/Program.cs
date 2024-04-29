@@ -133,6 +133,9 @@ builder.Services.AddScoped<FantasyRepository>();
 // Add Scoped Dota Client to be called for Dota Client Background Service
 builder.Services.AddScoped<DotaClient>();
 
+// Add Scoped Discord service to be used to call new discord users
+builder.Services.AddScoped<DiscordWebApiService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
