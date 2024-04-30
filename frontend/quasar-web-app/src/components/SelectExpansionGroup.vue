@@ -8,16 +8,16 @@
                 <template v-for="child in scope.opt.options" :key="child.label">
                     <q-item clickable @click="changeOption(child)">
                         <q-item-section>
-                            <q-item-label class="q-ml-md">{{ child.name }}</q-item-label>
+                            <q-item-label class="q-ml-md">
+                                <q-img :src=getPositionIcon(child.position) height="25px" width="25px"/>
+                                {{ child.name }} 
+                            </q-item-label>
                         </q-item-section>
                     </q-item>
                 </template>
             </q-expansion-item>
         </template>
     </q-select>
-    <!-- <q-select ref="expandSelect" use-input filled input-debounce="500" :modelValue="modelValue"
-        @update:model-value="updateSelectedOption" :options="options" remove-selected @filter="filterFn" option-label="name" :label="selectLabel ?? ''"
-        color="teal" clearable/> -->
 </template>
 
 <script>
@@ -47,13 +47,6 @@ export default {
 
         return {
             options,
-
-            // filterFn(val, update) {
-            //     const filterCriteria = val.toLowerCase()
-            //     update(() => {
-            //         options.value = props.selectOptions.filter(option => option.name.toLowerCase().includes(filterCriteria))
-            //     })
-            // }
             filterFn(val, update) {
                 const filterCriteria = val.toLowerCase()
                 update(() => {
@@ -69,6 +62,9 @@ export default {
     },
     emits: ['update:modelValue'],
     methods: {
+        getPositionIcon(positionInt) {
+            return `icons/pos_${positionInt}.png`
+        },
         changeOption(option) {
             this.$refs.expandSelect.updateInputValue('', true);
             this.$emit('update:modelValue', option);

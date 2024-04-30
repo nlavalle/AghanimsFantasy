@@ -99,9 +99,11 @@ export default {
             .map(player => (
               {
                 id: player.id,
-                name: player.dotaAccount.name
+                name: player.dotaAccount.name,
+                position: player.teamPosition
               }
-            )),
+            ))
+            .sort((playerA, playerB) => playerA.position - playerB.position),
         };
       })
     });
