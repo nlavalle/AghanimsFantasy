@@ -24,4 +24,6 @@ public class FantasyPlayer
     public long DotaAccountId { get; set; }
     public Account DotaAccount { get; set; } = null!;
 
+    [Column("team_position")]
+    public int TeamPosition {get;set;}
 }

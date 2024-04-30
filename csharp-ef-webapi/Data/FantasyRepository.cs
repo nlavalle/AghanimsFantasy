@@ -85,12 +85,29 @@ public class FantasyRepository : IFantasyRepository
         return await fantasyPlayerPointsByLeagueQuery.ToListAsync();
     }
 
+    public async Task<IEnumerable<FantasyPlayerPointTotals>> FantasyPlayerPointTotalsByFantasyLeagueAsync(int FantasyLeagueId)
+    {
+        _logger.LogInformation($"Fetching Fantasy Point Totals for Fantasy League Id: {FantasyLeagueId}");
+
+        var fantasyPlayerTotalsQuery = _dbContext.FantasyPlayerPointTotalsView
+            .Include(fppt => fppt.FantasyPlayer)
+            .Where(fppt => fppt.FantasyLeagueId == FantasyLeagueId)
+            .OrderByDescending(fppt => fppt.TotalMatchFantasyPoints);
+
+        _logger.LogInformation($"Match Details Query: {fantasyPlayerTotalsQuery.ToQueryString()}");
+
+        return await fantasyPlayerTotalsQuery.ToListAsync();
+    }
+
     public async Task<IEnumerable<FantasyDraftPointTotals>> FantasyDraftPointsByFantasyLeagueAsync(int FantasyLeagueId)
     {
         _logger.LogInformation($"Fetching Fantasy Points for Fantasy League Id: {FantasyLeagueId}");
 
-        var fantasyPlayerPoints = await FantasyPlayerPointsByFantasyLeagueAsync(FantasyLeagueId);
-        var playerTotals = AggregateFantasyPlayerPoints(fantasyPlayerPoints).ToList();
+        var playerTotals = await _dbContext.FantasyPlayerPointTotalsView
+            .Include(fppt => fppt.FantasyPlayer)
+            .Where(fppt => fppt.FantasyLeagueId == FantasyLeagueId)
+            .OrderByDescending(fppt => fppt.TotalMatchFantasyPoints)
+            .ToListAsync();
 
         var fantasyDraftPointsByLeagueQuery = await _dbContext.FantasyDrafts
             .Where(fl => fl.FantasyLeagueId == FantasyLeagueId)
@@ -119,8 +136,13 @@ public class FantasyRepository : IFantasyRepository
     {
         _logger.LogInformation($"Fetching Fantasy Points for LeagueID: {FantasyLeagueId}");
 
-        var fantasyPlayerPoints = await FantasyPlayerPointsByFantasyLeagueAsync(FantasyLeagueId);
-        var playerTotals = AggregateFantasyPlayerPoints(fantasyPlayerPoints).ToList();
+        // var fantasyPlayerPoints = await FantasyPlayerPointsByFantasyLeagueAsync(FantasyLeagueId);
+        // var playerTotals = AggregateFantasyPlayerPoints(fantasyPlayerPoints).ToList();
+        var playerTotals = await _dbContext.FantasyPlayerPointTotalsView
+            .Include(fppt => fppt.FantasyPlayer)
+            .Where(fppt => fppt.FantasyLeagueId == FantasyLeagueId)
+            .OrderByDescending(fppt => fppt.TotalMatchFantasyPoints)
+            .ToListAsync();
 
         var fantasyDraftPointsByUserLeague = await _dbContext.FantasyDrafts
             .Where(fd => fd.FantasyLeagueId == FantasyLeagueId && fd.DiscordAccountId == UserDiscordAccountId)
@@ -147,32 +169,6 @@ public class FantasyRepository : IFantasyRepository
 
             return fantasyDraftPoints;
         }
-    }
-
-    public IEnumerable<FantasyPlayerPointTotals> AggregateFantasyPlayerPoints(IEnumerable<FantasyPlayerPoints> fantasyPlayerPoints)
-    {
-        return fantasyPlayerPoints
-                .GroupBy(fp => fp.FantasyPlayer)
-                .Select(group => new FantasyPlayerPointTotals
-                {
-                    FantasyPlayer = group.Key,
-                    TotalMatches = group.Where(g => g.Match != null).Count(),
-                    TotalKills = group.Sum(result => result.Kills ?? 0),
-                    TotalKillsPoints = group.Sum(result => result.KillsPoints ?? 0),
-                    TotalDeaths = group.Sum(result => result.Deaths ?? 0),
-                    TotalDeathsPoints = group.Sum(result => result.DeathsPoints ?? 0),
-                    TotalAssists = group.Sum(result => result.Assists ?? 0),
-                    TotalAssistsPoints = group.Sum(result => result.AssistsPoints ?? 0),
-                    TotalLastHits = group.Sum(result => result.LastHits ?? 0),
-                    TotalLastHitsPoints = group.Sum(result => result.LastHitsPoints ?? 0),
-                    AvgGoldPerMin = group.Where(result => result.Match != null).Select(result => result.GoldPerMin ?? 0).DefaultIfEmpty().Average(),
-                    TotalGoldPerMinPoints = group.Sum(result => result.GoldPerMinPoints ?? 0),
-                    AvgXpPerMin = group.Where(result => result.Match != null).Select(result => result.XpPerMin ?? 0).DefaultIfEmpty().Average(),
-                    TotalXpPerMinPoints = group.Sum(result => result.XpPerMinPoints ?? 0),
-                    TotalMatchFantasyPoints = group.Sum(result => result.TotalMatchFantasyPoints ?? 0)
-                })
-                .OrderByDescending(fdp => fdp.TotalMatchFantasyPoints)
-                .ToList();
     }
 
     public async Task<IEnumerable<MetadataSummary>> AggregateMetadataAsync(int FantasyLeagueId)
@@ -234,7 +230,7 @@ public class FantasyRepository : IFantasyRepository
                             Id = final.Key.Id,
                             Team = final.Key.Team,
                             TeamId = final.Key.TeamId,
-
+                            TeamPosition = final.Key.TeamPosition
                         },
                         MatchesPlayed = final.Count(),
                         // Match Details
