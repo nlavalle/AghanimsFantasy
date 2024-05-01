@@ -48,7 +48,7 @@ public class FantasyRepository : IFantasyRepository
             .OrderBy(fp => fp.Team.Name)
                 .ThenBy(fp => fp.DotaAccount.Name);
 
-        _logger.LogInformation($"Fantasy Players by Fantasy League Query: {fantasyPlayerLeagueQuery.ToQueryString()}");
+        _logger.LogDebug($"Fantasy Players by Fantasy League Query: {fantasyPlayerLeagueQuery.ToQueryString()}");
 
         return await fantasyPlayerLeagueQuery.ToListAsync();
     }
@@ -66,7 +66,7 @@ public class FantasyRepository : IFantasyRepository
                 .ThenInclude(fp => fp.FantasyPlayer)
                 .ThenInclude(fp => fp.DotaAccount);
 
-        _logger.LogInformation($"Fantasy Drafts by User and Fantasy League Query: {fantasyDraftsUserQuery.ToQueryString()}");
+        _logger.LogDebug($"Fantasy Drafts by User and Fantasy League Query: {fantasyDraftsUserQuery.ToQueryString()}");
 
         return await fantasyDraftsUserQuery.ToListAsync();
     }
@@ -80,7 +80,7 @@ public class FantasyRepository : IFantasyRepository
             .Include(fppv => fppv.Match)
             .Where(fpp => fpp.FantasyLeagueId == FantasyLeagueId);
 
-        _logger.LogInformation($"Match Details Query: {fantasyPlayerPointsByLeagueQuery.ToQueryString()}");
+        _logger.LogDebug($"Match Details Query: {fantasyPlayerPointsByLeagueQuery.ToQueryString()}");
 
         return await fantasyPlayerPointsByLeagueQuery.ToListAsync();
     }
@@ -93,7 +93,7 @@ public class FantasyRepository : IFantasyRepository
             .Include(fppt => fppt.FantasyPlayer)
             .Where(fppt => fppt.FantasyLeagueId == FantasyLeagueId);
 
-        _logger.LogInformation($"Match Details Query: {fantasyPlayerTotalsQuery.ToQueryString()}");
+        _logger.LogDebug($"Match Details Query: {fantasyPlayerTotalsQuery.ToQueryString()}");
 
         return await fantasyPlayerTotalsQuery.ToListAsync();
     }
@@ -210,7 +210,7 @@ public class FantasyRepository : IFantasyRepository
                 .ThenBy(m => m.FantasyPlayer.Id)
                 .GroupBy(fpm => fpm.FantasyPlayer);
 
-        _logger.LogInformation($"Fantasy Metadata Query: {metadataQuery.ToQueryString()}");
+        _logger.LogDebug($"Fantasy Metadata Query: {metadataQuery.ToQueryString()}");
 
         var metadataQueryList = await metadataQuery.ToListAsync();
 
@@ -438,7 +438,7 @@ public class FantasyRepository : IFantasyRepository
             .Select(l => l.MatchHistory)
             .Include(mh => mh.Players);
 
-        _logger.LogInformation($"Match History SQL Query: {matchHistoryQuery.ToQueryString()}");
+        _logger.LogDebug($"Match History SQL Query: {matchHistoryQuery.ToQueryString()}");
 
         return await matchHistoryQuery.ToListAsync();
     }
@@ -475,7 +475,7 @@ public class FantasyRepository : IFantasyRepository
                 .Include(md => md.PicksBans)
                 .Include(md => md.Players).ThenInclude(p => p.AbilityUpgrades);
 
-        _logger.LogInformation($"Get Match Detail Query: {matchDetailsQuery.ToQueryString()}");
+        _logger.LogDebug($"Get Match Detail Query: {matchDetailsQuery.ToQueryString()}");
 
         return await matchDetailsQuery.FirstOrDefaultAsync();
     }
@@ -489,7 +489,7 @@ public class FantasyRepository : IFantasyRepository
             .Select(l => l.MatchMetadata ?? new GcMatchMetadata())
             .OrderByDescending(md => md.MatchId);
 
-        _logger.LogInformation($"Match Metadata SQL Query: {leagueMetadataQuery.ToQueryString()}");
+        _logger.LogDebug($"Match Metadata SQL Query: {leagueMetadataQuery.ToQueryString()}");
 
         return await leagueMetadataQuery.ToListAsync();
     }
@@ -505,7 +505,7 @@ public class FantasyRepository : IFantasyRepository
             .Skip(Skip)
             .Take(Take);
 
-        _logger.LogInformation($"Match Metadata SQL Query: {leagueMetadataQuery.ToQueryString()}");
+        _logger.LogDebug($"Match Metadata SQL Query: {leagueMetadataQuery.ToQueryString()}");
 
         return await leagueMetadataQuery.ToListAsync();
     }
@@ -537,7 +537,7 @@ public class FantasyRepository : IFantasyRepository
             .Skip(Skip)
             .Take(Take);
 
-        _logger.LogInformation($"Match Metadata SQL Query: {fantasyLeagueMetadataQuery.ToQueryString()}");
+        _logger.LogDebug($"Match Metadata SQL Query: {fantasyLeagueMetadataQuery.ToQueryString()}");
 
         return await fantasyLeagueMetadataQuery.ToListAsync();
     }
@@ -549,7 +549,7 @@ public class FantasyRepository : IFantasyRepository
         var matchMetadataQuery = _dbContext.GcMatchMetadata
                 .Where(md => md.MatchId == MatchId);
 
-        _logger.LogInformation($"Match Metadata Query: {matchMetadataQuery.ToQueryString()}");
+        _logger.LogDebug($"Match Metadata Query: {matchMetadataQuery.ToQueryString()}");
 
         return await matchMetadataQuery.FirstOrDefaultAsync();
     }
@@ -564,7 +564,7 @@ public class FantasyRepository : IFantasyRepository
                 .OrderByDescending(mhv => mhv.StartTime)
                 .Take(MatchCount);
 
-        _logger.LogInformation($"Match Highlights Query: {matchHighlightsQuery.ToQueryString()}");
+        _logger.LogDebug($"Match Highlights Query: {matchHighlightsQuery.ToQueryString()}");
 
         return await matchHighlightsQuery.ToListAsync();
     }

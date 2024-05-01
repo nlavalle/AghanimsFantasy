@@ -236,6 +236,7 @@ SELECT
 	coalesce(sum(total_match_fantasy_points),0) as total_match_fantasy_points
 FROM nadcl.fantasy_player_points
 group by fantasy_league_id, fantasy_player_id
+order by total_match_fantasy_points desc
 ;
 
 INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
