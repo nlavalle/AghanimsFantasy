@@ -44,9 +44,8 @@ namespace csharp_ef_webapi.Controllers
                 return BadRequest("Please provide a League ID to fetch fantasy player points of");
             }
 
-            var fantasyPlayerPoints = await _service.FantasyPlayerPointsByFantasyLeagueAsync(leagueId.Value);
-            var playerTotals = _service.AggregateFantasyPlayerPoints(fantasyPlayerPoints).ToList();
-            return Ok(playerTotals);
+            var fantasyPlayerPointTotals = await _service.FantasyPlayerPointTotalsByFantasyLeagueAsync(leagueId.Value);
+            return Ok(fantasyPlayerPointTotals);
         }
 
         // // GET: api/fantasy/players/5/match/metadata

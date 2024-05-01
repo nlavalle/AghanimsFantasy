@@ -48,7 +48,7 @@ public class FantasyRepository : IFantasyRepository
             .OrderBy(fp => fp.Team.Name)
                 .ThenBy(fp => fp.DotaAccount.Name);
 
-        _logger.LogInformation($"Fantasy Players by Fantasy League Query: {fantasyPlayerLeagueQuery.ToQueryString()}");
+        _logger.LogDebug($"Fantasy Players by Fantasy League Query: {fantasyPlayerLeagueQuery.ToQueryString()}");
 
         return await fantasyPlayerLeagueQuery.ToListAsync();
     }
@@ -66,7 +66,7 @@ public class FantasyRepository : IFantasyRepository
                 .ThenInclude(fp => fp.FantasyPlayer)
                 .ThenInclude(fp => fp.DotaAccount);
 
-        _logger.LogInformation($"Fantasy Drafts by User and Fantasy League Query: {fantasyDraftsUserQuery.ToQueryString()}");
+        _logger.LogDebug($"Fantasy Drafts by User and Fantasy League Query: {fantasyDraftsUserQuery.ToQueryString()}");
 
         return await fantasyDraftsUserQuery.ToListAsync();
     }
@@ -80,17 +80,33 @@ public class FantasyRepository : IFantasyRepository
             .Include(fppv => fppv.Match)
             .Where(fpp => fpp.FantasyLeagueId == FantasyLeagueId);
 
-        _logger.LogInformation($"Match Details Query: {fantasyPlayerPointsByLeagueQuery.ToQueryString()}");
+        _logger.LogDebug($"Match Details Query: {fantasyPlayerPointsByLeagueQuery.ToQueryString()}");
 
         return await fantasyPlayerPointsByLeagueQuery.ToListAsync();
+    }
+
+    public async Task<IEnumerable<FantasyPlayerPointTotals>> FantasyPlayerPointTotalsByFantasyLeagueAsync(int FantasyLeagueId)
+    {
+        _logger.LogInformation($"Fetching Fantasy Point Totals for Fantasy League Id: {FantasyLeagueId}");
+
+        var fantasyPlayerTotalsQuery = _dbContext.FantasyPlayerPointTotalsView
+            .Include(fppt => fppt.FantasyPlayer)
+            .Where(fppt => fppt.FantasyLeagueId == FantasyLeagueId);
+
+        _logger.LogDebug($"Match Details Query: {fantasyPlayerTotalsQuery.ToQueryString()}");
+
+        return await fantasyPlayerTotalsQuery.ToListAsync();
     }
 
     public async Task<IEnumerable<FantasyDraftPointTotals>> FantasyDraftPointsByFantasyLeagueAsync(int FantasyLeagueId)
     {
         _logger.LogInformation($"Fetching Fantasy Points for Fantasy League Id: {FantasyLeagueId}");
 
-        var fantasyPlayerPoints = await FantasyPlayerPointsByFantasyLeagueAsync(FantasyLeagueId);
-        var playerTotals = AggregateFantasyPlayerPoints(fantasyPlayerPoints).ToList();
+        var playerTotals = await _dbContext.FantasyPlayerPointTotalsView
+            .Include(fppt => fppt.FantasyPlayer)
+            .Where(fppt => fppt.FantasyLeagueId == FantasyLeagueId)
+            .OrderByDescending(fppt => fppt.TotalMatchFantasyPoints)
+            .ToListAsync();
 
         var fantasyDraftPointsByLeagueQuery = await _dbContext.FantasyDrafts
             .Where(fl => fl.FantasyLeagueId == FantasyLeagueId)
@@ -119,8 +135,13 @@ public class FantasyRepository : IFantasyRepository
     {
         _logger.LogInformation($"Fetching Fantasy Points for LeagueID: {FantasyLeagueId}");
 
-        var fantasyPlayerPoints = await FantasyPlayerPointsByFantasyLeagueAsync(FantasyLeagueId);
-        var playerTotals = AggregateFantasyPlayerPoints(fantasyPlayerPoints).ToList();
+        // var fantasyPlayerPoints = await FantasyPlayerPointsByFantasyLeagueAsync(FantasyLeagueId);
+        // var playerTotals = AggregateFantasyPlayerPoints(fantasyPlayerPoints).ToList();
+        var playerTotals = await _dbContext.FantasyPlayerPointTotalsView
+            .Include(fppt => fppt.FantasyPlayer)
+            .Where(fppt => fppt.FantasyLeagueId == FantasyLeagueId)
+            .OrderByDescending(fppt => fppt.TotalMatchFantasyPoints)
+            .ToListAsync();
 
         var fantasyDraftPointsByUserLeague = await _dbContext.FantasyDrafts
             .Where(fd => fd.FantasyLeagueId == FantasyLeagueId && fd.DiscordAccountId == UserDiscordAccountId)
@@ -147,32 +168,6 @@ public class FantasyRepository : IFantasyRepository
 
             return fantasyDraftPoints;
         }
-    }
-
-    public IEnumerable<FantasyPlayerPointTotals> AggregateFantasyPlayerPoints(IEnumerable<FantasyPlayerPoints> fantasyPlayerPoints)
-    {
-        return fantasyPlayerPoints
-                .GroupBy(fp => fp.FantasyPlayer)
-                .Select(group => new FantasyPlayerPointTotals
-                {
-                    FantasyPlayer = group.Key,
-                    TotalMatches = group.Where(g => g.Match != null).Count(),
-                    TotalKills = group.Sum(result => result.Kills ?? 0),
-                    TotalKillsPoints = group.Sum(result => result.KillsPoints ?? 0),
-                    TotalDeaths = group.Sum(result => result.Deaths ?? 0),
-                    TotalDeathsPoints = group.Sum(result => result.DeathsPoints ?? 0),
-                    TotalAssists = group.Sum(result => result.Assists ?? 0),
-                    TotalAssistsPoints = group.Sum(result => result.AssistsPoints ?? 0),
-                    TotalLastHits = group.Sum(result => result.LastHits ?? 0),
-                    TotalLastHitsPoints = group.Sum(result => result.LastHitsPoints ?? 0),
-                    AvgGoldPerMin = group.Where(result => result.Match != null).Select(result => result.GoldPerMin ?? 0).DefaultIfEmpty().Average(),
-                    TotalGoldPerMinPoints = group.Sum(result => result.GoldPerMinPoints ?? 0),
-                    AvgXpPerMin = group.Where(result => result.Match != null).Select(result => result.XpPerMin ?? 0).DefaultIfEmpty().Average(),
-                    TotalXpPerMinPoints = group.Sum(result => result.XpPerMinPoints ?? 0),
-                    TotalMatchFantasyPoints = group.Sum(result => result.TotalMatchFantasyPoints ?? 0)
-                })
-                .OrderByDescending(fdp => fdp.TotalMatchFantasyPoints)
-                .ToList();
     }
 
     public async Task<IEnumerable<MetadataSummary>> AggregateMetadataAsync(int FantasyLeagueId)
@@ -215,7 +210,7 @@ public class FantasyRepository : IFantasyRepository
                 .ThenBy(m => m.FantasyPlayer.Id)
                 .GroupBy(fpm => fpm.FantasyPlayer);
 
-        _logger.LogInformation($"Fantasy Metadata Query: {metadataQuery.ToQueryString()}");
+        _logger.LogDebug($"Fantasy Metadata Query: {metadataQuery.ToQueryString()}");
 
         var metadataQueryList = await metadataQuery.ToListAsync();
 
@@ -234,7 +229,7 @@ public class FantasyRepository : IFantasyRepository
                             Id = final.Key.Id,
                             Team = final.Key.Team,
                             TeamId = final.Key.TeamId,
-
+                            TeamPosition = final.Key.TeamPosition
                         },
                         MatchesPlayed = final.Count(),
                         // Match Details
@@ -443,7 +438,7 @@ public class FantasyRepository : IFantasyRepository
             .Select(l => l.MatchHistory)
             .Include(mh => mh.Players);
 
-        _logger.LogInformation($"Match History SQL Query: {matchHistoryQuery.ToQueryString()}");
+        _logger.LogDebug($"Match History SQL Query: {matchHistoryQuery.ToQueryString()}");
 
         return await matchHistoryQuery.ToListAsync();
     }
@@ -480,7 +475,7 @@ public class FantasyRepository : IFantasyRepository
                 .Include(md => md.PicksBans)
                 .Include(md => md.Players).ThenInclude(p => p.AbilityUpgrades);
 
-        _logger.LogInformation($"Get Match Detail Query: {matchDetailsQuery.ToQueryString()}");
+        _logger.LogDebug($"Get Match Detail Query: {matchDetailsQuery.ToQueryString()}");
 
         return await matchDetailsQuery.FirstOrDefaultAsync();
     }
@@ -494,7 +489,7 @@ public class FantasyRepository : IFantasyRepository
             .Select(l => l.MatchMetadata ?? new GcMatchMetadata())
             .OrderByDescending(md => md.MatchId);
 
-        _logger.LogInformation($"Match Metadata SQL Query: {leagueMetadataQuery.ToQueryString()}");
+        _logger.LogDebug($"Match Metadata SQL Query: {leagueMetadataQuery.ToQueryString()}");
 
         return await leagueMetadataQuery.ToListAsync();
     }
@@ -510,7 +505,7 @@ public class FantasyRepository : IFantasyRepository
             .Skip(Skip)
             .Take(Take);
 
-        _logger.LogInformation($"Match Metadata SQL Query: {leagueMetadataQuery.ToQueryString()}");
+        _logger.LogDebug($"Match Metadata SQL Query: {leagueMetadataQuery.ToQueryString()}");
 
         return await leagueMetadataQuery.ToListAsync();
     }
@@ -542,7 +537,7 @@ public class FantasyRepository : IFantasyRepository
             .Skip(Skip)
             .Take(Take);
 
-        _logger.LogInformation($"Match Metadata SQL Query: {fantasyLeagueMetadataQuery.ToQueryString()}");
+        _logger.LogDebug($"Match Metadata SQL Query: {fantasyLeagueMetadataQuery.ToQueryString()}");
 
         return await fantasyLeagueMetadataQuery.ToListAsync();
     }
@@ -554,7 +549,7 @@ public class FantasyRepository : IFantasyRepository
         var matchMetadataQuery = _dbContext.GcMatchMetadata
                 .Where(md => md.MatchId == MatchId);
 
-        _logger.LogInformation($"Match Metadata Query: {matchMetadataQuery.ToQueryString()}");
+        _logger.LogDebug($"Match Metadata Query: {matchMetadataQuery.ToQueryString()}");
 
         return await matchMetadataQuery.FirstOrDefaultAsync();
     }
@@ -569,7 +564,7 @@ public class FantasyRepository : IFantasyRepository
                 .OrderByDescending(mhv => mhv.StartTime)
                 .Take(MatchCount);
 
-        _logger.LogInformation($"Match Highlights Query: {matchHighlightsQuery.ToQueryString()}");
+        _logger.LogDebug($"Match Highlights Query: {matchHighlightsQuery.ToQueryString()}");
 
         return await matchHighlightsQuery.ToListAsync();
     }

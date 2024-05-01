@@ -12,6 +12,7 @@
       </div>
       <div>
         {{ team }}
+        <q-img :src=getPositionIcon(role) height="25px" width="25px"/>
       </div>
     </q-card-section>
     <q-card-section class="draft-body">
@@ -67,6 +68,10 @@ export default defineComponent({
     },
   },
   methods: {
+    getPositionIcon(positionInt) {
+      if(positionInt == 0) return null;
+      return `icons/pos_${positionInt}.png`
+    },
     getImageUrl() {
       if (this.teamImageSrc == 0) return null;
       return `logos/teams_logo_${this.teamImageSrc}.png`

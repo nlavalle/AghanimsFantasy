@@ -59,6 +59,21 @@ const statistics = [
     available: "Yes"
   },
   {
+    name: "Wards Planted",
+    value: "0.5",
+    available: "Yes"
+  },
+  {
+    name: "Camps Stacked",
+    value: "0.5",
+    available: "Yes"
+  },
+  {
+    name: "Stuns",
+    value: "0.05",
+    available: "Yes"
+  },
+  {
     name: "Tower Kill",
     value: "1",
     available: "No"
@@ -74,16 +89,6 @@ const statistics = [
     available: "No"
   },
   {
-    name: "Wards Planted",
-    value: "0.5",
-    available: "No"
-  },
-  {
-    name: "Camps Stacked",
-    value: "0.5",
-    available: "No"
-  },
-  {
     name: "Runes Grabbed",
     value: "0.25",
     available: "No"
@@ -93,11 +98,6 @@ const statistics = [
     value: "4.0",
     available: "No"
   },
-  {
-    name: "Stuns",
-    value: "0.05",
-    available: "No"
-  }
 ];
 const headers = [
   {

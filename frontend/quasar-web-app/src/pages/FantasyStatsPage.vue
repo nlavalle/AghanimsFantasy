@@ -11,18 +11,25 @@
             <q-tab-panels v-model="tab" animated style="width:100%;max-width:1800px">
                 <q-tab-panel name="fantasy" style="padding: 0px">
                     <div class="row">
-                        <div style="width:55%; max-width:300px; padding:10px">
+                        <div style="width:55%;max-width:300px; padding:10px;">
                             <q-input v-model="fantasyFilter" debounce="500" color="red-13" label="Search" dense outlined>
                                 <template v-slot:append>
                                     <q-icon name="search" />
                                 </template>
                             </q-input>
                         </div>
-                        <q-space />
+                        <div style="display:flex;align-items: center;">
+                            <q-btn v-if="selectedFantasyPlayer.length > 0" flat icon="highlight_off" size="14px"
+                                padding="md xs" @click="clearSelectedFantasyPlayers" />
+                        </div>
+                    </div>
+                    <div class="row">
                         <q-tabs v-if="!this.isDesktop" v-model="fantasyTab" dense class="text-grey-5" active-color="grey-1"
-                            indicator-color="red-13" style="width:45%;margin-bottom:5px">
+                            indicator-color="red-13" style="margin-bottom:5px">
                             <q-tab name="kda" label="K/D/A" />
                             <q-tab name="farm" label="Farm" />
+                            <q-tab name="support" label="Supp." />
+                            <q-tab name="damageHealing" label="Dmg/Heal" />
                         </q-tabs>
                     </div>
                     <div class="row">
@@ -47,6 +54,7 @@
                                                 <b>{{ props.value.playerName }}</b>
                                                 <br>
                                                 {{ props.value.teamName }}
+                                                <q-img :src=getPositionIcon(props.value.teamPosition) height="15px" width="15px"/>
                                             </div>
                                             <div class="text-grey-6">
                                                 {{ props.value.matches }} games
@@ -109,6 +117,87 @@
                                     </div>
                                 </q-td>
                             </template>
+                            <template v-slot:body-cell-totalSupportGoldSpent="props">
+                                <q-td :props="props">
+                                    <div style="white-space:normal">
+                                        <b>{{ props.value.supportGoldSpentPoints }}</b>
+                                        <br>
+                                        ({{ props.value.supportGoldSpent }})
+                                    </div>
+                                </q-td>
+                            </template>
+                            <template v-slot:body-cell-totalObsPlaced="props">
+                                <q-td :props="props">
+                                    <div style="white-space:normal">
+                                        <b>{{ props.value.observerWardsPlacedPoints }}</b>
+                                        <br>
+                                        ({{ props.value.observerWardsPlaced }})
+                                    </div>
+                                </q-td>
+                            </template>
+                            <template v-slot:body-cell-totalSentriesPlaced="props">
+                                <q-td :props="props">
+                                    <div style="white-space:normal">
+                                        <b>{{ props.value.sentryWardsPlacedPoints }}</b>
+                                        <br>
+                                        ({{ props.value.sentryWardsPlaced }})
+                                    </div>
+                                </q-td>
+                            </template>
+                            <template v-slot:body-cell-totalWardsDewarded="props">
+                                <q-td :props="props">
+                                    <div style="white-space:normal">
+                                        <b>{{ props.value.wardsDewardedPoints }}</b>
+                                        <br>
+                                        ({{ props.value.wardsDewarded }})
+                                    </div>
+                                </q-td>
+                            </template>
+                            <template v-slot:body-cell-totalCampsStacked="props">
+                                <q-td :props="props">
+                                    <div style="white-space:normal">
+                                        <b>{{ props.value.campsStackedPoints }}</b>
+                                        <br>
+                                        ({{ props.value.campsStacked }})
+                                    </div>
+                                </q-td>
+                            </template>
+                            <template v-slot:body-cell-totalHeroDamage="props">
+                                <q-td :props="props">
+                                    <div style="white-space:normal">
+                                        <b>{{ props.value.heroDamagePoints }}</b>
+                                        <br>
+                                        ({{ props.value.heroDamage }})
+                                    </div>
+                                </q-td>
+                            </template>
+                            <template v-slot:body-cell-totalTowerDamage="props">
+                                <q-td :props="props">
+                                    <div style="white-space:normal">
+                                        <b>{{ props.value.towerDamagePoints }}</b>
+                                        <br>
+                                        ({{ props.value.towerDamage }})
+                                    </div>
+                                </q-td>
+                            </template>
+                            <template v-slot:body-cell-totalHeroHealing="props">
+                                <q-td :props="props">
+                                    <div style="white-space:normal">
+                                        <b>{{ props.value.heroHealingPoints }}</b>
+                                        <br>
+                                        ({{ props.value.heroHealing }})
+                                    </div>
+                                </q-td>
+                            </template>
+                            <template v-slot:body-cell-totalStunDuration="props">
+                                <q-td :props="props">
+                                    <div style="white-space:normal">
+                                        <b>{{ props.value.stunDurationPoints }}</b>
+                                        <br>
+                                        ({{ props.value.stunDuration }})
+                                    </div>
+                                </q-td>
+                            </template>
                         </q-table>
                     </div>
                     <!-- <q-footer class="q-pa-sm compare-footer">
@@ -164,6 +253,7 @@
                                                     <b>{{ props.row.player.dotaAccount.name }}</b>
                                                     <br>
                                                     {{ props.row.player.team.name }}
+                                                    <q-img :src=getPositionIcon(props.row.player.teamPosition) height="15px" width="15px"/>
                                                 </div>
                                             </div>
                                         </div>
@@ -276,6 +366,7 @@
                                                     <b>{{ props.row.player.dotaAccount.name }}</b>
                                                     <br>
                                                     {{ props.row.player.team.name }}
+                                                    <q-img :src=getPositionIcon(props.row.player.teamPosition) height="15px" width="15px"/>
                                                 </div>
                                             </div>
                                         </div>
@@ -434,6 +525,7 @@ export default {
                         playerName: row.fantasyPlayer.dotaAccount.name,
                         playerPicture: row.fantasyPlayer.dotaAccount.steamProfilePicture,
                         teamName: row.fantasyPlayer.team.name,
+                        teamPosition: row.fantasyPlayer.teamPosition,
                         matches: row.totalMatches
                     };
                 },
@@ -448,7 +540,8 @@ export default {
                 format: val => `${val.toLocaleString()}`,
                 headerStyle: 'font-weight: bold',
                 style: 'font-weight: bold',
-                sortable: true
+                sortable: true,
+                sort: (a, b) => a - b
             },
         ];
         const kdaFantasyColumns = [
@@ -508,7 +601,7 @@ export default {
             },
             {
                 name: 'totalGoldPerMin',
-                label: isDesktop.value ? 'Average Gold Per Min' : 'G',
+                label: isDesktop.value ? 'Avg GPM' : 'G',
                 align: 'left',
                 field: row => {
                     return {
@@ -521,7 +614,7 @@ export default {
             },
             {
                 name: 'totalXpPerMin',
-                label: isDesktop.value ? 'Average XP Per Min' : 'XP',
+                label: isDesktop.value ? 'Avg XPM' : 'XP',
                 align: 'left',
                 field: row => {
                     return {
@@ -531,6 +624,127 @@ export default {
                 },
                 sortable: true,
                 sort: (a, b) => a.xpPerMinPoints - b.xpPerMinPoints
+            },
+        ];
+        const supportFantasyColumns = [
+            {
+                name: 'totalSupportGoldSpent',
+                label: isDesktop.value ? 'Supp. Gold Spent' : 'SG',
+                align: 'left',
+                field: row => {
+                    return {
+                        supportGoldSpent: row.totalSupportGoldSpent.toFixed(0).toLocaleString() ?? 0,
+                        supportGoldSpentPoints: row.totalSupportGoldSpentPoints.toFixed(1).toLocaleString()
+                    };
+                },
+                sortable: true,
+                sort: (a, b) => a.supportGoldSpentPoints - b.supportGoldSpentPoints
+            },
+            {
+                name: 'totalObsPlaced',
+                label: isDesktop.value ? 'Obs Placed' : 'OB',
+                align: 'left',
+                field: row => {
+                    return {
+                        observerWardsPlaced: row.totalObserverWardsPlaced.toFixed(0).toLocaleString() ?? 0,
+                        observerWardsPlacedPoints: row.totalObserverWardsPlacedPoints.toFixed(1).toLocaleString()
+                    };
+                },
+                sortable: true,
+                sort: (a, b) => a.observerWardsPlacedPoints - b.observerWardsPlacedPoints
+            },
+            {
+                name: 'totalSentriesPlaced',
+                label: isDesktop.value ? 'Sentries Placed' : 'SN',
+                align: 'left',
+                field: row => {
+                    return {
+                        sentryWardsPlaced: row.totalSentryWardsPlaced.toFixed(0).toLocaleString() ?? 0,
+                        sentryWardsPlacedPoints: row.totalSentryWardsPlacedPoints.toFixed(1).toLocaleString()
+                    };
+                },
+                sortable: true,
+                sort: (a, b) => a.sentryWardsPlacedPoints - b.sentryWardsPlacedPoints
+            },
+            {
+                name: 'totalWardsDewarded',
+                label: isDesktop.value ? 'Dewards' : 'DW',
+                align: 'left',
+                field: row => {
+                    return {
+                        wardsDewarded: row.totalWardsDewarded.toFixed(0).toLocaleString() ?? 0,
+                        wardsDewardedPoints: row.totalWardsDewardedPoints.toFixed(1).toLocaleString()
+                    };
+                },
+                sortable: true,
+                sort: (a, b) => a.wardsDewardedPoints - b.wardsDewardedPoints
+            },
+            {
+                name: 'totalCampsStacked',
+                label: isDesktop.value ? 'Camps Stacked' : 'C',
+                align: 'left',
+                field: row => {
+                    return {
+                        campsStacked: row.totalCampsStacked.toFixed(0).toLocaleString() ?? 0,
+                        campsStackedPoints: row.totalCampsStackedPoints.toFixed(1).toLocaleString()
+                    };
+                },
+                sortable: true,
+                sort: (a, b) => a.campsStackedPoints - b.campsStackedPoints
+            },
+        ];
+        const damageHealingFantasyColumns = [
+            {
+                name: 'totalHeroDamage',
+                label: isDesktop.value ? 'Hero Dmg' : 'HD',
+                align: 'left',
+                field: row => {
+                    return {
+                        heroDamage: row.totalHeroDamage.toLocaleString() ?? 0,
+                        heroDamagePoints: row.totalHeroDamagePoints.toFixed(1).toLocaleString()
+                    };
+                },
+                sortable: true,
+                sort: (a, b) => a.heroDamagePoints - b.heroDamagePoints
+            },
+            {
+                name: 'totalTowerDamage',
+                label: isDesktop.value ? 'Tower Dmg' : 'TD',
+                align: 'left',
+                field: row => {
+                    return {
+                        towerDamage: row.totalTowerDamage.toLocaleString() ?? 0,
+                        towerDamagePoints: row.totalTowerDamagePoints.toFixed(1).toLocaleString()
+                    };
+                },
+                sortable: true,
+                sort: (a, b) => a.towerDamagePoints - b.towerDamagePoints
+            },
+            {
+                name: 'totalHeroHealing',
+                label: isDesktop.value ? 'Hero Healing' : 'HH',
+                align: 'left',
+                field: row => {
+                    return {
+                        heroHealing: row.totalHeroHealing.toLocaleString() ?? 0,
+                        heroHealingPoints: row.totalHeroHealingPoints.toFixed(1).toLocaleString()
+                    };
+                },
+                sortable: true,
+                sort: (a, b) => a.heroHealingPoints - b.heroHealingPoints
+            },
+            {
+                name: 'totalStunDuration',
+                label: isDesktop.value ? 'Stun Dur.' : 'SD',
+                align: 'left',
+                field: row => {
+                    return {
+                        stunDuration: row.totalStunDuration.toFixed(1).toLocaleString() ?? 0,
+                        stunDurationPoints: row.totalStunDurationPoints.toFixed(1).toLocaleString()
+                    };
+                },
+                sortable: true,
+                sort: (a, b) => a.stunDurationPoints - b.stunDurationPoints
             },
         ];
 
@@ -631,7 +845,7 @@ export default {
             },
             {
                 name: 'totalSentriesPlaced',
-                label: isDesktop.value ? 'Sentires Placed' : 'SN',
+                label: isDesktop.value ? 'Sentries Placed' : 'SN',
                 align: 'left',
                 field: row => row.sentryWardsPlaced ?? 0,
                 sortable: true,
@@ -697,6 +911,9 @@ export default {
         const selectedLeaguePlayer = ref([]);
         const compareLeaguePlayers = ref([]);
 
+        const selectedFantasyPlayer = ref([]);
+        const compareFantasyPlayers = ref([]);
+
         onMounted(() => {
             if (leagueStore.selectedLeague) {
                 localApiService.getPlayerFantasyStats(leagueStore.selectedLeague.id)
@@ -728,8 +945,24 @@ export default {
             }
         };
 
+        const selectFantasyRow = (selectedRow) => {
+            const index = selectedFantasyPlayer.value.findIndex(row => row.player === selectedRow.player);
+
+            if (index !== -1) {
+                selectedFantasyPlayer.value.splice(index, 1);
+            } else {
+                if (selectedFantasyPlayer.value.length < 2) {
+                    selectedFantasyPlayer.value.push(selectedRow);
+                }
+            }
+        };
+
         const clearSelectedLeaguePlayers = () => {
             selectedLeaguePlayer.value = [];
+        };
+
+        const clearSelectedFantasyPlayers = () => {
+            selectedFantasyPlayer.value = [];
         };
 
         const CompareLeaguePlayers = () => {
@@ -741,6 +974,17 @@ export default {
             leagueCompareTable.classList.toggle("collapsed");
             compareLeaguePlayers.value = [...selectedLeaguePlayer.value];
             clearSelectedLeaguePlayers();
+        }
+
+        const CompareFantasyPlayers = () => {
+            compareOn.value = !compareOn.value;
+            var fantasyTable = document.getElementById('fantasyTable');
+            fantasyTable.classList.toggle("collapsed");
+
+            var fantasyCompareTable = document.getElementById('fantasyCompareTable');
+            fantasyCompareTable.classList.toggle("collapsed");
+            compareFantasyPlayers.value = [...selectedFantasyPlayer.value];
+            clearSelectedFantasyPlayers();
         }
 
         const playerFantasyStatsIndexed = computed(() => {
@@ -794,10 +1038,17 @@ export default {
             selectLeagueRow,
             CompareLeaguePlayers,
             clearSelectedLeaguePlayers,
+            selectedFantasyPlayer,
+            compareFantasyPlayers,
+            selectFantasyRow,
+            CompareFantasyPlayers,
+            clearSelectedFantasyPlayers,
             selectedFantasyColumns,
             commonFantasyColumns,
             kdaFantasyColumns,
             farmFantasyColumns,
+            supportFantasyColumns,
+            damageHealingFantasyColumns,
             commonLeagueColumns,
             kdaLeagueColumns,
             farmLeagueColumns,
@@ -810,7 +1061,7 @@ export default {
     computed: {
         displayedFantasyColumns() {
             if (this.isDesktop) {
-                return [...this.commonFantasyColumns, ...this.kdaFantasyColumns, ...this.farmFantasyColumns];
+                return [...this.commonFantasyColumns, ...this.kdaFantasyColumns, ...this.farmFantasyColumns, ...this.supportFantasyColumns, ...this.damageHealingFantasyColumns];
             }
             else {
                 switch (this.fantasyTab) {
@@ -818,6 +1069,10 @@ export default {
                         return [...this.commonFantasyColumns, ...this.kdaFantasyColumns];
                     case 'farm':
                         return [...this.commonFantasyColumns, ...this.farmFantasyColumns];
+                    case 'support':
+                        return [...this.commonFantasyColumns, ...this.supportFantasyColumns];
+                    case 'damageHealing':
+                        return [...this.commonFantasyColumns, ...this.damageHealingFantasyColumns];
                     default:
                         return [...this.commonFantasyColumns];
                 }
@@ -843,7 +1098,11 @@ export default {
             }
         }
     },
-
+    methods: {
+        getPositionIcon(positionInt) {
+            return `icons/pos_${positionInt}.png`
+        }
+    }
 }
 </script>
   
