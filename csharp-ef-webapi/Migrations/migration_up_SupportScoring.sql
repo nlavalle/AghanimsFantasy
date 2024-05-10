@@ -65,33 +65,33 @@ select
 	dgmmp.stun_duration as stun_duration,
 	dgmmp.stun_duration * dflw.stun_duration_weight as stun_duration_points,	
 	(
-		dmdp.kills * dflw.kills_weight +
-		dmdp.deaths * dflw.deaths_weight + 
-		dmdp.assists * dflw.assists_weight + 
-		dmdp.last_hits * dflw.last_hits_weight +
-		dmdp.gold_per_min * dflw.gold_per_min_weight + 
-		dmdp.xp_per_min * dflw.xp_per_min_weight + 
-		dmdp.net_worth * dflw.networth_weight +
-		dmdp.hero_damage * dflw.hero_damage_weight +
-		dmdp.tower_damage * dflw.tower_damage_weight +
-		dmdp.hero_healing * dflw.hero_healing_weight +
-		dmdp.gold * dflw.gold_weight +
-		dgmmp.fight_score * dflw.fight_score_weight +
-		dgmmp.farm_score * dflw.farm_score_weight + 
-		dgmmp.support_score * dflw.support_score_weight +
-		dgmmp.push_score * dflw.push_score_weight +
-		dgmmp.hero_xp * dflw.hero_xp_weight +
-		dgmmp.camps_stacked * dflw.camps_stacked_weight +
-		dgmmp.rampages * dflw.rampages_weight +
-		dgmmp.triple_kills * dflw.triple_kills_weight +
-		dgmmp.aegis_snatched * dflw.aegis_snatched_weight +	
-		dgmmp.rapiers_purchased * dflw.rapiers_purchased_weight +
-		dgmmp.couriers_killed * dflw.couriers_killed_weight +
-		dgmmp.support_gold_spent * dflw.support_gold_spent_weight +
-		dgmmp.observer_wards_placed * dflw.observer_wards_placed_weight +
-		dgmmp.sentry_wards_placed * dflw.sentry_wards_placed_weight +
-		dgmmp.wards_dewarded * dflw.wards_dewarded_weight +
-		dgmmp.stun_duration * dflw.stun_duration_weight	
+		coalesce(dmdp.kills * dflw.kills_weight, 0) +
+		coalesce(dmdp.deaths * dflw.deaths_weight, 0) + 
+		coalesce(dmdp.assists * dflw.assists_weight, 0) + 
+		coalesce(dmdp.last_hits * dflw.last_hits_weight, 0) +
+		coalesce(dmdp.gold_per_min * dflw.gold_per_min_weight, 0) + 
+		coalesce(dmdp.xp_per_min * dflw.xp_per_min_weight, 0) + 
+		coalesce(dmdp.net_worth * dflw.networth_weight, 0) +
+		coalesce(dmdp.hero_damage * dflw.hero_damage_weight, 0) +
+		coalesce(dmdp.tower_damage * dflw.tower_damage_weight, 0) +
+		coalesce(dmdp.hero_healing * dflw.hero_healing_weight, 0) +
+		coalesce(dmdp.gold * dflw.gold_weight, 0) +
+		coalesce(dgmmp.fight_score * dflw.fight_score_weight, 0) +
+		coalesce(dgmmp.farm_score * dflw.farm_score_weight, 0) + 
+		coalesce(dgmmp.support_score * dflw.support_score_weight, 0) +
+		coalesce(dgmmp.push_score * dflw.push_score_weight, 0) +
+		coalesce(dgmmp.hero_xp * dflw.hero_xp_weight, 0) +
+		coalesce(dgmmp.camps_stacked * dflw.camps_stacked_weight, 0) +
+		coalesce(dgmmp.rampages * dflw.rampages_weight, 0) +
+		coalesce(dgmmp.triple_kills * dflw.triple_kills_weight, 0) +
+		coalesce(dgmmp.aegis_snatched * dflw.aegis_snatched_weight, 0) +	
+		coalesce(dgmmp.rapiers_purchased * dflw.rapiers_purchased_weight, 0) +
+		coalesce(dgmmp.couriers_killed * dflw.couriers_killed_weight, 0) +
+		coalesce(dgmmp.support_gold_spent * dflw.support_gold_spent_weight, 0) +
+		coalesce(dgmmp.observer_wards_placed * dflw.observer_wards_placed_weight, 0) +
+		coalesce(dgmmp.sentry_wards_placed * dflw.sentry_wards_placed_weight, 0) +
+		coalesce(dgmmp.wards_dewarded * dflw.wards_dewarded_weight, 0) +
+		coalesce(dgmmp.stun_duration * dflw.stun_duration_weight, 0)	
 	)::numeric as total_match_fantasy_points	
 from nadcl.dota_fantasy_leagues dfl
 	join nadcl.dota_fantasy_league_weights dflw 
