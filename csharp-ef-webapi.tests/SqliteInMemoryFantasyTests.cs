@@ -121,7 +121,7 @@ public class SqliteInMemoryFantasyTests : IDisposable
                     dgmmp.sentry_wards_placed * dflw.sentry_wards_placed_weight +
                     dgmmp.wards_dewarded * dflw.wards_dewarded_weight +
                     dgmmp.stun_duration * dflw.stun_duration_weight	
-                as numeric) as total_match_fantasy_points	
+                as double) as total_match_fantasy_points	
             from dota_fantasy_leagues dfl
                 join dota_fantasy_league_weights dflw 
                     on dfl.id = dflw.fantasy_league_id 

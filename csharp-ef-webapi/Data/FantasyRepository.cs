@@ -91,7 +91,8 @@ public class FantasyRepository : IFantasyRepository
 
         var fantasyPlayerTotalsQuery = _dbContext.FantasyPlayerPointTotalsView
             .Include(fppt => fppt.FantasyPlayer)
-            .Where(fppt => fppt.FantasyLeagueId == FantasyLeagueId);
+            .Where(fppt => fppt.FantasyLeagueId == FantasyLeagueId)
+            .OrderByDescending(fppt => (double)fppt.TotalMatchFantasyPoints); // double casted needed for Sqlite: https://learn.microsoft.com/en-us/ef/core/providers/sqlite/limitations#query-limitations
 
         _logger.LogDebug($"Match Details Query: {fantasyPlayerTotalsQuery.ToQueryString()}");
 
