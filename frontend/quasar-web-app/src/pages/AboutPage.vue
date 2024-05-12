@@ -60,7 +60,7 @@ const statistics = [
   },
   {
     name: "Wards Planted",
-    value: "0.5",
+    value: "0.15",
     available: "Yes"
   },
   {
