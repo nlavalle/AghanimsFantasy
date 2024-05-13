@@ -1,18 +1,13 @@
 <template>
     <div class="sidebar" :style="{ width: sidebarWidth }">
         <h1>
-            <span v-if="collapsed">
-                <div>V</div>
-                <div>S</div>
-            </span>
-            <span v-else>Vue Sidebar</span>
+            <span>Vue Sidebar</span>
         </h1>
 
         <SidebarLink to="/" icon="fas fa-home">Home</SidebarLink>
-        <SidebarLink to="/dashboard" icon="fas fa-columns">Dashboard</SidebarLink>
-        <SidebarLink to="/analytics" icon="fas fa-chart-bar">Analytics</SidebarLink>
-        <SidebarLink to="/friends" icon="fas fa-users">Friends</SidebarLink>
-        <SidebarLink to="/image" icon="fas fa-image">Images</SidebarLink>
+        <SidebarLink to="/dashboard" icon="fas fa-columns">Fantasy Draft</SidebarLink>
+        <SidebarLink to="/analytics" icon="fas fa-chart-bar">Login</SidebarLink>
+        <SidebarLink to="/friends" icon="fas fa-users">Logout</SidebarLink>
 
         <span class="collapse-icon" @click="toggleSidebar" :class="{ 'rotate-180': collapsed }">
             <i class="fas fa-angle-double-left" />
@@ -45,8 +40,6 @@ import { collapsed, toggleSidebar, sidebarWidth } from './state'
     left: 0;
     bottom: 0;
     padding: 0.5em;
-
-    transition: 0.3s ease;
 
     display: flex;
     flex-direction: column;

@@ -1,11 +1,12 @@
 <template>
     <router-link :to="to" class="link" :class="{ active: isActive }">
         <i class="icon" :class="icon"></i>
-        <transition name="fade">
+        <slot></slot>
+        <!-- <transition name="fade">
             <span v-if="!collapsed">
                 <slot></slot>
             </span>
-        </transition>
+        </transition> -->
     </router-link>
 </template>
 
@@ -24,7 +25,7 @@ const isActive = computed(() => route.path == props.to)
 </script>
 
 <style scoped>
-.fade-enter-active,
+/* .fade-enter-active,
 .fade-leave-active {
     transition: opacity 0.1s;
 }
@@ -32,7 +33,7 @@ const isActive = computed(() => route.path == props.to)
 .fade-enter,
 .fade-leave-to {
     opacity: 0;
-}
+} */
 
 .link {
     display: flex;

@@ -2,30 +2,34 @@
 import { RouterView } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
 import Sidebar from '@/components/sidebar/Sidebar.vue';
-import { sidebarWidth } from '@/components/sidebar/state'
+import { sidebarWidth, collapsed } from '@/components/sidebar/state'
 </script>
 
 <template>
-  <header :style="{ 'margin-left': sidebarWidth }">
-    <Navbar style="width: 100%" />
+  <header>
+    <Navbar style="width: 100%" :style="{ 'margin-left': sidebarWidth }" />
   </header>
-  <Sidebar />
-  <main :style="{ 'margin-left': sidebarWidth }">
-    <RouterView />
+  <transition name="slide">
+    <Sidebar v-if="!collapsed" />
+  </transition>
+  <main>
+    <RouterView :style="{ 'margin-left': sidebarWidth }" />
   </main>
 </template>
 
 <style scoped>
-.layout {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  width: 100%;
+.slide-leave-active,
+.slide-enter-active {
+  transition: 0.5s ease;
+}
+.slide-enter-from {
+  transform: translate(-100%, 0);
+}
+.slide-leave-to {
+  transform: translate(-100%, 0);
 }
 
 header {
   line-height: 1.5;
-  max-height: 100vh;
 }
-
 </style>
