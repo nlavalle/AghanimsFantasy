@@ -1,62 +1,79 @@
-<script setup lang="ts">
-import { RouterLink } from 'vue-router'
-import { toggleSidebar } from '@/components/sidebar/state'
-</script>
-
 <template>
     <div class="navbar">
-        <nav>
-            <span class="sidebarToggle" @click="toggleSidebar">
-                <i class="icon fa-solid fa-bars"></i>
-            </span>
-            <router-link to="/about">About</router-link>
-            <router-link to="/fantasy">Fantasy</router-link>
-            <router-link to="/stats">Stats</router-link>
-            <router-link to="/leaderboard">Leaderboard</router-link>
-            <router-link to="/highlights">Highlights</router-link>
-        </nav>
-        <hr />
+        <span class="sidebarToggle" @click="toggleSidebar">
+            <i class="icon fa-solid fa-bars"></i>
+        </span>
+        <TabMenu style="width: 100%; text-transform: uppercase;" :model="items">
+            <template #item="{ item, props }">
+                <router-link v-slot="{ href, navigate }" :to="item.route" custom>
+                    <a :href="href" v-bind="props.action" @click="navigate" style="align-items:center;">
+                        <span v-bind="props.icon" style="margin-right: 0" />
+                        <span v-bind="props.label">{{ item.label }}</span>
+                    </a>
+                </router-link>
+            </template>
+        </TabMenu>
     </div>
 </template>
 
+<script setup lang="ts">
+import { ref } from 'vue';
+import { RouterLink } from 'vue-router'
+import { toggleSidebar } from '@/components/sidebar/state';
+import TabMenu from 'primevue/tabmenu';
+
+const items = ref([
+    {
+        icon: 'fa-solid fa-house',
+        label: '',
+        route: '/'
+    },
+    {
+        label: 'About',
+        route: '/about'
+    },
+    {
+        label: 'Fantasy',
+        route: '/fantasy'
+    },
+    {
+        label: 'Stats',
+        route: '/stats'
+    },
+    {
+        label: 'Leaderboard',
+        route: '/leaderboard'
+    },
+    {
+        label: 'Highlights',
+        route: '/highlights'
+    }
+])
+
+</script>
+
 <style scoped>
 .navbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-}
+    display: flex;
+    background: rgb(24, 24, 27);
 
-nav {
-    font-size: 14px;
-    text-align: left;
-    text-transform: uppercase;
-    font-family: Avenir, Helvetica, Arial, sans-serif;
-    margin-top: 0.5rem;
-}
-
-nav a.router-link-exact-active {
-    color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-    background-color: transparent;
-}
-
-nav a {
-    display: inline-block;
-    padding: 0 1rem;
 }
 
 .sidebarToggle {
-    margin-left: 1rem;
+    height: 49px;
+    cursor: pointer;
+    border: 1px solid #3f3f46;
+    border-width: 0 0 1px 0;
 }
 
 .sidebarToggle:hover {
-    color: var(--sidebar-item-hover)
+    color: var(--primary-color)
 }
 
 .sidebarToggle .icon {
-    width: 15px;
-    height: 15px;
+    vertical-align: middle;
+    margin: 15px;
+    width: 20px;
+    height: 20px;
 }
 </style>

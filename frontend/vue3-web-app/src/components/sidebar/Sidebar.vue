@@ -1,37 +1,55 @@
 <template>
     <div class="sidebar" :style="{ width: sidebarWidth }">
-        <h1>
-            <span>Vue Sidebar</span>
-        </h1>
+        <h3>
+            <div style="display:flex">
+                <div>
+                    <img src="@/assets/BannerAvatar.png" height="38px" width="38px" style="margin-right:5px;" />
+                </div>
+                <div>
+                    <span>Aghanim's Fantasy</span>
+                </div>
+            </div>
+        </h3>
 
-        <SidebarLink to="/" icon="fas fa-home">Home</SidebarLink>
-        <SidebarLink to="/dashboard" icon="fas fa-columns">Fantasy Draft</SidebarLink>
-        <SidebarLink to="/analytics" icon="fas fa-chart-bar">Login</SidebarLink>
-        <SidebarLink to="/friends" icon="fas fa-users">Logout</SidebarLink>
+        <SidebarLink class="link" to="/" icon="fas fa-home">Home</SidebarLink>
+        <SidebarLink class="link" to="/fantasy" icon="fas fa-columns">Fantasy Draft</SidebarLink>
 
-        <span class="collapse-icon" @click="toggleSidebar" :class="{ 'rotate-180': collapsed }">
-            <i class="fas fa-angle-double-left" />
-        </span>
+        <LeagueSelector class="dropdown" />
+
+        <LoginDiscord class="link" />
+
+        <div v-if="authenticated" class="userWelcome">
+            <span>
+                Welcome {{ user.name }}
+            </span>
+        </div>
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import SidebarLink from './SidebarLink.vue'
-import { collapsed, toggleSidebar, sidebarWidth } from './state'
-</script>
+import LoginDiscord from '@/components/LoginDiscord.vue'
+import LeagueSelector from '@/components/LeagueSelector.vue'
+import { sidebarWidth } from './state'
+import { useAuthStore } from '@/stores/auth'
+import { computed } from 'vue'
 
-<style>
-:root {
-    --sidebar-bg-color: #2f855a;
-    --sidebar-item-hover: #38a169;
-    --sidebar-item-active: #276749;
-}
-</style>
+const authStore = useAuthStore();
+
+const authenticated = computed(() => {
+    return authStore.authenticated;
+});
+
+const user = computed(() => {
+    return authStore.user ?? {};
+});
+
+</script>
 
 <style scoped>
 .sidebar {
     color: white;
-    background-color: var(--sidebar-bg-color);
+    background-color: var(--highlight-bg);
 
     float: left;
     position: fixed;
@@ -45,18 +63,51 @@ import { collapsed, toggleSidebar, sidebarWidth } from './state'
     flex-direction: column;
 }
 
-.collapse-icon {
+.link {
+    display: flex;
+    align-items: center;
+
+    cursor: pointer;
+    position: relative;
+    font-weight: 400;
+    user-select: none;
+
+    margin: 0.1em 0;
+    padding: 0.4em;
+    border-radius: 0.25em;
+    height: 1.5em;
+
+    color: white;
+    text-decoration: none;
+}
+
+.link:hover {
+    background-color: var(--highlight-bg)
+}
+
+.link.active {
+    background-color: var(--primary-color);
+}
+
+.dropdown {
+    display: flex;
+
+    /* cursor: pointer; */
+    position: relative;
+    font-weight: 400;
+    user-select: none;
+
+    margin: 0.1em 0;
+    padding-left: 0.4em;
+    border-radius: 0.25em;
+
+    color: white;
+    text-decoration: none;
+}
+
+.userWelcome {
     position: absolute;
     bottom: 0;
     padding: 0.75em;
-
-    color: rgba(255,255,255,0.7);
-
-    transition: 0.2s linear;
-}
-
-.rotate-180 {
-    transform: rotate(180deg);
-    transition: 0.2s linear;
 }
 </style>

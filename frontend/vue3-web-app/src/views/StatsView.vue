@@ -11,7 +11,7 @@ import Tabs from '../components/Tabs.vue'
 import Tab from '../components/Tab.vue'
 </script>
 
-<style>
+<style scoped>
 @media (min-width: 1024px) {
   .about {
     min-height: 100vh;
