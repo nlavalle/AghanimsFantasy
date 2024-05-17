@@ -38,7 +38,7 @@ namespace csharp_ef_webapi.Controllers
         [HttpGet("login")]
         public IActionResult DiscordLogin()
         {
-            return Ok("Login Successful");
+            return NoContent();
         }
 
         // GET: api/auth/accessdenied
