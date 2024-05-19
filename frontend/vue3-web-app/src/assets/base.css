@@ -1,22 +1,22 @@
 /* Aghanims Fantasy Color Palette */
 :root {
-  --aghanims-fantasy-accent: #E63946;
+  --aghanims-fantasy-accent: #e63946;
   --aghanims-fantasy-accent-dark: #9f0722;
-  --aghanims-fantasy-white: #E0E1DD;
-  --aghanims-fantasy-main-1: #778DA9;
-  --aghanims-fantasy-main-2: #415A77;
-  --aghanims-fantasy-main-3: #1B263B;
-  --aghanims-fantasy-main-4: #0D1B2A;
+  --aghanims-fantasy-white: #e0e1dd;
+  --aghanims-fantasy-main-1: #778da9;
+  --aghanims-fantasy-main-2: #415a77;
+  --aghanims-fantasy-main-3: #1b263b;
+  --aghanims-fantasy-main-4: #0d1b2a;
   --aghanims-fantasy-blue-1: #192038;
 
-  --gradient-purple-1: #7A0045;
-  --gradient-purple-2: #7A0058;
-  --gradient-purple-3: #7A0066;
-  --gradient-purple-4: #7A007A;
-  --gradient-purple-5: #68007A;
-  --gradient-purple-6: #5E007A;
-  --gradient-purple-7: #52007A;
-  --gradient-purple-8: #45007A;
-  --gradient-purple-9:  #35007A; 
-  --gradient-purple-10: #16007A;
+  --gradient-purple-1: #7a0045;
+  --gradient-purple-2: #7a0058;
+  --gradient-purple-3: #7a0066;
+  --gradient-purple-4: #7a007a;
+  --gradient-purple-5: #68007a;
+  --gradient-purple-6: #5e007a;
+  --gradient-purple-7: #52007a;
+  --gradient-purple-8: #45007a;
+  --gradient-purple-9: #35007a;
+  --gradient-purple-10: #16007a;
 }

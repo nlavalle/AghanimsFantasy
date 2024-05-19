@@ -1,9 +1,9 @@
-import { defineStore } from 'pinia';
+import { defineStore } from 'pinia'
 
-interface League {
-  id: number,
-  name: string,
-  isActive: boolean,
+export interface League {
+  id: number
+  name: string
+  isActive: boolean
   fantasyDraftLocked: Date
 }
 
@@ -16,25 +16,25 @@ export const useLeagueStore = defineStore({
 
   actions: {
     setLeagues(leagues: League[]) {
-      this.leagues = leagues;
+      this.leagues = leagues
     },
 
     clearLeagues() {
-      this.leagues = null;
+      this.leagues = null
     },
 
     setSelectedLeague(league: League) {
-      this.selectedLeague = league;
+      this.selectedLeague = league
     },
 
     clearSelectedLeague() {
-      this.selectedLeague = null;
-    },
+      this.selectedLeague = null
+    }
   },
 
   getters: {
     activeLeagues(): League[] {
-      return this.leagues?.filter(league => league.isActive) ?? []
+      return this.leagues?.filter((league) => league.isActive) ?? []
     }
   }
-});
+})

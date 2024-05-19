@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /about
+Allow: /fantasy
+Allow: /leaderboard
+Allow: /highlights
+Allow: /stats
+Disallow: /api/
+
+Sitemap: https://www.aghanimsfantasy.com/sitemap.xml

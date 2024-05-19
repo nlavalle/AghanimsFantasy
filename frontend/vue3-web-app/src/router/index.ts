@@ -26,6 +26,11 @@ const router = createRouter({
       path: '/fantasy',
       name: 'fantasy',
       component: () => import('../views/FantasyView.vue')
+    },
+    {
+      path: '/leaderboard',
+      name: 'leaderboard',
+      component: () => import('../views/LeaderboardView.vue')
     }
   ]
 })
