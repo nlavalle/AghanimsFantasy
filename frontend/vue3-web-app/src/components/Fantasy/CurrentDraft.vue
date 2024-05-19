@@ -22,6 +22,8 @@ export default defineComponent({
     name: 'CurrentDraft',
     components: {
         DraftPickCard,
+        VContainer,
+        VRow
     },
     props: {
         FantasyPoints: {

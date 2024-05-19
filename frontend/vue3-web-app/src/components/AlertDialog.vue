@@ -1,28 +1,31 @@
 <template>
     <v-dialog class="alert-dialog">
-        <v-card>
-            <v-card-text>
-                <span class="text-h6">Success!</span>
-            </v-card-text>
+        <template v-slot:default="{ isActive }">
+            <v-card>
+                <v-card-text>
+                    <span class="text-h6">Success!</span>
+                </v-card-text>
 
-            <v-card-text>
-                <p>Your Fantasy Draft was updated.</p>
-            </v-card-text>
+                <v-card-text>
+                    <p>Your Fantasy Draft was updated.</p>
+                </v-card-text>
 
-            <v-card-actions align="right">
-                <v-btn flat label="OK" color="white" v-close-popup @click="onOKClick"></v-btn>
-            </v-card-actions>
-        </v-card>
+                <v-card-actions align="right">
+                    <v-btn flat label="OK" color="white" @click="onOKClick(isActive)"></v-btn>
+                </v-card-actions>
+            </v-card>
+        </template>
     </v-dialog>
 </template>
 
 <script setup lang="ts">
 import { VDialog, VCard, VCardText, VCardActions, VBtn } from 'vuetify/components';
-import { defineEmits } from 'vue';
+import { defineEmits, type Ref } from 'vue';
 
 const emit = defineEmits(['ok']);
 
-const onOKClick = () => {
+const onOKClick = (isActive: Ref<boolean>) => {
+    isActive.value = false;
     emit('ok');
 }
 </script>
