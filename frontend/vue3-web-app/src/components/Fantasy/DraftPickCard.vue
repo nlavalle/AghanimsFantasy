@@ -121,7 +121,8 @@ const handleMouseMove = (event: MouseEvent) => {
 }
 
 .card-container:hover {
-  background: radial-gradient(at var(--x) var(--y), rgba(100, 100, 100, 0.1) 10%, transparent 90%);
+  background: radial-gradient(at var(--x) var(--y), rgba(200, 200, 200, 0.1) 10%, transparent 90%);
+  background-color: var(--aghanims-fantasy-blue-1);
 }
 
 .card-container {
@@ -163,7 +164,7 @@ const handleMouseMove = (event: MouseEvent) => {
 
 .draft-body:hover {
   background:
-    radial-gradient(at var(--x) var(--y), rgba(100, 100, 100, 0.1) 10%, transparent 90%),
+    radial-gradient(at var(--x) var(--y), rgba(200, 200, 200, 0.1) 10%, transparent 90%),
     linear-gradient(to bottom, var(--aghanims-fantasy-accent-dark), var(--aghanims-fantasy-blue-1))
 }
 

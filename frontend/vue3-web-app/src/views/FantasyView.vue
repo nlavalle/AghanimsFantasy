@@ -12,26 +12,7 @@
       </div>
       <div v-else class="row">
         <div class="row">
-          <div class="col col-2 draft-player">
-            <select-expansion-group v-model="draftedPlayerOne" :select-options="fantasyTeamPlayers"
-              @update:model-value="updateSelectedPlayers" select-label="Draft First Player" />
-          </div>
-          <div class="col col-2 draft-player">
-            <select-expansion-group v-model="draftedPlayerTwo" :select-options="fantasyTeamPlayers"
-              @update:model-value="updateSelectedPlayers" select-label="Draft Second Player" />
-          </div>
-          <div class="col col-2 draft-player">
-            <select-expansion-group v-model="draftedPlayerThree" :select-options="fantasyTeamPlayers"
-              @update:model-value="updateSelectedPlayers" select-label="Draft Third Player" />
-          </div>
-          <div class="col col-2 draft-player">
-            <select-expansion-group v-model="draftedPlayerFour" :select-options="fantasyTeamPlayers"
-              @update:model-value="updateSelectedPlayers" select-label="Draft Fourth Player" />
-          </div>
-          <div class="col col-2 draft-player">
-            <select-expansion-group v-model="draftedPlayerFive" :select-options="fantasyTeamPlayers"
-              @update:model-value="updateSelectedPlayers" select-label="Draft Fifth Player" />
-          </div>
+          <p>Placeholder</p>
         </div>
         <div class="row">
           <v-spacer />
@@ -52,81 +33,34 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
+import { VSpacer, VBtn } from 'vuetify/components';
 import { useAuthStore } from '@/stores/auth';
 import { useLeagueStore } from '@/stores/league';
 import { localApiService } from '@/services/localApiService';
-import SelectExpansionGroup from '@/components/Fantasy/SelectExpansionGroup.vue';
 import AlertDialog from '@/components/AlertDialog.vue'
 import ErrorDialog from '@/components/ErrorDialog.vue';
-import CurrentDraft from '@/components/Fantasy/CurrentDraft.vue'
-import { VSpacer, VBtn } from 'vuetify/components';
+import CurrentDraft from '@/components/Fantasy/CurrentDraft.vue';
+import { fantasyDraftState, type FantasyDraftPoints, type FantasyPlayer } from '@/components/Fantasy/fantasyDraft';
 
 const authStore = useAuthStore();
 const leagueStore = useLeagueStore();
+const { fantasyDraftPicks, setFantasyDraftPicks } = fantasyDraftState();
 
 const updateDraftVisibility = ref(false);
-const fantasyPlayers = ref([]);
-// const fantasyDraft = ref([]);
-const userDraftPoints = ref({});
-// const selectedFantasyPlayer = ref(null);
-const selectedPlayerIds = ref([]);
-const draftedPlayerOne = ref(null);
-const draftedPlayerTwo = ref(null);
-const draftedPlayerThree = ref(null);
-const draftedPlayerFour = ref(null);
-const draftedPlayerFive = ref(null);
+const fantasyPlayers = ref<FantasyPlayer[]>([]);
+const userDraftPoints = ref<FantasyDraftPoints>();
 
 const showSuccessModal = ref(false);
 const showErrorModal = ref(false);
 const errorDetails = ref(null);
 
-// Define a computed property to generate a grouped list of players per team
-const fantasyTeamPlayers = computed(() => {
-  return Array.from(new Set(fantasyPlayers.value.map(opt => opt.team.name))).map(teamName => {
-    return {
-      label: teamName,
-      options: fantasyPlayers.value
-        .filter(opt => opt.team.name === teamName) // Filter team
-        .filter(opt => !selectedPlayerIds.value.some((sel) => sel == opt.id)) // Filter selected players
-        .map(player => (
-          {
-            id: player.id,
-            name: player.dotaAccount.name,
-            position: player.teamPosition
-          }
-        ))
-        .sort((playerA, playerB) => playerA.position - playerB.position),
-    };
-  })
-});
-
 const updateDisabled = computed(() => {
   var currentDate = new Date();
-  var lockDate = new Date(leagueStore.selectedLeague?.fantasyDraftLocked * 1000 ?? new Date());
+  var draftLockEpoch: number = leagueStore.selectedLeague ? leagueStore.selectedLeague.fantasyDraftLocked : 0;
+  var lockDate = new Date(draftLockEpoch * 1000);
   //return currentDate > lockDate && userDraftPoints.value != {}; // TODO: Rethink logic on people who draft late
   return currentDate > lockDate;
 });
-
-const updateSelectedPlayers = () => {
-  selectedPlayerIds.value[0] = draftedPlayerOne.value?.id ?? 0;
-  selectedPlayerIds.value[1] = draftedPlayerTwo.value?.id ?? 0;
-  selectedPlayerIds.value[2] = draftedPlayerThree.value?.id ?? 0;
-  selectedPlayerIds.value[3] = draftedPlayerFour.value?.id ?? 0;
-  selectedPlayerIds.value[4] = draftedPlayerFive.value?.id ?? 0;
-};
-
-const clearSelectedPlayers = () => {
-  selectedPlayerIds.value[0] = 0;
-  selectedPlayerIds.value[1] = 0;
-  selectedPlayerIds.value[2] = 0;
-  selectedPlayerIds.value[3] = 0;
-  selectedPlayerIds.value[4] = 0;
-  draftedPlayerOne.value = null;
-  draftedPlayerTwo.value = null;
-  draftedPlayerThree.value = null;
-  draftedPlayerFour.value = null;
-  draftedPlayerFive.value = null;
-}
 
 const fetchFantasyData = async () => {
   await authStore.checkAuthenticatedAsync();
@@ -135,32 +69,8 @@ const fetchFantasyData = async () => {
       .then((result) => {
         fantasyPlayers.value = result;
       });
-    if (userDraftPoints.value.fantasyDraftPlayers && userDraftPoints.value.fantasyDraftPlayers.length > 0) {
-      draftedPlayerOne.value = {
-        id: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 1)[0]?.fantasyPlayer?.id,
-        name: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 1)[0]?.fantasyPlayer?.dotaAccount.name,
-        steamProfilePicture: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 1)[0]?.fantasyPlayer?.dotaAccount.steamProfilePicture,
-      }
-      draftedPlayerTwo.value = {
-        id: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 2)[0]?.fantasyPlayer?.id,
-        name: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 2)[0]?.fantasyPlayer?.dotaAccount.name,
-        steamProfilePicture: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 2)[0]?.fantasyPlayer?.dotaAccount.steamProfilePicture,
-      }
-      draftedPlayerThree.value = {
-        id: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 3)[0]?.fantasyPlayer?.id,
-        name: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 3)[0]?.fantasyPlayer?.dotaAccount.name,
-        steamProfilePicture: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 3)[0]?.fantasyPlayer?.dotaAccount.steamProfilePicture,
-      }
-      draftedPlayerFour.value = {
-        id: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 4)[0]?.fantasyPlayer?.id,
-        name: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 4)[0]?.fantasyPlayer?.dotaAccount.name,
-        steamProfilePicture: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 4)[0]?.fantasyPlayer?.dotaAccount.steamProfilePicture,
-      }
-      draftedPlayerFive.value = {
-        id: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 5)[0]?.fantasyPlayer?.id,
-        name: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 5)[0]?.fantasyPlayer?.dotaAccount.name,
-        steamProfilePicture: userDraftPoints.value.fantasyDraft.draftPickPlayers.filter(dpp => dpp.draftOrder == 5)[0]?.fantasyPlayer?.dotaAccount.steamProfilePicture,
-      }
+    if (userDraftPoints.value?.fantasyDraft.draftPickPlayers && userDraftPoints.value.fantasyDraft.draftPickPlayers.length > 0) {
+      setFantasyDraftPicks(userDraftPoints.value.fantasyDraft.draftPickPlayers);
     }
   }
 }
@@ -183,13 +93,7 @@ const saveDraft = async () => {
   await localApiService.saveFantasyDraft(
     authStore.user,
     leagueStore.selectedLeague,
-    [
-      draftedPlayerOne.value,
-      draftedPlayerTwo.value,
-      draftedPlayerThree.value,
-      draftedPlayerFour.value,
-      draftedPlayerFive.value
-    ]
+    fantasyDraftPicks
   )
     .then(() => {
       showSuccessModal.value = true;
@@ -198,7 +102,7 @@ const saveDraft = async () => {
         left: 0,
         behavior: 'smooth'
       });
-      localApiService.getUserDraftPoints(leagueStore.selectedLeague.id).then(result => {
+      localApiService.getUserDraftPoints(leagueStore.selectedLeague!.id).then(result => {
         userDraftPoints.value = result;
         fetchFantasyData();
       });
@@ -212,8 +116,6 @@ const saveDraft = async () => {
         behavior: 'smooth'
       });
     })
-
-
 };
 
 onMounted(() => {
@@ -226,26 +128,12 @@ onMounted(() => {
 
 });
 
-watch(() => authStore.authenticated, (newValue) => {
-  if (newValue) {
-    if (authStore.authenticated && leagueStore.selectedLeague) {
-      localApiService.getUserDraftPoints(leagueStore.selectedLeague.id).then(result => {
-        userDraftPoints.value = result;
-        fetchFantasyData();
-      });
-    }
-  }
-});
-
-watch(() => leagueStore.selectedLeague, (newValue) => {
-  if (newValue) {
-    clearSelectedPlayers(); // We don't want to persist any players in dropdowns
-    if (authStore.authenticated && leagueStore.selectedLeague) {
-      localApiService.getUserDraftPoints(leagueStore.selectedLeague.id).then(result => {
-        userDraftPoints.value = result;
-        fetchFantasyData();
-      });
-    }
+watch([authStore, leagueStore], () => {
+  if (authStore.authenticated && leagueStore.selectedLeague) {
+    localApiService.getUserDraftPoints(leagueStore.selectedLeague.id).then(result => {
+      userDraftPoints.value = result;
+      fetchFantasyData();
+    });
   }
 });
 
@@ -253,9 +141,6 @@ const authenticated = computed(() => {
   return authStore.authenticated
 })
 
-// const user = computed(() => {
-//   return authStore.user as User
-// })
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
@@ -271,8 +156,8 @@ const authenticated = computed(() => {
 }
 
 .btn-fantasy {
-  color: var(--nadcl-white);
-  background-color: var(--nadcl-main-2);
+  color: var(--aghanims-fantasy-white);
+  background-color: var(--aghanims-fantasy-main-2);
   margin: 10px;
 }
 </style>

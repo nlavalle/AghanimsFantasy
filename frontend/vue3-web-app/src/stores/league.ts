@@ -4,7 +4,7 @@ export interface League {
   id: number
   name: string
   isActive: boolean
-  fantasyDraftLocked: Date
+  fantasyDraftLocked: number
 }
 
 export const useLeagueStore = defineStore({

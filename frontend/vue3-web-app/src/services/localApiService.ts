@@ -277,15 +277,6 @@ export const localApiService = {
       })
   },
   saveFantasyDraft(user: any, league: any, draftPickArray: any) {
-    // var updateRequest = {
-    //     leagueId: league.id,
-    //     disordAccountId: user.id,
-    //     draftPickOne: draftPickArray[0]?.id ?? 0,
-    //     draftPickTwo: draftPickArray[1]?.id ?? 0,
-    //     draftPickThree: draftPickArray[2]?.id ?? 0,
-    //     draftPickFour: draftPickArray[3]?.id ?? 0,
-    //     draftPickFive: draftPickArray[4]?.id ?? 0,
-    // }
     const updateRequest = {
       FantasyLeagueId: league.id,
       DisordAccountId: user.id,
