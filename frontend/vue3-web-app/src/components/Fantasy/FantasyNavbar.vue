@@ -11,17 +11,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import { VTab, VTabs } from 'vuetify/components'
 import LeagueSelector from '@/components/LeagueSelector.vue'
-import { collapsed } from './FantasyState';
 
 const tabIndex = ref(0)
-
-watch(collapsed, (newValue) => {
-  // Reset the fantasy so it doesn't look like it's set if a user comes back to it
-  if (newValue) {
-    tabIndex.value = 0;
-  }
-});
 </script>
