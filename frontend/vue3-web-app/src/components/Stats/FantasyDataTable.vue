@@ -426,7 +426,7 @@ const playerFantasyStatsIndexed = computed(() => {
             ));
 });
 
-const displayedFantasyColumns = computed(() => {
+const displayedFantasyColumns = computed<any>(() => {
     if (isDesktop.value) {
         return [...commonFantasyColumns, ...kdaFantasyColumns, ...farmFantasyColumns, ...supportFantasyColumns, ...damageHealingFantasyColumns];
     }
