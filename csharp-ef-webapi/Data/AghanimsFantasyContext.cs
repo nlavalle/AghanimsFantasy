@@ -36,6 +36,7 @@ public class AghanimsFantasyContext : DbContext
     public DbSet<FantasyDraftPlayer> FantasyDraftPlayers { get; set; }
     public DbSet<FantasyPlayerPoints> FantasyPlayerPointsView { get; set; }
     public DbSet<FantasyPlayerPointTotals> FantasyPlayerPointTotalsView { get; set; }
+    public DbSet<FantasyNormalizedAverages> FantasyNormalizedAveragesView { get; set; }
     #endregion
 
     #region Match
@@ -117,6 +118,9 @@ public class AghanimsFantasyContext : DbContext
             .HasNoKey();
 
         modelBuilder.Entity<FantasyPlayerPointTotals>().ToView("fantasy_player_point_totals", "nadcl")
+            .HasNoKey();
+
+        modelBuilder.Entity<FantasyNormalizedAverages>().ToView("fantasy_normalized_averages", "nadcl")
             .HasNoKey();
 
         modelBuilder.Entity<MatchHighlights>().ToView("match_highlights", "nadcl")
