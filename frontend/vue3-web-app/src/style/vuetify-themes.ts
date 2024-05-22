@@ -5,8 +5,8 @@ export const AghanimsFantasyDarkTheme: ThemeDefinition = {
   colors: {
     background: '#121212',
     surface: '#1e1e1e',
-    primary: '#7A0066',
-    secondary: '#68007A',
+    primary: '#415A77',
+    secondary: '#1B263B',
     error: '#cf6679',
     info: '#2196f3',
     success: '#4caf50',

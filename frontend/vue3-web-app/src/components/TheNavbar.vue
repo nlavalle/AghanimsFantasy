@@ -1,7 +1,7 @@
 <template>
     <div class="bg-surface" style="display:flex">
         <v-tabs v-model="selectedTab">
-            <v-tab to="/"><span class="fa-solid fa-house"></span></v-tab>
+            <v-tab to="/" min-width="50px" max-width="50px"><span class="fa-solid fa-house"></span></v-tab>
             <v-tab to="/about">About</v-tab>
             <v-tab>Fantasy</v-tab>
             <v-tab to="/stats">Stats</v-tab>

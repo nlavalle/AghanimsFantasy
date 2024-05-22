@@ -1,24 +1,35 @@
 <template>
-  <v-select class="league-selector" label="League" v-model="selectedLeague" :items="leagueOptions" item-title="name"
-    item-value="id" @click="updateSelectedLeague" variant="underlined">
-    <!-- <template v-slot:selection="{ item }">
-            <span style="font-size: 10px;">{{ item.title }}</span>
-        </template> -->
-  </v-select>
+  <v-container class="ma-0" style="height:2.4rem">
+    <v-row>
+      <v-col style="max-width: 80px;" align-self="center">
+        <v-row class="pa-2 mb-1 league-selector-label" justify="end">
+          <span>League:</span>
+        </v-row>
+      </v-col>
+      <v-col>
+        <v-row>
+          <v-select class="league-selector" label="League" v-model="selectedLeague" :items="leagueOptions"
+            item-title="name" @update:model-value="updateSelectedLeague" density="compact" single-line
+            variant="underlined" return-object>
+          </v-select>
+        </v-row>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useLeagueStore, type League } from '@/stores/league'
 import { localApiService } from '@/services/localApiService'
-import { VSelect } from 'vuetify/components'
+import { VContainer, VRow, VCol, VSelect } from 'vuetify/components'
 
 const leagueStore = useLeagueStore()
 const selectedLeague = ref<League>({
   id: 0,
   isActive: false,
   name: '',
-  fantasyDraftLocked: new Date()
+  fantasyDraftLocked: 0
 })
 
 const leagueOptions = computed(() => {
@@ -37,23 +48,16 @@ onMounted(() => {
 })
 
 function updateSelectedLeague() {
+  console.log(selectedLeague.value)
   leagueStore.setSelectedLeague(selectedLeague.value)
 }
 </script>
 
 <style scoped>
-.league-container {
-  /* box-sizing: border-box; */
-  /* border: 1px solid var(--nadcl-white); */
-  /* border-radius: 5px; */
-  /* margin: auto; */
-  /* height: 40px; */
-  flex-direction: column;
-  justify-self: left;
-}
-
-.league-selector {
-  max-width: 180px;
+.league-selector-label {
+  text-transform: uppercase;
+  font-family: "Roboto", sans-serif;
+  font-size: 0.8rem;
 }
 
 .icon {

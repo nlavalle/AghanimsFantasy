@@ -96,6 +96,19 @@ export interface FantasyPlayer {
     teamPosition: number
 }
 
+export interface FantasyPlayerTopHeroes {
+    fantasyPlayerId: number,
+    fantasyPlayer: FantasyPlayer,
+    topHeroes: [{
+        hero: {
+            id: number,
+            name: string
+        },
+        count: number
+    }
+    ]
+}
+
 export interface DraftPickPlayer {
     fantasyDraftId: number,
     fantasyPlayerId: number,
@@ -103,9 +116,11 @@ export interface DraftPickPlayer {
     draftOrder: number
 }
 
-const fantasyDraftSelectedPlayers = ref<number[]>([]);
+const currentDraftSlotSelected = ref<number>(1);
 
-const fantasyDraftPicks = ref<DotaAccount[]>([]);
+const fantasyDraftPicks = ref<FantasyPlayer[]>([]);
+
+const fantasyPlayersAvailable = ref<FantasyPlayer[]>([]);
 
 export function serializeFantasyDraftToDraftPick(fantasyDraftPlayer: any) {
     return {
@@ -116,27 +131,41 @@ export function serializeFantasyDraftToDraftPick(fantasyDraftPlayer: any) {
 }
 
 export function fantasyDraftState() {
-    const updateSelectedPlayer = (selectedPlayerIndex: number, newValue: number) => {
-        fantasyDraftSelectedPlayers.value[selectedPlayerIndex] = newValue;
-    }
-
     const setFantasyDraftPicks = (fantasyDraftPickPlayers: DraftPickPlayer[]) => {
         fantasyDraftPickPlayers.forEach((draftPick: DraftPickPlayer) => {
-            fantasyDraftPicks.value[draftPick.draftOrder] = draftPick.fantasyPlayer.dotaAccount
+            fantasyDraftPicks.value[draftPick.draftOrder] = draftPick.fantasyPlayer
         })
     }
 
-    const clearSelectedPlayers = () => {
-        fantasyDraftSelectedPlayers.value.forEach((_, index) => {
-            fantasyDraftSelectedPlayers.value[index] = 0
-        })
+    const setFantasyPlayers = (fantasyPlayers: FantasyPlayer[]) => {
+        fantasyPlayersAvailable.value = fantasyPlayers;
+    }
+
+    const setFantasyPlayer = (fantasyPlayer: FantasyPlayer) => {
+        if (!currentDraftSlotSelected.value || currentDraftSlotSelected.value > 5 || currentDraftSlotSelected.value < 1) {
+            currentDraftSlotSelected.value = 1;
+        }
+
+        // If we already have this player then return function
+        if (fantasyDraftPicks.value.filter(dp => dp.id == fantasyPlayer.id).length > 0) {
+            return
+        }
+
+        fantasyDraftPicks.value[currentDraftSlotSelected.value] = fantasyPlayer;
+
+        // Increment current draft selected to next slot, roll over if > 5
+        currentDraftSlotSelected.value++;
+        if (currentDraftSlotSelected.value > 5) {
+            currentDraftSlotSelected.value = 1;
+        }
     }
 
     return {
-        fantasyDraftSelectedPlayers,
+        currentDraftSlotSelected,
         fantasyDraftPicks,
+        fantasyPlayersAvailable,
         setFantasyDraftPicks,
-        updateSelectedPlayer,
-        clearSelectedPlayers
+        setFantasyPlayers,
+        setFantasyPlayer
     }
 }

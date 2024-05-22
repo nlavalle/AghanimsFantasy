@@ -1,9 +1,9 @@
 <template>
   <div class="flex-container">
     <div v-if="authenticated" style="width:100%">
-      <div v-if="userDraftPoints">
-        <current-draft :FantasyPoints="userDraftPoints" />
-      </div>
+      <!-- <div v-if="userDraftPoints">
+        <CurrentDraft :FantasyPoints="userDraftPoints" />
+      </div> -->
       <div v-if="updateDraftVisibility || updateDisabled" class="row">
         <v-spacer />
         <v-btn class="btn-fantasy" :disabled="updateDisabled" @click="toggleUpdateDraft()">
@@ -12,7 +12,7 @@
       </div>
       <div v-else class="row">
         <div class="row">
-          <p>Placeholder</p>
+          <CreateDraft />
         </div>
         <div class="row">
           <v-spacer />
@@ -40,11 +40,12 @@ import { localApiService } from '@/services/localApiService';
 import AlertDialog from '@/components/AlertDialog.vue'
 import ErrorDialog from '@/components/ErrorDialog.vue';
 import CurrentDraft from '@/components/Fantasy/CurrentDraft.vue';
+import CreateDraft from '@/components/Fantasy/CreateDraft/CreateDraft.vue';
 import { fantasyDraftState, type FantasyDraftPoints, type FantasyPlayer } from '@/components/Fantasy/fantasyDraft';
 
 const authStore = useAuthStore();
 const leagueStore = useLeagueStore();
-const { fantasyDraftPicks, setFantasyDraftPicks } = fantasyDraftState();
+const { fantasyDraftPicks, setFantasyDraftPicks, setFantasyPlayers } = fantasyDraftState();
 
 const updateDraftVisibility = ref(false);
 const fantasyPlayers = ref<FantasyPlayer[]>([]);
@@ -68,6 +69,7 @@ const fetchFantasyData = async () => {
     localApiService.getFantasyPlayers(leagueStore.selectedLeague.id)
       .then((result) => {
         fantasyPlayers.value = result;
+        setFantasyPlayers(fantasyPlayers.value);
       });
     if (userDraftPoints.value?.fantasyDraft.draftPickPlayers && userDraftPoints.value.fantasyDraft.draftPickPlayers.length > 0) {
       setFantasyDraftPicks(userDraftPoints.value.fantasyDraft.draftPickPlayers);
@@ -93,7 +95,7 @@ const saveDraft = async () => {
   await localApiService.saveFantasyDraft(
     authStore.user,
     leagueStore.selectedLeague,
-    fantasyDraftPicks
+    fantasyDraftPicks.value
   )
     .then(() => {
       showSuccessModal.value = true;

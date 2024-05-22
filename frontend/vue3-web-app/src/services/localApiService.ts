@@ -1,5 +1,7 @@
 // apiService.js
 
+import type { FantasyPlayer } from "@/components/Fantasy/fantasyDraft"
+
 const baseUrl = '/api'
 
 export const localApiService = {
@@ -276,29 +278,71 @@ export const localApiService = {
         throw error
       })
   },
-  saveFantasyDraft(user: any, league: any, draftPickArray: any) {
+  getPlayerTopHeroes(fantasyPlayerId: number) {
+    return fetch(`${baseUrl}/player/${fantasyPlayerId}/topheroes`)
+      .then(
+        function (response: any) {
+          if (!response.ok) {
+            throw response.status
+          } else {
+            return response.json()
+          }
+        }.bind(this)
+      )
+      .then(
+        function (data: any) {
+          return data
+        }.bind(this)
+      )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
+  getPlayerFantasyAverages(fantasyPlayerId: number) {
+    return fetch(`${baseUrl}/player/${fantasyPlayerId}/fantasyaverages`)
+      .then(
+        function (response: any) {
+          if (!response.ok) {
+            throw response.status
+          } else {
+            return response.json()
+          }
+        }.bind(this)
+      )
+      .then(
+        function (data: any) {
+          return data
+        }.bind(this)
+      )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
+  saveFantasyDraft(user: any, league: any, draftPickArray: FantasyPlayer[]) {
     const updateRequest = {
       FantasyLeagueId: league.id,
       DisordAccountId: user.id,
       DraftPickPlayers: [
         {
-          FantasyPlayerId: draftPickArray[0]?.id,
+          FantasyPlayerId: draftPickArray[1]?.id,
           DraftOrder: 1
         },
         {
-          FantasyPlayerId: draftPickArray[1]?.id,
+          FantasyPlayerId: draftPickArray[2]?.id,
           DraftOrder: 2
         },
         {
-          FantasyPlayerId: draftPickArray[2]?.id,
+          FantasyPlayerId: draftPickArray[3]?.id,
           DraftOrder: 3
         },
         {
-          FantasyPlayerId: draftPickArray[3]?.id,
+          FantasyPlayerId: draftPickArray[4]?.id,
           DraftOrder: 4
         },
         {
-          FantasyPlayerId: draftPickArray[4]?.id,
+          FantasyPlayerId: draftPickArray[5]?.id,
           DraftOrder: 5
         }
       ]
