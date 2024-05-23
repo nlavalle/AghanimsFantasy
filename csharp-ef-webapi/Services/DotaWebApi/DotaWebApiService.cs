@@ -56,6 +56,7 @@ public class DotaWebApiService : BackgroundService
         CreateLauncher<MatchDetailsContext>(commonCooldown, baseApiUri, baseQuery);
         CreateLauncher<MatchMetadataContext>(commonCooldown, baseApiUri, baseQuery);
         CreateLauncher<TeamsContext>(commonCooldown, baseApiUri, baseQuery);
+        CreateLauncher<FantasyNormalizedAveragesContext>(commonCooldown, baseApiUri, baseQuery);
 
         // Ready
         _tcsReadyForRequests.SetResult();
@@ -68,6 +69,7 @@ public class DotaWebApiService : BackgroundService
             LoopOperation<MatchDetailsContext>(TimeSpan.FromMinutes(5), stoppingToken),
             LoopOperation<MatchMetadataContext>(TimeSpan.FromMinutes(5), stoppingToken),
             LoopOperation<TeamsContext>(TimeSpan.FromDays(1), stoppingToken),
+            LoopOperation<FantasyNormalizedAveragesContext>(TimeSpan.FromMinutes(5), stoppingToken),
         ];
         await Task.WhenAll(tasks);
     }

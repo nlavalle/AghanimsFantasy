@@ -36,7 +36,7 @@ namespace csharp_ef_webapi.Controllers
 
         // GET: api/player/1/fantasyaverages
         [HttpGet("{fantasyPlayerId}/fantasyaverages")]
-        public async Task<ActionResult<IEnumerable<FantasyNormalizedAverages>>> GetFantasyPlayerAverages(long? fantasyPlayerId)
+        public async Task<ActionResult<IEnumerable<FantasyNormalizedAveragesTable>>> GetFantasyPlayerAverages(long? fantasyPlayerId)
         {
             if (fantasyPlayerId == null)
             {

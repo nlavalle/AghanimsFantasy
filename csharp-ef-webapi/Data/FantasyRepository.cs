@@ -617,11 +617,11 @@ public class FantasyRepository : IFantasyRepository
                 .ToListAsync();
     }
 
-    public async Task<IEnumerable<FantasyNormalizedAverages>> GetFantasyNormalizedAveragesAsync(long FantasyPlayerId)
+    public async Task<IEnumerable<FantasyNormalizedAveragesTable>> GetFantasyNormalizedAveragesAsync(long FantasyPlayerId)
     {
         _logger.LogInformation($"Getting Player Averages");
 
-        return await _dbContext.FantasyNormalizedAveragesView
+        return await _dbContext.FantasyNormalizedAverages
                 .Where(fnp => fnp.FantasyPlayerId == FantasyPlayerId)
                 .ToListAsync();
     }

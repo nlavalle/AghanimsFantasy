@@ -32,7 +32,7 @@ public interface IFantasyRepository
 
     // Players
     Task<IEnumerable<Account>> GetPlayerAccounts();
-    Task<IEnumerable<FantasyNormalizedAverages>> GetFantasyNormalizedAveragesAsync(long FantasyPlayerId);
+    Task<IEnumerable<FantasyNormalizedAveragesTable>> GetFantasyNormalizedAveragesAsync(long FantasyPlayerId);
     Task<FantasyPlayerTopHeroes> GetFantasyPlayerTopHeroesAsync(long FantasyPlayerId);
 
     // Teams
