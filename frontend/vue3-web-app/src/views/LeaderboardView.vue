@@ -24,6 +24,16 @@ const leagueStore = useLeagueStore()
 
 const fantasyLeaderboard = ref([])
 
+interface Leaderboard {
+  fantasyDraft: {
+    id: number,
+  },
+  isTeam: boolean,
+  discordName: string,
+  teamId: number,
+  draftTotalFantasyPoints: number
+}
+
 onMounted(() => {
   if (authStore.authenticated && leagueStore.selectedLeague) {
     localApiService
@@ -36,7 +46,7 @@ const fantasyLeaderboardData = computed(() => {
   if (!fantasyLeaderboard.value || Object.keys(fantasyLeaderboard.value).length === 0) {
     return []
   }
-  return fantasyLeaderboard.value.map((leaderboard) => ({
+  return fantasyLeaderboard.value.map((leaderboard: Leaderboard) => ({
     id: leaderboard.fantasyDraft.id,
     isTeam: leaderboard.isTeam,
     teamId: leaderboard.teamId,

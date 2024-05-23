@@ -27,8 +27,9 @@ import { VContainer, VRow, VCol } from 'vuetify/components';
 import CreateDraftPicks from './CreateDraftPicks.vue';
 import PlayerPicksAvailable from './PlayerPicksAvailable.vue';
 import PlayerStats from './PlayerStats.vue';
+import type { FantasyPlayer } from '../fantasyDraft';
 
-const selectedPlayer = ref(null);
+const selectedPlayer = ref<FantasyPlayer>();
 
 </script>
 
