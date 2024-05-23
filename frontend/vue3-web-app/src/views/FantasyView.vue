@@ -1,39 +1,56 @@
 <template>
-  <div class="flex-container">
-    <div v-if="authenticated" style="width:100%">
-      <!-- <div v-if="userDraftPoints">
-        <CurrentDraft :FantasyPoints="userDraftPoints" />
-      </div> -->
-      <div v-if="updateDraftVisibility || updateDisabled" class="row">
-        <v-spacer />
-        <v-btn class="btn-fantasy" :disabled="updateDisabled" @click="toggleUpdateDraft()">
-          {{ updateDisabled ? "Draft Locked" : "Update Draft" }}
-        </v-btn>
-      </div>
-      <div v-else class="row">
-        <div class="row">
-          <CreateDraft />
-        </div>
-        <div class="row">
-          <v-spacer />
-          <v-btn class="btn-fantasy" @click="toggleUpdateDraft()">Cancel</v-btn>
-          <v-btn class="btn-fantasy" @click="saveDraft()">Save Draft</v-btn>
-        </div>
-      </div>
-      <AlertDialog v-model="showSuccessModal" @ok="scrollAfterAlertDialog" />
-      <ErrorDialog v-model="showErrorModal" :error="errorDetails" @ok="scrollAfterAlertDialog" />
-    </div>
-    <div v-else class="row text-white">
+  <v-container>
+    <v-row v-if="authenticated" style="width:100%">
+      <v-col>
+        <v-row>
+          <v-tabs v-model="fantasyTab">
+            <v-tab value="current">Current Draft</v-tab>
+            <v-tab value="draft">Draft Players</v-tab>
+          </v-tabs>
+        </v-row>
+        <v-row>
+          <v-tabs-window v-model="fantasyTab" style="width:100%">
+            <v-tabs-window-item value="current">
+              <div v-if="userDraftPoints">
+                <CurrentDraft :FantasyPoints="userDraftPoints" />
+              </div>
+            </v-tabs-window-item>
+            <v-tabs-window-item value="draft">
+              <div v-if="updateDraftVisibility || updateDisabled" class="row">
+                <v-spacer />
+                <v-btn class="btn-fantasy" :disabled="updateDisabled" @click="toggleUpdateDraft()">
+                  {{ updateDisabled ? "Draft Locked" : "Update Draft" }}
+                </v-btn>
+              </div>
+              <div v-else class="row">
+                <v-col>
+                  <v-row>
+                    <v-spacer />
+                    <v-btn class="btn-fantasy" @click="saveDraft()">Save Draft</v-btn>
+                  </v-row>
+                  <v-row>
+                    <CreateDraft />
+                  </v-row>
+                </v-col>
+              </div>
+              <AlertDialog v-model="showSuccessModal" @ok="scrollAfterAlertDialog" />
+              <ErrorDialog v-model="showErrorModal" :error="errorDetails" @ok="scrollAfterAlertDialog" />
+            </v-tabs-window-item>
+          </v-tabs-window>
+        </v-row>
+      </v-col>
+    </v-row>
+    <v-row v-else class="row text-white">
       <span class="not-authenticated">
         Not Authenticated
       </span>
-    </div>
-  </div>
+    </v-row>
+  </v-container>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
-import { VSpacer, VBtn } from 'vuetify/components';
+import { VSpacer, VBtn, VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem } from 'vuetify/components';
 import { useAuthStore } from '@/stores/auth';
 import { useLeagueStore } from '@/stores/league';
 import { localApiService } from '@/services/localApiService';
@@ -47,6 +64,7 @@ const authStore = useAuthStore();
 const leagueStore = useLeagueStore();
 const { fantasyDraftPicks, setFantasyDraftPicks, setFantasyPlayers } = fantasyDraftState();
 
+const fantasyTab = ref('current')
 const updateDraftVisibility = ref(false);
 const fantasyPlayers = ref<FantasyPlayer[]>([]);
 const userDraftPoints = ref<FantasyDraftPoints>();
@@ -108,6 +126,7 @@ const saveDraft = async () => {
         userDraftPoints.value = result;
         fetchFantasyData();
       });
+      fantasyTab.value = 'current'
     })
     .catch(error => {
       errorDetails.value = error;

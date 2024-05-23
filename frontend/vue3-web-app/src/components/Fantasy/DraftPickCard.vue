@@ -145,6 +145,10 @@ const handleMouseMove = (event: MouseEvent) => {
   padding: 0px;
 }
 
+.draft-image:hover {
+  padding: 0px;
+}
+
 .draft-header {
   font-size: 20px;
   font-weight: bold;

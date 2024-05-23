@@ -160,12 +160,17 @@ export function fantasyDraftState() {
         }
     }
 
+    const clearFantasyDraftPicks = () => {
+        fantasyDraftPicks.value = [];
+    }
+
     return {
         currentDraftSlotSelected,
         fantasyDraftPicks,
         fantasyPlayersAvailable,
         setFantasyDraftPicks,
         setFantasyPlayers,
-        setFantasyPlayer
+        setFantasyPlayer,
+        clearFantasyDraftPicks
     }
 }
