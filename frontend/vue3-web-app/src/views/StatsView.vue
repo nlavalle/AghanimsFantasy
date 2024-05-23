@@ -29,7 +29,12 @@
           </v-col>
         </v-tabs-window-item>
         <v-tabs-window-item value="league">
-          <span>League data</span>
+          <v-col>
+            <v-row v-if="selectedLeague">
+              <LeagueDataTable class="league-table" v-model:selectedLeague="selectedLeague">
+              </LeagueDataTable>
+            </v-row>
+          </v-col>
         </v-tabs-window-item>
       </v-tabs-window>
     </v-row>
@@ -38,15 +43,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import { VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem, VTextField, VBtn, VSelect } from 'vuetify/components';
+import { VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem, VSelect } from 'vuetify/components';
 import { localApiService } from '@/services/localApiService';
 import { useLeagueStore } from '@/stores/league';
 import FantasyDataTable from '@/components/Stats/FantasyDataTable.vue';
+import LeagueDataTable from '@/components/Stats/LeagueDataTable.vue';
 
 const statsTab = ref('fantasy')
 const leagueStore = useLeagueStore();
-
-const fantasyFilter = ref('');
 
 const selectedLeague = ref();
 
@@ -61,18 +65,3 @@ onMounted(() => {
 })
 
 </script>
-
-<style scoped>
-.fantasy-table {
-  font-size: 0.8rem;
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-}
-
-table th+th {
-  border-left: 1px solid #dddddd;
-}
-
-table td+td {
-  border-left: 1px solid #dddddd;
-}
-</style>

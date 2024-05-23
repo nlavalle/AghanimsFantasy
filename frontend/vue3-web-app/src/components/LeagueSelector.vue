@@ -48,7 +48,6 @@ onMounted(() => {
 })
 
 function updateSelectedLeague() {
-  console.log(selectedLeague.value)
   leagueStore.setSelectedLeague(selectedLeague.value)
 }
 </script>

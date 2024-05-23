@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/valid-v-slot -->
 <template>
     <v-data-table class="fantasy-table" :items="playerFantasyStatsIndexed" :headers="displayedFantasyColumns"
-        density="compact">
+        density="compact" :items-per-page="itemsPerPage">
         <template v-slot:item.fantasyPlayer="{ value }">
             <v-row class="mt-1 mb-1 pa-1">
                 <v-col class="mr-2" style="max-width:60px;width:60px;">
@@ -98,18 +98,29 @@
             <br>
             ({{ value.stunDuration }})
         </template>
+        <template v-slot:bottom>
+            <div class="text-center pt-2">
+                <v-pagination v-model="page" :length="pageCount"></v-pagination>
+            </div>
+        </template>
     </v-data-table>
 </template>
 
 <script setup lang="ts">
 import { ref, defineModel, onMounted, watch, computed } from 'vue';
-import { VRow, VCol, VDataTable } from 'vuetify/components';
+import { VRow, VCol, VDataTable, VPagination } from 'vuetify/components';
 import { localApiService } from '@/services/localApiService';
 import type { League } from '@/stores/league';
 
 const fantasyFilter = ref('');
 
 const selectedLeague = defineModel<League>('selectedLeague');
+
+const page = ref(1)
+const itemsPerPage = 100;
+const pageCount = computed(() => {
+    return Math.ceil(playerFantasyStats.value.length / itemsPerPage);
+})
 
 onMounted(() => {
     if (selectedLeague.value) {
