@@ -35,8 +35,9 @@ internal class MatchDetailsContext : DotaOperationContext
         try
         {
             // Find all the match histories without match detail rows and add tasks to fetch them all
-            ImmutableSortedSet<long> knownMatchHistories = _dbContext.MatchHistory.Select(x => x.MatchId).ToImmutableSortedSet();
-            ImmutableSortedSet<long> knownMatchDetails = _dbContext.MatchDetails.Select(x => x.MatchId).ToImmutableSortedSet();
+            var activeLeagues = _dbContext.Leagues.Where(l => l.IsActive == true).Select(l => l.Id).ToList();
+            ImmutableSortedSet<long> knownMatchHistories = _dbContext.MatchHistory.Where(mh => activeLeagues.Contains(mh.LeagueId)).Select(x => x.MatchId).ToImmutableSortedSet();
+            ImmutableSortedSet<long> knownMatchDetails = _dbContext.MatchDetails.Where(mh => activeLeagues.Contains(mh.LeagueId)).Select(x => x.MatchId).ToImmutableSortedSet();
 
             List<long> matchesWithoutDetails = knownMatchHistories.Except(knownMatchDetails).Take(50).ToList();
 
@@ -93,7 +94,8 @@ internal class MatchDetailsContext : DotaOperationContext
 
             }
         }
-        catch (Exception ex) {
+        catch (Exception ex)
+        {
             _logger.LogError($"An error occurred: {ex.Message}");
         }
     }
