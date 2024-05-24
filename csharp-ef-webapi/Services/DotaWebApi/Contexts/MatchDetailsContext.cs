@@ -102,45 +102,56 @@ internal class MatchDetailsContext : DotaOperationContext
 
     private async Task GetMatchDetailsAsync(long matchId, CancellationToken cancellationToken)
     {
-        UriBuilder uriBuilder = new UriBuilder(_config.BaseUri);
-        uriBuilder.AppendPath(AppendedApiPath);
-
-        Dictionary<string, string> query = new Dictionary<string, string>(_config.ConfigSettings);
-        query["match_id"] = matchId.ToString();
-
-        uriBuilder.SetQuery(query);
-
-        HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);
-
-        await WaitNextTaskScheduleAsync(cancellationToken);
-        HttpResponseMessage response = await _httpClient.SendAsync(httpRequest);
-        _logger.LogInformation($"Request submitted at {DateTime.Now.Ticks}");
-        response.EnsureSuccessStatusCode();
-
-        JToken responseRawJToken = JToken.Parse(await response.Content.ReadAsStringAsync());
-
-        // Read and deserialize the matches from the json response
-        JToken responseObject = responseRawJToken["result"] ?? "{}";
-
-        MatchDetail? matchResponse = JsonConvert.DeserializeObject<MatchDetail>(responseObject.ToString());
-
-        if (matchResponse != null)
+        try
         {
-            matchResponse.MatchId = matchId;
+            UriBuilder uriBuilder = new UriBuilder(_config.BaseUri);
+            uriBuilder.AppendPath(AppendedApiPath);
 
-            lock (_matches)
+            Dictionary<string, string> query = new Dictionary<string, string>(_config.ConfigSettings);
+            query["match_id"] = matchId.ToString();
+
+            uriBuilder.SetQuery(query);
+
+            HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);
+
+            await WaitNextTaskScheduleAsync(cancellationToken);
+            HttpResponseMessage response = await _httpClient.SendAsync(httpRequest);
+            _logger.LogInformation($"Request submitted at {DateTime.Now.Ticks}");
+            response.EnsureSuccessStatusCode();
+
+            JToken responseRawJToken = JToken.Parse(await response.Content.ReadAsStringAsync());
+
+            // Read and deserialize the matches from the json response
+            JToken responseObject = responseRawJToken["result"] ?? "{}";
+
+            MatchDetail? matchResponse = JsonConvert.DeserializeObject<MatchDetail>(responseObject.ToString());
+
+            if (matchResponse != null)
             {
-                _matches.Add(matchResponse);
+                matchResponse.MatchId = matchId;
+
+                lock (_matches)
+                {
+                    _matches.Add(matchResponse);
+                }
             }
+
+            // // If we want to do something when the process is done, we can use this instead
+            // if (Interlocked.Decrement(ref _remainingLeagues) == 0)
+            // {
+            // }
+        }
+        catch (HttpRequestException badResponse)
+        {
+            _logger.LogWarning($"Bad response received for match: {matchId}. Full error response message: {badResponse.Message}");
+        }
+        finally
+        {
+            Interlocked.Add(ref _startedMatches, 1);
+            Interlocked.Decrement(ref _remainingMatches);
         }
 
-        Interlocked.Add(ref _startedMatches, 1);
-        Interlocked.Decrement(ref _remainingMatches);
 
-        // // If we want to do something when the process is done, we can use this instead
-        // if (Interlocked.Decrement(ref _remainingLeagues) == 0)
-        // {
-        // }
     }
 
     public string GetMatchDetailFetchStatus()

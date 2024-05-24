@@ -32,10 +32,10 @@ internal class SteamClientMatchDetailsContext : DotaOperationContext
             _dotaClient.Wait();
 
             // Find all the match histories without match detail rows and add tasks to fetch them all
-            ImmutableSortedSet<ulong> knownMatchHistories = _dbContext.MatchHistory.Select(x => (ulong)x.MatchId).ToImmutableSortedSet();
+            ImmutableSortedSet<ulong> knownMatches = _dbContext.MatchDetails.Select(x => (ulong)x.MatchId).ToImmutableSortedSet();
             ImmutableSortedSet<ulong> knownMatchDetails = _dbContext.GcDotaMatches.Where(dm => dm.replay_state == CMsgDOTAMatch.ReplayState.REPLAY_AVAILABLE).Select(x => x.match_id).ToImmutableSortedSet();
 
-            List<ulong> matchesWithoutDetails = knownMatchHistories.Except(knownMatchDetails).Take(50).ToList();
+            List<ulong> matchesWithoutDetails = knownMatches.Except(knownMatchDetails).Take(50).ToList();
 
             if (matchesWithoutDetails.Count() > 0)
             {
