@@ -1,41 +1,42 @@
 <template>
-    <v-container fluid>
+    <v-container>
         <v-row justify="space-around">
-            <v-col class="available-team ma-2 pa-2" v-for="(team, teamIndex) in fantasyTeams" :key="teamIndex">
+            <v-col class="available-team ma-2 pa-2" v-for="(team, teamIndex) in fantasyTeams" :key="teamIndex"
+                :style="{ 'min-width': isDesktop ? '600px' : '340px', 'max-width': isDesktop ? '600px' : '340px' }">
+                <v-row class="available-team-title">
+                    <img :src="getImageUrl(team.id)" />
+                    <span>{{ team.name }}</span>
+                </v-row>
                 <v-row>
-                    <v-col>
-                        <v-row class="available-team-title">
-                            <img :src="getImageUrl(team.id)" />
-                            <span>{{ team.name }}</span>
+                    <v-col class="available-player ma-1" :class="{ 'disabled-player': disabledPlayer(player.id) }"
+                        v-for="(player, playerIndex) in fantasyPlayersByTeam(team.id)" :key="playerIndex"
+                        :style="{ 'min-width': isDesktop ? '110px' : '60px', 'max-width': isDesktop ? '110px' : '60px' }"
+                        @click="selectPlayer(player)">
+                        <v-row justify="center">
+                            <img :src="player.dotaAccount.steamProfilePicture" :alt="player.dotaAccount.name"
+                                :style="{ width: isDesktop ? '80px' : '40px', height: isDesktop ? '80px' : '40px' }" />
                         </v-row>
-                        <v-row>
-                            <v-col :class="{ 'disabled-player': disabledPlayer(player.id) }"
-                                v-for="(player, playerIndex) in fantasyPlayersByTeam(team.id)" :key="playerIndex"
-                                @click="selectPlayer(player)">
-                                <v-row class="available-player justify-center">
-                                    <img :src="player.dotaAccount.steamProfilePicture" :alt="player.dotaAccount.name" />
-                                </v-row>
-                                <v-row class="available-player-caption">
-                                    <span style="width: 100%">{{ player.dotaAccount.name }}</span>
-                                </v-row>
-                            </v-col>
+                        <v-row class="available-player-caption">
+                            <span style="width: 100%" :style="{ 'font-size': isDesktop ? '0.8em' : '0.5em' }">{{
+                                player.dotaAccount.name }}</span>
                         </v-row>
                     </v-col>
                 </v-row>
             </v-col>
         </v-row>
-
     </v-container>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { fantasyDraftState, type FantasyPlayer } from '../fantasyDraft';
 import { VContainer, VRow, VCol } from 'vuetify/components';
 
 const selectedPlayer = defineModel();
 
 const { fantasyPlayersAvailable, fantasyDraftPicks } = fantasyDraftState();
+
+const isDesktop = ref(window.outerWidth >= 600);
 
 const fantasyTeams = computed(() => {
     // We want the distinct teams
@@ -63,16 +64,9 @@ const disabledPlayer = (fantasyPlayerId: number) => {
 </script>
 
 <style scoped>
-.available-team {
-    min-width: 500px;
-    max-width: 500px;
-    margin-bottom: 15px;
-}
-
 .available-team-title {
-    width: 250px;
-    height: 50px;
     margin-right: 5px;
+    margin-top: 5px;
 }
 
 .available-team-title img {
@@ -87,13 +81,10 @@ const disabledPlayer = (fantasyPlayerId: number) => {
 }
 
 .available-player img {
-    width: 80px;
-    height: 80px;
     object-fit: cover;
 }
 
 .available-player-caption {
-    font-size: 0.8em;
     color: #FFF;
     text-align: center;
 }

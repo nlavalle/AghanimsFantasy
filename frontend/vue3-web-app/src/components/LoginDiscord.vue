@@ -13,7 +13,6 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth'
 import { onMounted, computed } from 'vue'
-import { VRow } from 'vuetify/components';
 
 const authStore = useAuthStore()
 

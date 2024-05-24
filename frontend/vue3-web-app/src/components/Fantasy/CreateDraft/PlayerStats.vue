@@ -1,17 +1,15 @@
 <template>
     <v-container class="player-stats">
-        <v-row v-if="selectedPlayer">
+        <v-row v-if="selectedPlayer" class="ml-1">
             <v-col>
                 <v-row>
                     <v-col>
                         <v-row>
-                            <img style="height:250px;" :src="selectedPlayer.dotaAccount.steamProfilePicture" />
+                            <img style="height:250px;" :src="selectedPlayer.dotaAccount.steamProfilePicture"
+                                :style="{ height: isDesktop ? '250px' : '130px' }" />
                         </v-row>
                     </v-col>
                     <v-col>
-                        <v-row>
-                            <v-btn color="primary" @click="draftPlayer()">Draft Player</v-btn>
-                        </v-row>
                         <v-row>
                             <span>Name: {{ selectedPlayer.dotaAccount.name }}</span>
                         </v-row>
@@ -20,6 +18,9 @@
                         </v-row>
                         <v-row>
                             <span>Role: {{ selectedPlayer.teamPosition }}</span>
+                        </v-row>
+                        <v-row>
+                            <v-btn color="primary" @click="draftPlayer()">Draft Player</v-btn>
                         </v-row>
                     </v-col>
                 </v-row>
@@ -34,16 +35,16 @@
                 </v-row>
                 <v-row>
                     <v-col>
-                        <v-row>
+                        <v-row justify="center">
                             <p>Fantasy Point Breakdown</p>
                             <div>
-                                <Radar style="height:200px;width:200px" :data="fantasyChartData" :options="options">
+                                <Radar style="height:200px;width:220px" :data="fantasyChartData" :options="options">
                                 </Radar>
                             </div>
                         </v-row>
                     </v-col>
                     <v-col>
-                        <v-row>
+                        <v-row justify="center">
                             <p>Dota Scores</p>
                             <div>
                                 <Radar style="height:200px;width:200px" :data="scoreChartData" :options="options">
@@ -51,9 +52,6 @@
                             </div>
                         </v-row>
                     </v-col>
-                </v-row>
-                <v-row>
-                    <p>Match Fantasy Point Avg</p>
                 </v-row>
             </v-col>
         </v-row>
@@ -88,6 +86,8 @@ ChartJS.register(
 
 const { setFantasyPlayer } = fantasyDraftState();
 const selectedPlayer = defineModel<FantasyPlayer>();
+
+const isDesktop = ref(window.outerWidth >= 600);
 
 const options = {
     responsive: true,

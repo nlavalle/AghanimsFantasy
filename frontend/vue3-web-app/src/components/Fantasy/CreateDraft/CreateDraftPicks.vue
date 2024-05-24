@@ -1,39 +1,38 @@
 <template>
-    <v-row>
-        <v-col>
-            <div class="gallery">
-                <div v-for="index in 5" :key="index" class="gallery-item">
-                    <div v-if="fantasyDraftPicks[index]" @click="changeActiveDraftPlayer(index)">
-                        <div class="parallelogram"
-                            :class="{ 'glow-active-slot': currentActiveDraftPlayerCheck(index) }">
-                            <img :src="fantasyDraftPicks[index].dotaAccount.steamProfilePicture"
-                                :alt="fantasyDraftPicks[index].dotaAccount.name" />
-                        </div>
-                        <div class="caption">{{ fantasyDraftPicks[index].dotaAccount.name }}</div>
-                    </div>
-                    <div v-else @click="changeActiveDraftPlayer(index)">
-                        <div class="parallelogram"
-                            :class="{ 'glow-active-slot': currentActiveDraftPlayerCheck(index) }">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </v-col>
-        <v-col>
-            <v-row justify="center">
-                <!-- <v-spacer /> -->
-                <v-btn class="mr-10 bg-primary" @click="clearDraft">Clear Draft</v-btn>
+    <v-row class="gallery" style="max-width:700px">
+        <v-col v-for="index in 5" :key="index" class="gallery-item">
+            <v-row v-if="fantasyDraftPicks[index]" @click="changeActiveDraftPlayer(index)">
+                <v-col>
+                    <v-row class="parallelogram" justify="center"
+                        :style="{ width: isDesktop ? '120px' : '60px', height: isDesktop ? '80px' : '40px', 'margin-left': isDesktop ? '5px' : '' }"
+                        :class="{ 'glow-active-slot': currentActiveDraftPlayerCheck(index) }">
+                        <img :src="fantasyDraftPicks[index].dotaAccount.steamProfilePicture"
+                            :alt="fantasyDraftPicks[index].dotaAccount.name" />
+                    </v-row>
+                    <v-row class="caption" justify="center"
+                        :style="{ 'font-size': isDesktop ? '1rem' : '0.8rem', 'max-width': isDesktop ? '120px' : '60px' }">{{
+                            fantasyDraftPicks[index].dotaAccount.name }}</v-row>
+                </v-col>
+
+            </v-row>
+            <v-row v-else @click="changeActiveDraftPlayer(index)">
+                <v-col class="parallelogram"
+                    :style="{ 'max-width': isDesktop ? '120px' : '60px', height: isDesktop ? '80px' : '40px' }"
+                    :class="{ 'glow-active-slot': currentActiveDraftPlayerCheck(index) }">
+                </v-col>
             </v-row>
         </v-col>
     </v-row>
-
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import { fantasyDraftState } from '../fantasyDraft';
-import { VBtn, VRow, VCol } from 'vuetify/components';
+import { VRow, VCol } from 'vuetify/components';
 
-const { currentDraftSlotSelected, fantasyDraftPicks, clearFantasyDraftPicks } = fantasyDraftState();
+const isDesktop = ref(window.outerWidth >= 600);
+
+const { currentDraftSlotSelected, fantasyDraftPicks } = fantasyDraftState();
 
 const changeActiveDraftPlayer = (activeDraftPlayerSlot: number) => {
     currentDraftSlotSelected.value = activeDraftPlayerSlot;
@@ -41,10 +40,6 @@ const changeActiveDraftPlayer = (activeDraftPlayerSlot: number) => {
 
 const currentActiveDraftPlayerCheck = (draftSlot: number) => {
     return draftSlot == currentDraftSlotSelected.value;
-}
-
-const clearDraft = () => {
-    clearFantasyDraftPicks();
 }
 
 </script>
@@ -63,13 +58,10 @@ const clearDraft = () => {
 
 .parallelogram {
     position: relative;
-    width: 120px;
-    height: 80px;
     overflow: hidden;
     transform: skew(20deg);
-    margin-bottom: 5px;
-    margin-left: 10px;
     border: 1px solid white;
+    background: radial-gradient(at center, #797979 10%, #323232 90%);
 }
 
 .parallelogram img {
@@ -90,5 +82,8 @@ const clearDraft = () => {
     font-size: 1em;
     color: #AAA;
     padding-left: 20px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 </style>

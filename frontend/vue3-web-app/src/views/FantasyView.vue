@@ -9,32 +9,26 @@
           </v-tabs>
         </v-row>
         <v-row>
-          <v-tabs-window v-model="fantasyTab" style="width:100%">
+          <v-tabs-window v-model="fantasyTab" style="width:100%;overflow: visible">
             <v-tabs-window-item value="current">
               <div v-if="userDraftPoints">
                 <CurrentDraft :FantasyPoints="userDraftPoints" />
               </div>
             </v-tabs-window-item>
-            <v-tabs-window-item value="draft">
-              <div v-if="updateDraftVisibility || updateDisabled" class="row">
+            <v-tabs-window-item value="draft" style="overflow: visible !important">
+              <v-row v-if="updateDraftVisibility || updateDisabled">
                 <v-spacer />
                 <v-btn class="btn-fantasy" :disabled="updateDisabled" @click="toggleUpdateDraft()">
                   {{ updateDisabled ? "Draft Locked" : "Update Draft" }}
                 </v-btn>
-              </div>
-              <div v-else class="row">
+              </v-row>
+              <v-row v-else>
                 <v-col>
                   <v-row>
-                    <v-spacer />
-                    <v-btn class="btn-fantasy" @click="saveDraft()">Save Draft</v-btn>
-                  </v-row>
-                  <v-row>
-                    <CreateDraft />
+                    <CreateDraft @saveDraft="saveDraft" />
                   </v-row>
                 </v-col>
-              </div>
-              <AlertDialog v-model="showSuccessModal" @ok="scrollAfterAlertDialog" />
-              <ErrorDialog v-model="showErrorModal" :error="errorDetails" @ok="scrollAfterAlertDialog" />
+              </v-row>
             </v-tabs-window-item>
           </v-tabs-window>
         </v-row>
@@ -46,6 +40,9 @@
       </span>
     </v-row>
   </v-container>
+
+  <AlertDialog v-model="showSuccessModal" @ok="scrollAfterAlertDialog" />
+  <ErrorDialog v-model="showErrorModal" :error="errorDetails" @ok="scrollAfterAlertDialog" />
 </template>
 
 <script setup lang="ts">
@@ -54,24 +51,24 @@ import { VSpacer, VBtn, VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsW
 import { useAuthStore } from '@/stores/auth';
 import { useLeagueStore } from '@/stores/league';
 import { localApiService } from '@/services/localApiService';
-import AlertDialog from '@/components/AlertDialog.vue'
-import ErrorDialog from '@/components/ErrorDialog.vue';
 import CurrentDraft from '@/components/Fantasy/CurrentDraft.vue';
 import CreateDraft from '@/components/Fantasy/CreateDraft/CreateDraft.vue';
 import { fantasyDraftState, type FantasyDraftPoints, type FantasyPlayer } from '@/components/Fantasy/fantasyDraft';
+import AlertDialog from '@/components/AlertDialog.vue'
+import ErrorDialog from '@/components/ErrorDialog.vue';
 
 const authStore = useAuthStore();
 const leagueStore = useLeagueStore();
 const { fantasyDraftPicks, setFantasyDraftPicks, setFantasyPlayers } = fantasyDraftState();
 
+const showSuccessModal = ref(false);
+const showErrorModal = ref(false);
+const errorDetails = ref(null);
+
 const fantasyTab = ref('current')
 const updateDraftVisibility = ref(false);
 const fantasyPlayers = ref<FantasyPlayer[]>([]);
 const userDraftPoints = ref<FantasyDraftPoints>();
-
-const showSuccessModal = ref(false);
-const showErrorModal = ref(false);
-const errorDetails = ref(null);
 
 const updateDisabled = computed(() => {
   var currentDate = new Date();
@@ -95,20 +92,6 @@ const fetchFantasyData = async () => {
   }
 }
 
-const toggleUpdateDraft = () => {
-  updateDraftVisibility.value = !updateDraftVisibility.value
-};
-
-const scrollAfterAlertDialog = () => {
-  setTimeout(function () {
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: 'smooth'
-    });
-  }, 200);
-}
-
 const saveDraft = async () => {
   await localApiService.saveFantasyDraft(
     authStore.user,
@@ -126,7 +109,7 @@ const saveDraft = async () => {
         userDraftPoints.value = result;
         fetchFantasyData();
       });
-      fantasyTab.value = 'current'
+      fantasyTab.value = 'current';
     })
     .catch(error => {
       errorDetails.value = error;
@@ -138,6 +121,20 @@ const saveDraft = async () => {
       });
     })
 };
+
+const toggleUpdateDraft = () => {
+  updateDraftVisibility.value = !updateDraftVisibility.value
+};
+
+const scrollAfterAlertDialog = () => {
+  setTimeout(function () {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  }, 200);
+}
 
 onMounted(() => {
   if (authStore.authenticated && leagueStore.selectedLeague) {
@@ -169,16 +166,5 @@ const authenticated = computed(() => {
 .not-authenticated {
   margin: 20px;
   font-size: 16px;
-}
-
-.draft-player {
-  min-width: 250px;
-  padding: 10px;
-}
-
-.btn-fantasy {
-  color: var(--aghanims-fantasy-white);
-  background-color: var(--aghanims-fantasy-main-2);
-  margin: 10px;
 }
 </style>
