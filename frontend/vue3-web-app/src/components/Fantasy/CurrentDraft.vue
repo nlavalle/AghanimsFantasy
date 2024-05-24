@@ -1,14 +1,13 @@
 <template>
     <v-container v-if="FantasyPoints?.fantasyDraft">
-        <v-row class="d-flex justify-center">
-            <span class="text-white current-draft-header">Current Draft</span>
-        </v-row>
-        <v-row class="d-flex justify-space-evenly" style="flex-flow:row wrap">
-            <draft-pick-card class="col-2 draft-card" v-for="fantasyDraftPoints in CombinedFantasyDraftPoints"
-                :key="fantasyDraftPoints.id" :name="fantasyDraftPoints.name" :team="fantasyDraftPoints.team"
-                :fantasyPoints="fantasyDraftPoints.fantasyPoints" :role="fantasyDraftPoints.role"
-                :description="fantasyDraftPoints.description" :playerImageSrc="fantasyDraftPoints.playerImageSrc"
-                :teamImageSrc="fantasyDraftPoints.teamImageSrc" />
+        <v-row justify="space-evenly">
+            <v-col class="ma-1 pa-1" v-for="fantasyDraftPoints in CombinedFantasyDraftPoints"
+                :key="fantasyDraftPoints.id">
+                <draft-pick-card :name="fantasyDraftPoints.name" :team="fantasyDraftPoints.team"
+                    :fantasyPoints="fantasyDraftPoints.fantasyPoints" :role="fantasyDraftPoints.role"
+                    :description="fantasyDraftPoints.description" :playerImageSrc="fantasyDraftPoints.playerImageSrc"
+                    :teamImageSrc="fantasyDraftPoints.teamImageSrc" />
+            </v-col>
         </v-row>
     </v-container>
 </template>
@@ -16,7 +15,7 @@
 <script setup lang="ts">
 import { computed, defineProps } from 'vue';
 import DraftPickCard from '@/components/Fantasy/DraftPickCard.vue';
-import { VContainer, VRow } from 'vuetify/components';
+import { VContainer, VRow, VCol } from 'vuetify/components';
 
 const props = defineProps({
     FantasyPoints: {
@@ -82,12 +81,4 @@ const CombinedFantasyDraftPoints = computed(() => {
 
 </script>
 
-<style scoped>
-.draft-card {
-    min-width: 300px;
-}
-
-.current-draft-header {
-    font-size: 28px;
-}
-</style>
+<style scoped></style>

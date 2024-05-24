@@ -1,42 +1,48 @@
 <template>
-  <div class="draft-card" @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave" @mousemove="handleMouseMove">
-    <v-card class="card-container">
-      <v-card-text class="draft-image">
-        <div class="flex-container">
-          <img height="115px" width="38%" :src="props.playerImageSrc" />
-          <img height="115px" width="62%" :src="getImageUrl()" />
-        </div>
-      </v-card-text>
-      <v-card-text class="draft-header">
-        <div>
-          {{ props.name }}
-        </div>
-        <div>
-          {{ props.team }}
-          <img :src=getPositionIcon(props.role) height="25px" width="25px" />
-        </div>
-      </v-card-text>
-      <v-card-text class="draft-body">
-        <div class="draft-body-main">
-          {{ props.fantasyPoints.toFixed(2) }}
-        </div>
-        <div class="draft-body-details">
-          Fantasy Points
-        </div>
-        <!-- <div class="draft-body-main">
-        {{ role }}
-      </div>
-      <div class="draft-body-details">
-        {{ description }}
-      </div> -->
-      </v-card-text>
+  <div class="draft-card" :style="{ width: isDesktop ? '300px' : '150px', height: isDesktop ? '380px' : '190px' }"
+    @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave" @mousemove="handleMouseMove">
+    <v-card class="card-container" height="100%">
+      <v-row :style="{ height: isDesktop ? '130px' : '70px' }">
+        <v-col>
+          <img :height="isDesktop ? '115px' : '58px'" width="38%" :src="props.playerImageSrc" />
+          <img :height="isDesktop ? '115px' : '58px'" width="62%" :src="getImageUrl()" />
+        </v-col>
+      </v-row>
+      <v-row align-content="center" :style="{ height: isDesktop ? '100px' : '50px' }">
+        <v-col class="pa-0">
+          <v-card-title :style="{ 'font-size': isDesktop ? '20px' : '12px' }">
+            <v-row justify="center">
+              {{ props.name }}
+            </v-row>
+          </v-card-title>
+          <v-card-subtitle :style="{ 'font-size': isDesktop ? '18px' : '11px' }">
+            <v-row justify="center">
+              <v-col style="text-align: center;">
+                {{ props.team }}
+                <img :src=getPositionIcon(props.role) height="20px" width="20px" />
+              </v-col>
+            </v-row>
+          </v-card-subtitle>
+        </v-col>
+      </v-row>
+      <v-row style="height:100%">
+        <v-card-text class="draft-body pt-1">
+          <div class="draft-body-main" :style="{ 'font-size': isDesktop ? '1.5rem' : '1rem' }">
+            {{ props.fantasyPoints.toFixed(2) }}
+          </div>
+          <div class="draft-body-details" :style="{ 'font-size': isDesktop ? '1rem' : '0.8rem' }">
+            Fantasy Points
+          </div>
+        </v-card-text>
+      </v-row>
+
     </v-card>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, defineProps } from 'vue';
-import { VCard, VCardText } from 'vuetify/components';
+import { VCard, VCardTitle, VCardSubtitle, VCardText, VRow, VCol } from 'vuetify/components';
 
 const props = defineProps({
   name: {
@@ -68,6 +74,8 @@ const props = defineProps({
     required: false
   },
 })
+
+const isDesktop = ref(window.outerWidth >= 600);
 
 const getPositionIcon = (positionInt: number) => {
   if (positionInt == 0) return undefined;
@@ -111,7 +119,6 @@ const handleMouseMove = (event: MouseEvent) => {
 
 <style scoped>
 .draft-card {
-  margin: 20px;
   perspective: 800px;
 }
 
@@ -132,8 +139,6 @@ const handleMouseMove = (event: MouseEvent) => {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   font-family: 'Merriweather', serif;
-  max-width: 300px;
-  height: 380px;
 }
 
 .card-container q-img {
@@ -141,29 +146,11 @@ const handleMouseMove = (event: MouseEvent) => {
   border-top-right-radius: 8px;
 }
 
-.draft-image {
-  padding: 0px;
-}
-
-.draft-image:hover {
-  padding: 0px;
-}
-
-.draft-header {
-  font-size: 20px;
-  font-weight: bold;
-
-  color: #fff;
-  padding: 16px;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-}
-
 .draft-body {
-  padding: 16px;
   background: linear-gradient(to bottom, var(--aghanims-fantasy-accent-dark), var(--aghanims-fantasy-blue-1));
   border-top: 3px solid var(--aghanims-fantasy-accent-dark);
   height: 50%;
+  text-align: center
 }
 
 .draft-body:hover {
@@ -173,17 +160,10 @@ const handleMouseMove = (event: MouseEvent) => {
 }
 
 .draft-body-main {
-  font-size: 1.5rem;
   font-weight: bold;
 }
 
 .draft-body-details {
   margin-top: 8px;
-}
-
-.flex-container {
-  display: flex;
-  flex-flow: row wrap;
-  max-width: 100%;
 }
 </style>

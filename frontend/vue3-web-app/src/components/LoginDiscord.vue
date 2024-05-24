@@ -1,15 +1,19 @@
 <template>
-  <div v-if="authenticated">
-    <span @click="logout"> <i class="icon fa-solid fa-right-from-bracket"></i>Logout </span>
-  </div>
-  <div v-else>
-    <span @click="login"> <i class="icon fa-regular fa-circle-user"></i>Login </span>
+  <div class="discord-login" style="width:80px">
+    <div v-if="authenticated">
+      <i class="icon fa-solid fa-right-from-bracket"></i>
+      <span @click="logout">Logout</span>
+    </div>
+    <div v-else>
+      <span @click="login"> <i class="icon fa-regular fa-circle-user"></i>Login </span>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth'
 import { onMounted, computed } from 'vue'
+import { VRow } from 'vuetify/components';
 
 const authStore = useAuthStore()
 
@@ -48,9 +52,13 @@ function logout() {
 </script>
 
 <style scoped>
+.discord-login {
+  font-size: 0.8rem;
+}
+
 .icon {
-  flex-shrink: 0;
-  width: 25px;
-  margin-right: 10px;
+  /* flex-shrink: 0; */
+  width: 20px;
+  margin-right: 2px;
 }
 </style>
