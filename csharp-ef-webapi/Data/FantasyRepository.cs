@@ -520,7 +520,7 @@ public class FantasyRepository : IFantasyRepository
             .OrderByDescending(md => md.MatchId)
             .ToListAsync();
 
-        var filtered = fantasyLeagueMetadataQuery            
+        var filtered = fantasyLeagueMetadataQuery
             .Select(l => l.MatchMetadata ?? new GcMatchMetadata())
             .ToList();
 
@@ -616,6 +616,57 @@ public class FantasyRepository : IFantasyRepository
         return await _dbContext.Accounts
                 .ToListAsync();
     }
+
+    public async Task<IEnumerable<FantasyNormalizedAveragesTable>> GetFantasyNormalizedAveragesAsync(long FantasyPlayerId)
+    {
+        _logger.LogInformation($"Getting Player Averages");
+
+        return await _dbContext.FantasyNormalizedAverages
+                .Where(fnp => fnp.FantasyPlayerId == FantasyPlayerId)
+                .ToListAsync();
+    }
+
+    public async Task<FantasyPlayerTopHeroes> GetFantasyPlayerTopHeroesAsync(long FantasyPlayerId)
+    {
+        _logger.LogInformation($"Getting Player Averages");
+
+        FantasyPlayer? fantasyPlayer = await _dbContext.FantasyPlayers.FindAsync(FantasyPlayerId);
+
+        if (fantasyPlayer == null)
+        {
+            // No player found
+            return new FantasyPlayerTopHeroes();
+        }
+
+        var heroes = await GetHeroesAsync();
+
+        var topHeroIds = await _dbContext.MatchDetailsPlayers
+                .Where(mdp => mdp.AccountId == fantasyPlayer.DotaAccountId)
+                .GroupBy(match => match.HeroId)
+                .Select(group => new
+                {
+                    HeroId = group.Key,
+                    Count = group.Count()
+                })
+                .OrderByDescending(group => group.Count)
+                .Take(3)
+                .ToArrayAsync();
+
+        var topHeroes = topHeroIds.Select(thi => new TopHeroCount
+        {
+            Hero = heroes.First(h => h.Id == thi.HeroId),
+            Count = thi.Count
+        })
+        .ToArray();
+
+        return new FantasyPlayerTopHeroes
+        {
+            FantasyPlayer = fantasyPlayer,
+            FantasyPlayerId = fantasyPlayer.Id,
+            TopHeroes = topHeroes
+        };
+    }
+
     #endregion Player
 
     #region Team

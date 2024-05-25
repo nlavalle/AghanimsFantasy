@@ -498,6 +498,271 @@ namespace csharp_ef_webapi.Migrations
                     b.ToTable("dota_fantasy_league_weights", "nadcl");
                 });
 
+            modelBuilder.Entity("csharp_ef_webapi.Models.FantasyNormalizedAverages", b =>
+                {
+                    b.Property<decimal?>("AvgAegisSnatchedPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("aegis_snatched_points");
+
+                    b.Property<decimal?>("AvgAssistsPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("assists_points");
+
+                    b.Property<decimal?>("AvgCampsStackedPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("camps_stacked_points");
+
+                    b.Property<decimal?>("AvgCouriersKilledPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("couriers_killed_points");
+
+                    b.Property<decimal?>("AvgDeathsPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("deaths_points");
+
+                    b.Property<float?>("AvgFarmScore")
+                        .HasColumnType("real")
+                        .HasColumnName("farm_score");
+
+                    b.Property<float?>("AvgFightScore")
+                        .HasColumnType("real")
+                        .HasColumnName("fight_score");
+
+                    b.Property<decimal?>("AvgGoldPerMinPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("gold_per_min_points");
+
+                    b.Property<decimal?>("AvgGoldPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("gold_points");
+
+                    b.Property<decimal?>("AvgHeroDamagePoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("hero_damage_points");
+
+                    b.Property<decimal?>("AvgHeroHealingPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("hero_healing_points");
+
+                    b.Property<decimal?>("AvgHeroXpPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("hero_xp_points");
+
+                    b.Property<decimal?>("AvgKillsPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("kills_points");
+
+                    b.Property<decimal?>("AvgLastHitsPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("last_hits_points");
+
+                    b.Property<decimal?>("AvgMatchFantasyPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_match_fantasy_points");
+
+                    b.Property<decimal?>("AvgNetworthPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("networth_points");
+
+                    b.Property<decimal?>("AvgObserverWardsPlacedPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("observer_wards_placed_points");
+
+                    b.Property<float?>("AvgPushScore")
+                        .HasColumnType("real")
+                        .HasColumnName("push_score");
+
+                    b.Property<decimal?>("AvgRampagesPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("rampages_points");
+
+                    b.Property<decimal?>("AvgRapiersPurchasedPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("rapiers_purchased_points");
+
+                    b.Property<decimal?>("AvgSentryWardsPlacedPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("sentry_wards_placed_points");
+
+                    b.Property<float?>("AvgStunDurationPoints")
+                        .HasColumnType("real")
+                        .HasColumnName("stun_duration_points");
+
+                    b.Property<decimal?>("AvgSupportGoldSpentPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("support_gold_spent_points");
+
+                    b.Property<float?>("AvgSupportScore")
+                        .HasColumnType("real")
+                        .HasColumnName("support_score");
+
+                    b.Property<decimal?>("AvgTowerDamagePoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("tower_damage_points");
+
+                    b.Property<decimal?>("AvgTripleKillsPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("triple_kills_points");
+
+                    b.Property<decimal?>("AvgWardsDewardedPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("wards_dewarded_points");
+
+                    b.Property<decimal?>("AvgXpPerMinPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("xp_per_min_points");
+
+                    b.Property<long>("FantasyPlayerId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("fantasy_player_id");
+
+                    b.Property<decimal?>("TotalMatches")
+                        .HasColumnType("numeric")
+                        .HasColumnName("matches_played");
+
+                    b.HasIndex("FantasyPlayerId");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("fantasy_normalized_averages", "nadcl");
+                });
+
+            modelBuilder.Entity("csharp_ef_webapi.Models.FantasyNormalizedAveragesTable", b =>
+                {
+                    b.Property<long>("FantasyNormalizedAveragesTableId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("fantasy_normalized_averages_table_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("FantasyNormalizedAveragesTableId"));
+
+                    b.Property<decimal?>("AvgAegisSnatchedPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("aegis_snatched_points");
+
+                    b.Property<decimal?>("AvgAssistsPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("assists_points");
+
+                    b.Property<decimal?>("AvgCampsStackedPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("camps_stacked_points");
+
+                    b.Property<decimal?>("AvgCouriersKilledPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("couriers_killed_points");
+
+                    b.Property<decimal?>("AvgDeathsPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("deaths_points");
+
+                    b.Property<float?>("AvgFarmScore")
+                        .HasColumnType("real")
+                        .HasColumnName("farm_score");
+
+                    b.Property<float?>("AvgFightScore")
+                        .HasColumnType("real")
+                        .HasColumnName("fight_score");
+
+                    b.Property<decimal?>("AvgGoldPerMinPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("gold_per_min_points");
+
+                    b.Property<decimal?>("AvgGoldPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("gold_points");
+
+                    b.Property<decimal?>("AvgHeroDamagePoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("hero_damage_points");
+
+                    b.Property<decimal?>("AvgHeroHealingPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("hero_healing_points");
+
+                    b.Property<decimal?>("AvgHeroXpPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("hero_xp_points");
+
+                    b.Property<decimal?>("AvgKillsPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("kills_points");
+
+                    b.Property<decimal?>("AvgLastHitsPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("last_hits_points");
+
+                    b.Property<decimal?>("AvgMatchFantasyPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_match_fantasy_points");
+
+                    b.Property<decimal?>("AvgNetworthPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("networth_points");
+
+                    b.Property<decimal?>("AvgObserverWardsPlacedPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("observer_wards_placed_points");
+
+                    b.Property<float?>("AvgPushScore")
+                        .HasColumnType("real")
+                        .HasColumnName("push_score");
+
+                    b.Property<decimal?>("AvgRampagesPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("rampages_points");
+
+                    b.Property<decimal?>("AvgRapiersPurchasedPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("rapiers_purchased_points");
+
+                    b.Property<decimal?>("AvgSentryWardsPlacedPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("sentry_wards_placed_points");
+
+                    b.Property<float?>("AvgStunDurationPoints")
+                        .HasColumnType("real")
+                        .HasColumnName("stun_duration_points");
+
+                    b.Property<decimal?>("AvgSupportGoldSpentPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("support_gold_spent_points");
+
+                    b.Property<float?>("AvgSupportScore")
+                        .HasColumnType("real")
+                        .HasColumnName("support_score");
+
+                    b.Property<decimal?>("AvgTowerDamagePoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("tower_damage_points");
+
+                    b.Property<decimal?>("AvgTripleKillsPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("triple_kills_points");
+
+                    b.Property<decimal?>("AvgWardsDewardedPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("wards_dewarded_points");
+
+                    b.Property<decimal?>("AvgXpPerMinPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("xp_per_min_points");
+
+                    b.Property<long>("FantasyPlayerId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("fantasy_player_id");
+
+                    b.Property<decimal?>("TotalMatches")
+                        .HasColumnType("numeric")
+                        .HasColumnName("matches_played");
+
+                    b.HasKey("FantasyNormalizedAveragesTableId");
+
+                    b.HasIndex("FantasyPlayerId");
+
+                    b.ToTable("dota_fantasy_normalized_averages", "nadcl");
+                });
+
             modelBuilder.Entity("csharp_ef_webapi.Models.FantasyPlayer", b =>
                 {
                     b.Property<long>("Id")
@@ -2234,6 +2499,28 @@ namespace csharp_ef_webapi.Migrations
                         .HasForeignKey("csharp_ef_webapi.Models.FantasyLeagueWeight", "FantasyLeagueId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("csharp_ef_webapi.Models.FantasyNormalizedAverages", b =>
+                {
+                    b.HasOne("csharp_ef_webapi.Models.FantasyPlayer", "FantasyPlayer")
+                        .WithMany()
+                        .HasForeignKey("FantasyPlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FantasyPlayer");
+                });
+
+            modelBuilder.Entity("csharp_ef_webapi.Models.FantasyNormalizedAveragesTable", b =>
+                {
+                    b.HasOne("csharp_ef_webapi.Models.FantasyPlayer", "FantasyPlayer")
+                        .WithMany()
+                        .HasForeignKey("FantasyPlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FantasyPlayer");
                 });
 
             modelBuilder.Entity("csharp_ef_webapi.Models.FantasyPlayer", b =>

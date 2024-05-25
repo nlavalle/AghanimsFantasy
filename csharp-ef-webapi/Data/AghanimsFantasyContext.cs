@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using csharp_ef_webapi.Models;
 using SteamKit2.GC.Dota.Internal;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 
 namespace csharp_ef_webapi.Data;
 public class AghanimsFantasyContext : DbContext
@@ -36,6 +37,8 @@ public class AghanimsFantasyContext : DbContext
     public DbSet<FantasyDraftPlayer> FantasyDraftPlayers { get; set; }
     public DbSet<FantasyPlayerPoints> FantasyPlayerPointsView { get; set; }
     public DbSet<FantasyPlayerPointTotals> FantasyPlayerPointTotalsView { get; set; }
+    public DbSet<FantasyNormalizedAverages> FantasyNormalizedAveragesView { get; set; }
+    public DbSet<FantasyNormalizedAveragesTable> FantasyNormalizedAverages { get; set; }
     #endregion
 
     #region Match
@@ -119,6 +122,10 @@ public class AghanimsFantasyContext : DbContext
         modelBuilder.Entity<FantasyPlayerPointTotals>().ToView("fantasy_player_point_totals", "nadcl")
             .HasNoKey();
 
+        modelBuilder.Entity<FantasyNormalizedAverages>()
+            .ToView("fantasy_normalized_averages", "nadcl")
+            .HasNoKey();
+
         modelBuilder.Entity<MatchHighlights>().ToView("match_highlights", "nadcl")
             .HasNoKey();
 
@@ -177,6 +184,10 @@ public class AghanimsFantasyContext : DbContext
             .HasPrincipalKey(fp => fp.Id)
             .HasForeignKey(fdp => fdp.FantasyPlayerId)
             .OnDelete(DeleteBehavior.ClientSetNull);
+
+        modelBuilder.Entity<FantasyNormalizedAveragesTable>()
+            .ToTable("dota_fantasy_normalized_averages", "nadcl")
+            .HasKey(fnat => fnat.FantasyNormalizedAveragesTableId);
 
         #region Metadata
 

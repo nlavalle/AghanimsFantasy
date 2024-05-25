@@ -32,13 +32,15 @@ public interface IFantasyRepository
 
     // Players
     Task<IEnumerable<Account>> GetPlayerAccounts();
+    Task<IEnumerable<FantasyNormalizedAveragesTable>> GetFantasyNormalizedAveragesAsync(long FantasyPlayerId);
+    Task<FantasyPlayerTopHeroes> GetFantasyPlayerTopHeroesAsync(long FantasyPlayerId);
 
     // Teams
     Task<IEnumerable<Team>> GetTeamsAsync();
 
     // Heroes
     Task<IEnumerable<Hero>> GetHeroesAsync();
-    
+
     // Discord
     Task<DiscordIds?> GetDiscordIdAsync(long GetDiscordId);
 }

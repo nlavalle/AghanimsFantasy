@@ -66,6 +66,7 @@ internal class MatchMetadataContext : DotaOperationContext
 
                 foreach (GcMatchMetadata matchDetail in _matches)
                 {
+                    Debug.Assert(_dbContext.MatchDetails.Any(md => md.MatchId == matchDetail.MatchId));
                     _dbContext.GcMatchMetadata.Add(matchDetail);
                 }
                 await _dbContext.SaveChangesAsync();

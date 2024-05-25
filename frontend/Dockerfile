@@ -1,16 +1,16 @@
-# build quasar-app
-FROM node:20-alpine as build-quasar-app
+# build frontend
+FROM node:20-alpine as build-frontend
 ARG build_type=build
 WORKDIR /app
-COPY quasar-web-app/package*.json ./
+COPY vue3-web-app/package*.json ./
 RUN npm install
-COPY quasar-web-app/ .
+COPY vue3-web-app/ .
 RUN npm run $build_type
 
 # production stage
 FROM nginx:stable-alpine as production-stage
 ARG nginx_config=prod-nginx.conf
-COPY --from=build-quasar-app /app/dist/spa /usr/share/nginx/html
+COPY --from=build-frontend /app/dist /usr/share/nginx/html
 COPY $nginx_config /etc/nginx/conf.d/default.conf
 COPY $nginx_config /etc/nginx/sites-available/aghanimsfantasy.com
 COPY $nginx_config /etc/nginx/sites-enabled/aghanimsfantasy.com
