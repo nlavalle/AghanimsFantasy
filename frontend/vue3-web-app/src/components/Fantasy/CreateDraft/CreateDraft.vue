@@ -40,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits } from 'vue';
+import { ref } from 'vue';
 import { VBtn, VNavigationDrawer } from 'vuetify/components';
 import CreateDraftPicks from './CreateDraftPicks.vue';
 import PlayerPicksAvailable from './PlayerPicksAvailable.vue';

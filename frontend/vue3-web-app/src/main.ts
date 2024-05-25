@@ -19,9 +19,6 @@ const vuetify = createVuetify({
       AghanimsFantasyDarkTheme
     }
   },
-  icons: {
-    defaultSet: 'mdi'
-  }
 })
 
 const app = createApp(App)
