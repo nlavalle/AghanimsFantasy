@@ -264,7 +264,8 @@ const formatPlayerAverages = (playerAverages: any) => {
 
 const getHeroIcon = (heroIconString: string) => {
     if (heroIconString == '') return undefined;
-    return `icons/heroes/${heroIconString}.png`
+    var formattedString = heroIconString.replace('npc_dota_hero_', '');
+    return `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${formattedString}.png`
 }
 
 </script>
