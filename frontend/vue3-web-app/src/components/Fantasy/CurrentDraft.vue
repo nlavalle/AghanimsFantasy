@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineProps } from 'vue';
+import { computed } from 'vue';
 import DraftPickCard from '@/components/Fantasy/DraftPickCard.vue';
 import { VContainer, VRow, VCol } from 'vuetify/components';
 
