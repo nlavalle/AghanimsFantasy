@@ -1,51 +1,83 @@
 <!-- eslint-disable vue/valid-v-slot -->
 <template>
-    <v-data-table class="league-table" :items="leagueMetadataStatsIndexed" :headers="displayedLeagueColumns"
-        density="compact" :items-per-page="itemsPerPage">
-        <template v-slot:item.leaguePlayer="{ value }">
-            <v-row class="mt-1 mb-1 pa-1">
-                <v-col class="mr-2" style="max-width:60px;width:60px;">
-                    <v-row>
-                        <img height="60px" width="60px" :src="value.playerPicture" />
+    <v-col>
+        <v-row v-if="!isDesktop" dense>
+            <v-tabs v-model="leagueTab" density="compact">
+                <v-tab value="kda" min-width="70px" width="70px">K/D/A</v-tab>
+                <v-tab value="farm" min-width="70px" width="70px">Farm</v-tab>
+                <v-tab value="support" min-width="80px" width="80px">Supp.</v-tab>
+                <v-tab value="damageHealing" min-width="100px" width="100px">Dmg/Heal</v-tab>
+            </v-tabs>
+        </v-row>
+        <v-row>
+            <v-data-table class="league-table" :items="leagueMetadataStatsIndexed" :headers="displayedLeagueColumns"
+                density="compact" :items-per-page="itemsPerPage"
+                :style="{ 'font-size': isDesktop ? '0.8rem' : '0.7rem' }">
+                <template v-slot:item.leaguePlayer="{ value }">
+                    <v-row v-if="isDesktop" class="ma-1 pa-1">
+                        <v-col class="mr-2" style="max-width:60px;width:60px;">
+                            <v-row>
+                                <img height="60px" width="60px" :src="value.playerPicture" />
+                            </v-row>
+                        </v-col>
+                        <v-col class="mt-1" style="width:150px">
+                            <v-row>
+                                <b>{{ value.playerName }}</b>
+                            </v-row>
+                            <v-row>
+                                {{ value.teamName }}
+                                <img :src=getPositionIcon(value.teamPosition) height="15px" width="15px" />
+                            </v-row>
+                            <v-row>
+                                {{ value.totalMatches }} games
+                            </v-row>
+                        </v-col>
                     </v-row>
-                </v-col>
-                <v-col class="mt-1" style="width:150px">
-                    <v-row>
-                        <b>{{ value.playerName }}</b>
+                    <v-row v-else class="ma-0 pa-0">
+                        <v-col class="mr-2" style="max-width:60px;width:60px;">
+                            <v-row>
+                                <img height="60px" width="60px" :src="value.playerPicture" />
+                            </v-row>
+                        </v-col>
+                        <v-col class="mt-1" style="width:150px">
+                            <v-row>
+                                <b>{{ value.playerName }}</b>
+                            </v-row>
+                            <v-row>
+                                {{ value.teamName }}
+                                <img :src=getPositionIcon(value.teamPosition) height="15px" width="15px" />
+                            </v-row>
+                            <v-row>
+                                {{ value.totalMatches }} games
+                            </v-row>
+                        </v-col>
                     </v-row>
-                    <v-row>
-                        {{ value.teamName }}
-                        <img :src=getPositionIcon(value.teamPosition) height="15px" width="15px" />
-                    </v-row>
-                    <v-row>
-                        {{ value.totalMatches }} games
-                    </v-row>
-                </v-col>
-            </v-row>
-        </template>
-        <template v-slot:item.totalHeroDamage="{ value }">
-            {{ value.toLocaleString() }}
-        </template>
-        <template v-slot:item.totalTowerDamage="{ value }">
-            {{ value.toLocaleString() }}
-        </template>
-        <template v-slot:item.totalHeroHealing="{ value }">
-            {{ value.toLocaleString() }}
-        </template>
-        <template v-slot:item.totalStunDuration="{ value }">
-            {{ value.toFixed(1) }}
-        </template>
-        <template v-slot:bottom>
-            <div class="text-center pt-2">
-                <v-pagination v-model="page" :length="pageCount"></v-pagination>
-            </div>
-        </template>
-    </v-data-table>
+                </template>
+                <template v-slot:item.totalHeroDamage="{ value }">
+                    {{ (value / 1000).toFixed(1) + 'k' }}
+                </template>
+                <template v-slot:item.totalTowerDamage="{ value }">
+                    {{ (value / 1000).toFixed(1) + 'k' }}
+                </template>
+                <template v-slot:item.totalHeroHealing="{ value }">
+                    {{ (value / 1000).toFixed(1) + 'k' }}
+                </template>
+                <template v-slot:item.totalStunDuration="{ value }">
+                    {{ (value / 1000).toFixed(1) + 'k' }}
+                </template>
+                <template v-slot:bottom>
+                    <div class="text-center pt-2">
+                        <v-pagination v-model="page" :length="pageCount"></v-pagination>
+                    </div>
+                </template>
+            </v-data-table>
+        </v-row>
+    </v-col>
 </template>
 
 <script setup lang="ts">
 import { ref, defineModel, onMounted, watch, computed } from 'vue';
-import { VRow, VCol, VDataTable, VPagination } from 'vuetify/components';
+import { VRow, VCol, VDataTable, VPagination, VTabs, VTab } from 'vuetify/components';
 import { localApiService } from '@/services/localApiService';
 import type { League } from '@/stores/league';
 
@@ -91,7 +123,7 @@ const commonLeagueColumns = [
                 totalMatches: row.matchesPlayed
             };
         },
-        style: 'width: 400px',
+        width: isDesktop.value ? '240px' : '200px',
         sortable: true,
     },
 ];
@@ -320,15 +352,16 @@ const getPositionIcon = (positionInt: number) => {
 
 <style scoped>
 .league-table {
-    font-size: 0.8rem;
     font-family: Avenir, Helvetica, Arial, sans-serif;
 }
 
-table th+th {
-    border-left: 1px solid #dddddd;
+.v-data-table ::v-deep(th) {
+    padding: 0 4px 0 0 !important;
+    /* border-right: 1px solid #383838; */
 }
 
-table td+td {
-    border-left: 1px solid #dddddd;
+.v-data-table ::v-deep(td) {
+    padding: 0 4px 0 0 !important;
+    /* border-right: 1px solid #383838; */
 }
 </style>

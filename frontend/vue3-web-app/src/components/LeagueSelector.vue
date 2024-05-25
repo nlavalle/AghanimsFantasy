@@ -8,9 +8,11 @@
       </v-col>
       <v-col>
         <v-row>
-          <v-select class="league-selector" label="League" v-model="selectedLeague" :items="leagueOptions"
-            item-title="name" @update:model-value="updateSelectedLeague" density="compact" single-line
-            variant="underlined" return-object>
+          <v-select label="League" v-model="selectedLeague" :items="leagueOptions" item-title="name"
+            @update:model-value="updateSelectedLeague" density="compact" single-line variant="underlined" return-object>
+            <template v-slot:item="{ props, item }">
+              <v-list-item v-bind="props" class="league-selector" :title="item.raw.name"></v-list-item>
+            </template>
           </v-select>
         </v-row>
       </v-col>
@@ -22,7 +24,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useLeagueStore, type League } from '@/stores/league'
 import { localApiService } from '@/services/localApiService'
-import { VContainer, VRow, VCol, VSelect } from 'vuetify/components'
+import { VContainer, VRow, VCol, VSelect, VListItem } from 'vuetify/components'
 
 const leagueStore = useLeagueStore()
 const selectedLeague = ref<League>({
@@ -56,6 +58,10 @@ function updateSelectedLeague() {
 .league-selector-label {
   text-transform: uppercase;
   font-family: "Roboto", sans-serif;
+  font-size: 0.8rem;
+}
+
+.league-selector :deep(.v-list-item-title) {
   font-size: 0.8rem;
 }
 

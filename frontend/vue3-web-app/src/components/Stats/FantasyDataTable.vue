@@ -1,114 +1,146 @@
 <!-- eslint-disable vue/valid-v-slot -->
 <template>
-    <v-data-table class="fantasy-table" :items="playerFantasyStatsIndexed" :headers="displayedFantasyColumns"
-        density="compact" :items-per-page="itemsPerPage">
-        <template v-slot:item.fantasyPlayer="{ value }">
-            <v-row class="mt-1 mb-1 pa-1">
-                <v-col class="mr-2" style="max-width:60px;width:60px;">
-                    <v-row>
-                        <img height="60px" width="60px" :src="value.playerPicture" />
+    <v-col>
+        <v-row v-if="!isDesktop" dense>
+            <v-tabs v-model="fantasyTab" density="compact">
+                <v-tab value="kda" min-width="70px" width="70px">K/D/A</v-tab>
+                <v-tab value="farm" min-width="70px" width="70px">Farm</v-tab>
+                <v-tab value="support" min-width="80px" width="80px">Supp.</v-tab>
+                <v-tab value="damageHealing" min-width="100px" width="100px">Dmg/Heal</v-tab>
+            </v-tabs>
+        </v-row>
+        <v-row>
+            <v-data-table class="fantasy-table" :items="playerFantasyStatsIndexed" :headers="displayedFantasyColumns"
+                density="compact" :items-per-page="itemsPerPage"
+                :style="{ 'font-size': isDesktop ? '0.8rem' : '0.7rem' }">
+                <template v-slot:item.fantasyPlayer="{ value }">
+                    <v-row v-if="isDesktop" class="ma-1 pa-1">
+                        <v-col class="mr-2" style="max-width:60px;width:60px;">
+                            <v-row>
+                                <img height="60px" width="60px" :src="value.playerPicture" />
+                            </v-row>
+                        </v-col>
+                        <v-col class="mt-1" style="width:150px">
+                            <v-row>
+                                <b>{{ value.playerName }}</b>
+                            </v-row>
+                            <v-row>
+                                {{ value.teamName }}
+                                <img :src=getPositionIcon(value.teamPosition) height="15px" width="15px" />
+                            </v-row>
+                            <v-row>
+                                {{ value.totalMatches }} games
+                            </v-row>
+                        </v-col>
                     </v-row>
-                </v-col>
-                <v-col class="mt-1" style="width:150px">
-                    <v-row>
-                        <b>{{ value.playerName }}</b>
+                    <v-row v-else class="ma-0 pa-0" style="width:120px">
+                        <v-col class="mt-1">
+                            <v-row>
+                                <b>{{ value.playerName }}</b>
+                            </v-row>
+                            <v-row>
+                                {{ value.teamName }}
+                                <img :src=getPositionIcon(value.teamPosition) height="15px" width="15px" />
+                            </v-row>
+                            <v-row>
+                                {{ value.totalMatches }} games
+                            </v-row>
+                        </v-col>
                     </v-row>
-                    <v-row>
-                        {{ value.teamName }}
-                        <img :src=getPositionIcon(value.teamPosition) height="15px" width="15px" />
-                    </v-row>
-                    <v-row>
-                        {{ value.totalMatches }} games
-                    </v-row>
-                </v-col>
-            </v-row>
-        </template>
-        <template v-slot:item.totalKills="{ value }">
-            <b>{{ value.killPoints }}</b>
-            <br>
-            ({{ value.kills }})
-        </template>
-        <template v-slot:item.totalDeaths="{ value }">
-            <b>{{ value.deathPoints }}</b>
-            <br>
-            ({{ value.deaths }})
-        </template>
-        <template v-slot:item.totalAssists="{ value }">
-            <b>{{ value.assistPoints }}</b>
-            <br>
-            ({{ value.assists }})
-        </template>
-        <template v-slot:item.totalLastHits="{ value }">
-            <b>{{ value.lastHitsPoints }}</b>
-            <br>
-            ({{ value.lastHits }})
-        </template>
-        <template v-slot:item.totalGoldPerMin="{ value }">
-            <b>{{ value.goldPerMinPoints }}</b>
-            <br>
-            ({{ value.goldPerMin }})
-        </template>
-        <template v-slot:item.totalXpPerMin="{ value }">
-            <b>{{ value.xpPerMinPoints }}</b>
-            <br>
-            ({{ value.xpPerMin }})
-        </template>
-        <template v-slot:item.totalSupportGoldSpent="{ value }">
-            <b>{{ value.supportGoldSpentPoints }}</b>
-            <br>
-            ({{ value.supportGoldSpent }})
-        </template>
-        <template v-slot:item.totalObsPlaced="{ value }">
-            <b>{{ value.observerWardsPlacedPoints }}</b>
-            <br>
-            ({{ value.observerWardsPlaced }})
-        </template>
-        <template v-slot:item.totalSentriesPlaced="{ value }">
-            <b>{{ value.sentryWardsPlacedPoints }}</b>
-            <br>
-            ({{ value.sentryWardsPlaced }})
-        </template>
-        <template v-slot:item.totalWardsDewarded="{ value }">
-            <b>{{ value.wardsDewardedPoints }}</b>
-            <br>
-            ({{ value.wardsDewarded }})
-        </template>
-        <template v-slot:item.totalCampsStacked="{ value }">
-            <b>{{ value.campsStackedPoints }}</b>
-            <br>
-            ({{ value.campsStacked }})
-        </template>
-        <template v-slot:item.totalHeroDamage="{ value }">
-            <b>{{ value.heroDamagePoints }}</b>
-            <br>
-            ({{ value.heroDamage }})
-        </template>
-        <template v-slot:item.totalTowerDamage="{ value }">
-            <b>{{ value.towerDamagePoints }}</b>
-            <br>
-            ({{ value.towerDamage }})
-        </template>
-        <template v-slot:item.totalHeroHealing="{ value }">
-            <b>{{ value.heroHealingPoints }}</b>
-            <br>
-            ({{ value.heroHealing }})
-        </template>
-        <template v-slot:item.totalStunDuration="{ value }">
-            <b>{{ value.stunDurationPoints }}</b>
-            <br>
-            ({{ value.stunDuration }})
-        </template>
-        <template v-slot:bottom>
-            <div class="text-center pt-2">
-                <v-pagination v-model="page" :length="pageCount"></v-pagination>
-            </div>
-        </template>
-    </v-data-table>
+                </template>
+
+                <template v-slot:item.totalPoints="{ value }">
+                    <b>{{ value }}</b>
+                </template>
+                <template v-slot:item.totalKills="{ value }">
+                    <b>{{ value.killPoints }}</b>
+                    <br>
+                    ({{ value.kills }})
+                </template>
+                <template v-slot:item.totalDeaths="{ value }">
+                    <b>{{ value.deathPoints }}</b>
+                    <br>
+                    ({{ value.deaths }})
+                </template>
+                <template v-slot:item.totalAssists="{ value }">
+                    <b>{{ value.assistPoints }}</b>
+                    <br>
+                    ({{ value.assists }})
+                </template>
+                <template v-slot:item.totalLastHits="{ value }">
+                    <b>{{ value.lastHitsPoints }}</b>
+                    <br>
+                    ({{ value.lastHits }})
+                </template>
+                <template v-slot:item.totalGoldPerMin="{ value }">
+                    <b>{{ value.goldPerMinPoints }}</b>
+                    <br>
+                    ({{ value.goldPerMin }})
+                </template>
+                <template v-slot:item.totalXpPerMin="{ value }">
+                    <b>{{ value.xpPerMinPoints }}</b>
+                    <br>
+                    ({{ value.xpPerMin }})
+                </template>
+                <template v-slot:item.totalSupportGoldSpent="{ value }">
+                    <b>{{ value.supportGoldSpentPoints }}</b>
+                    <br>
+                    ({{ (value.supportGoldSpent / 1000).toFixed(1) + 'k' }})
+                </template>
+                <template v-slot:item.totalObsPlaced="{ value }">
+                    <b>{{ value.observerWardsPlacedPoints }}</b>
+                    <br>
+                    ({{ value.observerWardsPlaced }})
+                </template>
+                <template v-slot:item.totalSentriesPlaced="{ value }">
+                    <b>{{ value.sentryWardsPlacedPoints }}</b>
+                    <br>
+                    ({{ value.sentryWardsPlaced }})
+                </template>
+                <template v-slot:item.totalWardsDewarded="{ value }">
+                    <b>{{ value.wardsDewardedPoints }}</b>
+                    <br>
+                    ({{ value.wardsDewarded }})
+                </template>
+                <template v-slot:item.totalCampsStacked="{ value }">
+                    <b>{{ value.campsStackedPoints }}</b>
+                    <br>
+                    ({{ value.campsStacked }})
+                </template>
+                <template v-slot:item.totalHeroDamage="{ value }">
+                    <b>{{ value.heroDamagePoints }}</b>
+                    <br>
+                    ({{ value.heroDamage }})
+                </template>
+                <template v-slot:item.totalTowerDamage="{ value }">
+                    <b>{{ value.towerDamagePoints }}</b>
+                    <br>
+                    ({{ value.towerDamage }})
+                </template>
+                <template v-slot:item.totalHeroHealing="{ value }">
+                    <b>{{ value.heroHealingPoints }}</b>
+                    <br>
+                    ({{ value.heroHealing }})
+                </template>
+                <template v-slot:item.totalStunDuration="{ value }">
+                    <b>{{ value.stunDurationPoints }}</b>
+                    <br>
+                    ({{ value.stunDuration }})
+                </template>
+                <template v-slot:bottom>
+                    <div class="text-center pt-2">
+                        <v-pagination v-model="page" :length="pageCount"></v-pagination>
+                    </div>
+                </template>
+            </v-data-table>
+        </v-row>
+    </v-col>
+
 </template>
 
 <script setup lang="ts">
 import { ref, defineModel, onMounted, watch, computed } from 'vue';
-import { VRow, VCol, VDataTable, VPagination } from 'vuetify/components';
+import { VRow, VCol, VDataTable, VPagination, VTabs, VTab } from 'vuetify/components';
 import { localApiService } from '@/services/localApiService';
 import type { League } from '@/stores/league';
 
@@ -150,8 +182,8 @@ const commonFantasyColumns = [
         title: '',
         align: 'center',
         value: (row: any) => row.position,
-        style: 'width: 15px',
-        sortable: false
+        width: '15px',
+        sortable: true
     },
     {
         key: 'fantasyPlayer',
@@ -166,8 +198,9 @@ const commonFantasyColumns = [
                 totalMatches: row.totalMatches
             };
         },
-        style: 'width: 400px',
-        sortable: false
+        width: isDesktop.value ? '240px' : '120px',
+        sortable: true,
+        sort: (a: any, b: any) => a.playerName > b.playerName
     },
     {
         key: 'totalPoints',
@@ -175,8 +208,7 @@ const commonFantasyColumns = [
         align: 'left',
         value: (row: any) => row.totalMatchFantasyPoints.toFixed(1),
         format: (val: number) => `${val.toLocaleString()}`,
-        headerStyle: 'font-weight: bold',
-        style: 'font-weight: bold',
+        width: '50px',
         sortable: true,
         sort: (a: number, b: number) => a - b
     },
@@ -337,8 +369,8 @@ const damageHealingFantasyColumns = [
         align: 'left',
         value: (row: any) => {
             return {
-                heroDamage: row.totalHeroDamage.toLocaleString() ?? 0,
-                heroDamagePoints: row.totalHeroDamagePoints.toFixed(1).toLocaleString()
+                heroDamage: (row.totalHeroDamage / 1000).toFixed(1) + 'k' ?? '0',
+                heroDamagePoints: row.totalHeroDamagePoints.toFixed(1)
             };
         },
         sortable: true,
@@ -350,8 +382,8 @@ const damageHealingFantasyColumns = [
         align: 'left',
         value: (row: any) => {
             return {
-                towerDamage: row.totalTowerDamage.toLocaleString() ?? 0,
-                towerDamagePoints: row.totalTowerDamagePoints.toFixed(1).toLocaleString()
+                towerDamage: (row.totalTowerDamage / 1000).toFixed(1) + 'k' ?? '0',
+                towerDamagePoints: row.totalTowerDamagePoints.toFixed(1)
             };
         },
         sortable: true,
@@ -363,8 +395,8 @@ const damageHealingFantasyColumns = [
         align: 'left',
         value: (row: any) => {
             return {
-                heroHealing: row.totalHeroHealing.toLocaleString() ?? 0,
-                heroHealingPoints: row.totalHeroHealingPoints.toFixed(1).toLocaleString()
+                heroHealing: (row.totalHeroHealing / 1000).toFixed(1) + 'k' ?? '0',
+                heroHealingPoints: row.totalHeroHealingPoints.toFixed(1)
             };
         },
         sortable: true,
@@ -377,7 +409,7 @@ const damageHealingFantasyColumns = [
         value: (row: any) => {
             return {
                 stunDuration: row.totalStunDuration.toFixed(1).toLocaleString() ?? 0,
-                stunDurationPoints: row.totalStunDurationPoints.toFixed(1).toLocaleString()
+                stunDurationPoints: row.totalStunDurationPoints.toFixed(1)
             };
         },
         sortable: true,
@@ -464,15 +496,16 @@ const getPositionIcon = (positionInt: number) => {
 
 <style scoped>
 .fantasy-table {
-    font-size: 0.8rem;
     font-family: Avenir, Helvetica, Arial, sans-serif;
 }
 
-table th+th {
-    border-left: 1px solid #dddddd;
+.v-data-table ::v-deep(th) {
+    padding: 0 4px 0 0 !important;
+    /* border-right: 1px solid #383838; */
 }
 
-table td+td {
-    border-left: 1px solid #dddddd;
+.v-data-table ::v-deep(td) {
+    padding: 0 4px 0 0 !important;
+    /* border-right: 1px solid #383838; */
 }
 </style>

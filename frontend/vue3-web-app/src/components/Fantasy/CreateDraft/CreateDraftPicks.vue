@@ -16,9 +16,11 @@
 
             </v-row>
             <v-row v-else @click="changeActiveDraftPlayer(index)">
-                <v-col class="parallelogram"
-                    :style="{ 'max-width': isDesktop ? '120px' : '60px', height: isDesktop ? '80px' : '40px' }"
-                    :class="{ 'glow-active-slot': currentActiveDraftPlayerCheck(index) }">
+                <v-col>
+                    <v-row class="parallelogram"
+                        :style="{ 'max-width': isDesktop ? '120px' : '60px', 'min-width': isDesktop ? '120px' : '60px', 'min-height': isDesktop ? '80px' : '40px', 'margin-left': isDesktop ? '5px' : '' }"
+                        :class="{ 'glow-active-slot': currentActiveDraftPlayerCheck(index) }">
+                    </v-row>
                 </v-col>
             </v-row>
         </v-col>

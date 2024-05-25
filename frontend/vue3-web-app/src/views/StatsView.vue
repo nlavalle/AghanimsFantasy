@@ -12,8 +12,11 @@
       </v-col>
       <v-col>
         <v-row>
-          <v-select class="league-selector" label="League" v-model="selectedLeague" :items="availableLeagues"
-            item-title="name" item-value="id" variant="underlined" return-object>
+          <v-select label="League" v-model="selectedLeague" :items="availableLeagues" item-title="name" item-value="id"
+            variant="underlined" return-object>
+            <template v-slot:item="{ props, item }">
+              <v-list-item v-bind="props" class="league-selector" :title="item.raw.name"></v-list-item>
+            </template>
           </v-select>
         </v-row>
       </v-col>
@@ -43,16 +46,16 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import { VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem, VSelect } from 'vuetify/components';
+import { VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem, VListItem, VSelect } from 'vuetify/components';
 import { localApiService } from '@/services/localApiService';
-import { useLeagueStore } from '@/stores/league';
+import { useLeagueStore, type League } from '@/stores/league';
 import FantasyDataTable from '@/components/Stats/FantasyDataTable.vue';
 import LeagueDataTable from '@/components/Stats/LeagueDataTable.vue';
 
 const statsTab = ref('fantasy')
 const leagueStore = useLeagueStore();
 
-const selectedLeague = ref();
+const selectedLeague = ref<League>();
 
 const availableLeagues = computed(() => {
   return leagueStore.activeLeagues
@@ -60,8 +63,14 @@ const availableLeagues = computed(() => {
 
 onMounted(() => {
   localApiService.getLeagues().then((result: any) => {
-    leagueStore.setLeagues(result)
+    leagueStore.setLeagues(result);
   })
 })
 
 </script>
+
+<style scoped>
+.league-selector :deep(.v-list-item-title) {
+  font-size: 0.8rem;
+}
+</style>
