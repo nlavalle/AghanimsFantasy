@@ -134,7 +134,7 @@ const kdaLeagueColumns = [
         align: 'left',
         value: (row: any) => row.kills,
         sortable: true,
-        sort: (a: number, b: number) => a - b
+        sort: (a: number, b: number) => b - a
     },
     {
         key: 'totalDeaths',
@@ -142,7 +142,7 @@ const kdaLeagueColumns = [
         align: 'left',
         value: (row: any) => row.deaths,
         sortable: true,
-        sort: (a: number, b: number) => a - b
+        sort: (a: number, b: number) => b - a
     },
     {
         key: 'totalAssists',
@@ -150,7 +150,7 @@ const kdaLeagueColumns = [
         align: 'left',
         value: (row: any) => row.assists,
         sortable: true,
-        sort: (a: number, b: number) => a - b
+        sort: (a: number, b: number) => b - a
     },
 ];
 const farmLeagueColumns = [
@@ -160,7 +160,7 @@ const farmLeagueColumns = [
         align: 'left',
         value: (row: any) => row.lastHits,
         sortable: true,
-        sort: (a: number, b: number) => a - b
+        sort: (a: number, b: number) => b - a
     },
     {
         key: 'totalDenies',
@@ -168,7 +168,7 @@ const farmLeagueColumns = [
         align: 'left',
         value: (row: any) => row.denies,
         sortable: true,
-        sort: (a: number, b: number) => a - b
+        sort: (a: number, b: number) => b - a
     },
     {
         key: 'totalGoldPerMin',
@@ -176,7 +176,7 @@ const farmLeagueColumns = [
         align: 'left',
         value: (row: any) => row.goldPerMin,
         sortable: true,
-        sort: (a: number, b: number) => a - b
+        sort: (a: number, b: number) => b - a
     },
     {
         key: 'totalXpPerMin',
@@ -184,7 +184,7 @@ const farmLeagueColumns = [
         align: 'left',
         value: (row: any) => row.xpPerMin,
         sortable: true,
-        sort: (a: number, b: number) => a - b
+        sort: (a: number, b: number) => b - a
     },
 ];
 const supportLeagueColumns = [
@@ -194,7 +194,7 @@ const supportLeagueColumns = [
         align: 'left',
         value: (row: any) => row.supportGoldSpent ?? 0,
         sortable: true,
-        sort: (a: number, b: number) => a - b
+        sort: (a: number, b: number) => b - a
     },
     {
         key: 'totalObsPlaced',
@@ -202,7 +202,7 @@ const supportLeagueColumns = [
         align: 'left',
         value: (row: any) => row.observerWardsPlaced ?? 0,
         sortable: true,
-        sort: (a: number, b: number) => a - b
+        sort: (a: number, b: number) => b - a
     },
     {
         key: 'totalSentriesPlaced',
@@ -210,7 +210,7 @@ const supportLeagueColumns = [
         align: 'left',
         value: (row: any) => row.sentryWardsPlaced ?? 0,
         sortable: true,
-        sort: (a: number, b: number) => a - b
+        sort: (a: number, b: number) => b - a
     },
     {
         key: 'totalWardsDewarded',
@@ -218,7 +218,7 @@ const supportLeagueColumns = [
         align: 'left',
         value: (row: any) => row.wardsDewarded ?? 0,
         sortable: true,
-        sort: (a: number, b: number) => a - b
+        sort: (a: number, b: number) => b - a
     },
     {
         key: 'totalCampsStacked',
@@ -226,7 +226,7 @@ const supportLeagueColumns = [
         align: 'left',
         value: (row: any) => row.campsStacked ?? 0,
         sortable: true,
-        sort: (a: number, b: number) => a - b
+        sort: (a: number, b: number) => b - a
     },
 ];
 const damageHealingLeagueColumns = [
@@ -236,7 +236,7 @@ const damageHealingLeagueColumns = [
         align: 'left',
         value: (row: any) => row.heroDamage ?? 0,
         sortable: true,
-        sort: (a: number, b: number) => a - b
+        sort: (a: number, b: number) => b - a
     },
     {
         key: 'totalTowerDamage',
@@ -244,7 +244,7 @@ const damageHealingLeagueColumns = [
         align: 'left',
         value: (row: any) => row.towerDamage ?? 0,
         sortable: true,
-        sort: (a: number, b: number) => a - b
+        sort: (a: number, b: number) => b - a
     },
     {
         key: 'totalHeroHealing',
@@ -252,7 +252,7 @@ const damageHealingLeagueColumns = [
         align: 'left',
         value: (row: any) => row.heroHealing ?? 0,
         sortable: true,
-        sort: (a: number, b: number) => a - b
+        sort: (a: number, b: number) => b - a
     },
     {
         key: 'totalStunDuration',
@@ -260,7 +260,7 @@ const damageHealingLeagueColumns = [
         align: 'left',
         value: (row: any) => row.stunDuration ?? 0,
         sortable: true,
-        sort: (a: number, b: number) => a - b
+        sort: (a: number, b: number) => b - a
     },
 ];
 

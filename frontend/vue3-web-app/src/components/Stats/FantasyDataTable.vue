@@ -210,7 +210,7 @@ const commonFantasyColumns = [
         format: (val: number) => `${val.toLocaleString()}`,
         width: '50px',
         sortable: true,
-        sort: (a: number, b: number) => a - b
+        sort: (a: number, b: number) => b - a
     },
 ];
 const kdaFantasyColumns = [
@@ -225,7 +225,7 @@ const kdaFantasyColumns = [
             };
         },
         sortable: true,
-        sort: (a: any, b: any) => a.killPoints - b.killPoints
+        sort: (a: any, b: any) => b.killPoints - a.killPoints
     },
     {
         key: 'totalDeaths',
@@ -238,7 +238,7 @@ const kdaFantasyColumns = [
             };
         },
         sortable: true,
-        sort: (a: any, b: any) => a.deathPoints - b.deathPoints
+        sort: (a: any, b: any) => b.deathPoints - a.deathPoints
     },
     {
         key: 'totalAssists',
@@ -251,7 +251,7 @@ const kdaFantasyColumns = [
             };
         },
         sortable: true,
-        sort: (a: any, b: any) => a.assistPoints - b.assistPoints
+        sort: (a: any, b: any) => b.assistPoints - a.assistPoints
     },
 ];
 const farmFantasyColumns = [
@@ -266,7 +266,7 @@ const farmFantasyColumns = [
             };
         },
         sortable: true,
-        sort: (a: any, b: any) => a.lastHitsPoints - b.lastHitsPoints
+        sort: (a: any, b: any) => b.lastHitsPoints - a.lastHitsPoints
     },
     {
         key: 'totalGoldPerMin',
@@ -279,7 +279,7 @@ const farmFantasyColumns = [
             };
         },
         sortable: true,
-        sort: (a: any, b: any) => a.goldPerMinPoints - b.goldPerMinPoints
+        sort: (a: any, b: any) => b.goldPerMinPoints - a.goldPerMinPoints
     },
     {
         key: 'totalXpPerMin',
@@ -292,7 +292,7 @@ const farmFantasyColumns = [
             };
         },
         sortable: true,
-        sort: (a: any, b: any) => a.xpPerMinPoints - b.xpPerMinPoints
+        sort: (a: any, b: any) => b.xpPerMinPoints - a.xpPerMinPoints
     },
 ];
 const supportFantasyColumns = [
@@ -307,7 +307,7 @@ const supportFantasyColumns = [
             };
         },
         sortable: true,
-        sort: (a: any, b: any) => a.supportGoldSpentPoints - b.supportGoldSpentPoints
+        sort: (a: any, b: any) => b.supportGoldSpentPoints - a.supportGoldSpentPoints
     },
     {
         key: 'totalObsPlaced',
@@ -320,7 +320,7 @@ const supportFantasyColumns = [
             };
         },
         sortable: true,
-        sort: (a: any, b: any) => a.observerWardsPlacedPoints - b.observerWardsPlacedPoints
+        sort: (a: any, b: any) => b.observerWardsPlacedPoints - a.observerWardsPlacedPoints
     },
     {
         key: 'totalSentriesPlaced',
@@ -333,7 +333,7 @@ const supportFantasyColumns = [
             };
         },
         sortable: true,
-        sort: (a: any, b: any) => a.sentryWardsPlacedPoints - b.sentryWardsPlacedPoints
+        sort: (a: any, b: any) => b.sentryWardsPlacedPoints - a.sentryWardsPlacedPoints
     },
     {
         key: 'totalWardsDewarded',
@@ -346,7 +346,7 @@ const supportFantasyColumns = [
             };
         },
         sortable: true,
-        sort: (a: any, b: any) => a.wardsDewardedPoints - b.wardsDewardedPoints
+        sort: (a: any, b: any) => b.wardsDewardedPoints - a.wardsDewardedPoints
     },
     {
         key: 'totalCampsStacked',
@@ -359,7 +359,7 @@ const supportFantasyColumns = [
             };
         },
         sortable: true,
-        sort: (a: any, b: any) => a.campsStackedPoints - b.campsStackedPoints
+        sort: (a: any, b: any) => b.campsStackedPoints - a.campsStackedPoints
     },
 ];
 const damageHealingFantasyColumns = [
@@ -374,7 +374,7 @@ const damageHealingFantasyColumns = [
             };
         },
         sortable: true,
-        sort: (a: any, b: any) => a.heroDamagePoints - b.heroDamagePoints
+        sort: (a: any, b: any) => b.heroDamagePoints - a.heroDamagePoints
     },
     {
         key: 'totalTowerDamage',
@@ -387,7 +387,7 @@ const damageHealingFantasyColumns = [
             };
         },
         sortable: true,
-        sort: (a: any, b: any) => a.towerDamagePoints - b.towerDamagePoints
+        sort: (a: any, b: any) => b.towerDamagePoints - a.towerDamagePoints
     },
     {
         key: 'totalHeroHealing',
@@ -400,7 +400,7 @@ const damageHealingFantasyColumns = [
             };
         },
         sortable: true,
-        sort: (a: any, b: any) => a.heroHealingPoints - b.heroHealingPoints
+        sort: (a: any, b: any) => b.heroHealingPoints - a.heroHealingPoints
     },
     {
         key: 'totalStunDuration',
@@ -413,7 +413,7 @@ const damageHealingFantasyColumns = [
             };
         },
         sortable: true,
-        sort: (a: any, b: any) => a.stunDurationPoints - b.stunDurationPoints
+        sort: (a: any, b: any) => b.stunDurationPoints - a.stunDurationPoints
     },
 ];
 
