@@ -1,19 +1,19 @@
+<!-- eslint-disable vue/valid-v-slot -->
 <template>
   <div class="about">
-    <div class="row justify-evenly">
-      <div class="col col-4-grow">
-        <p class="text-white">
-          Dota 2 Fantasy Draft, click the fantasy tab to get started.
-          <br />
-          Points are calculated using the pattern below trying to follow the TI fantasy scoring.
-          Certain statistics require parsing the .dem replay files to measure, so the unavailable
-          metrics won't be involved in the calculation until that is added to the API service that
-          fetches match data (hopefully by Season 7).
-        </p>
-      </div>
+    <div>
+      <p class="text-white">
+        Dota 2 Fantasy Draft, click the fantasy tab to get started.
+        <br />
+        Points are calculated using the pattern below trying to follow the TI fantasy scoring.
+        Certain statistics require parsing the .dem replay files to measure, so the unavailable
+        metrics won't be involved in the calculation until that is added to the API service that
+        fetches match data (hopefully by Season 7).
+      </p>
     </div>
-    <div class="row justify-evenly">
-      <v-data-table :items="statistics" hide-default-footer density="compact">
+    <div>
+      <v-data-table class="about-table" :items="statistics" :headers="statsHeaders" hide-default-footer
+        density="compact">
         <template v-slot:item.value="{ item }">
           <span :style="getPointsPer(item)">{{ item.value }}</span>
         </template>
@@ -27,6 +27,24 @@
 
 <script setup lang="ts">
 import { VDataTable } from 'vuetify/components'
+
+const statsHeaders = [
+  {
+    title: 'Name',
+    value: 'name',
+    width: '40%'
+  },
+  {
+    title: 'Points Per',
+    value: 'value',
+    width: '30%'
+  },
+  {
+    title: 'Available?',
+    value: 'available',
+    width: '30%'
+  },
+];
 
 const statistics = [
   {
@@ -110,51 +128,19 @@ const getAvailability = (field: { available: string }) => {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style>
-.about {
-  margin-top: 10px;
-  margin-left: 10px;
-  margin-right: 10px;
-}
-
+<style scoped>
 .about-table {
+  margin: 20px;
   max-width: 375px;
+  border: 2px solid var(--aghanims-fantasy-main-2);
+  border-radius: 5px;
 }
 
-.about-table .p-datatable-thead > tr > th {
-  border-right: 1px solid var(--aghanims-fantasy-main-3);
+.v-data-table ::v-deep(thead) {
+  background-color: var(--aghanims-fantasy-main-2);
 }
 
-.about-table .p-datatable-tbody > tr > td {
-  border-right: 1px solid var(--aghanims-fantasy-main-3);
-}
-
-.about-table .p-datatable-thead > tr > th:last-child,
-.about-table .p-datatable-tbody > tr > td:last-child {
-  border-right: none;
-  /* Remove the border from the last column */
-}
-
-.about-table .p-datatable-tbody > tr:not(:last-child) > td {
-  border-bottom: none;
-  /* Remove the bottom border of each cell to hide row gridlines */
-}
-
-.about-table-header {
-  background-color: var(--aghanims-fantasy-main-3);
-  color: var(--aghanims-fantasy-white);
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 16px;
-}
-
-.about-table-header:not(:first-child) > div {
-  justify-content: center;
-}
-
-.about-table-body {
-  color: var(--aghanims-fantasy-white);
-  background-color: var(--surface-card);
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 16px;
+.v-data-table ::v-deep(td) {
+  border-right: 1px solid var(--aghanims-fantasy-main-2);
 }
 </style>
