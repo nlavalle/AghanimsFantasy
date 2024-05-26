@@ -7,7 +7,7 @@
                 <v-row class="mt-4">
                     <v-btn class="mr-1" style="width:55%;" color="primary" @click="draftPlayer()">Draft Player</v-btn>
                     <v-btn class="ml-1" style="width:40%;" color="primary" @click="randomPlayer()">
-                        <i class="fa-solid fa-dice"></i>
+                        <font-awesome-icon :icon="faDice" />
                         <span class="ml-1">Random</span>
                     </v-btn>
                 </v-row>
@@ -37,6 +37,8 @@ import { fantasyDraftState } from '../fantasyDraft';
 import PlayerStatsBio from '@/components/Fantasy/PlayerStats/PlayerStatsBio.vue'
 import PlayerTopHeroes from '@/components/Fantasy/PlayerStats/PlayerTopHeroes.vue'
 import PlayerRadarChart from '@/components/Fantasy/PlayerStats/PlayerRadarChart.vue'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { faDice } from '@fortawesome/free-solid-svg-icons';
 
 
 
