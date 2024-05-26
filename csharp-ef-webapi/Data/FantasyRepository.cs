@@ -640,13 +640,21 @@ public class FantasyRepository : IFantasyRepository
 
         var heroes = await GetHeroesAsync();
 
-        var topHeroIds = await _dbContext.MatchDetailsPlayers
-                .Where(mdp => mdp.AccountId == fantasyPlayer.DotaAccountId)
-                .GroupBy(match => match.HeroId)
+        var topHeroIds = await _dbContext.MatchDetails
+                .SelectMany(
+                    md => md.Players,
+                    (left, right) => new { MatchDetail = left, MatchDetailPlayer = right }
+                )
+                .Where(mdp => mdp.MatchDetailPlayer.AccountId == fantasyPlayer.DotaAccountId)
+                .GroupBy(match => match.MatchDetailPlayer.HeroId)
                 .Select(group => new
                 {
                     HeroId = group.Key,
-                    Count = group.Count()
+                    Count = group.Count(),
+                    Wins = group.Where(g => (g.MatchDetail.RadiantWin && g.MatchDetailPlayer.TeamNumber == 0) ||
+                    (!g.MatchDetail.RadiantWin && g.MatchDetailPlayer.TeamNumber == 1)).Count(),
+                    Losses = group.Where(g => (!g.MatchDetail.RadiantWin && g.MatchDetailPlayer.TeamNumber == 0) ||
+                    (g.MatchDetail.RadiantWin && g.MatchDetailPlayer.TeamNumber == 1)).Count()
                 })
                 .OrderByDescending(group => group.Count)
                 .Take(3)
@@ -655,7 +663,9 @@ public class FantasyRepository : IFantasyRepository
         var topHeroes = topHeroIds.Select(thi => new TopHeroCount
         {
             Hero = heroes.First(h => h.Id == thi.HeroId),
-            Count = thi.Count
+            Count = thi.Count,
+            Wins = thi.Wins,
+            Losses = thi.Losses
         })
         .ToArray();
 
