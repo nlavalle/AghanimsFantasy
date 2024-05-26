@@ -1,56 +1,26 @@
 <template>
-    <v-container class="player-stats">
-        <v-row v-if="selectedPlayer" class="ml-1">
+    <v-container class="player-stats pl-1">
+        <v-row v-if="selectedPlayer" class="ml-0">
             <v-col>
-                <v-row>
-                    <v-col>
-                        <v-row>
-                            <img style="height:250px;" :src="selectedPlayer.dotaAccount.steamProfilePicture"
-                                :style="{ height: isDesktop ? '250px' : '130px' }" />
-                        </v-row>
-                    </v-col>
-                    <v-col>
-                        <v-row>
-                            <span>Name: {{ selectedPlayer.dotaAccount.name }}</span>
-                        </v-row>
-                        <v-row>
-                            <span>Team: {{ selectedPlayer.team.name }}</span>
-                        </v-row>
-                        <v-row>
-                            <span>Role: {{ selectedPlayer.teamPosition }}</span>
-                        </v-row>
-                        <v-row>
-                            <v-btn color="primary" @click="draftPlayer()">Draft Player</v-btn>
-                        </v-row>
-                    </v-col>
+                <PlayerStatsBio :selected-player="selectedPlayer">
+                </PlayerStatsBio>
+                <v-row class="mt-4">
+                    <v-btn class="mr-1" style="width:55%;" color="primary" @click="draftPlayer()">Draft Player</v-btn>
+                    <v-btn class="ml-1" style="width:40%;" color="primary" @click="randomPlayer()">
+                        <i class="fa-solid fa-dice"></i>
+                        <span class="ml-1">Random</span>
+                    </v-btn>
                 </v-row>
-                <v-row>
-                    <span>Top Heroes played</span>
-                </v-row>
-                <v-row v-if="playerTopHeroes">
-                    <v-col v-for="(hero, index) in playerTopHeroes.topHeroes" :key="index">
-                        <img style="width:64px;height:36px" :src="getHeroIcon(hero.hero.name)" />
-                        <p>{{ hero.count }}</p>
-                    </v-col>
-                </v-row>
-                <v-row>
+                <PlayerTopHeroes class="player-top-heroes mt-5 pa-1" :selected-player="selectedPlayer">
+                </PlayerTopHeroes>
+                <v-row class="mt-4" style="border:1px solid black">
                     <v-col>
-                        <v-row justify="center">
-                            <p>Fantasy Point Breakdown</p>
-                            <div>
-                                <Radar style="height:200px;width:220px" :data="fantasyChartData" :options="options">
-                                </Radar>
-                            </div>
-                        </v-row>
+                        <PlayerRadarChart class="player-radar-chart pa-1" title="Fantasy Point Breakdown"
+                            :chart-labels="fantasyLabels" :chart-dataset="fantasyDataset" />
                     </v-col>
                     <v-col>
-                        <v-row justify="center">
-                            <p>Dota Scores</p>
-                            <div>
-                                <Radar style="height:200px;width:200px" :data="scoreChartData" :options="options">
-                                </Radar>
-                            </div>
-                        </v-row>
+                        <PlayerRadarChart class="player-radar-chart pa-1" title="Dota Scores"
+                            :chart-labels="scoreLabels" :chart-dataset="scoreDataset" />
                     </v-col>
                 </v-row>
             </v-col>
@@ -61,106 +31,39 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { VContainer, VRow, VCol, VBtn } from 'vuetify/components';
-import {
-    Chart as ChartJS,
-    RadialLinearScale,
-    PointElement,
-    LineElement,
-    Filler,
-    Tooltip,
-    Legend
-} from 'chart.js'
-import { Radar } from 'vue-chartjs'
 import type { FantasyPlayer, FantasyPlayerTopHeroes } from '../fantasyDraft';
 import { localApiService } from '@/services/localApiService'
 import { fantasyDraftState } from '../fantasyDraft';
+import PlayerStatsBio from '@/components/Fantasy/PlayerStats/PlayerStatsBio.vue'
+import PlayerTopHeroes from '@/components/Fantasy/PlayerStats/PlayerTopHeroes.vue'
+import PlayerRadarChart from '@/components/Fantasy/PlayerStats/PlayerRadarChart.vue'
 
-ChartJS.register(
-    RadialLinearScale,
-    PointElement,
-    LineElement,
-    Filler,
-    Tooltip,
-    Legend
-)
 
-const { setFantasyPlayer } = fantasyDraftState();
+
+const { fantasyPlayersAvailable, fantasyDraftPicks, setFantasyPlayer } = fantasyDraftState();
 const selectedPlayer = defineModel<FantasyPlayer>();
 
-const isDesktop = ref(window.outerWidth >= 600);
 
-const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-        legend: {
-            display: false
-        }
-    },
-    scales: {
-        r: {
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            pointLabels: {
-                color: '#fff'
-            },
-            angleLines: {
-                color: 'rgba(255, 99, 132, 0.2)' // Custom color for angle lines
-            },
-            grid: {
-                color: 'rgba(255, 99, 132, 0.2)' // Custom color for grid lines
-            },
-            ticks: {
-                display: false
-            }
-        }
-    }
-}
+const fantasyLabels = [
+    'K/D/A',
+    'Farming',
+    'Supporting',
+    'Damage/Healing',
+    'Games Played'
+];
 
-const fantasyChartData = ref({
-    labels: [
-        'K/D/A',
-        'Farming',
-        'Supporting',
-        'Damage/Healing',
-        'Games Played'
-    ],
-    datasets: [
-        {
-            data: [0, 0, 0, 0, 0],
-            fill: true,
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            borderColor: 'rgb(255, 99, 132)',
-            pointBackgroundColor: 'rgb(255, 99, 132)',
-            pointBorderColor: '#fff',
-            pointHoverBackgroundColor: '#fff',
-            pointHoverBorderColor: 'rgb(255, 99, 132)'
-        },
-    ]
-})
+const fantasyDataset = ref([0, 0, 0, 0, 0]);
 
-const scoreChartData = ref({
-    labels: [
-        'Fighting',
-        'Farming',
-        'Supporting',
-        'Pushing'
-    ],
-    datasets: [
-        {
-            data: [0, 0, 0, 0],
-            fill: true,
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            borderColor: 'rgb(255, 99, 132)',
-            pointBackgroundColor: 'rgb(255, 99, 132)',
-            pointBorderColor: '#fff',
-            pointHoverBackgroundColor: '#fff',
-            pointHoverBorderColor: 'rgb(255, 99, 132)'
-        },
-    ]
-})
+const scoreLabels = [
+    'Fighting',
+    'Farming',
+    'Supporting',
+    'Pushing'
+];
+
+const scoreDataset = ref([0, 0, 0, 0]);
 
 const playerTopHeroes = ref<FantasyPlayerTopHeroes>();
-// const playerAverages = ref(null);
 
 watch(selectedPlayer, (newPlayer) => {
     if (newPlayer) {
@@ -172,11 +75,6 @@ watch(selectedPlayer, (newPlayer) => {
     }
 });
 
-const draftPlayer = () => {
-    if (selectedPlayer.value) {
-        setFantasyPlayer(selectedPlayer.value);
-    }
-}
 
 const formatPlayerAverages = (playerAverages: any) => {
     var firstPlayerAverages = playerAverages[0];
@@ -205,33 +103,13 @@ const formatPlayerAverages = (playerAverages: any) => {
 
     var matchesPlayed = firstPlayerAverages.totalMatches * 100;
 
-    fantasyChartData.value = {
-        labels: [
-            'K/D/A',
-            'Farming',
-            'Supporting',
-            'Damage/Healing',
-            'Games Played'
-        ],
-        datasets: [
-            {
-                data: [
-                    kdaTotal,
-                    farmTotal,
-                    supportTotal,
-                    damageHealingTotal,
-                    matchesPlayed
-                ],
-                fill: true,
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgb(255, 99, 132)',
-                pointBackgroundColor: 'rgb(255, 99, 132)',
-                pointBorderColor: '#fff',
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: 'rgb(255, 99, 132)'
-            },
-        ]
-    }
+    fantasyDataset.value = [
+        kdaTotal,
+        farmTotal,
+        supportTotal,
+        damageHealingTotal,
+        matchesPlayed
+    ]
 
     //Scores
     var fightScore = firstPlayerAverages.avgFightScore * 100;
@@ -239,41 +117,39 @@ const formatPlayerAverages = (playerAverages: any) => {
     var supportScore = firstPlayerAverages.avgSupportScore * 100;
     var pushScore = firstPlayerAverages.avgPushScore * 100;
 
-    scoreChartData.value = {
-        labels: [
-            'Fighting',
-            'Farming',
-            'Supporting',
-            'Pushing'
-        ],
-        datasets: [
-            {
-                data: [fightScore, farmScore, supportScore, pushScore],
-                fill: true,
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgb(255, 99, 132)',
-                pointBackgroundColor: 'rgb(255, 99, 132)',
-                pointBorderColor: '#fff',
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: 'rgb(255, 99, 132)'
-            },
-        ]
+    scoreDataset.value = [fightScore, farmScore, supportScore, pushScore]
+
+}
+
+const draftPlayer = () => {
+    if (selectedPlayer.value) {
+        setFantasyPlayer(selectedPlayer.value);
     }
-
 }
 
-const getHeroIcon = (heroIconString: string) => {
-    if (heroIconString == '') return undefined;
-    var formattedString = heroIconString.replace('npc_dota_hero_', '');
-    return `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${formattedString}.png`
+const randomPlayer = () => {
+    var availablePicks = fantasyPlayersAvailable.value.filter(pa => !fantasyDraftPicks.value.includes(pa))
+    var randomPick = availablePicks[(Math.floor(Math.random() * availablePicks.length))];
+    selectedPlayer.value = randomPick;
 }
+
+
+
 
 </script>
 
 <style scoped>
 .player-stats {
-    height: 100%;
     background-color: rgba(27, 38, 59, 0.4);
-    /* hex for agh-fan-main-3: #1b263b */
+    height: 100%;
+}
+
+.player-top-heroes {
+    background: linear-gradient(to bottom, var(--aghanims-fantasy-main-3), var(--aghanims-fantasy-main-4));
+    border: 1px solid black;
+}
+
+.player-radar-chart {
+    background: linear-gradient(to bottom, black, var(--aghanims-fantasy-main-4));
 }
 </style>
