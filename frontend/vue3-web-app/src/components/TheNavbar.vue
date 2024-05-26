@@ -1,7 +1,9 @@
 <template>
     <div class="bg-surface" style="display:flex">
         <v-tabs v-model="selectedTab">
-            <v-tab to="/" min-width="50px" max-width="50px"><span class="fa-solid fa-house"></span></v-tab>
+            <v-tab to="/" min-width="50px" max-width="50px">
+                <font-awesome-icon :icon="faHouse" />
+            </v-tab>
             <v-tab to="/about" min-width="80px" width="80px">About</v-tab>
             <v-tab min-width="90px" width="90px">Fantasy</v-tab>
             <v-tab to="/stats" min-width="70px" width="70px">Stats</v-tab>
@@ -18,9 +20,9 @@
 import { ref } from 'vue';
 import { VTab, VTabs, VSpacer } from 'vuetify/components';
 import FantasyNavbar from '@/components/Fantasy/FantasyNavbar.vue';
-// import LoginDiscord from '@/components/LoginDiscord.vue';
-
-const LoginDiscord = () => import('@/components/LoginDiscord.vue')
+import LoginDiscord from '@/components/LoginDiscord.vue';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { faHouse } from '@fortawesome/free-solid-svg-icons';
 
 const selectedTab = ref(0)
 

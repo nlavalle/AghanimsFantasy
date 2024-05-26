@@ -64,10 +64,4 @@ function updateSelectedLeague() {
 .league-selector :deep(.v-list-item-title) {
   font-size: 0.8rem;
 }
-
-.icon {
-  flex-shrink: 0;
-  width: 25px;
-  margin-right: 10px;
-}
 </style>
