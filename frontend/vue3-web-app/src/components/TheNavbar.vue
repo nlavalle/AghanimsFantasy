@@ -18,7 +18,9 @@
 import { ref } from 'vue';
 import { VTab, VTabs, VSpacer } from 'vuetify/components';
 import FantasyNavbar from '@/components/Fantasy/FantasyNavbar.vue';
-import LoginDiscord from '@/components/LoginDiscord.vue';
+// import LoginDiscord from '@/components/LoginDiscord.vue';
+
+const LoginDiscord = () => import('@/components/LoginDiscord.vue')
 
 const selectedTab = ref(0)
 

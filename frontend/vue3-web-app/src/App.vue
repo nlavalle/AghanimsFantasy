@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import Navbar from '@/components/TheNavbar.vue'
-import { VApp } from 'vuetify/components'
+import { VApp, VMain } from 'vuetify/components'
 </script>
 
 <template>
@@ -9,9 +9,9 @@ import { VApp } from 'vuetify/components'
     <header class="bg-surface">
       <Navbar />
     </header>
-    <main>
+    <v-main>
       <RouterView />
-    </main>
+    </v-main>
   </v-app>
 </template>
 
