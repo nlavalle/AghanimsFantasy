@@ -20,7 +20,7 @@
 
 <script setup lang="ts">
 import { VDialog, VCard, VCardText, VCardActions, VBtn } from 'vuetify/components';
-import { defineEmits, defineProps, type Ref } from 'vue';
+import { type Ref } from 'vue';
 
 const props = defineProps({
     error: {

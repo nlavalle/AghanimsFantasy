@@ -369,7 +369,7 @@ const damageHealingFantasyColumns = [
         align: 'left',
         value: (row: any) => {
             return {
-                heroDamage: (row.totalHeroDamage / 1000).toFixed(1) + 'k' ?? '0',
+                heroDamage: (row.totalHeroDamage / 1000).toFixed(1) + 'k',
                 heroDamagePoints: row.totalHeroDamagePoints.toFixed(1)
             };
         },
@@ -382,7 +382,7 @@ const damageHealingFantasyColumns = [
         align: 'left',
         value: (row: any) => {
             return {
-                towerDamage: (row.totalTowerDamage / 1000).toFixed(1) + 'k' ?? '0',
+                towerDamage: (row.totalTowerDamage / 1000).toFixed(1) + 'k',
                 towerDamagePoints: row.totalTowerDamagePoints.toFixed(1)
             };
         },
@@ -395,7 +395,7 @@ const damageHealingFantasyColumns = [
         align: 'left',
         value: (row: any) => {
             return {
-                heroHealing: (row.totalHeroHealing / 1000).toFixed(1) + 'k' ?? '0',
+                heroHealing: (row.totalHeroHealing / 1000).toFixed(1) + 'k',
                 heroHealingPoints: row.totalHeroHealingPoints.toFixed(1)
             };
         },

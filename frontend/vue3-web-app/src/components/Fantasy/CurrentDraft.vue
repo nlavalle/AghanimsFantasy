@@ -3,17 +3,20 @@
         <v-row justify="space-evenly">
             <v-col class="ma-1 pa-1" v-for="fantasyDraftPoints in CombinedFantasyDraftPoints"
                 :key="fantasyDraftPoints.id">
-                <draft-pick-card :name="fantasyDraftPoints.name" :team="fantasyDraftPoints.team"
-                    :fantasyPoints="fantasyDraftPoints.fantasyPoints" :role="fantasyDraftPoints.role"
-                    :description="fantasyDraftPoints.description" :playerImageSrc="fantasyDraftPoints.playerImageSrc"
-                    :teamImageSrc="fantasyDraftPoints.teamImageSrc" />
+                <v-row class="mt-1" justify="center">
+                    <draft-pick-card :name="fantasyDraftPoints.name" :team="fantasyDraftPoints.team"
+                        :fantasyPoints="fantasyDraftPoints.fantasyPoints" :role="fantasyDraftPoints.role"
+                        :description="fantasyDraftPoints.description"
+                        :playerImageSrc="fantasyDraftPoints.playerImageSrc"
+                        :teamImageSrc="fantasyDraftPoints.teamImageSrc" />
+                </v-row>
             </v-col>
         </v-row>
     </v-container>
 </template>
 
 <script setup lang="ts">
-import { computed, defineProps } from 'vue';
+import { computed } from 'vue';
 import DraftPickCard from '@/components/Fantasy/DraftPickCard.vue';
 import { VContainer, VRow, VCol } from 'vuetify/components';
 

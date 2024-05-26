@@ -6,8 +6,6 @@ import { createPinia } from 'pinia'
 import App from '@/App.vue'
 import router from '@/router'
 
-import '@fortawesome/fontawesome-free/js/all'
-
 import { createVuetify } from 'vuetify'
 import 'vuetify/styles' // Ensure you are using css-loader
 import { AghanimsFantasyDarkTheme } from './style/vuetify-themes'
@@ -19,9 +17,6 @@ const vuetify = createVuetify({
       AghanimsFantasyDarkTheme
     }
   },
-  icons: {
-    defaultSet: 'mdi'
-  }
 })
 
 const app = createApp(App)

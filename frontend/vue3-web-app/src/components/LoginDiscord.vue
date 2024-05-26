@@ -1,11 +1,11 @@
 <template>
   <div class="discord-login" style="width:80px">
     <div v-if="authenticated">
-      <i class="icon fa-solid fa-right-from-bracket"></i>
+      <font-awesome-icon class="icon" :icon="faRightFromBracket" />
       <span @click="logout">Logout</span>
     </div>
     <div v-else>
-      <span @click="login"> <i class="icon fa-regular fa-circle-user"></i>Login </span>
+      <span @click="login"> <font-awesome-icon class="icon" :icon="faCircleUser" />Login </span>
     </div>
   </div>
 </template>
@@ -13,6 +13,9 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth'
 import { onMounted, computed } from 'vue'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { faRightFromBracket, faCircleUser } from '@fortawesome/free-solid-svg-icons';
+
 
 const authStore = useAuthStore()
 

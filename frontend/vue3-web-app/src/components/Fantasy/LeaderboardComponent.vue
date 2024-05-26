@@ -28,7 +28,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue';
 import type { PropType } from 'vue';
 import type { User } from '@/stores/auth';
 import type { LeaderboardItem } from '@/types/LeaderboardItem';

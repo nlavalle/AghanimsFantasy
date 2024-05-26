@@ -20,7 +20,7 @@
 
 <script setup lang="ts">
 import { VDialog, VCard, VCardText, VCardActions, VBtn } from 'vuetify/components';
-import { defineEmits, type Ref } from 'vue';
+import { type Ref } from 'vue';
 
 const emit = defineEmits(['ok']);
 

@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps } from 'vue';
+import { ref } from 'vue';
 import { VCard, VCardTitle, VCardSubtitle, VCardText, VRow, VCol } from 'vuetify/components';
 
 const props = defineProps({
