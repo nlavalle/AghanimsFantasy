@@ -1,10 +1,12 @@
 namespace csharp_ef_webapi.Models;
 
+using csharp_ef_webapi.Models.Fantasy;
+
 // This is a view model and isn't saved in the db (in case we change the scoring)
 public class MetadataSummary
 {
     public FantasyPlayer Player { get; set; } = null!;
-    public int? MatchesPlayed {get;set;}
+    public int? MatchesPlayed { get; set; }
     // Match Details
     public int? Kills { get; set; }
     public double? KillsAverage { get; set; }

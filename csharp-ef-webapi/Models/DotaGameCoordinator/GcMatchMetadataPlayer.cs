@@ -1,4 +1,4 @@
-namespace csharp_ef_webapi.Models;
+namespace csharp_ef_webapi.Models.GameCoordinator;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;

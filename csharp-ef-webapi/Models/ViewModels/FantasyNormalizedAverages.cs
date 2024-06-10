@@ -1,7 +1,7 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
 namespace csharp_ef_webapi.Models;
+
+using System.ComponentModel.DataAnnotations.Schema;
+using csharp_ef_webapi.Models.Fantasy;
 
 // This is a view model and isn't saved in the db (in case we change the scoring)
 public class FantasyNormalizedAverages

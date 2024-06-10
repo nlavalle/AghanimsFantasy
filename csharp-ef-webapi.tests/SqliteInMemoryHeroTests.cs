@@ -3,6 +3,7 @@ using System.Data.Common;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using csharp_ef_webapi.Models.ProMetadata;
 
 
 namespace csharp_ef_webapi.UnitTests.Data;
@@ -66,8 +67,8 @@ public class SqliteInMemoryHeroTests : IDisposable
     public async void GetAllHeroes()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<FantasyRepository>>();
-        var repository = new FantasyRepository(loggerMock.Object, context);
+        var loggerMock = new Mock<ILogger<ProMetadataRepository>>();
+        var repository = new ProMetadataRepository(loggerMock.Object, context);
 
         var heroes = await repository.GetHeroesAsync();
 

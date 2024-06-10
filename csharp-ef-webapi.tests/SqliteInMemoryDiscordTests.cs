@@ -81,10 +81,10 @@ public class SqliteInMemoryDiscordTests : IDisposable
             x => x.Log(
                 It.Is<LogLevel>(l => l == LogLevel.Error),
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) =>  v.ToString() == "401 Unauthorized error on Discord call"),
+                It.Is<It.IsAnyType>((v, t) => v.ToString() == "401 Unauthorized error on Discord call"),
                 It.IsAny<Exception>(),
                 It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)
-                ), 
+                ),
             Times.Once
         );
     }
@@ -107,10 +107,10 @@ public class SqliteInMemoryDiscordTests : IDisposable
             x => x.Log(
                 It.Is<LogLevel>(l => l == LogLevel.Error),
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) =>  v.ToString() == "Malformed or missing Discord response for user ID 1234"),
+                It.Is<It.IsAnyType>((v, t) => v.ToString() == "Malformed or missing Discord response for user ID 1234"),
                 It.IsAny<Exception>(),
                 It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)
-                ), 
+                ),
             Times.Once
         );
     }
@@ -129,8 +129,8 @@ public class SqliteInMemoryDiscordTests : IDisposable
         await discordApiService.GetDiscordByIdAsync(123L);
 
         // Assert
-        Assert.True(context.DiscordIds.Where(di => di.DiscordId == 123).Count() == 1);
-        Assert.True(context.DiscordIds.Where(di => di.DiscordName == "pants").Count() == 1);
+        Assert.True(context.DiscordUsers.Where(di => di.Id == 123).Count() == 1);
+        Assert.True(context.DiscordUsers.Where(di => di.Username == "pants").Count() == 1);
     }
 
     // Helper class for mocking HTTP responses

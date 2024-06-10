@@ -3,6 +3,9 @@ using System.Data.Common;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using csharp_ef_webapi.Models.ProMetadata;
+using csharp_ef_webapi.Models.Fantasy;
+using csharp_ef_webapi.Models.WebApi;
 
 
 namespace csharp_ef_webapi.UnitTests.Data;
@@ -317,8 +320,8 @@ public class SqliteInMemoryMatchTests : IDisposable
     public async void GetLeagueMatches()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<FantasyRepository>>();
-        var repository = new FantasyRepository(loggerMock.Object, context);
+        var loggerMock = new Mock<ILogger<WebApiRepository>>();
+        var repository = new WebApiRepository(loggerMock.Object, context);
 
         var matchHistories = await repository.GetMatchHistoryByFantasyLeagueAsync(1);
         Assert.Equal(2, matchHistories.Count());
@@ -329,8 +332,8 @@ public class SqliteInMemoryMatchTests : IDisposable
     public async void GetSingleMatch()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<FantasyRepository>>();
-        var repository = new FantasyRepository(loggerMock.Object, context);
+        var loggerMock = new Mock<ILogger<WebApiRepository>>();
+        var repository = new WebApiRepository(loggerMock.Object, context);
 
         var matchDetail = await repository.GetMatchDetailAsync(1);
         Assert.NotNull(matchDetail);
@@ -342,8 +345,8 @@ public class SqliteInMemoryMatchTests : IDisposable
     public async void GetUnknownMatch()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<FantasyRepository>>();
-        var repository = new FantasyRepository(loggerMock.Object, context);
+        var loggerMock = new Mock<ILogger<WebApiRepository>>();
+        var repository = new WebApiRepository(loggerMock.Object, context);
 
         var matchDetail = await repository.GetMatchDetailAsync(5);
         Assert.Null(matchDetail);
@@ -353,8 +356,8 @@ public class SqliteInMemoryMatchTests : IDisposable
     public async void GetOutdatedMatch()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<FantasyRepository>>();
-        var repository = new FantasyRepository(loggerMock.Object, context);
+        var loggerMock = new Mock<ILogger<WebApiRepository>>();
+        var repository = new WebApiRepository(loggerMock.Object, context);
 
         var matchDetail = await repository.GetMatchDetailsByFantasyLeagueAsync(2);
         // Match Detail 4 exists but is older than league start time
@@ -365,8 +368,8 @@ public class SqliteInMemoryMatchTests : IDisposable
     public async void GetMatchDetails()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<FantasyRepository>>();
-        var repository = new FantasyRepository(loggerMock.Object, context);
+        var loggerMock = new Mock<ILogger<WebApiRepository>>();
+        var repository = new WebApiRepository(loggerMock.Object, context);
 
         var matchDetails = await repository.GetMatchDetailsByFantasyLeagueAsync(1);
         Assert.Equal(2, matchDetails.Count());
@@ -377,8 +380,8 @@ public class SqliteInMemoryMatchTests : IDisposable
     public async void GetEmptyLeagueMatchDetails()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<FantasyRepository>>();
-        var repository = new FantasyRepository(loggerMock.Object, context);
+        var loggerMock = new Mock<ILogger<WebApiRepository>>();
+        var repository = new WebApiRepository(loggerMock.Object, context);
 
         var matchDetails = await repository.GetMatchDetailsByFantasyLeagueAsync(3);
         Assert.Empty(matchDetails);
@@ -389,8 +392,8 @@ public class SqliteInMemoryMatchTests : IDisposable
     public async void GetMatchDetailPlayers()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<FantasyRepository>>();
-        var repository = new FantasyRepository(loggerMock.Object, context);
+        var loggerMock = new Mock<ILogger<WebApiRepository>>();
+        var repository = new WebApiRepository(loggerMock.Object, context);
 
         var matchDetailPlayers = await repository.GetMatchDetailPlayersByLeagueAsync(100);
         Assert.Equal(2, matchDetailPlayers.Count());
@@ -401,8 +404,8 @@ public class SqliteInMemoryMatchTests : IDisposable
     public async void GetMatchDetailPlayersAllLeagues()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<FantasyRepository>>();
-        var repository = new FantasyRepository(loggerMock.Object, context);
+        var loggerMock = new Mock<ILogger<WebApiRepository>>();
+        var repository = new WebApiRepository(loggerMock.Object, context);
 
         var matchDetailPlayers = await repository.GetMatchDetailPlayersByLeagueAsync(null);
         Assert.Equal(2, matchDetailPlayers.Count());

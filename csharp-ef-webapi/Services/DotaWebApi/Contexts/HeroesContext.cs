@@ -1,5 +1,5 @@
 using csharp_ef_webapi.Data;
-using csharp_ef_webapi.Models;
+using csharp_ef_webapi.Models.ProMetadata;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 

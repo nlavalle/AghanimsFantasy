@@ -1,5 +1,5 @@
 using csharp_ef_webapi.Data;
-using csharp_ef_webapi.Models;
+using csharp_ef_webapi.Models.ProMetadata;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -26,27 +26,27 @@ internal class TeamsContext : DotaOperationContext
         {
             _logger.LogInformation($"Fetching heroes");
 
-                List<long> distinctTeams = _dbContext.MatchHistory
-                    .Select(mh => mh.RadiantTeamId)
-                    .Union(_dbContext.MatchHistory.Select(mh => mh.DireTeamId))
-                    .Distinct()
-                    .Where(t => t != 0)
-                    .ToList();
+            List<long> distinctTeams = _dbContext.MatchHistory
+                .Select(mh => mh.RadiantTeamId)
+                .Union(_dbContext.MatchHistory.Select(mh => mh.DireTeamId))
+                .Distinct()
+                .Where(t => t != 0)
+                .ToList();
 
-                List<long> newTeams = distinctTeams
-                    .Except(_dbContext.Teams.Select(t => t.Id)).ToList();
+            List<long> newTeams = distinctTeams
+                .Except(_dbContext.Teams.Select(t => t.Id)).ToList();
 
-                if (newTeams.Count() > 0)
+            if (newTeams.Count() > 0)
+            {
+                _logger.LogInformation($"Fetching {newTeams.Count()} new team details.");
+                List<Task<List<Team>>> fetchTeamsTasks = new List<Task<List<Team>>>();
+
+                foreach (long teamId in newTeams)
                 {
-                    _logger.LogInformation($"Fetching {newTeams.Count()} new team details.");
-                    List<Task<List<Team>>> fetchTeamsTasks = new List<Task<List<Team>>>();
+                    fetchTeamsTasks.Add(GetTeamAsync(teamId, cancellationToken));
+                }
 
-                    foreach (long teamId in newTeams)
-                    {
-                        fetchTeamsTasks.Add(GetTeamAsync(teamId, cancellationToken));
-                    }
-
-                    await Task.WhenAll(fetchTeamsTasks);
+                await Task.WhenAll(fetchTeamsTasks);
 
                 foreach (Team team in fetchTeamsTasks.SelectMany(t => t.Result).ToList())
                 {
@@ -56,8 +56,8 @@ internal class TeamsContext : DotaOperationContext
                         _dbContext.Teams.Add(team);
                     }
                 }
-                }
-                await _dbContext.SaveChangesAsync();
+            }
+            await _dbContext.SaveChangesAsync();
 
             _logger.LogInformation($"Missing team details fetch done");
         }

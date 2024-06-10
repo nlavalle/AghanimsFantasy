@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using csharp_ef_webapi.Data;
-using csharp_ef_webapi.Models;
+using csharp_ef_webapi.Models.Discord;
 
 namespace csharp_ef_webapi.Controllers
 {
@@ -19,36 +19,36 @@ namespace csharp_ef_webapi.Controllers
 
         // GET: api/DiscordId
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DiscordIds>>> GetDiscordIds()
+        public async Task<ActionResult<IEnumerable<DiscordUser>>> GetDiscordUsers()
         {
-            return Ok(await _context.DiscordIds.ToListAsync());
+            return Ok(await _context.DiscordUsers.ToListAsync());
         }
 
         // GET: api/DiscordId/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<DiscordIds>> GetDiscordIds(long id)
+        public async Task<ActionResult<DiscordUser>> GetDiscordUser(long id)
         {
-            var discordIds = await _context.DiscordIds.FindAsync(id);
+            var discordUser = await _context.DiscordUsers.FindAsync(id);
 
-            if (discordIds == null)
+            if (discordUser == null)
             {
                 return NotFound();
             }
 
-            return Ok(discordIds);
+            return Ok(discordUser);
         }
 
         // PUT: api/DiscordId/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutDiscordIds(long id, DiscordIds discordIds)
+        public async Task<IActionResult> PutDiscordUsers(long id, DiscordUser discordUser)
         {
-            if (id != discordIds.DiscordId)
+            if (id != discordUser.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(discordIds).State = EntityState.Modified;
+            _context.Entry(discordUser).State = EntityState.Modified;
 
             try
             {
@@ -56,7 +56,7 @@ namespace csharp_ef_webapi.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!DiscordIdsExists(id))
+                if (!DiscordUserExists(id))
                 {
                     return NotFound();
                 }
@@ -72,33 +72,33 @@ namespace csharp_ef_webapi.Controllers
         // POST: api/DiscordId
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<DiscordIds>> PostDiscordIds(DiscordIds discordIds)
+        public async Task<ActionResult<DiscordUser>> PostDiscordUsers(DiscordUser discordUsers)
         {
-            _context.DiscordIds.Add(discordIds);
+            _context.DiscordUsers.Add(discordUsers);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetDiscordIds", new { id = discordIds.DiscordId }, discordIds);
+            return CreatedAtAction("GetDiscordIds", new { id = discordUsers.Id }, discordUsers);
         }
 
         // DELETE: api/DiscordId/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDiscordIds(long id)
+        public async Task<IActionResult> DeleteDiscordUsers(long id)
         {
-            var discordIds = await _context.DiscordIds.FindAsync(id);
-            if (discordIds == null)
+            var discordUser = await _context.DiscordUsers.FindAsync(id);
+            if (discordUser == null)
             {
                 return NotFound();
             }
 
-            _context.DiscordIds.Remove(discordIds);
+            _context.DiscordUsers.Remove(discordUser);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool DiscordIdsExists(long id)
+        private bool DiscordUserExists(long id)
         {
-            return _context.DiscordIds.Any(e => e.DiscordId == id);
+            return _context.DiscordUsers.Any(e => e.Id == id);
         }
     }
 }

@@ -3,7 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using csharp_ef_webapi.Models;
 using SteamKit2.GC.Dota.Internal;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
+using csharp_ef_webapi.Models.Discord;
+using csharp_ef_webapi.Models.WebApi;
+using csharp_ef_webapi.Models.GameCoordinator;
+using csharp_ef_webapi.Models.ProMetadata;
+using csharp_ef_webapi.Models.Fantasy;
 
 namespace csharp_ef_webapi.Data;
 public class AghanimsFantasyContext : DbContext
@@ -17,21 +21,22 @@ public class AghanimsFantasyContext : DbContext
     {
     }
 
-    public DbSet<BalanceLedger> BalanceLedger { get; set; }
-    public DbSet<DiscordIds> DiscordIds { get; set; }
-    public DbSet<PlayerMatchDetails> PlayerMatchDetails { get; set; }
-    public DbSet<MatchStatus> MatchStatus { get; set; }
-    public DbSet<Bromance> Bromance { get; set; }
-    public DbSet<BetStreak> BetStreaks { get; set; }
-    public DbSet<MatchStreak> MatchStreaks { get; set; }
+    #region ProMetadata
     public DbSet<League> Leagues { get; set; }
     public DbSet<Account> Accounts { get; set; }
     public DbSet<Hero> Heroes { get; set; }
     public DbSet<Team> Teams { get; set; }
+    #endregion ProMetadata
+
+    #region Discord
+    public DbSet<DiscordUser> DiscordUsers { get; set; }
+    #endregion Discord
 
     #region Fantasy
     public DbSet<FantasyLeague> FantasyLeagues { get; set; }
     public DbSet<FantasyLeagueWeight> FantasyLeagueWeights { get; set; }
+    public DbSet<FantasyMatch> FantasyMatches { get; set; }
+    public DbSet<FantasyMatchPlayer> FantasyMatchPlayers { get; set; }
     public DbSet<FantasyDraft> FantasyDrafts { get; set; }
     public DbSet<FantasyPlayer> FantasyPlayers { get; set; }
     public DbSet<FantasyDraftPlayer> FantasyDraftPlayers { get; set; }
@@ -65,7 +70,6 @@ public class AghanimsFantasyContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("nadcl");
-        modelBuilder.Entity<BalanceLedger>().ToTable("balance_ledger", "nadcl");
 
         modelBuilder.Entity<CMsgDOTAMatch>().ToTable("gc_dota_matches", "nadcl");
         modelBuilder.Entity<CMsgDOTAMatch>().HasKey(gcm => gcm.match_id);
@@ -74,12 +78,6 @@ public class AghanimsFantasyContext : DbContext
         modelBuilder.Entity<CMsgDOTAMatch>().Ignore(gcm => gcm.picks_bans);
         modelBuilder.Entity<CMsgDOTAMatch>().Ignore(gcm => gcm.broadcaster_channels);
         modelBuilder.Entity<CMsgDOTAMatch>().Ignore(gcm => gcm.coaches);
-
-        modelBuilder.Entity<PlayerMatchDetails>()
-            .HasKey(pmd => new { pmd.MatchId, pmd.PlayerSlot });
-
-        modelBuilder.Entity<Bromance>()
-            .HasKey(b => new { b.bro1Name, b.bro2Name });
 
         modelBuilder.Entity<League>()
             .HasMany(l => l.MatchDetails)
@@ -103,7 +101,7 @@ public class AghanimsFantasyContext : DbContext
 
         modelBuilder.Entity<FantasyLeague>()
             .HasMany(fl => fl.FantasyPlayers)
-            .WithOne(fp => fp.FantasyLeague)
+            .WithOne()
             .HasForeignKey(fp => fp.FantasyLeagueId);
 
         modelBuilder.Entity<FantasyLeague>()
@@ -143,12 +141,6 @@ public class AghanimsFantasyContext : DbContext
             .HasMany(md => md.Players)
             .WithOne()
             .HasForeignKey(p => p.MatchId);
-
-        modelBuilder.Entity<MatchDetail>()
-            .HasOne(md => md.MatchMetadata)
-            .WithOne(md => md.MatchDetail)
-            .HasForeignKey<GcMatchMetadata>(mmd => mmd.MatchId)
-            .IsRequired();
 
         modelBuilder.Entity<MatchDetailsPlayer>()
             .HasMany(mdp => mdp.AbilityUpgrades)
@@ -207,10 +199,6 @@ public class AghanimsFantasyContext : DbContext
 
         modelBuilder.Entity<GcMatchMetadata>()
             .Navigation(md => md.MatchTips)
-            .AutoInclude();
-
-        modelBuilder.Entity<GcMatchMetadata>()
-            .Navigation(md => md.MatchDetail)
             .AutoInclude();
 
         modelBuilder.Entity<GcMatchMetadataTeam>()

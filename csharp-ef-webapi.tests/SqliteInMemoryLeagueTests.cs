@@ -3,6 +3,8 @@ using System.Data.Common;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using csharp_ef_webapi.Models.ProMetadata;
+using csharp_ef_webapi.Models.Fantasy;
 
 
 namespace csharp_ef_webapi.UnitTests.Data;
@@ -62,7 +64,7 @@ public class SqliteInMemoryLeagueTests : IDisposable
                 LeagueId = 1,
                 Name = "test league 1",
                 IsActive = true,
-                FantasyDraftLocked = new DateTimeOffset(new DateTime(2024,1,1)).ToUnixTimeSeconds(),
+                FantasyDraftLocked = new DateTimeOffset(new DateTime(2024, 1, 1)).ToUnixTimeSeconds(),
                 LeagueStartTime = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds(),
                 LeagueEndTime = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds()
             },
@@ -91,8 +93,8 @@ public class SqliteInMemoryLeagueTests : IDisposable
     public async void GetAllLeaguesTest()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<FantasyRepository>>();
-        var repository = new FantasyRepository(loggerMock.Object, context);
+        var loggerMock = new Mock<ILogger<ProMetadataRepository>>();
+        var repository = new ProMetadataRepository(loggerMock.Object, context);
 
         var leagues = await repository.GetLeaguesAsync(null);
 
@@ -106,8 +108,8 @@ public class SqliteInMemoryLeagueTests : IDisposable
     public async void GetActiveLeaguesTest()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<FantasyRepository>>();
-        var repository = new FantasyRepository(loggerMock.Object, context);
+        var loggerMock = new Mock<ILogger<ProMetadataRepository>>();
+        var repository = new ProMetadataRepository(loggerMock.Object, context);
 
         var leagues = await repository.GetLeaguesAsync(true);
 
@@ -126,7 +128,7 @@ public class SqliteInMemoryLeagueTests : IDisposable
 
         var league = await repository.GetLeagueLockedDate(1);
 
-        Assert.Equal(league, new DateTimeOffset(new DateTime(2024,1,1)).UtcDateTime);
+        Assert.Equal(league, new DateTimeOffset(new DateTime(2024, 1, 1)).UtcDateTime);
     }
     #endregion
 }

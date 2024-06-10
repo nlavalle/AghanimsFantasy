@@ -3,6 +3,10 @@ using System.Data.Common;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using csharp_ef_webapi.Models.ProMetadata;
+using csharp_ef_webapi.Models.Fantasy;
+using csharp_ef_webapi.Models.WebApi;
+using csharp_ef_webapi.Models.GameCoordinator;
 
 
 namespace csharp_ef_webapi.UnitTests.Data;
@@ -212,7 +216,8 @@ public class SqliteInMemoryFantasyTests : IDisposable
             viewCommand.ExecuteNonQuery();
         }
 
-        Team team = new Team {
+        Team team = new Team
+        {
             Id = 1
         };
 
@@ -439,20 +444,7 @@ public class SqliteInMemoryFantasyTests : IDisposable
                         RadiantWin = true,
                         StartTime = new DateTimeOffset(new DateTime(2024, 1, 1)).ToUnixTimeSeconds(),
                         TowerStatusDire = 0,
-                        TowerStatusRadiant = 0,
-                        MatchMetadata = new GcMatchMetadata {
-                            Id = 10,
-                            MatchId = 1,
-                            Teams = [
-                                new GcMatchMetadataTeam {
-                                    Players = [
-                                        new GcMatchMetadataPlayer {
-                                            Id = 100
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
+                        TowerStatusRadiant = 0
                     },
                     new MatchDetail
                     {
@@ -478,19 +470,6 @@ public class SqliteInMemoryFantasyTests : IDisposable
                         StartTime = new DateTimeOffset(new DateTime(2024, 1, 1)).ToUnixTimeSeconds(),
                         TowerStatusDire = 0,
                         TowerStatusRadiant = 0,
-                        MatchMetadata = new GcMatchMetadata {
-                            Id = 20,
-                            MatchId = 2,
-                            Teams = [
-                                new GcMatchMetadataTeam {
-                                    Players = [
-                                        new GcMatchMetadataPlayer {
-                                            Id = 200
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
                     },
                     new MatchDetail
                     {
@@ -517,6 +496,34 @@ public class SqliteInMemoryFantasyTests : IDisposable
                         TowerStatusDire = 0,
                         TowerStatusRadiant = 0
                     },
+                ],
+                MatchMetadatas = [
+                    new GcMatchMetadata {
+                        Id = 20,
+                        MatchId = 2,
+                        Teams = [
+                            new GcMatchMetadataTeam {
+                                Players = [
+                                    new GcMatchMetadataPlayer {
+                                        Id = 200
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    new GcMatchMetadata {
+                        Id = 10,
+                        MatchId = 1,
+                        Teams = [
+                            new GcMatchMetadataTeam {
+                                Players = [
+                                    new GcMatchMetadataPlayer {
+                                        Id = 100
+                                    }
+                                ]
+                            }
+                        ]
+                    }
                 ]
             },
             new League
@@ -646,7 +653,7 @@ public class SqliteInMemoryFantasyTests : IDisposable
         };
 
         fantasyDraft.DraftPickPlayers.Add(
-            new FantasyDraftPlayer() { FantasyPlayer = context.FantasyPlayers.First(fp => fp.Id == 1) ?? new FantasyPlayer(), DraftOrder = 1 }
+            new FantasyDraftPlayer() { FantasyPlayer = context.FantasyPlayers.First(fp => fp.Id == 1) ?? new FantasyPlayer() { Team = new Team(), DotaAccount = new Account() }, DraftOrder = 1 }
         );
 
         context.FantasyDrafts.AddRange(

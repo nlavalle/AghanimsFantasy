@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using csharp_ef_webapi.Models;
 using csharp_ef_webapi.Data;
+using csharp_ef_webapi.Models.ProMetadata;
 
 namespace csharp_ef_webapi.Controllers
 {
@@ -8,18 +8,18 @@ namespace csharp_ef_webapi.Controllers
     [ApiController]
     public class HeroController : ControllerBase
     {
-        private readonly FantasyRepository _service;
+        private readonly ProMetadataRepository _proMetadataRepository;
 
-        public HeroController(FantasyRepository service)
+        public HeroController(ProMetadataRepository proMetadataRepository)
         {
-            _service = service;
+            _proMetadataRepository = proMetadataRepository;
         }
 
         // GET: api/Hero/Heroes
         [HttpGet("heroes")]
         public async Task<ActionResult<IEnumerable<Hero>>> GetHeroes()
         {
-            return Ok(await _service.GetHeroesAsync());
+            return Ok(await _proMetadataRepository.GetHeroesAsync());
         }
     }
 }

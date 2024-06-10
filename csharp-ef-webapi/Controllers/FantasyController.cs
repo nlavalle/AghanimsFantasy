@@ -2,6 +2,8 @@
 using System.Security.Claims;
 using csharp_ef_webapi.Data;
 using csharp_ef_webapi.Models;
+using csharp_ef_webapi.Models.Fantasy;
+using csharp_ef_webapi.Models.GameCoordinator;
 using csharp_ef_webapi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,11 +14,15 @@ namespace csharp_ef_webapi.Controllers
     [ApiController]
     public class FantasyController : ControllerBase
     {
-        private readonly FantasyRepository _service;
+        private readonly FantasyRepository _fantasyRepository;
+        private readonly ProMetadataRepository _proMetadataRepository;
+        private readonly DiscordRepository _discordRepository;
         private readonly DiscordWebApiService _discordService;
-        public FantasyController(FantasyRepository service, DiscordWebApiService discordService)
+        public FantasyController(FantasyRepository fantasyRepository, ProMetadataRepository proMetadataRepository, DiscordRepository discordRepository, DiscordWebApiService discordService)
         {
-            _service = service;
+            _fantasyRepository = fantasyRepository;
+            _proMetadataRepository = proMetadataRepository;
+            _discordRepository = discordRepository;
             _discordService = discordService;
         }
 
@@ -24,14 +30,14 @@ namespace csharp_ef_webapi.Controllers
         [HttpGet("leagues")]
         public async Task<ActionResult<IEnumerable<FantasyLeague>>> GetFantasyLeagues(bool? is_active = null)
         {
-            return Ok(await _service.GetFantasyLeaguesAsync(is_active));
+            return Ok(await _fantasyRepository.GetFantasyLeaguesAsync(is_active));
         }
 
         // GET: api/fantasy/players/5
         [HttpGet("players/{leagueId}")]
         public async Task<ActionResult<List<FantasyPlayer>>> GetFantasyPlayers(int? leagueId)
         {
-            var players = await _service.FantasyPlayersByFantasyLeagueAsync(leagueId);
+            var players = await _fantasyRepository.FantasyPlayersByFantasyLeagueAsync(leagueId);
             return Ok(players);
         }
 
@@ -44,7 +50,7 @@ namespace csharp_ef_webapi.Controllers
                 return BadRequest("Please provide a League ID to fetch fantasy player points of");
             }
 
-            var fantasyPlayerPointTotals = await _service.FantasyPlayerPointTotalsByFantasyLeagueAsync(leagueId.Value);
+            var fantasyPlayerPointTotals = await _fantasyRepository.FantasyPlayerPointTotalsByFantasyLeagueAsync(leagueId.Value);
             return Ok(fantasyPlayerPointTotals);
         }
 
@@ -65,21 +71,21 @@ namespace csharp_ef_webapi.Controllers
         //     return Ok(matches);
         // }
 
-        // GET: api/fantasy/league/5/metadata
-        [HttpGet("league/{fantasyLeagueId}/metadata")]
-        public async Task<ActionResult<List<MetadataSummary>>> GetFantasyLeagueMatchMetadata(int fantasyLeagueId)
-        {
-            var matchSummary = await _service.AggregateMetadataAsync(fantasyLeagueId);
+        // // GET: api/fantasy/league/5/metadata
+        // [HttpGet("league/{fantasyLeagueId}/metadata")]
+        // public async Task<ActionResult<List<MetadataSummary>>> GetFantasyLeagueMatchMetadata(int fantasyLeagueId)
+        // {
+        //     var matchSummary = await _service.AggregateMetadataAsync(fantasyLeagueId);
 
-            if (matchSummary == null)
-            {
-                return NotFound();
-            }
+        //     if (matchSummary == null)
+        //     {
+        //         return NotFound();
+        //     }
 
-            matchSummary = matchSummary.OrderBy(m => m.Player.DotaAccount.Name);
+        //     matchSummary = matchSummary.OrderBy(m => m.Player.DotaAccount.Name);
 
-            return Ok(matchSummary);
-        }
+        //     return Ok(matchSummary);
+        // }
 
         // GET: api/fantasy/players/5/top10
         [Authorize]
@@ -99,7 +105,7 @@ namespace csharp_ef_webapi.Controllers
                 return BadRequest("Please provide a League ID to fetch a draft of");
             }
 
-            var fantasyPoints = await _service.FantasyDraftPointsByFantasyLeagueAsync(leagueId.Value);
+            var fantasyPoints = await _fantasyRepository.FantasyDraftPointsByFantasyLeagueAsync(leagueId.Value);
 
             if (fantasyPoints.Count() == 0)
             {
@@ -107,7 +113,7 @@ namespace csharp_ef_webapi.Controllers
                 return Ok(new { });
             }
 
-            var fantasyTeams = await _service.GetTeamsAsync();
+            var fantasyTeams = await _proMetadataRepository.GetTeamsAsync();
 
             var top10Players = fantasyPoints.Where(fp => !fp.IsTeam).OrderByDescending(fp => fp.DraftTotalFantasyPoints).Take(10).ToList();
 
@@ -153,7 +159,7 @@ namespace csharp_ef_webapi.Controllers
         [HttpGet("{fantasyLeagueId}/highlights/{matchCount}")]
         public async Task<ActionResult<List<GcMatchMetadata>>> GetMatchHighlights(int fantasyLeagueId, int matchCount)
         {
-            var matchHighlights = await _service.GetLastNMatchHighlights(fantasyLeagueId, matchCount);
+            var matchHighlights = await _fantasyRepository.GetLastNMatchHighlights(fantasyLeagueId, matchCount);
 
             if (matchHighlights == null)
             {
@@ -181,7 +187,7 @@ namespace csharp_ef_webapi.Controllers
                 return BadRequest("Please provide a League ID to fetch a draft of");
             }
 
-            return Ok(await _service.FantasyDraftsByUserLeagueAsync(userDiscordAccountId, leagueId.Value));
+            return Ok(await _fantasyRepository.FantasyDraftsByUserLeagueAsync(userDiscordAccountId, leagueId.Value));
         }
 
         // GET: api/fantasy/draft/5/points
@@ -202,14 +208,14 @@ namespace csharp_ef_webapi.Controllers
                 return BadRequest("Please provide a League ID to fetch a draft of");
             }
 
-            var fantasyPoints = await _service.FantasyPlayersByFantasyLeagueAsync(leagueId.Value);
+            var fantasyPoints = await _fantasyRepository.FantasyPlayersByFantasyLeagueAsync(leagueId.Value);
             if (fantasyPoints.Count() == 0)
             {
                 // League doesn't have fantasy players/points yet
                 return Ok(new { });
             }
 
-            var userDraftPoints = await _service.FantasyDraftPointsByUserLeagueAsync(userDiscordAccountId, leagueId.Value);
+            var userDraftPoints = await _fantasyRepository.FantasyDraftPointsByUserLeagueAsync(userDiscordAccountId, leagueId.Value);
             if (userDraftPoints == null)
             {
                 // User has no draft yet so return an empty okay
@@ -238,16 +244,16 @@ namespace csharp_ef_webapi.Controllers
                 return BadRequest("Could not retrieve user's discord ID");
             }
 
-            var existingDiscordUser = await _service.GetDiscordIdAsync(userDiscordAccountId);
+            var existingDiscordUser = await _discordRepository.GetDiscordUserAsync(userDiscordAccountId);
             if (existingDiscordUser == null)
             {
                 // New discord user, run call to look them up
                 await _discordService.GetDiscordByIdAsync(userDiscordAccountId);
             }
 
-            var existingUserDraft = await _service.FantasyDraftsByUserLeagueAsync(userDiscordAccountId, fantasyDraft.FantasyLeagueId);
+            var existingUserDraft = await _fantasyRepository.FantasyDraftsByUserLeagueAsync(userDiscordAccountId, fantasyDraft.FantasyLeagueId);
 
-            var draftLockedDate = await _service.GetLeagueLockedDate(fantasyDraft.FantasyLeagueId);
+            var draftLockedDate = await _fantasyRepository.GetLeagueLockedDate(fantasyDraft.FantasyLeagueId);
             if (existingUserDraft.Count() > 0 && DateTime.UtcNow > draftLockedDate)
             {
                 // If a user hasn't drafted yet let them add it in late, if they already have a draft though return a bad request cannot update
@@ -257,10 +263,10 @@ namespace csharp_ef_webapi.Controllers
             object fantasyDraftPostResponse = null;
 
             // Fantasy Draft may be incomplete, so go through and add the IDs passed
-            await _service.ClearUserFantasyPlayersAsync(userDiscordAccountId, fantasyDraft.FantasyLeagueId);
+            await _fantasyRepository.ClearUserFantasyPlayersAsync(userDiscordAccountId, fantasyDraft.FantasyLeagueId);
             for (int i = 0; i <= 4; i++)
             {
-                fantasyDraftPostResponse = await _service.AddNewUserFantasyPlayerAsync(userDiscordAccountId, fantasyDraft.FantasyLeagueId, fantasyDraft.DraftPickPlayers[i].FantasyPlayerId, i + 1);
+                fantasyDraftPostResponse = await _fantasyRepository.AddNewUserFantasyPlayerAsync(userDiscordAccountId, fantasyDraft.FantasyLeagueId, fantasyDraft.DraftPickPlayers[i].FantasyPlayerId, i + 1);
             }
 
             return CreatedAtAction(nameof(GetUserDraft), new { leagueId = fantasyDraft.FantasyLeagueId }, fantasyDraftPostResponse);

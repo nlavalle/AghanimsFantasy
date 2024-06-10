@@ -1,9 +1,8 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
 using csharp_ef_webapi.Data;
-using csharp_ef_webapi.Models;
+using csharp_ef_webapi.Models.GameCoordinator;
 using ICSharpCode.SharpZipLib.BZip2;
-using Microsoft.EntityFrameworkCore;
 using ProtoBuf;
 using SteamKit2.GC.Dota.Internal;
 

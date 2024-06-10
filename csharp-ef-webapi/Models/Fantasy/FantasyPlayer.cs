@@ -1,7 +1,8 @@
-namespace csharp_ef_webapi.Models;
+namespace csharp_ef_webapi.Models.Fantasy;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using csharp_ef_webapi.Models.ProMetadata;
 using Newtonsoft.Json;
 
 [Table("dota_fantasy_players")]
@@ -14,16 +15,15 @@ public class FantasyPlayer
 
     [Column("fantasy_league_id")]
     public int FantasyLeagueId { get; set; }
-    public FantasyLeague FantasyLeague { get; set; } = null!;
 
     [Column("team_id")]
     public long TeamId { get; set; }
-    public Team Team { get; set; } = new Team();
+    public required Team Team { get; set; }
 
     [Column("dota_account_id")]
     public long DotaAccountId { get; set; }
-    public Account DotaAccount { get; set; } = null!;
+    public required Account DotaAccount { get; set; }
 
     [Column("team_position")]
-    public int TeamPosition {get;set;}
+    public int TeamPosition { get; set; }
 }

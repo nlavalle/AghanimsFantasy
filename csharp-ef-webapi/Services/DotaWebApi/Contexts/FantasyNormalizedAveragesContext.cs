@@ -1,9 +1,7 @@
-using System.Collections.Immutable;
 using csharp_ef_webapi.Data;
 using csharp_ef_webapi.Models;
+using csharp_ef_webapi.Models.Fantasy;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace csharp_ef_webapi.Services;
 internal class FantasyNormalizedAveragesContext : DotaOperationContext

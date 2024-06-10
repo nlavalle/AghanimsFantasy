@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using csharp_ef_webapi.Data;
-using csharp_ef_webapi.Models;
-using Microsoft.EntityFrameworkCore;
+using csharp_ef_webapi.Models.WebApi;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 

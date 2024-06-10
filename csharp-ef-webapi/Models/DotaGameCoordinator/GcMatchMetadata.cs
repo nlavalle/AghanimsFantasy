@@ -1,4 +1,4 @@
-namespace csharp_ef_webapi.Models;
+namespace csharp_ef_webapi.Models.GameCoordinator;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -12,7 +12,6 @@ public class GcMatchMetadata
     public long Id { get; set; }
     [Column("match_id")]
     public long MatchId { get; set; }
-    public MatchDetail MatchDetail { get; set; } = null!;
     [Column("lobby_id")]
     public ulong LobbyId { get; set; }
     [Column("report_until_time")]

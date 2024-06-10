@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using csharp_ef_webapi.Models;
 using csharp_ef_webapi.Data;
+using csharp_ef_webapi.Models.ProMetadata;
 
 namespace csharp_ef_webapi.Controllers
 {
@@ -8,18 +8,18 @@ namespace csharp_ef_webapi.Controllers
     [ApiController]
     public class TeamController : ControllerBase
     {
-        private readonly FantasyRepository _service;
+        private readonly ProMetadataRepository _proMetadataRepository;
 
-        public TeamController(FantasyRepository service)
+        public TeamController(ProMetadataRepository proMetadataRepository)
         {
-            _service = service;
+            _proMetadataRepository = proMetadataRepository;
         }
 
         // GET: api/Team/teams
         [HttpGet("teams")]
         public async Task<ActionResult<IEnumerable<Team>>> GetTeams()
         {
-            return Ok(await _service.GetTeamsAsync());
+            return Ok(await _proMetadataRepository.GetTeamsAsync());
         }
     }
 }
