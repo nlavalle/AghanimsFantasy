@@ -3,7 +3,7 @@
 Work in progress, goal is to have a fantasy league setup primarily for the NADCL.
 
 ### Requirements
-This project depends on two things:
+This project depends on three things:
 1. A valid Steam API Key to make background calls to dota looking for league games and match details. You can request for a steamkey here: https://steamcommunity.com/dev/apikey
 2. A discord bot client ID/secret, full information on creating a bot can be found here: https://discord.com/developers/docs/getting-started
 3. A valid Steam account to log in and talk to the game coordinator, this is needed for replay parsing that we can't get via the API.
