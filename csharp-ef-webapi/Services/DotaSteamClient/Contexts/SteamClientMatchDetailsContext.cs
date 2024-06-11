@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using csharp_ef_webapi.Data;
+using csharp_ef_webapi.Models.GameCoordinator;
 using SteamKit2.GC.Dota.Internal;
 
 namespace csharp_ef_webapi.Services;
@@ -32,7 +33,7 @@ internal class SteamClientMatchDetailsContext : DotaOperationContext
             _dotaClient.Wait();
 
             // Find all the match histories without match detail rows and add tasks to fetch them all
-            ImmutableSortedSet<ulong> knownMatches = _dbContext.MatchDetails.Select(x => (ulong)x.MatchId).ToImmutableSortedSet();
+            ImmutableSortedSet<ulong> knownMatches = _dbContext.MatchHistory.Select(x => (ulong)x.MatchId).ToImmutableSortedSet();
             ImmutableSortedSet<ulong> knownMatchDetails = _dbContext.GcDotaMatches.Where(dm => dm.replay_state == CMsgDOTAMatch.ReplayState.REPLAY_AVAILABLE).Select(x => x.match_id).ToImmutableSortedSet();
 
             List<ulong> matchesWithoutDetails = knownMatches.Except(knownMatchDetails).Take(50).ToList();
@@ -59,7 +60,6 @@ internal class SteamClientMatchDetailsContext : DotaOperationContext
                         {
                             _dbContext.GcDotaMatches.Add(matchDetails);
                         }
-
                     }
                 }
 

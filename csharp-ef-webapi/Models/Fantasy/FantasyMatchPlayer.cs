@@ -1,4 +1,4 @@
-namespace csharp_ef_webapi.Models;
+namespace csharp_ef_webapi.Models.Fantasy;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -38,6 +38,14 @@ public class FantasyMatchPlayer
             return Team?.Name ?? string.Empty;
         }
     }
+
+    [Column("match_detail_player_parsed")]
+    [JsonProperty("match_detail_player_parsed")]
+    public bool MatchDetailPlayerParsed { get; set; }
+
+    [Column("gc_metadata_player_parsed")]
+    [JsonProperty("gc_metadata_player_parsed")]
+    public bool GcMetadataPlayerParsed { get; set; }
 
     [Column("dota_team_side")]
     [JsonProperty("dota_team_side")]
@@ -171,4 +179,36 @@ public class FantasyMatchPlayer
     [Column("gold")]
     [JsonProperty("gold")]
     public int? Gold { get; set; }
+
+    // Match Metadata
+
+    [Column("fight_score")]
+    public float? FightScore { get; set; }
+
+    [Column("farm_score")]
+    public float? FarmScore { get; set; }
+
+    [Column("support_score")]
+    public float? SupportScore { get; set; }
+
+    [Column("push_score")]
+    public float? PushScore { get; set; }
+
+    [Column("hero_xp")]
+    public uint? HeroXp { get; set; }
+
+    [Column("rampages")]
+    public uint? Rampages { get; set; }
+
+    [Column("triple_kills")]
+    public uint? TripleKills { get; set; }
+
+    [Column("aegis_snatched")]
+    public uint? AegisSnatched { get; set; }
+
+    [Column("rapiers_purchased")]
+    public uint? RapiersPurchased { get; set; }
+
+    [Column("couriers_killed")]
+    public uint? CouriersKilled { get; set; }
 }

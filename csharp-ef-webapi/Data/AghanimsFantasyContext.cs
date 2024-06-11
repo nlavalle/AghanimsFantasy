@@ -71,13 +71,43 @@ public class AghanimsFantasyContext : DbContext
     {
         modelBuilder.HasDefaultSchema("nadcl");
 
-        modelBuilder.Entity<CMsgDOTAMatch>().ToTable("gc_dota_matches", "nadcl");
+        modelBuilder.Entity<CMsgDOTAMatch>().ToTable("dota_gc_match_details", "nadcl");
         modelBuilder.Entity<CMsgDOTAMatch>().HasKey(gcm => gcm.match_id);
         modelBuilder.Entity<CMsgDOTAMatch>().Ignore(gcm => gcm.custom_game_data);
         modelBuilder.Entity<CMsgDOTAMatch>().Ignore(gcm => gcm.players);
         modelBuilder.Entity<CMsgDOTAMatch>().Ignore(gcm => gcm.picks_bans);
         modelBuilder.Entity<CMsgDOTAMatch>().Ignore(gcm => gcm.broadcaster_channels);
         modelBuilder.Entity<CMsgDOTAMatch>().Ignore(gcm => gcm.coaches);
+
+
+        modelBuilder.Entity<CMsgDOTAMatch>(match =>
+        {
+            match.OwnsMany(m => m.players, player =>
+            {
+                player.ToTable("dota_gc_match_detail_players", "nadcl");
+                player.WithOwner().HasForeignKey("MatchId");
+                player.Property<int>("Id");
+                player.HasKey("Id");
+                player.Ignore(p => p.additional_units_inventory);
+                player.Ignore(p => p.ability_upgrades);
+                player.Ignore(p => p.custom_game_data);
+                player.Ignore(p => p.permanent_buffs);
+                player.OwnsMany(p => p.hero_damage_dealt, damage_dealt =>
+                {
+                    damage_dealt.ToTable("dota_gc_match_detail_player_damage_dealt", "nadcl");
+                    damage_dealt.WithOwner().HasForeignKey("MatchPlayerId");
+                    damage_dealt.Property<int>("Id");
+                    damage_dealt.HasKey("Id");
+                });
+                player.OwnsMany(p => p.hero_damage_received, damage_received =>
+                {
+                    damage_received.ToTable("dota_gc_match_detail_player_damage_received", "nadcl");
+                    damage_received.WithOwner().HasForeignKey("MatchPlayerId");
+                    damage_received.Property<int>("Id");
+                    damage_received.HasKey("Id");
+                });
+            });
+        });
 
         modelBuilder.Entity<League>()
             .HasMany(l => l.MatchDetails)
@@ -113,6 +143,11 @@ public class AghanimsFantasyContext : DbContext
         modelBuilder.Entity<FantasyDraft>()
             .Navigation(fd => fd.DraftPickPlayers)
             .AutoInclude();
+
+        modelBuilder.Entity<FantasyMatch>()
+            .HasMany(fm => fm.Players)
+            .WithOne()
+            .HasForeignKey(fmp => fmp.MatchId);
 
         modelBuilder.Entity<FantasyPlayerPoints>().ToView("fantasy_player_points", "nadcl")
             .HasNoKey();

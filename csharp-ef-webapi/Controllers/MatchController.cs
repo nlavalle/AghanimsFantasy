@@ -9,13 +9,11 @@ namespace csharp_ef_webapi.Controllers
     [ApiController]
     public class MatchController : ControllerBase
     {
-        private readonly FantasyRepository _fantasyRepository;
         private readonly WebApiRepository _webApiRepository;
         private readonly GameCoordinatorRepository _gameCoordinatorRepository;
 
-        public MatchController(FantasyRepository fantasyRepository, WebApiRepository webApiRepository, GameCoordinatorRepository gameCoordinatorRepository)
+        public MatchController(WebApiRepository webApiRepository, GameCoordinatorRepository gameCoordinatorRepository)
         {
-            _fantasyRepository = fantasyRepository;
             _webApiRepository = webApiRepository;
             _gameCoordinatorRepository = gameCoordinatorRepository;
         }

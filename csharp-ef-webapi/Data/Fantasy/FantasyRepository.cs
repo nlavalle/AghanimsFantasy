@@ -60,12 +60,12 @@ public class FantasyRepository : IFantasyRepository
 
         var fantasyDraftsUserQuery = _dbContext.FantasyDrafts
             .Where(fd => fd.FantasyLeagueId == FantasyLeagueId && fd.DiscordAccountId == UserDiscordAccountId)
-            .Include(fd => fd.DraftPickPlayers)
-                .ThenInclude(fp => fp.FantasyPlayer)
-                .ThenInclude(fp => fp.Team)
-            .Include(fd => fd.DraftPickPlayers)
-                .ThenInclude(fp => fp.FantasyPlayer)
-                .ThenInclude(fp => fp.DotaAccount);
+            .Include(fd => fd.DraftPickPlayers.Where(dpp => dpp.FantasyPlayer != null))
+                .ThenInclude(dpp => dpp.FantasyPlayer)
+                .ThenInclude(fp => fp!.Team)
+            .Include(fd => fd.DraftPickPlayers.Where(dpp => dpp.FantasyPlayer != null))
+                .ThenInclude(dpp => dpp.FantasyPlayer)
+                .ThenInclude(fp => fp!.DotaAccount);
 
         _logger.LogDebug($"Fantasy Drafts by User and Fantasy League Query: {fantasyDraftsUserQuery.ToQueryString()}");
 
@@ -137,8 +137,6 @@ public class FantasyRepository : IFantasyRepository
     {
         _logger.LogInformation($"Fetching Fantasy Points for LeagueID: {FantasyLeagueId}");
 
-        // var fantasyPlayerPoints = await FantasyPlayerPointsByFantasyLeagueAsync(FantasyLeagueId);
-        // var playerTotals = AggregateFantasyPlayerPoints(fantasyPlayerPoints).ToList();
         var playerTotals = await _dbContext.FantasyPlayerPointTotalsView
             .Include(fppt => fppt.FantasyPlayer)
             .Where(fppt => fppt.FantasyLeagueId == FantasyLeagueId)
@@ -266,6 +264,7 @@ public class FantasyRepository : IFantasyRepository
 
         return updateDraft;
     }
+
     #endregion Fantasy
 
     #region Match
@@ -311,21 +310,22 @@ public class FantasyRepository : IFantasyRepository
 
         var heroes = await _dbContext.Heroes.ToListAsync();
 
-        var topHeroIds = await _dbContext.MatchDetails
+        var topHeroIds = await _dbContext.FantasyMatches
                 .SelectMany(
                     md => md.Players,
-                    (left, right) => new { MatchDetail = left, MatchDetailPlayer = right }
+                    (left, right) => new { Match = left, MatchPlayer = right }
                 )
-                .Where(mdp => mdp.MatchDetailPlayer.AccountId == fantasyPlayer.DotaAccountId)
-                .GroupBy(match => match.MatchDetailPlayer.HeroId)
+                .Where(mdp => mdp.MatchPlayer.Account != null && mdp.MatchPlayer.Account.Id == fantasyPlayer.DotaAccountId)
+                .Where(mdp => mdp.MatchPlayer.Hero != null)
+                .GroupBy(match => match.MatchPlayer.Hero)
                 .Select(group => new
                 {
-                    HeroId = group.Key,
+                    HeroId = group.Key!.Id,
                     Count = group.Count(),
-                    Wins = group.Where(g => (g.MatchDetail.RadiantWin && g.MatchDetailPlayer.TeamNumber == 0) ||
-                    (!g.MatchDetail.RadiantWin && g.MatchDetailPlayer.TeamNumber == 1)).Count(),
-                    Losses = group.Where(g => (!g.MatchDetail.RadiantWin && g.MatchDetailPlayer.TeamNumber == 0) ||
-                    (g.MatchDetail.RadiantWin && g.MatchDetailPlayer.TeamNumber == 1)).Count()
+                    Wins = group.Where(g => (g.Match.RadiantWin != null && g.Match.RadiantWin.Value && !g.MatchPlayer.DotaTeamSide) ||
+                    (g.Match.RadiantWin != null && !g.Match.RadiantWin.Value && g.MatchPlayer.DotaTeamSide)).Count(),
+                    Losses = group.Where(g => (g.Match.RadiantWin != null && !g.Match.RadiantWin.Value && !g.MatchPlayer.DotaTeamSide) ||
+                    (g.Match.RadiantWin != null && g.Match.RadiantWin.Value && g.MatchPlayer.DotaTeamSide)).Count()
                 })
                 .OrderByDescending(group => group.Count)
                 .Take(3)

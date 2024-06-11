@@ -116,11 +116,11 @@ const commonLeagueColumns = [
         align: 'left',
         value: (row: any) => {
             return {
-                playerName: row.player.dotaAccount.name,
-                playerPicture: row.player.dotaAccount.steamProfilePicture,
-                teamName: row.player.team.name,
-                teamPosition: row.player.teamPosition,
-                totalMatches: row.matchesPlayed
+                playerName: row.fantasyPlayer.dotaAccount.name,
+                playerPicture: row.fantasyPlayer.dotaAccount.steamProfilePicture,
+                teamName: row.fantasyPlayer.team.name,
+                teamPosition: row.fantasyPlayer.teamPosition,
+                totalMatches: row.totalMatches
             };
         },
         width: isDesktop.value ? '240px' : '200px',
@@ -132,7 +132,7 @@ const kdaLeagueColumns = [
         key: 'totalKills',
         title: isDesktop.value ? 'Kills' : 'K',
         align: 'left',
-        value: (row: any) => row.kills,
+        value: (row: any) => row.totalKills,
         sortable: true,
         sort: (a: number, b: number) => b - a
     },
@@ -140,7 +140,7 @@ const kdaLeagueColumns = [
         key: 'totalDeaths',
         title: isDesktop.value ? 'Deaths' : 'D',
         align: 'left',
-        value: (row: any) => row.deaths,
+        value: (row: any) => row.totalDeaths,
         sortable: true,
         sort: (a: number, b: number) => b - a
     },
@@ -148,7 +148,7 @@ const kdaLeagueColumns = [
         key: 'totalAssists',
         title: isDesktop.value ? 'Assists' : 'A',
         align: 'left',
-        value: (row: any) => row.assists,
+        value: (row: any) => row.totalAssists,
         sortable: true,
         sort: (a: number, b: number) => b - a
     },
@@ -158,7 +158,7 @@ const farmLeagueColumns = [
         key: 'totalLastHits',
         title: isDesktop.value ? 'Last Hits' : 'LH',
         align: 'left',
-        value: (row: any) => row.lastHits,
+        value: (row: any) => row.totalLastHits,
         sortable: true,
         sort: (a: number, b: number) => b - a
     },
@@ -166,7 +166,7 @@ const farmLeagueColumns = [
         key: 'totalDenies',
         title: isDesktop.value ? 'Denies' : 'DN',
         align: 'left',
-        value: (row: any) => row.denies,
+        value: (row: any) => row.totalDenies,
         sortable: true,
         sort: (a: number, b: number) => b - a
     },
@@ -174,7 +174,7 @@ const farmLeagueColumns = [
         key: 'totalGoldPerMin',
         title: isDesktop.value ? 'Avg GPM' : 'G',
         align: 'left',
-        value: (row: any) => row.goldPerMin,
+        value: (row: any) => row.avgGoldPerMin,
         sortable: true,
         sort: (a: number, b: number) => b - a
     },
@@ -182,7 +182,7 @@ const farmLeagueColumns = [
         key: 'totalXpPerMin',
         title: isDesktop.value ? 'Avg XPM' : 'XP',
         align: 'left',
-        value: (row: any) => row.xpPerMin,
+        value: (row: any) => row.avgXpPerMin,
         sortable: true,
         sort: (a: number, b: number) => b - a
     },

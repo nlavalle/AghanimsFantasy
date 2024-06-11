@@ -3,6 +3,7 @@ namespace csharp_ef_webapi.Models.Discord;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+[Table("discord_users")]
 public class DiscordUser
 {
     [Key]
