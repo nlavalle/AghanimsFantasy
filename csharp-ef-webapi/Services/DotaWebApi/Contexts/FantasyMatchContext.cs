@@ -154,6 +154,13 @@ internal class FantasyMatchContext : DotaOperationContext
                         continue;
                     }
 
+                    FantasyMatch? fantasyMatch = _dbContext.FantasyMatches.Find((long)gcMatchDetailPlayer.Match.match_id);
+                    if (fantasyMatch == null)
+                    {
+                        _logger.LogInformation($"Missing Match parent {gcMatchDetailPlayer.Match.match_id}, skipping and will retry.");
+                        continue;
+                    }
+
 
                     FantasyMatchPlayer newPlayer = new FantasyMatchPlayer()
                     {
