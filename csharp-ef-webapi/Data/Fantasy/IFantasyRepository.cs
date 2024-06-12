@@ -1,12 +1,10 @@
-using csharp_ef_webapi.Models;
-
 namespace csharp_ef_webapi.Data;
+
+using csharp_ef_webapi.Models;
+using csharp_ef_webapi.Models.Fantasy;
+
 public interface IFantasyRepository
 {
-    // Leagues
-    Task<League?> GetLeagueAsync(int LeagueId);
-    Task<IEnumerable<League>> GetLeaguesAsync(bool? IsActive);
-
     // Fantasy Leagues
     Task<DateTime> GetLeagueLockedDate(int LeagueId);
 
@@ -14,33 +12,15 @@ public interface IFantasyRepository
     Task<IEnumerable<FantasyPlayer>> FantasyPlayersByFantasyLeagueAsync(int? FantasyLeagueId);
     Task<IEnumerable<FantasyDraft>> FantasyDraftsByUserLeagueAsync(long UserDiscordAccountId, int LeagueId);
     Task<IEnumerable<FantasyPlayerPoints>> FantasyPlayerPointsByFantasyLeagueAsync(int LeagueId);
+    Task<IEnumerable<FantasyPlayerPointTotals>> FantasyPlayerPointTotalsByFantasyLeagueAsync(int FantasyLeagueId);
     Task<IEnumerable<FantasyDraftPointTotals>> FantasyDraftPointsByFantasyLeagueAsync(int LeagueId);
     Task<FantasyDraftPointTotals?> FantasyDraftPointsByUserLeagueAsync(long UserDiscordAccountId, int LeagueId);
     Task ClearUserFantasyPlayersAsync(long UserDiscordAccountId, int LeagueId);
     Task<FantasyDraft> AddNewUserFantasyPlayerAsync(long UserDiscordAccountId, int LeagueId, long? FantasyPlayerId, int DraftOrder);
+    Task<IEnumerable<MetadataSummary>> MetadataSummariesByFantasyLeagueAsync(int FantasyLeagueId);
 
     // Matches
-    Task<IEnumerable<MatchHistory>> GetMatchHistoryByFantasyLeagueAsync(int LeagueId);
-    Task<MatchDetail?> GetMatchDetailAsync(long MatchId);
-    Task<IEnumerable<MatchDetailsPlayer>> GetMatchDetailPlayersByLeagueAsync(int? LeagueId);
-    Task<IEnumerable<GcMatchMetadata>> GetLeagueMetadataAsync(int LeagueId);
-    Task<IEnumerable<GcMatchMetadata>> GetLeagueMetadataAsync(int LeagueId, int Skip, int Take);
-    Task<IEnumerable<GcMatchMetadata>> GetFantasyLeagueMetadataAsync(int FantasyLeagueId);
-    Task<IEnumerable<GcMatchMetadata>> GetFantasyLeagueMetadataAsync(int FantasyLeagueId, int Skip, int Take);
-    Task<GcMatchMetadata?> GetMatchMetadataAsync(long MatchId);
     Task<IEnumerable<MatchHighlights>> GetLastNMatchHighlights(int FantasyLeagueId, int MatchCount);
-
-    // Players
-    Task<IEnumerable<Account>> GetPlayerAccounts();
     Task<IEnumerable<FantasyNormalizedAveragesTable>> GetFantasyNormalizedAveragesAsync(long FantasyPlayerId);
     Task<FantasyPlayerTopHeroes> GetFantasyPlayerTopHeroesAsync(long FantasyPlayerId);
-
-    // Teams
-    Task<IEnumerable<Team>> GetTeamsAsync();
-
-    // Heroes
-    Task<IEnumerable<Hero>> GetHeroesAsync();
-
-    // Discord
-    Task<DiscordIds?> GetDiscordIdAsync(long GetDiscordId);
 }

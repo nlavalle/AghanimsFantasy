@@ -152,10 +152,10 @@ namespace csharp_ef_webapi.Migrations
 
                     b.HasKey("match_id");
 
-                    b.ToTable("gc_dota_matches", "nadcl");
+                    b.ToTable("dota_gc_match_details", "nadcl");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.Account", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.Discord.DiscordUser", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -164,103 +164,17 @@ namespace csharp_ef_webapi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Username")
+                        .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.Property<string>("SteamProfilePicture")
-                        .HasColumnType("text")
-                        .HasColumnName("steam_profile_picture");
+                        .HasColumnName("username");
 
                     b.HasKey("Id");
 
-                    b.ToTable("dota_accounts", "nadcl");
+                    b.ToTable("discord_users", "nadcl");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.BalanceLedger", b =>
-                {
-                    b.Property<long>("DiscordId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("discord_id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("DiscordId"));
-
-                    b.Property<long>("Tokens")
-                        .HasColumnType("bigint")
-                        .HasColumnName("tokens");
-
-                    b.HasKey("DiscordId");
-
-                    b.ToTable("balance_ledger", "nadcl");
-                });
-
-            modelBuilder.Entity("csharp_ef_webapi.Models.BetStreak", b =>
-                {
-                    b.Property<string>("discordName")
-                        .HasColumnType("text")
-                        .HasColumnName("discord_name");
-
-                    b.Property<long>("bet_streak")
-                        .HasColumnType("bigint")
-                        .HasColumnName("streak");
-
-                    b.HasKey("discordName");
-
-                    b.ToTable("bets_streaks", "nadcl");
-                });
-
-            modelBuilder.Entity("csharp_ef_webapi.Models.Bromance", b =>
-                {
-                    b.Property<string>("bro1Name")
-                        .HasColumnType("text")
-                        .HasColumnName("bro_1_name");
-
-                    b.Property<string>("bro2Name")
-                        .HasColumnType("text")
-                        .HasColumnName("bro_2_name");
-
-                    b.Property<int>("totalMatches")
-                        .HasColumnType("integer")
-                        .HasColumnName("total_matches");
-
-                    b.Property<int>("totalWins")
-                        .HasColumnType("integer")
-                        .HasColumnName("total_wins");
-
-                    b.HasKey("bro1Name", "bro2Name");
-
-                    b.ToTable("bromance_last_60", "nadcl");
-                });
-
-            modelBuilder.Entity("csharp_ef_webapi.Models.DiscordIds", b =>
-                {
-                    b.Property<long>("DiscordId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("discord_id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("DiscordId"));
-
-                    b.Property<long>("AccountId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("account_id");
-
-                    b.Property<string>("DiscordName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("discord_name");
-
-                    b.Property<long>("SteamId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("steam_id");
-
-                    b.HasKey("DiscordId");
-
-                    b.ToTable("discord_ids", "nadcl");
-                });
-
-            modelBuilder.Entity("csharp_ef_webapi.Models.FantasyDraft", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.Fantasy.FantasyDraft", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -292,7 +206,7 @@ namespace csharp_ef_webapi.Migrations
                     b.ToTable("dota_fantasy_drafts", "nadcl");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.FantasyDraftPlayer", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.Fantasy.FantasyDraftPlayer", b =>
                 {
                     b.Property<long?>("FantasyPlayerId")
                         .HasColumnType("bigint")
@@ -313,7 +227,7 @@ namespace csharp_ef_webapi.Migrations
                     b.ToTable("dota_fantasy_draft_players", "nadcl");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.FantasyLeague", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.Fantasy.FantasyLeague", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -353,7 +267,7 @@ namespace csharp_ef_webapi.Migrations
                     b.ToTable("dota_fantasy_leagues", "nadcl");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.FantasyLeagueWeight", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.Fantasy.FantasyLeagueWeight", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -498,136 +412,250 @@ namespace csharp_ef_webapi.Migrations
                     b.ToTable("dota_fantasy_league_weights", "nadcl");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.FantasyNormalizedAverages", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.Fantasy.FantasyMatch", b =>
                 {
-                    b.Property<decimal?>("AvgAegisSnatchedPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("aegis_snatched_points");
+                    b.Property<long>("MatchId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("match_id");
 
-                    b.Property<decimal?>("AvgAssistsPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("assists_points");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("MatchId"));
 
-                    b.Property<decimal?>("AvgCampsStackedPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("camps_stacked_points");
+                    b.Property<int?>("DireScore")
+                        .HasColumnType("integer")
+                        .HasColumnName("dire_score");
 
-                    b.Property<decimal?>("AvgCouriersKilledPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("couriers_killed_points");
+                    b.Property<long?>("DireTeamId")
+                        .HasColumnType("bigint");
 
-                    b.Property<decimal?>("AvgDeathsPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("deaths_points");
+                    b.Property<int?>("Duration")
+                        .HasColumnType("integer")
+                        .HasColumnName("duration");
 
-                    b.Property<float?>("AvgFarmScore")
+                    b.Property<int?>("FirstBloodTime")
+                        .HasColumnType("integer")
+                        .HasColumnName("first_blood_time");
+
+                    b.Property<int?>("GameMode")
+                        .HasColumnType("integer")
+                        .HasColumnName("game_mode");
+
+                    b.Property<bool>("GcMetadataParsed")
+                        .HasColumnType("boolean")
+                        .HasColumnName("gc_metadata_parsed");
+
+                    b.Property<int>("LeagueId")
+                        .HasColumnType("integer")
+                        .HasColumnName("league_id");
+
+                    b.Property<int>("LobbyType")
+                        .HasColumnType("integer")
+                        .HasColumnName("lobby_type");
+
+                    b.Property<bool>("MatchDetailParsed")
+                        .HasColumnType("boolean")
+                        .HasColumnName("match_detail_parsed");
+
+                    b.Property<bool>("MatchHistoryParsed")
+                        .HasColumnType("boolean")
+                        .HasColumnName("match_history_parsed");
+
+                    b.Property<int?>("PreGameDuration")
+                        .HasColumnType("integer")
+                        .HasColumnName("pre_game_duration");
+
+                    b.Property<int?>("RadiantScore")
+                        .HasColumnType("integer")
+                        .HasColumnName("radiant_score");
+
+                    b.Property<long?>("RadiantTeamId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool?>("RadiantWin")
+                        .HasColumnType("boolean")
+                        .HasColumnName("radiant_win");
+
+                    b.Property<long>("StartTime")
+                        .HasColumnType("bigint")
+                        .HasColumnName("start_time");
+
+                    b.HasKey("MatchId");
+
+                    b.HasIndex("DireTeamId");
+
+                    b.HasIndex("RadiantTeamId");
+
+                    b.ToTable("fantasy_match", "nadcl");
+                });
+
+            modelBuilder.Entity("csharp_ef_webapi.Models.Fantasy.FantasyMatchPlayer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<long>("AccountId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("AegisSnatched")
+                        .HasColumnType("bigint")
+                        .HasColumnName("aegis_snatched");
+
+                    b.Property<int?>("Assists")
+                        .HasColumnType("integer")
+                        .HasColumnName("assists");
+
+                    b.Property<int?>("CampsStacked")
+                        .HasColumnType("integer")
+                        .HasColumnName("camps_stacked");
+
+                    b.Property<long?>("CouriersKilled")
+                        .HasColumnType("bigint")
+                        .HasColumnName("couriers_killed");
+
+                    b.Property<int?>("Deaths")
+                        .HasColumnType("integer")
+                        .HasColumnName("deaths");
+
+                    b.Property<int?>("Denies")
+                        .HasColumnType("integer")
+                        .HasColumnName("denies");
+
+                    b.Property<int?>("Dewards")
+                        .HasColumnType("integer")
+                        .HasColumnName("dewards");
+
+                    b.Property<bool>("DotaTeamSide")
+                        .HasColumnType("boolean")
+                        .HasColumnName("dota_team_side");
+
+                    b.Property<float?>("FarmScore")
                         .HasColumnType("real")
                         .HasColumnName("farm_score");
 
-                    b.Property<float?>("AvgFightScore")
+                    b.Property<float?>("FightScore")
                         .HasColumnType("real")
                         .HasColumnName("fight_score");
 
-                    b.Property<decimal?>("AvgGoldPerMinPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("gold_per_min_points");
+                    b.Property<bool>("GcMetadataPlayerParsed")
+                        .HasColumnType("boolean")
+                        .HasColumnName("gc_metadata_player_parsed");
 
-                    b.Property<decimal?>("AvgGoldPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("gold_points");
+                    b.Property<int?>("Gold")
+                        .HasColumnType("integer")
+                        .HasColumnName("gold");
 
-                    b.Property<decimal?>("AvgHeroDamagePoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("hero_damage_points");
+                    b.Property<int?>("GoldPerMin")
+                        .HasColumnType("integer")
+                        .HasColumnName("gold_per_min");
 
-                    b.Property<decimal?>("AvgHeroHealingPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("hero_healing_points");
+                    b.Property<int?>("HeroDamage")
+                        .HasColumnType("integer")
+                        .HasColumnName("hero_damage");
 
-                    b.Property<decimal?>("AvgHeroXpPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("hero_xp_points");
+                    b.Property<int?>("HeroHealing")
+                        .HasColumnType("integer")
+                        .HasColumnName("hero_healing");
 
-                    b.Property<decimal?>("AvgKillsPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("kills_points");
+                    b.Property<long?>("HeroId")
+                        .HasColumnType("bigint");
 
-                    b.Property<decimal?>("AvgLastHitsPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("last_hits_points");
+                    b.Property<long?>("HeroXp")
+                        .HasColumnType("bigint")
+                        .HasColumnName("hero_xp");
 
-                    b.Property<decimal?>("AvgMatchFantasyPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("total_match_fantasy_points");
+                    b.Property<int?>("Kills")
+                        .HasColumnType("integer")
+                        .HasColumnName("kills");
 
-                    b.Property<decimal?>("AvgNetworthPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("networth_points");
+                    b.Property<int?>("LastHits")
+                        .HasColumnType("integer")
+                        .HasColumnName("last_hits");
 
-                    b.Property<decimal?>("AvgObserverWardsPlacedPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("observer_wards_placed_points");
+                    b.Property<int?>("Level")
+                        .HasColumnType("integer")
+                        .HasColumnName("level");
 
-                    b.Property<float?>("AvgPushScore")
+                    b.Property<bool>("MatchDetailPlayerParsed")
+                        .HasColumnType("boolean")
+                        .HasColumnName("match_detail_player_parsed");
+
+                    b.Property<long>("MatchId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("match_id");
+
+                    b.Property<long?>("Networth")
+                        .HasColumnType("bigint")
+                        .HasColumnName("net_worth");
+
+                    b.Property<int?>("ObserverWardsPlaced")
+                        .HasColumnType("integer")
+                        .HasColumnName("observer_wards_placed");
+
+                    b.Property<int>("PlayerSlot")
+                        .HasColumnType("integer")
+                        .HasColumnName("player_slot");
+
+                    b.Property<float?>("PushScore")
                         .HasColumnType("real")
                         .HasColumnName("push_score");
 
-                    b.Property<decimal?>("AvgRampagesPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("rampages_points");
+                    b.Property<long?>("Rampages")
+                        .HasColumnType("bigint")
+                        .HasColumnName("rampages");
 
-                    b.Property<decimal?>("AvgRapiersPurchasedPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("rapiers_purchased_points");
+                    b.Property<long?>("RapiersPurchased")
+                        .HasColumnType("bigint")
+                        .HasColumnName("rapiers_purchased");
 
-                    b.Property<decimal?>("AvgSentryWardsPlacedPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("sentry_wards_placed_points");
+                    b.Property<int?>("SentyWardsPlaced")
+                        .HasColumnType("integer")
+                        .HasColumnName("sentry_wards_placed");
 
-                    b.Property<float?>("AvgStunDurationPoints")
+                    b.Property<float?>("StunDuration")
                         .HasColumnType("real")
-                        .HasColumnName("stun_duration_points");
+                        .HasColumnName("stun_duration");
 
-                    b.Property<decimal?>("AvgSupportGoldSpentPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("support_gold_spent_points");
+                    b.Property<int?>("SupportGoldSpent")
+                        .HasColumnType("integer")
+                        .HasColumnName("support_gold_spent");
 
-                    b.Property<float?>("AvgSupportScore")
+                    b.Property<float?>("SupportScore")
                         .HasColumnType("real")
                         .HasColumnName("support_score");
 
-                    b.Property<decimal?>("AvgTowerDamagePoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("tower_damage_points");
+                    b.Property<long?>("TeamId")
+                        .HasColumnType("bigint");
 
-                    b.Property<decimal?>("AvgTripleKillsPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("triple_kills_points");
+                    b.Property<int?>("TowerDamage")
+                        .HasColumnType("integer")
+                        .HasColumnName("tower_damage");
 
-                    b.Property<decimal?>("AvgWardsDewardedPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("wards_dewarded_points");
-
-                    b.Property<decimal?>("AvgXpPerMinPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("xp_per_min_points");
-
-                    b.Property<long>("FantasyPlayerId")
+                    b.Property<long?>("TripleKills")
                         .HasColumnType("bigint")
-                        .HasColumnName("fantasy_player_id");
+                        .HasColumnName("triple_kills");
 
-                    b.Property<decimal?>("TotalMatches")
-                        .HasColumnType("numeric")
-                        .HasColumnName("matches_played");
+                    b.Property<int?>("XpPerMin")
+                        .HasColumnType("integer")
+                        .HasColumnName("xp_per_min");
 
-                    b.HasIndex("FantasyPlayerId");
+                    b.HasKey("Id");
 
-                    b.ToTable((string)null);
+                    b.HasIndex("AccountId");
 
-                    b.ToView("fantasy_normalized_averages", "nadcl");
+                    b.HasIndex("HeroId");
+
+                    b.HasIndex("MatchId");
+
+                    b.HasIndex("TeamId");
+
+                    b.ToTable("fantasy_match_player", "nadcl");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.FantasyNormalizedAveragesTable", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.Fantasy.FantasyNormalizedAveragesTable", b =>
                 {
                     b.Property<long>("FantasyNormalizedAveragesTableId")
                         .ValueGeneratedOnAdd()
@@ -763,7 +791,7 @@ namespace csharp_ef_webapi.Migrations
                     b.ToTable("dota_fantasy_normalized_averages", "nadcl");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.FantasyPlayer", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.Fantasy.FantasyPlayer", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -797,6 +825,135 @@ namespace csharp_ef_webapi.Migrations
                     b.HasIndex("TeamId");
 
                     b.ToTable("dota_fantasy_players", "nadcl");
+                });
+
+            modelBuilder.Entity("csharp_ef_webapi.Models.FantasyNormalizedAverages", b =>
+                {
+                    b.Property<decimal?>("AvgAegisSnatchedPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("aegis_snatched_points");
+
+                    b.Property<decimal?>("AvgAssistsPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("assists_points");
+
+                    b.Property<decimal?>("AvgCampsStackedPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("camps_stacked_points");
+
+                    b.Property<decimal?>("AvgCouriersKilledPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("couriers_killed_points");
+
+                    b.Property<decimal?>("AvgDeathsPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("deaths_points");
+
+                    b.Property<float?>("AvgFarmScore")
+                        .HasColumnType("real")
+                        .HasColumnName("farm_score");
+
+                    b.Property<float?>("AvgFightScore")
+                        .HasColumnType("real")
+                        .HasColumnName("fight_score");
+
+                    b.Property<decimal?>("AvgGoldPerMinPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("gold_per_min_points");
+
+                    b.Property<decimal?>("AvgGoldPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("gold_points");
+
+                    b.Property<decimal?>("AvgHeroDamagePoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("hero_damage_points");
+
+                    b.Property<decimal?>("AvgHeroHealingPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("hero_healing_points");
+
+                    b.Property<decimal?>("AvgHeroXpPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("hero_xp_points");
+
+                    b.Property<decimal?>("AvgKillsPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("kills_points");
+
+                    b.Property<decimal?>("AvgLastHitsPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("last_hits_points");
+
+                    b.Property<decimal?>("AvgMatchFantasyPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_match_fantasy_points");
+
+                    b.Property<decimal?>("AvgNetworthPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("networth_points");
+
+                    b.Property<decimal?>("AvgObserverWardsPlacedPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("observer_wards_placed_points");
+
+                    b.Property<float?>("AvgPushScore")
+                        .HasColumnType("real")
+                        .HasColumnName("push_score");
+
+                    b.Property<decimal?>("AvgRampagesPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("rampages_points");
+
+                    b.Property<decimal?>("AvgRapiersPurchasedPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("rapiers_purchased_points");
+
+                    b.Property<decimal?>("AvgSentryWardsPlacedPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("sentry_wards_placed_points");
+
+                    b.Property<float?>("AvgStunDurationPoints")
+                        .HasColumnType("real")
+                        .HasColumnName("stun_duration_points");
+
+                    b.Property<decimal?>("AvgSupportGoldSpentPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("support_gold_spent_points");
+
+                    b.Property<float?>("AvgSupportScore")
+                        .HasColumnType("real")
+                        .HasColumnName("support_score");
+
+                    b.Property<decimal?>("AvgTowerDamagePoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("tower_damage_points");
+
+                    b.Property<decimal?>("AvgTripleKillsPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("triple_kills_points");
+
+                    b.Property<decimal?>("AvgWardsDewardedPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("wards_dewarded_points");
+
+                    b.Property<decimal?>("AvgXpPerMinPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("xp_per_min_points");
+
+                    b.Property<long>("FantasyPlayerId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("fantasy_player_id");
+
+                    b.Property<decimal?>("TotalMatches")
+                        .HasColumnType("numeric")
+                        .HasColumnName("matches_played");
+
+                    b.HasIndex("FantasyPlayerId");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("fantasy_normalized_averages", "nadcl");
                 });
 
             modelBuilder.Entity("csharp_ef_webapi.Models.FantasyPlayerPointTotals", b =>
@@ -1283,7 +1440,7 @@ namespace csharp_ef_webapi.Migrations
                     b.ToView("fantasy_player_points", "nadcl");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.GcMatchMetadata", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.GameCoordinator.GcMatchMetadata", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1291,6 +1448,9 @@ namespace csharp_ef_webapi.Migrations
                         .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<int?>("LeagueId")
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("LobbyId")
                         .HasColumnType("numeric(20,0)")
@@ -1310,13 +1470,12 @@ namespace csharp_ef_webapi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MatchId")
-                        .IsUnique();
+                    b.HasIndex("LeagueId");
 
                     b.ToTable("dota_gc_match_metadata", "nadcl");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.GcMatchMetadataItemPurchase", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.GameCoordinator.GcMatchMetadataItemPurchase", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1343,7 +1502,7 @@ namespace csharp_ef_webapi.Migrations
                     b.ToTable("dota_gc_match_metadata_itempurchase", "nadcl");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.GcMatchMetadataPlayer", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.GameCoordinator.GcMatchMetadataPlayer", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1506,7 +1665,7 @@ namespace csharp_ef_webapi.Migrations
                     b.ToTable("dota_gc_match_metadata_player", "nadcl");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.GcMatchMetadataPlayerKill", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.GameCoordinator.GcMatchMetadataPlayerKill", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1533,7 +1692,7 @@ namespace csharp_ef_webapi.Migrations
                     b.ToTable("dota_gc_match_metadata_playerkill", "nadcl");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.GcMatchMetadataTeam", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.GameCoordinator.GcMatchMetadataTeam", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1580,7 +1739,7 @@ namespace csharp_ef_webapi.Migrations
                     b.ToTable("dota_gc_match_metadata_team", "nadcl");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.GcMatchMetadataTip", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.GameCoordinator.GcMatchMetadataTip", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1611,7 +1770,158 @@ namespace csharp_ef_webapi.Migrations
                     b.ToTable("dota_gc_match_metadata_tip", "nadcl");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.Hero", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.MatchHighlights", b =>
+                {
+                    b.Property<int?>("Assists")
+                        .HasColumnType("integer")
+                        .HasColumnName("assists");
+
+                    b.Property<decimal?>("AssistsDiff")
+                        .HasColumnType("numeric")
+                        .HasColumnName("assists_diff");
+
+                    b.Property<decimal?>("AssistsPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("assists_points");
+
+                    b.Property<bool>("AssistsPointsDeviation")
+                        .HasColumnType("boolean")
+                        .HasColumnName("assists_points_deviation");
+
+                    b.Property<int?>("Deaths")
+                        .HasColumnType("integer")
+                        .HasColumnName("deaths");
+
+                    b.Property<decimal?>("DeathsDiff")
+                        .HasColumnType("numeric")
+                        .HasColumnName("deaths_diff");
+
+                    b.Property<decimal?>("DeathsPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("deaths_points");
+
+                    b.Property<bool>("DeathsPointsDeviation")
+                        .HasColumnType("boolean")
+                        .HasColumnName("deaths_points_deviation");
+
+                    b.Property<int>("FantasyLeagueId")
+                        .HasColumnType("integer")
+                        .HasColumnName("fantasy_league_id");
+
+                    b.Property<long>("FantasyPlayerId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("fantasy_player_id");
+
+                    b.Property<int?>("GoldPerMin")
+                        .HasColumnType("integer")
+                        .HasColumnName("gold_per_min");
+
+                    b.Property<decimal?>("GoldPerMinDiff")
+                        .HasColumnType("numeric")
+                        .HasColumnName("gold_per_min_diff");
+
+                    b.Property<decimal?>("GoldPerMinPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("gold_per_min_points");
+
+                    b.Property<bool>("GoldPerMinPointsDeviation")
+                        .HasColumnType("boolean")
+                        .HasColumnName("gold_per_min_deviation");
+
+                    b.Property<int?>("Kills")
+                        .HasColumnType("integer")
+                        .HasColumnName("kills");
+
+                    b.Property<decimal?>("KillsDiff")
+                        .HasColumnType("numeric")
+                        .HasColumnName("kills_diff");
+
+                    b.Property<decimal?>("KillsPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("kills_points");
+
+                    b.Property<bool>("KillsPointsDeviation")
+                        .HasColumnType("boolean")
+                        .HasColumnName("kills_points_deviation");
+
+                    b.Property<int?>("LastHits")
+                        .HasColumnType("integer")
+                        .HasColumnName("last_hits");
+
+                    b.Property<decimal?>("LastHitsDiff")
+                        .HasColumnType("numeric")
+                        .HasColumnName("last_hits_diff");
+
+                    b.Property<decimal?>("LastHitsPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("last_hits_points");
+
+                    b.Property<bool>("LastHitsPointsDeviation")
+                        .HasColumnType("boolean")
+                        .HasColumnName("last_hits_points_deviation");
+
+                    b.Property<long>("MatchId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("match_id");
+
+                    b.Property<long>("StartTime")
+                        .HasColumnType("bigint")
+                        .HasColumnName("start_time");
+
+                    b.Property<int>("TeamId")
+                        .HasColumnType("integer")
+                        .HasColumnName("team_id");
+
+                    b.Property<decimal?>("TotalMatchFantasyPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_match_fantasy_points");
+
+                    b.Property<int?>("XpPerMin")
+                        .HasColumnType("integer")
+                        .HasColumnName("xp_per_min");
+
+                    b.Property<decimal?>("XpPerMinDiff")
+                        .HasColumnType("numeric")
+                        .HasColumnName("xp_per_min_diff");
+
+                    b.Property<decimal?>("XpPerMinPoints")
+                        .HasColumnType("numeric")
+                        .HasColumnName("xp_per_min_points");
+
+                    b.Property<bool>("XpPerMinPointsDeviation")
+                        .HasColumnType("boolean")
+                        .HasColumnName("xp_per_min_deviation");
+
+                    b.HasIndex("FantasyPlayerId");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("match_highlights", "nadcl");
+                });
+
+            modelBuilder.Entity("csharp_ef_webapi.Models.ProMetadata.Account", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<string>("SteamProfilePicture")
+                        .HasColumnType("text")
+                        .HasColumnName("steam_profile_picture");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("dota_accounts", "nadcl");
+                });
+
+            modelBuilder.Entity("csharp_ef_webapi.Models.ProMetadata.Hero", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1629,7 +1939,7 @@ namespace csharp_ef_webapi.Migrations
                     b.ToTable("dota_heroes", "nadcl");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.League", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.ProMetadata.League", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1651,7 +1961,85 @@ namespace csharp_ef_webapi.Migrations
                     b.ToTable("dota_leagues", "nadcl");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.MatchDetail", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.ProMetadata.Team", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Abbreviation")
+                        .HasColumnType("text")
+                        .HasColumnName("abbreviation");
+
+                    b.Property<long>("AdminAccountId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("admin_account_id");
+
+                    b.Property<string>("CountryCode")
+                        .HasColumnType("text")
+                        .HasColumnName("country_code");
+
+                    b.Property<int>("GamesPlayed")
+                        .HasColumnType("integer")
+                        .HasColumnName("games_played");
+
+                    b.Property<string>("Logo")
+                        .HasColumnType("text")
+                        .HasColumnName("logo");
+
+                    b.Property<string>("LogoSponsor")
+                        .HasColumnType("text")
+                        .HasColumnName("logo_sponsor");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<long>("Player0AccountId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("player_0_account_id");
+
+                    b.Property<long>("Player1AccountId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("player_1_account_id");
+
+                    b.Property<long>("Player2AccountId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("player_2_account_id");
+
+                    b.Property<long>("Player3AccountId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("player_3_account_id");
+
+                    b.Property<long>("Player4AccountId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("player_4_account_id");
+
+                    b.Property<long>("Player5AccountId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("player_5_account_id");
+
+                    b.Property<string>("Tag")
+                        .HasColumnType("text")
+                        .HasColumnName("tag");
+
+                    b.Property<long>("TimeCreated")
+                        .HasColumnType("bigint")
+                        .HasColumnName("time_created");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("text")
+                        .HasColumnName("url");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("dota_teams", "nadcl");
+                });
+
+            modelBuilder.Entity("csharp_ef_webapi.Models.WebApi.MatchDetail", b =>
                 {
                     b.Property<long>("MatchId")
                         .ValueGeneratedOnAdd()
@@ -1743,7 +2131,7 @@ namespace csharp_ef_webapi.Migrations
                     b.ToTable("dota_match_details", "nadcl");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.MatchDetailsPicksBans", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.WebApi.MatchDetailsPicksBans", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1779,7 +2167,7 @@ namespace csharp_ef_webapi.Migrations
                     b.ToTable("dota_match_details_picks_bans", "nadcl");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.MatchDetailsPlayer", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.WebApi.MatchDetailsPlayer", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1943,7 +2331,7 @@ namespace csharp_ef_webapi.Migrations
                     b.ToTable("dota_match_details_players", "nadcl");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.MatchDetailsPlayersAbilityUpgrade", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.WebApi.MatchDetailsPlayersAbilityUpgrade", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1975,136 +2363,7 @@ namespace csharp_ef_webapi.Migrations
                     b.ToTable("dota_match_details_players_ability_upgrades", "nadcl");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.MatchHighlights", b =>
-                {
-                    b.Property<int?>("Assists")
-                        .HasColumnType("integer")
-                        .HasColumnName("assists");
-
-                    b.Property<decimal?>("AssistsDiff")
-                        .HasColumnType("numeric")
-                        .HasColumnName("assists_diff");
-
-                    b.Property<decimal?>("AssistsPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("assists_points");
-
-                    b.Property<bool>("AssistsPointsDeviation")
-                        .HasColumnType("boolean")
-                        .HasColumnName("assists_points_deviation");
-
-                    b.Property<int?>("Deaths")
-                        .HasColumnType("integer")
-                        .HasColumnName("deaths");
-
-                    b.Property<decimal?>("DeathsDiff")
-                        .HasColumnType("numeric")
-                        .HasColumnName("deaths_diff");
-
-                    b.Property<decimal?>("DeathsPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("deaths_points");
-
-                    b.Property<bool>("DeathsPointsDeviation")
-                        .HasColumnType("boolean")
-                        .HasColumnName("deaths_points_deviation");
-
-                    b.Property<int>("FantasyLeagueId")
-                        .HasColumnType("integer")
-                        .HasColumnName("fantasy_league_id");
-
-                    b.Property<long>("FantasyPlayerId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("fantasy_player_id");
-
-                    b.Property<int?>("GoldPerMin")
-                        .HasColumnType("integer")
-                        .HasColumnName("gold_per_min");
-
-                    b.Property<decimal?>("GoldPerMinDiff")
-                        .HasColumnType("numeric")
-                        .HasColumnName("gold_per_min_diff");
-
-                    b.Property<decimal?>("GoldPerMinPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("gold_per_min_points");
-
-                    b.Property<bool>("GoldPerMinPointsDeviation")
-                        .HasColumnType("boolean")
-                        .HasColumnName("gold_per_min_deviation");
-
-                    b.Property<int?>("Kills")
-                        .HasColumnType("integer")
-                        .HasColumnName("kills");
-
-                    b.Property<decimal?>("KillsDiff")
-                        .HasColumnType("numeric")
-                        .HasColumnName("kills_diff");
-
-                    b.Property<decimal?>("KillsPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("kills_points");
-
-                    b.Property<bool>("KillsPointsDeviation")
-                        .HasColumnType("boolean")
-                        .HasColumnName("kills_points_deviation");
-
-                    b.Property<int?>("LastHits")
-                        .HasColumnType("integer")
-                        .HasColumnName("last_hits");
-
-                    b.Property<decimal?>("LastHitsDiff")
-                        .HasColumnType("numeric")
-                        .HasColumnName("last_hits_diff");
-
-                    b.Property<decimal?>("LastHitsPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("last_hits_points");
-
-                    b.Property<bool>("LastHitsPointsDeviation")
-                        .HasColumnType("boolean")
-                        .HasColumnName("last_hits_points_deviation");
-
-                    b.Property<long>("MatchId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("match_id");
-
-                    b.Property<long>("StartTime")
-                        .HasColumnType("bigint")
-                        .HasColumnName("start_time");
-
-                    b.Property<int>("TeamId")
-                        .HasColumnType("integer")
-                        .HasColumnName("team_id");
-
-                    b.Property<decimal?>("TotalMatchFantasyPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("total_match_fantasy_points");
-
-                    b.Property<int?>("XpPerMin")
-                        .HasColumnType("integer")
-                        .HasColumnName("xp_per_min");
-
-                    b.Property<decimal?>("XpPerMinDiff")
-                        .HasColumnType("numeric")
-                        .HasColumnName("xp_per_min_diff");
-
-                    b.Property<decimal?>("XpPerMinPoints")
-                        .HasColumnType("numeric")
-                        .HasColumnName("xp_per_min_points");
-
-                    b.Property<bool>("XpPerMinPointsDeviation")
-                        .HasColumnType("boolean")
-                        .HasColumnName("xp_per_min_deviation");
-
-                    b.HasIndex("FantasyPlayerId");
-
-                    b.ToTable((string)null);
-
-                    b.ToView("match_highlights", "nadcl");
-                });
-
-            modelBuilder.Entity("csharp_ef_webapi.Models.MatchHistory", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.WebApi.MatchHistory", b =>
                 {
                     b.Property<long>("MatchId")
                         .ValueGeneratedOnAdd()
@@ -2152,7 +2411,7 @@ namespace csharp_ef_webapi.Migrations
                     b.ToTable("dota_match_history", "nadcl");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.MatchHistoryPlayer", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.WebApi.MatchHistoryPlayer", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -2192,290 +2451,315 @@ namespace csharp_ef_webapi.Migrations
                     b.ToTable("dota_match_history_players", "nadcl");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.MatchStatus", b =>
+            modelBuilder.Entity("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch", b =>
                 {
-                    b.Property<long>("MatchId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("match_id");
+                    b.OwnsMany("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch.players#SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player", "players", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("MatchId"));
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
+                            b1.Property<decimal>("MatchId")
+                                .HasColumnType("numeric(20,0)");
 
-                    b.HasKey("MatchId");
+                            b1.Property<long>("account_id")
+                                .HasColumnType("bigint");
 
-                    b.ToTable("match_status", "nadcl");
+                            b1.Property<bool>("active_plus_subscription")
+                                .HasColumnType("boolean");
+
+                            b1.Property<long>("assists")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("bot_difficulty")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("bounty_runes")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("claimed_denies")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("claimed_farm_gold")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("claimed_misses")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("deaths")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("denies")
+                                .HasColumnType("bigint");
+
+                            b1.Property<float>("expected_team_contribution")
+                                .HasColumnType("real");
+
+                            b1.Property<bool>("feeding_detected")
+                                .HasColumnType("boolean");
+
+                            b1.Property<long>("gold")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("gold_lost_to_death")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("gold_per_min")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("gold_spent")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("hero_damage")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("hero_healing")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("hero_id")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("hero_pick_order")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("hero_play_count")
+                                .HasColumnType("bigint");
+
+                            b1.Property<bool>("hero_was_dota_plus_suggestion")
+                                .HasColumnType("boolean");
+
+                            b1.Property<bool>("hero_was_randomed")
+                                .HasColumnType("boolean");
+
+                            b1.Property<int>("item_0")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("item_1")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("item_2")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("item_3")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("item_4")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("item_5")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("item_6")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("item_7")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("item_8")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("item_9")
+                                .HasColumnType("integer");
+
+                            b1.Property<long>("kills")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("lane_selection_flags")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("last_hits")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("leaver_status")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("level")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("misses")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("mmr_type")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("net_worth")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("outposts_captured")
+                                .HasColumnType("bigint");
+
+                            b1.Property<decimal>("party_id")
+                                .HasColumnType("numeric(20,0)");
+
+                            b1.Property<string>("player_name")
+                                .HasColumnType("text");
+
+                            b1.Property<long>("player_slot")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("previous_rank")
+                                .HasColumnType("bigint");
+
+                            b1.Property<string>("pro_name")
+                                .HasColumnType("text");
+
+                            b1.Property<int>("rank_change")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("rank_uncertainty_change")
+                                .HasColumnType("integer");
+
+                            b1.Property<string>("real_name")
+                                .HasColumnType("text");
+
+                            b1.Property<float>("scaled_assists")
+                                .HasColumnType("real");
+
+                            b1.Property<float>("scaled_deaths")
+                                .HasColumnType("real");
+
+                            b1.Property<long>("scaled_hero_damage")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("scaled_hero_healing")
+                                .HasColumnType("bigint");
+
+                            b1.Property<float>("scaled_kills")
+                                .HasColumnType("real");
+
+                            b1.Property<float>("scaled_metric")
+                                .HasColumnType("real");
+
+                            b1.Property<long>("scaled_tower_damage")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("search_rank")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("search_rank_uncertainty")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("seconds_dead")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("support_ability_value")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("support_gold")
+                                .HasColumnType("bigint");
+
+                            b1.Property<int>("team_number")
+                                .HasColumnType("integer");
+
+                            b1.Property<long>("team_slot")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("time_last_seen")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("tower_damage")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("xp_per_min")
+                                .HasColumnType("bigint");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("MatchId");
+
+                            b1.ToTable("dota_gc_match_detail_players", "nadcl");
+
+                            b1.WithOwner()
+                                .HasForeignKey("MatchId");
+
+                            b1.OwnsMany("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch.players#SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player.hero_damage_dealt#SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player+HeroDamageReceived", "hero_damage_dealt", b2 =>
+                                {
+                                    b2.Property<int>("Id")
+                                        .ValueGeneratedOnAdd()
+                                        .HasColumnType("integer");
+
+                                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b2.Property<int>("Id"));
+
+                                    b2.Property<int>("MatchPlayerId")
+                                        .HasColumnType("integer");
+
+                                    b2.Property<int>("damage_type")
+                                        .HasColumnType("integer");
+
+                                    b2.Property<long>("post_reduction")
+                                        .HasColumnType("bigint");
+
+                                    b2.Property<long>("pre_reduction")
+                                        .HasColumnType("bigint");
+
+                                    b2.HasKey("Id");
+
+                                    b2.HasIndex("MatchPlayerId");
+
+                                    b2.ToTable("dota_gc_match_detail_player_damage_dealt", "nadcl");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("MatchPlayerId");
+                                });
+
+                            b1.OwnsMany("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch.players#SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player.hero_damage_received#SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player+HeroDamageReceived", "hero_damage_received", b2 =>
+                                {
+                                    b2.Property<int>("Id")
+                                        .ValueGeneratedOnAdd()
+                                        .HasColumnType("integer");
+
+                                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b2.Property<int>("Id"));
+
+                                    b2.Property<int>("MatchPlayerId")
+                                        .HasColumnType("integer");
+
+                                    b2.Property<int>("damage_type")
+                                        .HasColumnType("integer");
+
+                                    b2.Property<long>("post_reduction")
+                                        .HasColumnType("bigint");
+
+                                    b2.Property<long>("pre_reduction")
+                                        .HasColumnType("bigint");
+
+                                    b2.HasKey("Id");
+
+                                    b2.HasIndex("MatchPlayerId");
+
+                                    b2.ToTable("dota_gc_match_detail_player_damage_received", "nadcl");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("MatchPlayerId");
+                                });
+
+                            b1.Navigation("hero_damage_dealt");
+
+                            b1.Navigation("hero_damage_received");
+                        });
+
+                    b.Navigation("players");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.MatchStreak", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.Fantasy.FantasyDraft", b =>
                 {
-                    b.Property<string>("discordName")
-                        .HasColumnType("text")
-                        .HasColumnName("discord_name");
-
-                    b.Property<long>("match_streak")
-                        .HasColumnType("bigint")
-                        .HasColumnName("streak");
-
-                    b.HasKey("discordName");
-
-                    b.ToTable("matches_streaks", "nadcl");
-                });
-
-            modelBuilder.Entity("csharp_ef_webapi.Models.PlayerMatchDetails", b =>
-                {
-                    b.Property<long>("MatchId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("match_id");
-
-                    b.Property<int>("PlayerSlot")
-                        .HasColumnType("integer")
-                        .HasColumnName("player_slot");
-
-                    b.Property<long>("AccountId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("account_id");
-
-                    b.Property<int?>("AghanimsScepter")
-                        .HasColumnType("integer")
-                        .HasColumnName("aghanims_scepter");
-
-                    b.Property<int?>("AghanimsShard")
-                        .HasColumnType("integer")
-                        .HasColumnName("aghanims_shard");
-
-                    b.Property<int?>("Assists")
-                        .HasColumnType("integer")
-                        .HasColumnName("assists");
-
-                    b.Property<int?>("Backpack0")
-                        .HasColumnType("integer")
-                        .HasColumnName("backpack_0");
-
-                    b.Property<int?>("Backpack1")
-                        .HasColumnType("integer")
-                        .HasColumnName("backpack_1");
-
-                    b.Property<int?>("Backpack2")
-                        .HasColumnType("integer")
-                        .HasColumnName("backpack_2");
-
-                    b.Property<int?>("Deaths")
-                        .HasColumnType("integer")
-                        .HasColumnName("deaths");
-
-                    b.Property<int?>("Denies")
-                        .HasColumnType("integer")
-                        .HasColumnName("denies");
-
-                    b.Property<int?>("Gold")
-                        .HasColumnType("integer")
-                        .HasColumnName("gold");
-
-                    b.Property<int?>("GoldPerMin")
-                        .HasColumnType("integer")
-                        .HasColumnName("gold_per_min");
-
-                    b.Property<int?>("GoldSpent")
-                        .HasColumnType("integer")
-                        .HasColumnName("gold_spent");
-
-                    b.Property<int?>("HeroDamage")
-                        .HasColumnType("integer")
-                        .HasColumnName("hero_damage");
-
-                    b.Property<int?>("HeroHealing")
-                        .HasColumnType("integer")
-                        .HasColumnName("hero_healing");
-
-                    b.Property<int>("HeroId")
-                        .HasColumnType("integer")
-                        .HasColumnName("hero_id");
-
-                    b.Property<int?>("Item0")
-                        .HasColumnType("integer")
-                        .HasColumnName("item_0");
-
-                    b.Property<int?>("Item1")
-                        .HasColumnType("integer")
-                        .HasColumnName("item_1");
-
-                    b.Property<int?>("Item2")
-                        .HasColumnType("integer")
-                        .HasColumnName("item_2");
-
-                    b.Property<int?>("Item3")
-                        .HasColumnType("integer")
-                        .HasColumnName("item_3");
-
-                    b.Property<int?>("Item4")
-                        .HasColumnType("integer")
-                        .HasColumnName("item_4");
-
-                    b.Property<int?>("Item5")
-                        .HasColumnType("integer")
-                        .HasColumnName("item_5");
-
-                    b.Property<int?>("ItemNeutral")
-                        .HasColumnType("integer")
-                        .HasColumnName("item_neutral");
-
-                    b.Property<int?>("Kills")
-                        .HasColumnType("integer")
-                        .HasColumnName("kills");
-
-                    b.Property<int?>("LastHits")
-                        .HasColumnType("integer")
-                        .HasColumnName("last_hits");
-
-                    b.Property<int?>("LeaverStatus")
-                        .HasColumnType("integer")
-                        .HasColumnName("leaver_status");
-
-                    b.Property<int?>("Level")
-                        .HasColumnType("integer")
-                        .HasColumnName("level");
-
-                    b.Property<int?>("Moonshard")
-                        .HasColumnType("integer")
-                        .HasColumnName("moonshard");
-
-                    b.Property<long?>("Networth")
-                        .HasColumnType("bigint")
-                        .HasColumnName("net_worth");
-
-                    b.Property<int?>("ScaledHeroDamage")
-                        .HasColumnType("integer")
-                        .HasColumnName("scaled_hero_damage");
-
-                    b.Property<int?>("ScaledHeroHealing")
-                        .HasColumnType("integer")
-                        .HasColumnName("scaled_hero_healing");
-
-                    b.Property<int?>("ScaledTowerDamage")
-                        .HasColumnType("integer")
-                        .HasColumnName("scaled_tower_damage");
-
-                    b.Property<int?>("TeamNumber")
-                        .HasColumnType("integer")
-                        .HasColumnName("team_number");
-
-                    b.Property<int?>("TeamSlot")
-                        .HasColumnType("integer")
-                        .HasColumnName("team_slot");
-
-                    b.Property<int?>("TowerDamage")
-                        .HasColumnType("integer")
-                        .HasColumnName("tower_damage");
-
-                    b.Property<int?>("XpPerMin")
-                        .HasColumnType("integer")
-                        .HasColumnName("xp_per_min");
-
-                    b.HasKey("MatchId", "PlayerSlot");
-
-                    b.ToTable("player_match_details", "nadcl");
-                });
-
-            modelBuilder.Entity("csharp_ef_webapi.Models.Team", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Abbreviation")
-                        .HasColumnType("text")
-                        .HasColumnName("abbreviation");
-
-                    b.Property<long>("AdminAccountId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("admin_account_id");
-
-                    b.Property<string>("CountryCode")
-                        .HasColumnType("text")
-                        .HasColumnName("country_code");
-
-                    b.Property<int>("GamesPlayed")
-                        .HasColumnType("integer")
-                        .HasColumnName("games_played");
-
-                    b.Property<string>("Logo")
-                        .HasColumnType("text")
-                        .HasColumnName("logo");
-
-                    b.Property<string>("LogoSponsor")
-                        .HasColumnType("text")
-                        .HasColumnName("logo_sponsor");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.Property<long>("Player0AccountId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("player_0_account_id");
-
-                    b.Property<long>("Player1AccountId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("player_1_account_id");
-
-                    b.Property<long>("Player2AccountId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("player_2_account_id");
-
-                    b.Property<long>("Player3AccountId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("player_3_account_id");
-
-                    b.Property<long>("Player4AccountId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("player_4_account_id");
-
-                    b.Property<long>("Player5AccountId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("player_5_account_id");
-
-                    b.Property<string>("Tag")
-                        .HasColumnType("text")
-                        .HasColumnName("tag");
-
-                    b.Property<long>("TimeCreated")
-                        .HasColumnType("bigint")
-                        .HasColumnName("time_created");
-
-                    b.Property<string>("Url")
-                        .HasColumnType("text")
-                        .HasColumnName("url");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("dota_teams", "nadcl");
-                });
-
-            modelBuilder.Entity("csharp_ef_webapi.Models.FantasyDraft", b =>
-                {
-                    b.HasOne("csharp_ef_webapi.Models.FantasyLeague", null)
+                    b.HasOne("csharp_ef_webapi.Models.Fantasy.FantasyLeague", null)
                         .WithMany("FantasyDrafts")
                         .HasForeignKey("FantasyLeagueId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.FantasyDraftPlayer", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.Fantasy.FantasyDraftPlayer", b =>
                 {
-                    b.HasOne("csharp_ef_webapi.Models.FantasyDraft", null)
+                    b.HasOne("csharp_ef_webapi.Models.Fantasy.FantasyDraft", null)
                         .WithMany("DraftPickPlayers")
                         .HasForeignKey("FantasyDraftId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("csharp_ef_webapi.Models.FantasyPlayer", "FantasyPlayer")
+                    b.HasOne("csharp_ef_webapi.Models.Fantasy.FantasyPlayer", "FantasyPlayer")
                         .WithMany()
                         .HasForeignKey("FantasyPlayerId")
                         .IsRequired();
@@ -2483,27 +2767,71 @@ namespace csharp_ef_webapi.Migrations
                     b.Navigation("FantasyPlayer");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.FantasyLeague", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.Fantasy.FantasyLeague", b =>
                 {
-                    b.HasOne("csharp_ef_webapi.Models.League", null)
+                    b.HasOne("csharp_ef_webapi.Models.ProMetadata.League", null)
                         .WithMany("FantasyLeagues")
                         .HasForeignKey("LeagueId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.FantasyLeagueWeight", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.Fantasy.FantasyLeagueWeight", b =>
                 {
-                    b.HasOne("csharp_ef_webapi.Models.FantasyLeague", null)
+                    b.HasOne("csharp_ef_webapi.Models.Fantasy.FantasyLeague", null)
                         .WithOne("FantasyLeagueWeight")
-                        .HasForeignKey("csharp_ef_webapi.Models.FantasyLeagueWeight", "FantasyLeagueId")
+                        .HasForeignKey("csharp_ef_webapi.Models.Fantasy.FantasyLeagueWeight", "FantasyLeagueId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.FantasyNormalizedAverages", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.Fantasy.FantasyMatch", b =>
                 {
-                    b.HasOne("csharp_ef_webapi.Models.FantasyPlayer", "FantasyPlayer")
+                    b.HasOne("csharp_ef_webapi.Models.ProMetadata.Team", "DireTeam")
+                        .WithMany()
+                        .HasForeignKey("DireTeamId");
+
+                    b.HasOne("csharp_ef_webapi.Models.ProMetadata.Team", "RadiantTeam")
+                        .WithMany()
+                        .HasForeignKey("RadiantTeamId");
+
+                    b.Navigation("DireTeam");
+
+                    b.Navigation("RadiantTeam");
+                });
+
+            modelBuilder.Entity("csharp_ef_webapi.Models.Fantasy.FantasyMatchPlayer", b =>
+                {
+                    b.HasOne("csharp_ef_webapi.Models.ProMetadata.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("csharp_ef_webapi.Models.ProMetadata.Hero", "Hero")
+                        .WithMany()
+                        .HasForeignKey("HeroId");
+
+                    b.HasOne("csharp_ef_webapi.Models.Fantasy.FantasyMatch", null)
+                        .WithMany("Players")
+                        .HasForeignKey("MatchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("csharp_ef_webapi.Models.ProMetadata.Team", "Team")
+                        .WithMany()
+                        .HasForeignKey("TeamId");
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Hero");
+
+                    b.Navigation("Team");
+                });
+
+            modelBuilder.Entity("csharp_ef_webapi.Models.Fantasy.FantasyNormalizedAveragesTable", b =>
+                {
+                    b.HasOne("csharp_ef_webapi.Models.Fantasy.FantasyPlayer", "FantasyPlayer")
                         .WithMany()
                         .HasForeignKey("FantasyPlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2512,32 +2840,21 @@ namespace csharp_ef_webapi.Migrations
                     b.Navigation("FantasyPlayer");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.FantasyNormalizedAveragesTable", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.Fantasy.FantasyPlayer", b =>
                 {
-                    b.HasOne("csharp_ef_webapi.Models.FantasyPlayer", "FantasyPlayer")
-                        .WithMany()
-                        .HasForeignKey("FantasyPlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("FantasyPlayer");
-                });
-
-            modelBuilder.Entity("csharp_ef_webapi.Models.FantasyPlayer", b =>
-                {
-                    b.HasOne("csharp_ef_webapi.Models.Account", "DotaAccount")
+                    b.HasOne("csharp_ef_webapi.Models.ProMetadata.Account", "DotaAccount")
                         .WithMany()
                         .HasForeignKey("DotaAccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("csharp_ef_webapi.Models.FantasyLeague", "FantasyLeague")
+                    b.HasOne("csharp_ef_webapi.Models.Fantasy.FantasyLeague", null)
                         .WithMany("FantasyPlayers")
                         .HasForeignKey("FantasyLeagueId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("csharp_ef_webapi.Models.Team", "Team")
+                    b.HasOne("csharp_ef_webapi.Models.ProMetadata.Team", "Team")
                         .WithMany()
                         .HasForeignKey("TeamId")
                         .OnDelete(DeleteBehavior.ClientNoAction)
@@ -2545,14 +2862,23 @@ namespace csharp_ef_webapi.Migrations
 
                     b.Navigation("DotaAccount");
 
-                    b.Navigation("FantasyLeague");
-
                     b.Navigation("Team");
+                });
+
+            modelBuilder.Entity("csharp_ef_webapi.Models.FantasyNormalizedAverages", b =>
+                {
+                    b.HasOne("csharp_ef_webapi.Models.Fantasy.FantasyPlayer", "FantasyPlayer")
+                        .WithMany()
+                        .HasForeignKey("FantasyPlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FantasyPlayer");
                 });
 
             modelBuilder.Entity("csharp_ef_webapi.Models.FantasyPlayerPointTotals", b =>
                 {
-                    b.HasOne("csharp_ef_webapi.Models.FantasyPlayer", "FantasyPlayer")
+                    b.HasOne("csharp_ef_webapi.Models.Fantasy.FantasyPlayer", "FantasyPlayer")
                         .WithMany()
                         .HasForeignKey("FantasyPlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2563,13 +2889,13 @@ namespace csharp_ef_webapi.Migrations
 
             modelBuilder.Entity("csharp_ef_webapi.Models.FantasyPlayerPoints", b =>
                 {
-                    b.HasOne("csharp_ef_webapi.Models.FantasyPlayer", "FantasyPlayer")
+                    b.HasOne("csharp_ef_webapi.Models.Fantasy.FantasyPlayer", "FantasyPlayer")
                         .WithMany()
                         .HasForeignKey("FantasyPlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("csharp_ef_webapi.Models.MatchDetailsPlayer", "Match")
+                    b.HasOne("csharp_ef_webapi.Models.WebApi.MatchDetailsPlayer", "Match")
                         .WithMany()
                         .HasForeignKey("MatchDetailsPlayerId");
 
@@ -2578,98 +2904,56 @@ namespace csharp_ef_webapi.Migrations
                     b.Navigation("Match");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.GcMatchMetadata", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.GameCoordinator.GcMatchMetadata", b =>
                 {
-                    b.HasOne("csharp_ef_webapi.Models.MatchDetail", "MatchDetail")
-                        .WithOne("MatchMetadata")
-                        .HasForeignKey("csharp_ef_webapi.Models.GcMatchMetadata", "MatchId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("MatchDetail");
+                    b.HasOne("csharp_ef_webapi.Models.ProMetadata.League", null)
+                        .WithMany("MatchMetadatas")
+                        .HasForeignKey("LeagueId");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.GcMatchMetadataItemPurchase", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.GameCoordinator.GcMatchMetadataItemPurchase", b =>
                 {
-                    b.HasOne("csharp_ef_webapi.Models.GcMatchMetadataPlayer", null)
+                    b.HasOne("csharp_ef_webapi.Models.GameCoordinator.GcMatchMetadataPlayer", null)
                         .WithMany("Items")
                         .HasForeignKey("GcMatchMetadataPlayerId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.GcMatchMetadataPlayer", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.GameCoordinator.GcMatchMetadataPlayer", b =>
                 {
-                    b.HasOne("csharp_ef_webapi.Models.GcMatchMetadataTeam", null)
+                    b.HasOne("csharp_ef_webapi.Models.GameCoordinator.GcMatchMetadataTeam", null)
                         .WithMany("Players")
                         .HasForeignKey("GcMatchMetadataTeamId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.GcMatchMetadataPlayerKill", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.GameCoordinator.GcMatchMetadataPlayerKill", b =>
                 {
-                    b.HasOne("csharp_ef_webapi.Models.GcMatchMetadataPlayer", null)
+                    b.HasOne("csharp_ef_webapi.Models.GameCoordinator.GcMatchMetadataPlayer", null)
                         .WithMany("Kills")
                         .HasForeignKey("GcMatchMetadataPlayerId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.GcMatchMetadataTeam", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.GameCoordinator.GcMatchMetadataTeam", b =>
                 {
-                    b.HasOne("csharp_ef_webapi.Models.GcMatchMetadata", null)
+                    b.HasOne("csharp_ef_webapi.Models.GameCoordinator.GcMatchMetadata", null)
                         .WithMany("Teams")
                         .HasForeignKey("GcMatchMetadataId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.GcMatchMetadataTip", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.GameCoordinator.GcMatchMetadataTip", b =>
                 {
-                    b.HasOne("csharp_ef_webapi.Models.GcMatchMetadata", null)
+                    b.HasOne("csharp_ef_webapi.Models.GameCoordinator.GcMatchMetadata", null)
                         .WithMany("MatchTips")
                         .HasForeignKey("GcMatchMetadataId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.MatchDetail", b =>
-                {
-                    b.HasOne("csharp_ef_webapi.Models.League", "League")
-                        .WithMany("MatchDetails")
-                        .HasForeignKey("LeagueId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("League");
-                });
-
-            modelBuilder.Entity("csharp_ef_webapi.Models.MatchDetailsPicksBans", b =>
-                {
-                    b.HasOne("csharp_ef_webapi.Models.MatchDetail", null)
-                        .WithMany("PicksBans")
-                        .HasForeignKey("MatchId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("csharp_ef_webapi.Models.MatchDetailsPlayer", b =>
-                {
-                    b.HasOne("csharp_ef_webapi.Models.MatchDetail", null)
-                        .WithMany("Players")
-                        .HasForeignKey("MatchId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("csharp_ef_webapi.Models.MatchDetailsPlayersAbilityUpgrade", b =>
-                {
-                    b.HasOne("csharp_ef_webapi.Models.MatchDetailsPlayer", null)
-                        .WithMany("AbilityUpgrades")
-                        .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("csharp_ef_webapi.Models.MatchHighlights", b =>
                 {
-                    b.HasOne("csharp_ef_webapi.Models.FantasyPlayer", "FantasyPlayer")
+                    b.HasOne("csharp_ef_webapi.Models.Fantasy.FantasyPlayer", "FantasyPlayer")
                         .WithMany()
                         .HasForeignKey("FantasyPlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2678,30 +2962,68 @@ namespace csharp_ef_webapi.Migrations
                     b.Navigation("FantasyPlayer");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.MatchHistory", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.WebApi.MatchDetail", b =>
                 {
-                    b.HasOne("csharp_ef_webapi.Models.League", null)
-                        .WithMany("MatchHistories")
+                    b.HasOne("csharp_ef_webapi.Models.ProMetadata.League", "League")
+                        .WithMany("MatchDetails")
                         .HasForeignKey("LeagueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("League");
+                });
+
+            modelBuilder.Entity("csharp_ef_webapi.Models.WebApi.MatchDetailsPicksBans", b =>
+                {
+                    b.HasOne("csharp_ef_webapi.Models.WebApi.MatchDetail", null)
+                        .WithMany("PicksBans")
+                        .HasForeignKey("MatchId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.MatchHistoryPlayer", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.WebApi.MatchDetailsPlayer", b =>
                 {
-                    b.HasOne("csharp_ef_webapi.Models.MatchHistory", null)
+                    b.HasOne("csharp_ef_webapi.Models.WebApi.MatchDetail", null)
                         .WithMany("Players")
                         .HasForeignKey("MatchId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.FantasyDraft", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.WebApi.MatchDetailsPlayersAbilityUpgrade", b =>
+                {
+                    b.HasOne("csharp_ef_webapi.Models.WebApi.MatchDetailsPlayer", null)
+                        .WithMany("AbilityUpgrades")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("csharp_ef_webapi.Models.WebApi.MatchHistory", b =>
+                {
+                    b.HasOne("csharp_ef_webapi.Models.ProMetadata.League", null)
+                        .WithMany("MatchHistories")
+                        .HasForeignKey("LeagueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("csharp_ef_webapi.Models.WebApi.MatchHistoryPlayer", b =>
+                {
+                    b.HasOne("csharp_ef_webapi.Models.WebApi.MatchHistory", null)
+                        .WithMany("Players")
+                        .HasForeignKey("MatchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("csharp_ef_webapi.Models.Fantasy.FantasyDraft", b =>
                 {
                     b.Navigation("DraftPickPlayers");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.FantasyLeague", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.Fantasy.FantasyLeague", b =>
                 {
                     b.Navigation("FantasyDrafts");
 
@@ -2711,49 +3033,54 @@ namespace csharp_ef_webapi.Migrations
                     b.Navigation("FantasyPlayers");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.GcMatchMetadata", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.Fantasy.FantasyMatch", b =>
+                {
+                    b.Navigation("Players");
+                });
+
+            modelBuilder.Entity("csharp_ef_webapi.Models.GameCoordinator.GcMatchMetadata", b =>
                 {
                     b.Navigation("MatchTips");
 
                     b.Navigation("Teams");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.GcMatchMetadataPlayer", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.GameCoordinator.GcMatchMetadataPlayer", b =>
                 {
                     b.Navigation("Items");
 
                     b.Navigation("Kills");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.GcMatchMetadataTeam", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.GameCoordinator.GcMatchMetadataTeam", b =>
                 {
                     b.Navigation("Players");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.League", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.ProMetadata.League", b =>
                 {
                     b.Navigation("FantasyLeagues");
 
                     b.Navigation("MatchDetails");
 
                     b.Navigation("MatchHistories");
+
+                    b.Navigation("MatchMetadatas");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.MatchDetail", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.WebApi.MatchDetail", b =>
                 {
-                    b.Navigation("MatchMetadata");
-
                     b.Navigation("PicksBans");
 
                     b.Navigation("Players");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.MatchDetailsPlayer", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.WebApi.MatchDetailsPlayer", b =>
                 {
                     b.Navigation("AbilityUpgrades");
                 });
 
-            modelBuilder.Entity("csharp_ef_webapi.Models.MatchHistory", b =>
+            modelBuilder.Entity("csharp_ef_webapi.Models.WebApi.MatchHistory", b =>
                 {
                     b.Navigation("Players");
                 });

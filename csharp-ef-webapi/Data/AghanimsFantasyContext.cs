@@ -3,7 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using csharp_ef_webapi.Models;
 using SteamKit2.GC.Dota.Internal;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
+using csharp_ef_webapi.Models.Discord;
+using csharp_ef_webapi.Models.WebApi;
+using csharp_ef_webapi.Models.GameCoordinator;
+using csharp_ef_webapi.Models.ProMetadata;
+using csharp_ef_webapi.Models.Fantasy;
 
 namespace csharp_ef_webapi.Data;
 public class AghanimsFantasyContext : DbContext
@@ -17,26 +21,28 @@ public class AghanimsFantasyContext : DbContext
     {
     }
 
-    public DbSet<BalanceLedger> BalanceLedger { get; set; }
-    public DbSet<DiscordIds> DiscordIds { get; set; }
-    public DbSet<PlayerMatchDetails> PlayerMatchDetails { get; set; }
-    public DbSet<MatchStatus> MatchStatus { get; set; }
-    public DbSet<Bromance> Bromance { get; set; }
-    public DbSet<BetStreak> BetStreaks { get; set; }
-    public DbSet<MatchStreak> MatchStreaks { get; set; }
+    #region ProMetadata
     public DbSet<League> Leagues { get; set; }
     public DbSet<Account> Accounts { get; set; }
     public DbSet<Hero> Heroes { get; set; }
     public DbSet<Team> Teams { get; set; }
+    #endregion ProMetadata
+
+    #region Discord
+    public DbSet<DiscordUser> DiscordUsers { get; set; }
+    #endregion Discord
 
     #region Fantasy
     public DbSet<FantasyLeague> FantasyLeagues { get; set; }
     public DbSet<FantasyLeagueWeight> FantasyLeagueWeights { get; set; }
+    public DbSet<FantasyMatch> FantasyMatches { get; set; }
+    public DbSet<FantasyMatchPlayer> FantasyMatchPlayers { get; set; }
     public DbSet<FantasyDraft> FantasyDrafts { get; set; }
     public DbSet<FantasyPlayer> FantasyPlayers { get; set; }
     public DbSet<FantasyDraftPlayer> FantasyDraftPlayers { get; set; }
     public DbSet<FantasyPlayerPoints> FantasyPlayerPointsView { get; set; }
     public DbSet<FantasyPlayerPointTotals> FantasyPlayerPointTotalsView { get; set; }
+    public DbSet<MetadataSummary> MetadataSummaries { get; set; }
     public DbSet<FantasyNormalizedAverages> FantasyNormalizedAveragesView { get; set; }
     public DbSet<FantasyNormalizedAveragesTable> FantasyNormalizedAverages { get; set; }
     #endregion
@@ -65,9 +71,8 @@ public class AghanimsFantasyContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("nadcl");
-        modelBuilder.Entity<BalanceLedger>().ToTable("balance_ledger", "nadcl");
 
-        modelBuilder.Entity<CMsgDOTAMatch>().ToTable("gc_dota_matches", "nadcl");
+        modelBuilder.Entity<CMsgDOTAMatch>().ToTable("dota_gc_match_details", "nadcl");
         modelBuilder.Entity<CMsgDOTAMatch>().HasKey(gcm => gcm.match_id);
         modelBuilder.Entity<CMsgDOTAMatch>().Ignore(gcm => gcm.custom_game_data);
         modelBuilder.Entity<CMsgDOTAMatch>().Ignore(gcm => gcm.players);
@@ -75,11 +80,35 @@ public class AghanimsFantasyContext : DbContext
         modelBuilder.Entity<CMsgDOTAMatch>().Ignore(gcm => gcm.broadcaster_channels);
         modelBuilder.Entity<CMsgDOTAMatch>().Ignore(gcm => gcm.coaches);
 
-        modelBuilder.Entity<PlayerMatchDetails>()
-            .HasKey(pmd => new { pmd.MatchId, pmd.PlayerSlot });
 
-        modelBuilder.Entity<Bromance>()
-            .HasKey(b => new { b.bro1Name, b.bro2Name });
+        modelBuilder.Entity<CMsgDOTAMatch>(match =>
+        {
+            match.OwnsMany(m => m.players, player =>
+            {
+                player.ToTable("dota_gc_match_detail_players", "nadcl");
+                player.WithOwner().HasForeignKey("MatchId");
+                player.Property<int>("Id");
+                player.HasKey("Id");
+                player.Ignore(p => p.additional_units_inventory);
+                player.Ignore(p => p.ability_upgrades);
+                player.Ignore(p => p.custom_game_data);
+                player.Ignore(p => p.permanent_buffs);
+                player.OwnsMany(p => p.hero_damage_dealt, damage_dealt =>
+                {
+                    damage_dealt.ToTable("dota_gc_match_detail_player_damage_dealt", "nadcl");
+                    damage_dealt.WithOwner().HasForeignKey("MatchPlayerId");
+                    damage_dealt.Property<int>("Id");
+                    damage_dealt.HasKey("Id");
+                });
+                player.OwnsMany(p => p.hero_damage_received, damage_received =>
+                {
+                    damage_received.ToTable("dota_gc_match_detail_player_damage_received", "nadcl");
+                    damage_received.WithOwner().HasForeignKey("MatchPlayerId");
+                    damage_received.Property<int>("Id");
+                    damage_received.HasKey("Id");
+                });
+            });
+        });
 
         modelBuilder.Entity<League>()
             .HasMany(l => l.MatchDetails)
@@ -103,7 +132,7 @@ public class AghanimsFantasyContext : DbContext
 
         modelBuilder.Entity<FantasyLeague>()
             .HasMany(fl => fl.FantasyPlayers)
-            .WithOne(fp => fp.FantasyLeague)
+            .WithOne()
             .HasForeignKey(fp => fp.FantasyLeagueId);
 
         modelBuilder.Entity<FantasyLeague>()
@@ -116,11 +145,23 @@ public class AghanimsFantasyContext : DbContext
             .Navigation(fd => fd.DraftPickPlayers)
             .AutoInclude();
 
+        modelBuilder.Entity<FantasyMatch>()
+            .HasMany(fm => fm.Players)
+            .WithOne()
+            .HasForeignKey(fmp => fmp.MatchId);
+
         modelBuilder.Entity<FantasyPlayerPoints>().ToView("fantasy_player_points", "nadcl")
             .HasNoKey();
 
         modelBuilder.Entity<FantasyPlayerPointTotals>().ToView("fantasy_player_point_totals", "nadcl")
             .HasNoKey();
+
+        modelBuilder.Entity<MetadataSummary>().ToView("fantasy_match_metadata", "nadcl")
+            .HasNoKey()
+            .HasOne(ms => ms.FantasyPlayer)
+            .WithMany()
+            .HasForeignKey(ms => ms.FantasyPlayerId)
+            .HasPrincipalKey(fp => fp.Id);
 
         modelBuilder.Entity<FantasyNormalizedAverages>()
             .ToView("fantasy_normalized_averages", "nadcl")
@@ -143,12 +184,6 @@ public class AghanimsFantasyContext : DbContext
             .HasMany(md => md.Players)
             .WithOne()
             .HasForeignKey(p => p.MatchId);
-
-        modelBuilder.Entity<MatchDetail>()
-            .HasOne(md => md.MatchMetadata)
-            .WithOne(md => md.MatchDetail)
-            .HasForeignKey<GcMatchMetadata>(mmd => mmd.MatchId)
-            .IsRequired();
 
         modelBuilder.Entity<MatchDetailsPlayer>()
             .HasMany(mdp => mdp.AbilityUpgrades)
@@ -207,10 +242,6 @@ public class AghanimsFantasyContext : DbContext
 
         modelBuilder.Entity<GcMatchMetadata>()
             .Navigation(md => md.MatchTips)
-            .AutoInclude();
-
-        modelBuilder.Entity<GcMatchMetadata>()
-            .Navigation(md => md.MatchDetail)
             .AutoInclude();
 
         modelBuilder.Entity<GcMatchMetadataTeam>()

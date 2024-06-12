@@ -1,7 +1,8 @@
-namespace csharp_ef_webapi.Models;
+namespace csharp_ef_webapi.Models.WebApi;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using csharp_ef_webapi.Models.ProMetadata;
 using Newtonsoft.Json;
 
 // https://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/v1?
@@ -101,6 +102,4 @@ public class MatchDetail
 
     [JsonProperty("picks_bans")]
     public List<MatchDetailsPicksBans> PicksBans { get; set; } = new List<MatchDetailsPicksBans>();
-    public GcMatchMetadata? MatchMetadata { get; set; }
-
 }

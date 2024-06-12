@@ -1,4 +1,4 @@
-namespace csharp_ef_webapi.Models;
+namespace csharp_ef_webapi.Models.WebApi;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -30,7 +30,7 @@ public class MatchHistory
     [Column("start_time")]
     [JsonProperty("start_time")]
     public long StartTime { get; set; }
-    public DateTime StartTimeFormatted 
+    public DateTime StartTimeFormatted
     {
         get
         {

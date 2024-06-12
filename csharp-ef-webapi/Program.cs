@@ -127,8 +127,12 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddHostedService<DotaWebApiService>();
 builder.Services.AddHostedService<DotaSteamClientService>();
 
-// Add FantasyRepository to be used by controllers
+// Add Repositories to be used by controllers
 builder.Services.AddScoped<FantasyRepository>();
+builder.Services.AddScoped<ProMetadataRepository>();
+builder.Services.AddScoped<WebApiRepository>();
+builder.Services.AddScoped<GameCoordinatorRepository>();
+builder.Services.AddScoped<DiscordRepository>();
 
 // Add Scoped Dota Client to be called for Dota Client Background Service
 builder.Services.AddScoped<DotaClient>();

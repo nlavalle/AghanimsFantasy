@@ -1,6 +1,6 @@
 using System.Net;
 using csharp_ef_webapi.Data;
-using csharp_ef_webapi.Models;
+using csharp_ef_webapi.Models.Discord;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
@@ -37,13 +37,7 @@ public class DiscordWebApiService
             var discordObject = JsonConvert.DeserializeObject<DiscordUser>(await response.Content.ReadAsStringAsync());
             if (discordObject != null && discordObject.Username != null)
             {
-                DiscordIds newDiscordUser = new DiscordIds
-                {
-                    DiscordId = discordObject.Id,
-                    DiscordName = discordObject.Username
-                };
-
-                _dbContext.DiscordIds.Add(newDiscordUser);
+                _dbContext.DiscordUsers.Add(discordObject);
                 await _dbContext.SaveChangesAsync();
             }
             else
@@ -51,9 +45,9 @@ public class DiscordWebApiService
                 _logger.LogError($"Malformed or missing Discord response for user ID {DiscordId}");
             }
         }
-        catch(HttpRequestException ex)
+        catch (HttpRequestException ex)
         {
-            if(ex.StatusCode == HttpStatusCode.Unauthorized)
+            if (ex.StatusCode == HttpStatusCode.Unauthorized)
             {
                 _logger.LogError($"401 Unauthorized error on Discord call");
             }

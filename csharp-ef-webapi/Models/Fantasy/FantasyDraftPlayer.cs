@@ -1,4 +1,4 @@
-namespace csharp_ef_webapi.Models;
+namespace csharp_ef_webapi.Models.Fantasy;
 
 using System.ComponentModel.DataAnnotations.Schema;
 

@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 using csharp_ef_webapi.Data;
-using csharp_ef_webapi.Models;
+using csharp_ef_webapi.Models.WebApi;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -32,66 +32,68 @@ internal class LeagueHistoryContext : DotaOperationContext
 
     protected override async Task OperateAsync(CancellationToken cancellationToken)
     {
-        try{
-        Dictionary<string, string> query = new Dictionary<string, string>();
-
-        var leagues = _dbContext.Leagues.Where(l => l.IsActive).Select(l => l.Id).Distinct().ToArray();
-        var length = leagues.Length;
-
-        // Knowing the length triggers a lot of stuff
-        _totalLeagues = length;
-        Volatile.Write(ref _remainingLeagues, length);
-        _logger.LogInformation($"Fetching league matches for {length} leagues");
-        Task[] tasks = new Task[length];
-
-        for (int i = 0; i < length; i++)
+        try
         {
-            var league = leagues[i];
+            Dictionary<string, string> query = new Dictionary<string, string>();
 
-            tasks[i] = GetMatchHistoryAsync(league, cancellationToken);
-        }
+            var leagues = _dbContext.Leagues.Where(l => l.IsActive).Select(l => l.Id).Distinct().ToArray();
+            var length = leagues.Length;
 
-        await Task.WhenAll(tasks);
+            // Knowing the length triggers a lot of stuff
+            _totalLeagues = length;
+            Volatile.Write(ref _remainingLeagues, length);
+            _logger.LogInformation($"Fetching league matches for {length} leagues");
+            Task[] tasks = new Task[length];
 
-        // Going to assume that an ImmutableSortedSet is the fastest to do Contains()
-        var knownHeroes = _dbContext.Heroes.Select(x => x.Id).ToImmutableSortedSet();
-        bool triedHeroFetch = false;
-
-        // _matches is safe to use here, because this location is guaranteed to be the only user
-        foreach (MatchHistory match in _matches)
-        {
-            if (!_dbContext.MatchHistory.Any(m => m.MatchId == match.MatchId))
+            for (int i = 0; i < length; i++)
             {
-                // Set Players Match IDs since it's not in json
-                foreach (MatchHistoryPlayer player in match.Players)
+                var league = leagues[i];
+
+                tasks[i] = GetMatchHistoryAsync(league, cancellationToken);
+            }
+
+            await Task.WhenAll(tasks);
+
+            // Going to assume that an ImmutableSortedSet is the fastest to do Contains()
+            var knownHeroes = _dbContext.Heroes.Select(x => x.Id).ToImmutableSortedSet();
+            bool triedHeroFetch = false;
+
+            // _matches is safe to use here, because this location is guaranteed to be the only user
+            foreach (MatchHistory match in _matches)
+            {
+                if (!_dbContext.MatchHistory.Any(m => m.MatchId == match.MatchId))
                 {
-                    while (!knownHeroes.Contains(player.HeroId))
+                    // Set Players Match IDs since it's not in json
+                    foreach (MatchHistoryPlayer player in match.Players)
                     {
-                        if (!triedHeroFetch)
+                        while (!knownHeroes.Contains(player.HeroId))
                         {
-                            // TODO: await _apiService.StartOperation<HeroesContext>(cancellationToken, true);
-                            knownHeroes = _dbContext.Heroes.Select(x => x.Id).ToImmutableSortedSet();
-                            triedHeroFetch = true;
-                            continue;
+                            if (!triedHeroFetch)
+                            {
+                                // TODO: await _apiService.StartOperation<HeroesContext>(cancellationToken, true);
+                                knownHeroes = _dbContext.Heroes.Select(x => x.Id).ToImmutableSortedSet();
+                                triedHeroFetch = true;
+                                continue;
+                            }
+
+                            // TODO: Clarify
+                            throw new Exception("Hero does not exist.");
                         }
 
-                        // TODO: Clarify
-                        throw new Exception("Hero does not exist.");
+                        player.MatchId = match.MatchId;
                     }
-
-                    player.MatchId = match.MatchId;
+                    _dbContext.MatchHistory.Add(match);
                 }
-                _dbContext.MatchHistory.Add(match);
             }
-        }
-        
-        await _dbContext.SaveChangesAsync();
 
-        // TODO: await _apiService.StartOperation<MatchDetailsContext>(cancellationToken, true);
+            await _dbContext.SaveChangesAsync();
 
-        _logger.LogInformation($"League Match History fetch done");
+            // TODO: await _apiService.StartOperation<MatchDetailsContext>(cancellationToken, true);
+
+            _logger.LogInformation($"League Match History fetch done");
         }
-        catch (Exception ex) {
+        catch (Exception ex)
+        {
             _logger.LogError($"An error occurred: {ex.Message}");
         }
     }
@@ -122,7 +124,7 @@ internal class LeagueHistoryContext : DotaOperationContext
             HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);
 
             await WaitNextTaskScheduleAsync(cancellationToken);
-            
+
             HttpResponseMessage response = await _httpClient.SendAsync(httpRequest);
             _logger.LogInformation($"Request submitted at {DateTime.Now.Ticks}");
             response.EnsureSuccessStatusCode();
@@ -135,7 +137,7 @@ internal class LeagueHistoryContext : DotaOperationContext
             JToken matchesJson = responseObject["matches"] ?? "[]";
 
             List<MatchHistory> matchResponse = JsonConvert.DeserializeObject<List<MatchHistory>>(matchesJson.ToString()) ?? new List<MatchHistory>();
-            
+
             lock (_matches)
             {
                 _matches.AddRange(matchResponse);

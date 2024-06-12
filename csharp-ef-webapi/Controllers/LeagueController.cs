@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using csharp_ef_webapi.Models;
 using csharp_ef_webapi.Data;
 using csharp_ef_webapi.Utilities;
+using csharp_ef_webapi.Models.ProMetadata;
+using csharp_ef_webapi.Models.WebApi;
+using csharp_ef_webapi.Models.GameCoordinator;
 
 namespace csharp_ef_webapi.Controllers
 {
@@ -9,25 +11,29 @@ namespace csharp_ef_webapi.Controllers
     [ApiController]
     public class LeagueController : ControllerBase
     {
-        private readonly FantasyRepository _service;
+        private readonly ProMetadataRepository _proMetadataRepository;
+        private readonly WebApiRepository _webApiRepository;
+        private readonly GameCoordinatorRepository _gameCoordinatorRepository;
 
-        public LeagueController(FantasyRepository service)
+        public LeagueController(ProMetadataRepository proMetadataRepository, WebApiRepository webApiRepository, GameCoordinatorRepository gameCoordinatorRepository)
         {
-            _service = service;
+            _proMetadataRepository = proMetadataRepository;
+            _webApiRepository = webApiRepository;
+            _gameCoordinatorRepository = gameCoordinatorRepository;
         }
 
         // GET: api/League
         [HttpGet]
         public async Task<ActionResult<IEnumerable<League>>> GetLeagues(bool? is_active = null)
         {
-            return Ok(await _service.GetLeaguesAsync(is_active));
+            return Ok(await _proMetadataRepository.GetLeaguesAsync(is_active));
         }
 
         // GET: api/League/5
         [HttpGet("{id}")]
         public async Task<ActionResult<League>> GetLeague(int id)
         {
-            var league = await _service.GetLeagueAsync(id);
+            var league = await _proMetadataRepository.GetLeagueAsync(id);
 
             if (league == null)
             {
@@ -42,7 +48,7 @@ namespace csharp_ef_webapi.Controllers
         public async Task<ActionResult<IEnumerable<MatchHistory>>> GetLeagueMatchHistory(int fantasyLeagueId)
         {
 
-            var matches = await _service.GetMatchHistoryByFantasyLeagueAsync(fantasyLeagueId);
+            var matches = await _webApiRepository.GetMatchHistoryByFantasyLeagueAsync(fantasyLeagueId);
 
             if (matches == null || matches.Count() == 0)
             {
@@ -56,7 +62,7 @@ namespace csharp_ef_webapi.Controllers
         [HttpGet("{leagueId}/match/details")]
         public async Task<ActionResult<List<MatchDetail>>> GetLeagueMatchDetails(int fantasyLeagueId)
         {
-            var matches = await _service.GetMatchDetailsByFantasyLeagueAsync(fantasyLeagueId);
+            var matches = await _webApiRepository.GetMatchDetailsByFantasyLeagueAsync(fantasyLeagueId);
 
             if (matches == null || matches.Count() == 0)
             {
@@ -70,7 +76,7 @@ namespace csharp_ef_webapi.Controllers
         [HttpGet("{leagueId}/match/{matchId}/details")]
         public async Task<ActionResult<MatchDetail>> GetLeagueMatchIdDetails(int leagueId, long matchId)
         {
-            var matches = await _service.GetMatchDetailAsync(matchId);
+            var matches = await _webApiRepository.GetMatchDetailAsync(matchId);
 
             if (matches == null)
             {
@@ -87,7 +93,7 @@ namespace csharp_ef_webapi.Controllers
             // Limit pageSize max
             if (pageSize > 100) { pageSize = 100; }
 
-            var matches = await _service.GetLeagueMetadataAsync(leagueId);
+            var matches = await _gameCoordinatorRepository.GetLeagueMetadataAsync(leagueId);
 
             if (matches == null || matches.Count() == 0)
             {
@@ -101,68 +107,5 @@ namespace csharp_ef_webapi.Controllers
 
             return Ok(paginatedMatches);
         }
-
-        // // PUT: api/League/5
-        // // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        // [HttpPut("{id}")]
-        // public async Task<IActionResult> PutLeague(int id, League league)
-        // {
-        //     if (id != league.id)
-        //     {
-        //         return BadRequest();
-        //     }
-
-        //     _dbContext.Entry(league).State = EntityState.Modified;
-
-        //     try
-        //     {
-        //         await _dbContext.SaveChangesAsync();
-        //     }
-        //     catch (DbUpdateConcurrencyException)
-        //     {
-        //         if (!LeagueExists(id))
-        //         {
-        //             return NotFound();
-        //         }
-        //         else
-        //         {
-        //             throw;
-        //         }
-        //     }
-
-        //     return NoContent();
-        // }
-
-        // // POST: api/League
-        // // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        // [HttpPost]
-        // public async Task<ActionResult<League>> PostLeague(League league)
-        // {
-        //     _dbContext.Leagues.Add(league);
-        //     await _dbContext.SaveChangesAsync();
-
-        //     return CreatedAtAction("GetLeague", new { id = league.id }, league);
-        // }
-
-        // // DELETE: api/League/5
-        // [HttpDelete("{id}")]
-        // public async Task<IActionResult> DeleteLeague(int id)
-        // {
-        //     var league = await _dbContext.Leagues.FindAsync(id);
-        //     if (league == null)
-        //     {
-        //         return NotFound();
-        //     }
-
-        //     _dbContext.Leagues.Remove(league);
-        //     await _dbContext.SaveChangesAsync();
-
-        //     return NoContent();
-        // }
-
-        // private bool LeagueExists(int id)
-        // {
-        //     return _dbContext.Leagues.Any(e => e.id == id);
-        // }
     }
 }

@@ -53,6 +53,12 @@
                         </v-col>
                     </v-row>
                 </template>
+                <template v-slot:item.totalGoldPerMin="{ value }">
+                    {{ (value).toFixed(2) }}
+                </template>
+                <template v-slot:item.totalXpPerMin="{ value }">
+                    {{ (value).toFixed(2) }}
+                </template>
                 <template v-slot:item.totalHeroDamage="{ value }">
                     {{ (value / 1000).toFixed(1) + 'k' }}
                 </template>
@@ -116,10 +122,10 @@ const commonLeagueColumns = [
         align: 'left',
         value: (row: any) => {
             return {
-                playerName: row.player.dotaAccount.name,
-                playerPicture: row.player.dotaAccount.steamProfilePicture,
-                teamName: row.player.team.name,
-                teamPosition: row.player.teamPosition,
+                playerName: row.fantasyPlayer.dotaAccount.name,
+                playerPicture: row.fantasyPlayer.dotaAccount.steamProfilePicture,
+                teamName: row.fantasyPlayer.team.name,
+                teamPosition: row.fantasyPlayer.teamPosition,
                 totalMatches: row.matchesPlayed
             };
         },
@@ -174,7 +180,7 @@ const farmLeagueColumns = [
         key: 'totalGoldPerMin',
         title: isDesktop.value ? 'Avg GPM' : 'G',
         align: 'left',
-        value: (row: any) => row.goldPerMin,
+        value: (row: any) => row.goldPerMinAverage,
         sortable: true,
         sort: (a: number, b: number) => b - a
     },
@@ -182,7 +188,7 @@ const farmLeagueColumns = [
         key: 'totalXpPerMin',
         title: isDesktop.value ? 'Avg XPM' : 'XP',
         align: 'left',
-        value: (row: any) => row.xpPerMin,
+        value: (row: any) => row.xpPerMinAverage,
         sortable: true,
         sort: (a: number, b: number) => b - a
     },

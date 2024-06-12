@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using csharp_ef_webapi.Models.Fantasy;
 
 namespace csharp_ef_webapi.Models;
 

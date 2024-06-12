@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using csharp_ef_webapi.Models;
 using csharp_ef_webapi.Data;
+using csharp_ef_webapi.Models.ProMetadata;
+using csharp_ef_webapi.Models.Fantasy;
 
 namespace csharp_ef_webapi.Controllers
 {
@@ -8,18 +10,20 @@ namespace csharp_ef_webapi.Controllers
     [ApiController]
     public class PlayerController : ControllerBase
     {
-        private readonly FantasyRepository _service;
+        private readonly FantasyRepository _fantasyRepository;
+        private readonly ProMetadataRepository _proMetadataRepository;
 
-        public PlayerController(FantasyRepository service)
+        public PlayerController(FantasyRepository fantasyRepository, ProMetadataRepository proMetadataRepository)
         {
-            _service = service;
+            _fantasyRepository = fantasyRepository;
+            _proMetadataRepository = proMetadataRepository;
         }
 
         // GET: api/player/accounts
         [HttpGet("accounts")]
         public async Task<ActionResult<IEnumerable<Account>>> GetAccounts()
         {
-            return Ok(await _service.GetPlayerAccounts());
+            return Ok(await _proMetadataRepository.GetPlayerAccounts());
         }
 
         // GET: api/player/1/topheroes
@@ -31,7 +35,7 @@ namespace csharp_ef_webapi.Controllers
                 return BadRequest("Please specify a Fantasy Player Id");
             }
 
-            return Ok(await _service.GetFantasyPlayerTopHeroesAsync(fantasyPlayerId.Value));
+            return Ok(await _fantasyRepository.GetFantasyPlayerTopHeroesAsync(fantasyPlayerId.Value));
         }
 
         // GET: api/player/1/fantasyaverages
@@ -43,7 +47,7 @@ namespace csharp_ef_webapi.Controllers
                 return BadRequest("Please specify a Fantasy Player Id");
             }
 
-            return Ok(await _service.GetFantasyNormalizedAveragesAsync(fantasyPlayerId.Value));
+            return Ok(await _fantasyRepository.GetFantasyNormalizedAveragesAsync(fantasyPlayerId.Value));
         }
     }
 }

@@ -1,7 +1,7 @@
+namespace csharp_ef_webapi.Models.Fantasy;
+
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
-namespace csharp_ef_webapi.Models;
 
 [Table("dota_fantasy_league_weights")]
 public class FantasyLeagueWeight

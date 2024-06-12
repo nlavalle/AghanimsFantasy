@@ -1,77 +1,126 @@
 namespace csharp_ef_webapi.Models;
 
+using System.ComponentModel.DataAnnotations.Schema;
+using csharp_ef_webapi.Models.Fantasy;
+
 // This is a view model and isn't saved in the db (in case we change the scoring)
 public class MetadataSummary
 {
-    public FantasyPlayer Player { get; set; } = null!;
-    public int? MatchesPlayed {get;set;}
-    // Match Details
-    public int? Kills { get; set; }
-    public double? KillsAverage { get; set; }
-    public int? Deaths { get; set; }
-    public double? DeathsAverage { get; set; }
-    public int? Assists { get; set; }
-    public double? AssistsAverage { get; set; }
-    public int? LastHits { get; set; }
-    public double? LastHitsAverage { get; set; }
-    public int? Denies { get; set; }
-    public double? DeniesAverage { get; set; }
-    public int? GoldPerMin { get; set; }
-    public double? GoldPerMinAverage { get; set; }
-    public int? XpPerMin { get; set; }
-    public double? XpPerMinAverage { get; set; }
-    public long? Networth { get; set; }
-    public double? NetworthAverage { get; set; }
-    public int? HeroDamage { get; set; }
-    public double? HeroDamageAverage { get; set; }
-    public int? TowerDamage { get; set; }
-    public double? TowerDamageAverage { get; set; }
-    public int? HeroHealing { get; set; }
-    public double? HeroHealingAverage { get; set; }
-    public int? Gold { get; set; }
-    public double? GoldAverage { get; set; }
-    public int? ScaledHeroDamage { get; set; }
-    public double? ScaledHeroDamageAverage { get; set; }
-    public int? ScaledTowerDamage { get; set; }
-    public double? ScaledTowerDamageAverage { get; set; }
-    public int? ScaledHeroHealing { get; set; }
-    public double? ScaledHeroHealingAverage { get; set; }
+    [Column("fantasy_league_id")]
+    public long FantasyLeagueId { get; set; }
 
-    // Match Metadata
-    public uint WinStreak { get; set; }
-    public uint BestWinStreak { get; set; }
-    public float FightScore { get; set; }
-    public double? FightScoreAverage { get; set; }
-    public float FarmScore { get; set; }
-    public double? FarmScoreAverage { get; set; }
-    public float SupportScore { get; set; }
-    public double? SupportScoreAverage { get; set; }
-    public float PushScore { get; set; }
-    public double? PushScoreAverage { get; set; }
-    public uint HeroXp { get; set; }
-    public double? HeroXpAverage { get; set; }
-    public uint CampsStacked { get; set; }
-    public double? CampsStackedAverage { get; set; }
-    public uint Rampages { get; set; }
-    public double? RampagesAverage { get; set; }
-    public uint TripleKills { get; set; }
-    public double? TripleKillsAverage { get; set; }
-    public uint AegisSnatched { get; set; }
-    public double? AegisSnatchedAverage { get; set; }
-    public uint RapiersPurchased { get; set; }
-    public double? RapiersPurchasedAverage { get; set; }
-    public uint CouriersKilled { get; set; }
-    public double? CouriersKilledAverage { get; set; }
-    public uint NetworthRank { get; set; }
-    public double? NetworthRankAverage { get; set; }
+    [Column("fantasy_player_id")]
+    public long FantasyPlayerId { get; set; }
+    public FantasyPlayer? FantasyPlayer { get; set; }
+
+    [Column("matches_played")]
+    public int? MatchesPlayed { get; set; }
+
+    [Column("kills_sum")]
+    public int? Kills { get; set; }
+
+    [Column("kills_avg")]
+    public double? KillsAverage { get; set; }
+
+    [Column("deaths_sum")]
+    public int? Deaths { get; set; }
+
+    [Column("deaths_avg")]
+    public double? DeathsAverage { get; set; }
+
+    [Column("assists_sum")]
+    public int? Assists { get; set; }
+
+    [Column("assists_avg")]
+    public double? AssistsAverage { get; set; }
+
+    [Column("last_hits_sum")]
+    public int? LastHits { get; set; }
+
+    [Column("last_hits_avg")]
+    public double? LastHitsAverage { get; set; }
+
+    [Column("denies_sum")]
+    public int? Denies { get; set; }
+
+    [Column("denies_avg")]
+    public double? DeniesAverage { get; set; }
+
+    [Column("gold_per_min_sum")]
+    public int? GoldPerMin { get; set; }
+
+    [Column("gold_per_min_avg")]
+    public double? GoldPerMinAverage { get; set; }
+
+    [Column("xp_per_min_sum")]
+    public int? XpPerMin { get; set; }
+
+    [Column("xp_per_min_avg")]
+    public double? XpPerMinAverage { get; set; }
+
+    [Column("support_gold_spent_sum")]
     public uint SupportGoldSpent { get; set; }
+
+    [Column("support_gold_spent_avg")]
     public double? SupportGoldSpentAverage { get; set; }
+
+    [Column("observer_wards_placed_sum")]
     public uint ObserverWardsPlaced { get; set; }
+
+    [Column("observer_wards_placed_avg")]
     public double? ObserverWardsPlacedAverage { get; set; }
+
+    [Column("sentry_wards_placed_sum")]
     public uint SentryWardsPlaced { get; set; }
+
+    [Column("sentry_wards_placed_avg")]
     public double? SentryWardsPlacedAverage { get; set; }
+
+    [Column("dewards_sum")]
     public uint WardsDewarded { get; set; }
+
+    [Column("dewards_avg")]
     public double? WardsDewardedAverage { get; set; }
+
+    [Column("camps_stacked_sum")]
+    public uint CampsStacked { get; set; }
+
+    [Column("camps_stacked_avg")]
+    public double? CampsStackedAverage { get; set; }
+
+    [Column("stun_duration_sum")]
     public float StunDuration { get; set; }
+
+    [Column("stun_duration_avg")]
     public double? StunDurationAverage { get; set; }
+
+    [Column("net_worth_sum")]
+    public long? Networth { get; set; }
+
+    [Column("net_worth_avg")]
+    public double? NetworthAverage { get; set; }
+
+    [Column("hero_damage_sum")]
+    public int? HeroDamage { get; set; }
+
+    [Column("hero_damage_avg")]
+    public double? HeroDamageAverage { get; set; }
+
+    [Column("tower_damage_sum")]
+    public int? TowerDamage { get; set; }
+
+    [Column("tower_damage_avg")]
+    public double? TowerDamageAverage { get; set; }
+
+    [Column("hero_healing_sum")]
+    public int? HeroHealing { get; set; }
+
+    [Column("hero_healing_avg")]
+    public double? HeroHealingAverage { get; set; }
+
+    [Column("gold_sum")]
+    public int? Gold { get; set; }
+
+    [Column("gold_avg")]
+    public double? GoldAverage { get; set; }
 }

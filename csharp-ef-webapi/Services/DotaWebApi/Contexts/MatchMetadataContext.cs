@@ -1,9 +1,8 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
 using csharp_ef_webapi.Data;
-using csharp_ef_webapi.Models;
+using csharp_ef_webapi.Models.GameCoordinator;
 using ICSharpCode.SharpZipLib.BZip2;
-using Microsoft.EntityFrameworkCore;
 using ProtoBuf;
 using SteamKit2.GC.Dota.Internal;
 
@@ -66,7 +65,7 @@ internal class MatchMetadataContext : DotaOperationContext
 
                 foreach (GcMatchMetadata matchDetail in _matches)
                 {
-                    Debug.Assert(_dbContext.MatchDetails.Any(md => md.MatchId == matchDetail.MatchId));
+                    Debug.Assert(_dbContext.MatchHistory.Any(md => md.MatchId == matchDetail.MatchId));
                     _dbContext.GcMatchMetadata.Add(matchDetail);
                 }
                 await _dbContext.SaveChangesAsync();
