@@ -56,9 +56,9 @@ namespace csharp_ef_webapi.Controllers
 
         // GET: api/fantasy/league/5/metadata
         [HttpGet("league/{fantasyLeagueId}/metadata")]
-        public async Task<ActionResult<List<FantasyPlayerPointTotals>>> GetFantasyLeagueMatchMetadata(int fantasyLeagueId)
+        public async Task<ActionResult<List<MetadataSummary>>> GetFantasyLeagueMatchMetadata(int fantasyLeagueId)
         {
-            var matchSummary = await _fantasyRepository.FantasyPlayerPointTotalsByFantasyLeagueAsync(fantasyLeagueId);
+            var matchSummary = await _fantasyRepository.MetadataSummariesByFantasyLeagueAsync(fantasyLeagueId);
 
             if (matchSummary == null)
             {

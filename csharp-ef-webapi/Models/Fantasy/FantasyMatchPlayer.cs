@@ -19,7 +19,7 @@ public class FantasyMatchPlayer
 
     [Column("account_id")]
     [JsonProperty("account_id")]
-    public Account? Account { get; set; }
+    public required Account Account { get; set; }
     public string AccountFormatted
     {
         get

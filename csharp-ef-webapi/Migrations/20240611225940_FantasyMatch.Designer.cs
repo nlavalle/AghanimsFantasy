@@ -13,7 +13,7 @@ using csharp_ef_webapi.Data;
 namespace csharp_ef_webapi.Migrations
 {
     [DbContext(typeof(AghanimsFantasyContext))]
-    [Migration("20240611061359_FantasyMatch")]
+    [Migration("20240611225940_FantasyMatch")]
     partial class FantasyMatch
     {
         /// <inheritdoc />
@@ -500,7 +500,7 @@ namespace csharp_ef_webapi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<long?>("AccountId")
+                    b.Property<long>("AccountId")
                         .HasColumnType("bigint");
 
                     b.Property<long?>("AegisSnatched")
@@ -2807,7 +2807,9 @@ namespace csharp_ef_webapi.Migrations
                 {
                     b.HasOne("csharp_ef_webapi.Models.ProMetadata.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("AccountId");
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("csharp_ef_webapi.Models.ProMetadata.Hero", "Hero")
                         .WithMany()

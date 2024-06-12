@@ -110,7 +110,7 @@ CREATE UNIQUE INDEX "IX_dota_gc_match_metadata_match_id" ON nadcl.dota_gc_match_
 ALTER TABLE nadcl.dota_gc_match_metadata ADD CONSTRAINT "FK_dota_gc_match_metadata_dota_match_details_match_id" FOREIGN KEY (match_id) REFERENCES nadcl.dota_match_details (match_id) ON DELETE CASCADE;
 
 DELETE FROM "__EFMigrationsHistory"
-WHERE "MigrationId" = '20240611061359_FantasyMatch';
+WHERE "MigrationId" = '20240611225940_FantasyMatch';
 
 COMMIT;
 

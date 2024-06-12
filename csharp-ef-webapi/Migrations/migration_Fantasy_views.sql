@@ -1,3 +1,4 @@
+drop view if exists nadcl.fantasy_match_metadata;
 drop view if exists nadcl.fantasy_normalized_averages;
 drop view if exists nadcl.match_highlights;
 drop view if exists nadcl.fantasy_player_point_totals;
@@ -361,3 +362,55 @@ from avg_scores
 	cross join min_max
 ;
 
+create view nadcl.fantasy_match_metadata as
+select
+	fl.id as fantasy_league_id,
+	fp.id as fantasy_player_id,
+	count(fmp.match_id) as matches_played,
+	coalesce(sum(fmp.kills),0) as kills_sum,
+	coalesce(avg(fmp.kills),0) as kills_avg,
+	coalesce(sum(fmp.deaths),0) as deaths_sum,
+	coalesce(avg(fmp.deaths),0) as deaths_avg,
+	coalesce(sum(fmp.assists),0) as assists_sum,
+	coalesce(avg(fmp.assists),0) as assists_avg,
+	coalesce(sum(fmp.last_hits),0) as last_hits_sum,
+	coalesce(avg(fmp.last_hits),0) as last_hits_avg,
+	coalesce(sum(fmp.denies),0) as denies_sum,
+	coalesce(avg(fmp.denies),0) as denies_avg,
+	coalesce(sum(fmp.gold_per_min),0) as gold_per_min_sum,
+	coalesce(avg(fmp.gold_per_min),0) as gold_per_min_avg,
+	coalesce(sum(fmp.xp_per_min),0) as xp_per_min_sum,
+	coalesce(avg(fmp.xp_per_min),0) as xp_per_min_avg,
+	coalesce(sum(fmp.support_gold_spent),0) as support_gold_spent_sum,
+	coalesce(avg(fmp.support_gold_spent),0) as support_gold_spent_avg,
+	coalesce(sum(fmp.observer_wards_placed),0) as observer_wards_placed_sum,
+	coalesce(avg(fmp.observer_wards_placed),0) as observer_wards_placed_avg,
+	coalesce(sum(fmp.sentry_wards_placed),0) as sentry_wards_placed_sum,
+	coalesce(avg(fmp.sentry_wards_placed),0) as sentry_wards_placed_avg,
+	coalesce(sum(fmp.dewards),0) as dewards_sum,
+	coalesce(avg(fmp.dewards),0) as dewards_avg,
+	coalesce(sum(fmp.camps_stacked),0) as camps_stacked_sum,
+	coalesce(avg(fmp.camps_stacked),0) as camps_stacked_avg,
+	coalesce(sum(fmp.stun_duration),0) as stun_duration_sum,
+	coalesce(avg(fmp.stun_duration),0) as stun_duration_avg,
+	coalesce(sum(fmp.net_worth),0) as net_worth_sum,
+	coalesce(avg(fmp.net_worth),0) as net_worth_avg,
+	coalesce(sum(fmp.hero_damage),0) as hero_damage_sum,
+	coalesce(avg(fmp.hero_damage),0) as hero_damage_avg,
+	coalesce(sum(fmp.tower_damage),0) as tower_damage_sum,
+	coalesce(avg(fmp.tower_damage),0) as tower_damage_avg,
+	coalesce(sum(fmp.hero_healing),0) as hero_healing_sum,
+	coalesce(avg(fmp.hero_healing),0) as hero_healing_avg,
+	coalesce(sum(fmp.gold),0) as gold_sum,
+	coalesce(avg(fmp.gold),0) as gold_avg
+from nadcl.dota_fantasy_leagues fl
+	join nadcl.dota_fantasy_players fp
+		on fl.id = fp.fantasy_league_id
+	left join nadcl.fantasy_match fm
+		on fl.league_id = fm.league_id
+			and fl.league_start_time <= fm.start_time
+			and fl.league_end_time >= fm.start_time
+	left join nadcl.fantasy_match_player fmp
+		on fm.match_id = fmp.match_id and fmp."AccountId" = fp.dota_account_id
+group by fl.id, fp.id
+;

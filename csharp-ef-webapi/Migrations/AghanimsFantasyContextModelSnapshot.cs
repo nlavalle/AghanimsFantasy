@@ -497,7 +497,7 @@ namespace csharp_ef_webapi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<long?>("AccountId")
+                    b.Property<long>("AccountId")
                         .HasColumnType("bigint");
 
                     b.Property<long?>("AegisSnatched")
@@ -2453,7 +2453,7 @@ namespace csharp_ef_webapi.Migrations
 
             modelBuilder.Entity("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch", b =>
                 {
-                    b.OwnsMany("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player", "players", b1 =>
+                    b.OwnsMany("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch.players#SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player", "players", b1 =>
                         {
                             b1.Property<int>("Id")
                                 .ValueGeneratedOnAdd()
@@ -2674,7 +2674,7 @@ namespace csharp_ef_webapi.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("MatchId");
 
-                            b1.OwnsMany("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player+HeroDamageReceived", "hero_damage_dealt", b2 =>
+                            b1.OwnsMany("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch.players#SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player.hero_damage_dealt#SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player+HeroDamageReceived", "hero_damage_dealt", b2 =>
                                 {
                                     b2.Property<int>("Id")
                                         .ValueGeneratedOnAdd()
@@ -2704,7 +2704,7 @@ namespace csharp_ef_webapi.Migrations
                                         .HasForeignKey("MatchPlayerId");
                                 });
 
-                            b1.OwnsMany("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player+HeroDamageReceived", "hero_damage_received", b2 =>
+                            b1.OwnsMany("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch.players#SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player.hero_damage_received#SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player+HeroDamageReceived", "hero_damage_received", b2 =>
                                 {
                                     b2.Property<int>("Id")
                                         .ValueGeneratedOnAdd()
@@ -2804,7 +2804,9 @@ namespace csharp_ef_webapi.Migrations
                 {
                     b.HasOne("csharp_ef_webapi.Models.ProMetadata.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("AccountId");
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("csharp_ef_webapi.Models.ProMetadata.Hero", "Hero")
                         .WithMany()

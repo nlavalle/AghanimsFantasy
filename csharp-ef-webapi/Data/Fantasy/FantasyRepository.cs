@@ -265,6 +265,19 @@ public class FantasyRepository : IFantasyRepository
         return updateDraft;
     }
 
+
+    public async Task<IEnumerable<MetadataSummary>> MetadataSummariesByFantasyLeagueAsync(int FantasyLeagueId)
+    {
+        _logger.LogInformation($"Fetching Metadata for Fantasy League Id: {FantasyLeagueId}");
+
+        List<MetadataSummary> metadataSummaries = await _dbContext.MetadataSummaries
+            .Where(ms => ms.FantasyLeagueId == FantasyLeagueId)
+            .Include(ms => ms.FantasyPlayer)
+            .ToListAsync();
+
+        return metadataSummaries;
+    }
+
     #endregion Fantasy
 
     #region Match

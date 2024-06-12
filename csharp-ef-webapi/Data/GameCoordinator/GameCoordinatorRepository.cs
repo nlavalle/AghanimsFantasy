@@ -1,3 +1,5 @@
+using System.Diagnostics.Tracing;
+using csharp_ef_webapi.Models;
 using csharp_ef_webapi.Models.GameCoordinator;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
@@ -82,7 +84,6 @@ public class GameCoordinatorRepository : IGameCoordinatorRepository
 
         return await matchMetadataQuery.FirstOrDefaultAsync();
     }
-
 
     private IQueryable<GcMatchMetadata> QueryLeagueMatchMetadata(int? LeagueId)
     {

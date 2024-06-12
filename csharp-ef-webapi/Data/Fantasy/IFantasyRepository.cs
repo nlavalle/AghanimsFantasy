@@ -17,6 +17,7 @@ public interface IFantasyRepository
     Task<FantasyDraftPointTotals?> FantasyDraftPointsByUserLeagueAsync(long UserDiscordAccountId, int LeagueId);
     Task ClearUserFantasyPlayersAsync(long UserDiscordAccountId, int LeagueId);
     Task<FantasyDraft> AddNewUserFantasyPlayerAsync(long UserDiscordAccountId, int LeagueId, long? FantasyPlayerId, int DraftOrder);
+    Task<IEnumerable<MetadataSummary>> MetadataSummariesByFantasyLeagueAsync(int FantasyLeagueId);
 
     // Matches
     Task<IEnumerable<MatchHighlights>> GetLastNMatchHighlights(int FantasyLeagueId, int MatchCount);

@@ -124,7 +124,7 @@ internal class FantasyMatchContext : DotaOperationContext
                 .SelectMany(match => match.players,
                 (left, right) => new { Match = left, MatchPlayer = right })
                 .Where(gcmp => !_dbContext.FantasyMatchPlayers.Any(fmp => fmp.MatchId == (long)gcmp.Match.match_id && fmp.Account != null && fmp.Account.Id == gcmp.MatchPlayer.account_id))
-                .Take(50)
+                .Take(500) // 10 players per match and 50 matches per pull so this feels equivalent
                 .ToList();
 
             if (gcMatchPlayers.Count() > 0)

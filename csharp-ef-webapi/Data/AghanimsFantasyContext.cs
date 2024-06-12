@@ -42,6 +42,7 @@ public class AghanimsFantasyContext : DbContext
     public DbSet<FantasyDraftPlayer> FantasyDraftPlayers { get; set; }
     public DbSet<FantasyPlayerPoints> FantasyPlayerPointsView { get; set; }
     public DbSet<FantasyPlayerPointTotals> FantasyPlayerPointTotalsView { get; set; }
+    public DbSet<MetadataSummary> MetadataSummaries { get; set; }
     public DbSet<FantasyNormalizedAverages> FantasyNormalizedAveragesView { get; set; }
     public DbSet<FantasyNormalizedAveragesTable> FantasyNormalizedAverages { get; set; }
     #endregion
@@ -154,6 +155,13 @@ public class AghanimsFantasyContext : DbContext
 
         modelBuilder.Entity<FantasyPlayerPointTotals>().ToView("fantasy_player_point_totals", "nadcl")
             .HasNoKey();
+
+        modelBuilder.Entity<MetadataSummary>().ToView("fantasy_match_metadata", "nadcl")
+            .HasNoKey()
+            .HasOne(ms => ms.FantasyPlayer)
+            .WithMany()
+            .HasForeignKey(ms => ms.FantasyPlayerId)
+            .HasPrincipalKey(fp => fp.Id);
 
         modelBuilder.Entity<FantasyNormalizedAverages>()
             .ToView("fantasy_normalized_averages", "nadcl")

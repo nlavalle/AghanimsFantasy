@@ -271,7 +271,7 @@ namespace csharp_ef_webapi.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     match_id = table.Column<long>(type: "bigint", nullable: false),
-                    AccountId = table.Column<long>(type: "bigint", nullable: true),
+                    AccountId = table.Column<long>(type: "bigint", nullable: false),
                     TeamId = table.Column<long>(type: "bigint", nullable: true),
                     match_detail_player_parsed = table.Column<bool>(type: "boolean", nullable: false),
                     gc_metadata_player_parsed = table.Column<bool>(type: "boolean", nullable: false),
@@ -316,7 +316,8 @@ namespace csharp_ef_webapi.Migrations
                         column: x => x.AccountId,
                         principalSchema: "nadcl",
                         principalTable: "dota_accounts",
-                        principalColumn: "id");
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_fantasy_match_player_dota_heroes_HeroId",
                         column: x => x.HeroId,
