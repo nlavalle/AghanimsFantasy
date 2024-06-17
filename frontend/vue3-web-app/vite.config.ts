@@ -51,6 +51,18 @@ export default defineConfig({
           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
           'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization'
         }
+      },
+      '/swagger': {
+        target: 'https://localhost:5001',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/swagger/, '/swagger'),
+        secure: false,
+        headers:
+        {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization'
+        }
       }
     },
   },

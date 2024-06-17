@@ -85,7 +85,7 @@
 import { ref, defineModel, onMounted, watch, computed } from 'vue';
 import { VRow, VCol, VDataTable, VPagination, VTabs, VTab } from 'vuetify/components';
 import { localApiService } from '@/services/localApiService';
-import type { League } from '@/stores/league';
+import type { League } from '@/types/League';
 
 const isDesktop = ref(window.outerWidth >= 600);
 

@@ -34,6 +34,26 @@ public class ProMetadataRepository : IProMetadataRepository
 
         return await _dbContext.Leagues.FindAsync(LeagueId);
     }
+
+    public async Task AddLeagueAsync(League newLeague)
+    {
+        _logger.LogInformation($"Adding new League {newLeague.Name}");
+
+        await _dbContext.Leagues.AddAsync(newLeague);
+        await _dbContext.SaveChangesAsync();
+
+        return;
+    }
+
+    public async Task DeleteLeagueAsync(League deleteLeague)
+    {
+        _logger.LogInformation($"Removing League {deleteLeague.Name}");
+
+        _dbContext.Leagues.Remove(deleteLeague);
+        await _dbContext.SaveChangesAsync();
+
+        return;
+    }
     #endregion League
 
     #region Team

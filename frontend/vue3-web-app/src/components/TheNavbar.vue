@@ -7,6 +7,7 @@
             <v-tab to="/about" min-width="80px" width="80px">About</v-tab>
             <v-tab min-width="90px" width="90px">Fantasy</v-tab>
             <v-tab to="/stats" min-width="70px" width="70px">Stats</v-tab>
+            <v-tab v-show="authStore.user?.isAdmin ?? false" to="/admin" min-width="80px" width="80px">Admin</v-tab>
         </v-tabs>
         <v-spacer />
         <LoginDiscord class="mt-3 login-discord" />
@@ -23,8 +24,11 @@ import FantasyNavbar from '@/components/Fantasy/FantasyNavbar.vue';
 import LoginDiscord from '@/components/LoginDiscord.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faHouse } from '@fortawesome/free-solid-svg-icons';
+import { useAuthStore } from '@/stores/auth';
 
 const selectedTab = ref(0)
+
+const authStore = useAuthStore();
 
 </script>
 

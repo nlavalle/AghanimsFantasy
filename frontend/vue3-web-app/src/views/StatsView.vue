@@ -48,21 +48,22 @@
 import { ref, onMounted, computed } from 'vue';
 import { VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem, VListItem, VSelect } from 'vuetify/components';
 import { localApiService } from '@/services/localApiService';
-import { useLeagueStore, type League } from '@/stores/league';
+import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import FantasyDataTable from '@/components/Stats/FantasyDataTable.vue';
 import LeagueDataTable from '@/components/Stats/LeagueDataTable.vue';
+import type { FantasyLeague } from '@/types/FantasyLeague';
 
 const statsTab = ref('fantasy')
-const leagueStore = useLeagueStore();
+const leagueStore = useFantasyLeagueStore();
 
-const selectedLeague = ref<League>();
+const selectedLeague = ref<FantasyLeague>();
 
 const availableLeagues = computed(() => {
   return leagueStore.activeLeagues
 })
 
 onMounted(() => {
-  localApiService.getLeagues().then((result: any) => {
+  localApiService.getFantasyLeagues().then((result: any) => {
     leagueStore.setLeagues(result);
   })
 })

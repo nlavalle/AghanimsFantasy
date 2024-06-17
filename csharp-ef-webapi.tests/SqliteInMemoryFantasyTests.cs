@@ -676,7 +676,7 @@ public class SqliteInMemoryFantasyTests : IDisposable
         var loggerMock = new Mock<ILogger<FantasyRepository>>();
         var repository = new FantasyRepository(loggerMock.Object, context);
 
-        var fantasyPlayers = await repository.FantasyPlayersByFantasyLeagueAsync(1);
+        var fantasyPlayers = await repository.GetFantasyPlayersAsync(1);
         Assert.Equal(3, fantasyPlayers.Count());
         Assert.IsAssignableFrom<IEnumerable<FantasyPlayer>>(fantasyPlayers);
     }
@@ -688,7 +688,7 @@ public class SqliteInMemoryFantasyTests : IDisposable
         var loggerMock = new Mock<ILogger<FantasyRepository>>();
         var repository = new FantasyRepository(loggerMock.Object, context);
 
-        var fantasyPlayers = await repository.FantasyPlayersByFantasyLeagueAsync(null);
+        var fantasyPlayers = await repository.GetFantasyPlayersAsync(null);
         Assert.Equal(4, fantasyPlayers.Count());
         Assert.IsAssignableFrom<IEnumerable<FantasyPlayer>>(fantasyPlayers);
     }
@@ -700,7 +700,7 @@ public class SqliteInMemoryFantasyTests : IDisposable
         var loggerMock = new Mock<ILogger<FantasyRepository>>();
         var repository = new FantasyRepository(loggerMock.Object, context);
 
-        var fantasyPlayers = await repository.FantasyPlayersByFantasyLeagueAsync(3);
+        var fantasyPlayers = await repository.GetFantasyPlayersAsync(3);
         Assert.Empty(fantasyPlayers);
     }
 
