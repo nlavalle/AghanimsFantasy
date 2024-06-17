@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 export interface User {
   id: number
   name: string
+  isAdmin: boolean
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -54,7 +55,12 @@ export const useAuthStore = defineStore('auth', {
                 (claim: { type: string }) =>
                   claim.type ===
                   'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'
-              ).value
+              ).value,
+              isAdmin: data.find(
+                (claim: { type: string }) =>
+                  claim.type ===
+                  'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
+              ).value == "admin",
             }
           })
       }

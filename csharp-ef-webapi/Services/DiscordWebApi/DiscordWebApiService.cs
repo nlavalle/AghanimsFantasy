@@ -1,7 +1,6 @@
 using System.Net;
 using csharp_ef_webapi.Data;
 using csharp_ef_webapi.Models.Discord;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace csharp_ef_webapi.Services;

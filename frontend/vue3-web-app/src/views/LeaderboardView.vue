@@ -15,12 +15,12 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { VContainer, VRow } from 'vuetify/components'
 import { localApiService } from '@/services/localApiService'
 import { useAuthStore, type User } from '@/stores/auth'
-import { useLeagueStore } from '@/stores/league'
+import { useFantasyLeagueStore } from '@/stores/fantasyLeague'
 import LeaderboardComponent from '@/components/Fantasy/LeaderboardComponent.vue'
 import type { LeaderboardItem } from '@/types/LeaderboardItem'
 
 const authStore = useAuthStore()
-const leagueStore = useLeagueStore()
+const leagueStore = useFantasyLeagueStore()
 
 const fantasyLeaderboard = ref([])
 

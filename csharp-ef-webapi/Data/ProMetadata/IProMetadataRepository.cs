@@ -6,6 +6,8 @@ public interface IProMetadataRepository
     // Leagues
     Task<League?> GetLeagueAsync(int LeagueId);
     Task<IEnumerable<League>> GetLeaguesAsync(bool? IsActive);
+    Task AddLeagueAsync(League newLeague);
+    Task DeleteLeagueAsync(League deleteLeague);
 
     // Teams
     Task<IEnumerable<Team>> GetTeamsAsync();

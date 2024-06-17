@@ -22,16 +22,20 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useLeagueStore, type League } from '@/stores/league'
+import { useFantasyLeagueStore } from '@/stores/fantasyLeague'
 import { localApiService } from '@/services/localApiService'
 import { VContainer, VRow, VCol, VSelect, VListItem } from 'vuetify/components'
+import type { FantasyLeague } from '@/types/FantasyLeague';
 
-const leagueStore = useLeagueStore()
-const selectedLeague = ref<League>({
+const leagueStore = useFantasyLeagueStore()
+const selectedLeague = ref<FantasyLeague>({
   id: 0,
+  leagueId: 0,
   isActive: false,
   name: '',
-  fantasyDraftLocked: 0
+  fantasyDraftLocked: 0,
+  leagueStartTime: 0,
+  leagueEndTime: 0
 })
 
 const leagueOptions = computed(() => {
@@ -39,7 +43,7 @@ const leagueOptions = computed(() => {
 })
 
 onMounted(() => {
-  localApiService.getLeagues().then((result: any) => {
+  localApiService.getFantasyLeagues().then((result: any) => {
     leagueStore.setLeagues(result)
     //default to most recent league
     selectedLeague.value = leagueStore.activeLeagues.reduce((max, current) => {

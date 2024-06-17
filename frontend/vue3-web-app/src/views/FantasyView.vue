@@ -49,7 +49,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { VSpacer, VBtn, VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem } from 'vuetify/components';
 import { useAuthStore } from '@/stores/auth';
-import { useLeagueStore } from '@/stores/league';
+import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import { localApiService } from '@/services/localApiService';
 import CurrentDraft from '@/components/Fantasy/CurrentDraft.vue';
 import CreateDraft from '@/components/Fantasy/CreateDraft/CreateDraft.vue';
@@ -58,7 +58,7 @@ import AlertDialog from '@/components/AlertDialog.vue'
 import ErrorDialog from '@/components/ErrorDialog.vue';
 
 const authStore = useAuthStore();
-const leagueStore = useLeagueStore();
+const leagueStore = useFantasyLeagueStore();
 const { fantasyDraftPicks, setFantasyDraftPicks, setFantasyPlayers } = fantasyDraftState();
 
 const showSuccessModal = ref(false);

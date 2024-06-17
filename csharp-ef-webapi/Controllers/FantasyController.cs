@@ -37,7 +37,7 @@ namespace csharp_ef_webapi.Controllers
         [HttpGet("players/{leagueId}")]
         public async Task<ActionResult<List<FantasyPlayer>>> GetFantasyPlayers(int? leagueId)
         {
-            var players = await _fantasyRepository.FantasyPlayersByFantasyLeagueAsync(leagueId);
+            var players = await _fantasyRepository.GetFantasyPlayersAsync(leagueId);
             return Ok(players);
         }
 
@@ -191,7 +191,7 @@ namespace csharp_ef_webapi.Controllers
                 return BadRequest("Please provide a League ID to fetch a draft of");
             }
 
-            var fantasyPoints = await _fantasyRepository.FantasyPlayersByFantasyLeagueAsync(leagueId.Value);
+            var fantasyPoints = await _fantasyRepository.GetFantasyPlayersAsync(leagueId.Value);
             if (fantasyPoints.Count() == 0)
             {
                 // League doesn't have fantasy players/points yet

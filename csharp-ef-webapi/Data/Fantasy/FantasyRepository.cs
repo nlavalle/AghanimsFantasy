@@ -22,6 +22,8 @@ public class FantasyRepository : IFantasyRepository
 
     #region Fantasy
 
+    #region FantasyLeague
+
     public async Task<IEnumerable<FantasyLeague>> GetFantasyLeaguesAsync(bool? IsActive)
     {
         _logger.LogInformation($"Fetching All Fantasy Leagues");
@@ -38,9 +40,33 @@ public class FantasyRepository : IFantasyRepository
         return await _dbContext.FantasyLeagues.FindAsync(FantasyLeagueId);
     }
 
-    public async Task<IEnumerable<FantasyPlayer>> FantasyPlayersByFantasyLeagueAsync(int? FantasyLeagueId)
+    public async Task AddFantasyLeagueAsync(FantasyLeague newFantasyLeague)
     {
-        _logger.LogInformation($"Fetching Fantasy Players Fantasy League Id: {FantasyLeagueId}");
+        _logger.LogInformation($"Adding new Fantasy League {newFantasyLeague.Name}");
+
+        await _dbContext.FantasyLeagues.AddAsync(newFantasyLeague);
+        await _dbContext.SaveChangesAsync();
+
+        return;
+    }
+
+    public async Task DeleteFantasyLeagueAsync(FantasyLeague deleteFantasyLeague)
+    {
+        _logger.LogInformation($"Removing Fantasy League {deleteFantasyLeague.Name}");
+
+        _dbContext.FantasyLeagues.Remove(deleteFantasyLeague);
+        await _dbContext.SaveChangesAsync();
+
+        return;
+    }
+    #endregion FantasyLeague
+
+
+    #region FantasyPlayer
+
+    public async Task<IEnumerable<FantasyPlayer>> GetFantasyPlayersAsync(int? FantasyLeagueId)
+    {
+        _logger.LogInformation($"Get Fantasy Players by Fantasy League Id: {FantasyLeagueId}");
 
         var fantasyPlayerLeagueQuery = _dbContext.FantasyPlayers
             .Include(fp => fp.Team)
@@ -49,27 +75,36 @@ public class FantasyRepository : IFantasyRepository
             .OrderBy(fp => fp.Team.Name)
                 .ThenBy(fp => fp.DotaAccount.Name);
 
-        _logger.LogDebug($"Fantasy Players by Fantasy League Query: {fantasyPlayerLeagueQuery.ToQueryString()}");
+        _logger.LogDebug($"Get Fantasy Players by Fantasy League Query: {fantasyPlayerLeagueQuery.ToQueryString()}");
 
         return await fantasyPlayerLeagueQuery.ToListAsync();
     }
 
-    public async Task<IEnumerable<FantasyDraft>> FantasyDraftsByUserLeagueAsync(long UserDiscordAccountId, int FantasyLeagueId)
+    public async Task<FantasyPlayer?> GetFantasyPlayerAsync(int FantasyPlayerId)
     {
-        _logger.LogInformation($"Fetching User {UserDiscordAccountId} Fantasy Draft for Fantasy League Id: {FantasyLeagueId}");
+        _logger.LogInformation($"Get Single Fantasy Player {FantasyPlayerId}");
 
-        var fantasyDraftsUserQuery = _dbContext.FantasyDrafts
-            .Where(fd => fd.FantasyLeagueId == FantasyLeagueId && fd.DiscordAccountId == UserDiscordAccountId)
-            .Include(fd => fd.DraftPickPlayers.Where(dpp => dpp.FantasyPlayer != null))
-                .ThenInclude(dpp => dpp.FantasyPlayer)
-                .ThenInclude(fp => fp!.Team)
-            .Include(fd => fd.DraftPickPlayers.Where(dpp => dpp.FantasyPlayer != null))
-                .ThenInclude(dpp => dpp.FantasyPlayer)
-                .ThenInclude(fp => fp!.DotaAccount);
+        return await _dbContext.FantasyPlayers.FindAsync(FantasyPlayerId);
+    }
 
-        _logger.LogDebug($"Fantasy Drafts by User and Fantasy League Query: {fantasyDraftsUserQuery.ToQueryString()}");
+    public async Task AddFantasyPlayerAsync(FantasyPlayer newFantasyPlayer)
+    {
+        _logger.LogInformation($"Adding new Fantasy Player {newFantasyPlayer.DotaAccount.Name}");
 
-        return await fantasyDraftsUserQuery.ToListAsync();
+        await _dbContext.FantasyPlayers.AddAsync(newFantasyPlayer);
+        await _dbContext.SaveChangesAsync();
+
+        return;
+    }
+
+    public async Task DeleteFantasyPlayerAsync(FantasyPlayer deleteFantasyPlayer)
+    {
+        _logger.LogInformation($"Removing Fantasy League {deleteFantasyPlayer.DotaAccount.Name}");
+
+        _dbContext.FantasyPlayers.Remove(deleteFantasyPlayer);
+        await _dbContext.SaveChangesAsync();
+
+        return;
     }
 
     public async Task<IEnumerable<FantasyPlayerPoints>> FantasyPlayerPointsByFantasyLeagueAsync(int FantasyLeagueId)
@@ -98,6 +133,86 @@ public class FantasyRepository : IFantasyRepository
         _logger.LogDebug($"Match Details Query: {fantasyPlayerTotalsQuery.ToQueryString()}");
 
         return await fantasyPlayerTotalsQuery.ToListAsync();
+    }
+
+    public async Task<FantasyPlayerTopHeroes> GetFantasyPlayerTopHeroesAsync(long FantasyPlayerId)
+    {
+        _logger.LogInformation($"Getting Player Averages");
+
+        FantasyPlayer? fantasyPlayer = await _dbContext.FantasyPlayers.FindAsync(FantasyPlayerId);
+
+        if (fantasyPlayer == null)
+        {
+            // No player found
+            return new FantasyPlayerTopHeroes();
+        }
+
+        var heroes = await _dbContext.Heroes.ToListAsync();
+
+        var topHeroIds = await _dbContext.FantasyMatches
+                .SelectMany(
+                    md => md.Players,
+                    (left, right) => new { Match = left, MatchPlayer = right }
+                )
+                .Where(mdp => mdp.MatchPlayer.Account != null && mdp.MatchPlayer.Account.Id == fantasyPlayer.DotaAccountId)
+                .Where(mdp => mdp.MatchPlayer.Hero != null)
+                .GroupBy(match => match.MatchPlayer.Hero)
+                .Select(group => new
+                {
+                    HeroId = group.Key!.Id,
+                    Count = group.Count(),
+                    Wins = group.Where(g => (g.Match.RadiantWin != null && g.Match.RadiantWin.Value && !g.MatchPlayer.DotaTeamSide) ||
+                    (g.Match.RadiantWin != null && !g.Match.RadiantWin.Value && g.MatchPlayer.DotaTeamSide)).Count(),
+                    Losses = group.Where(g => (g.Match.RadiantWin != null && !g.Match.RadiantWin.Value && !g.MatchPlayer.DotaTeamSide) ||
+                    (g.Match.RadiantWin != null && g.Match.RadiantWin.Value && g.MatchPlayer.DotaTeamSide)).Count()
+                })
+                .OrderByDescending(group => group.Count)
+                .Take(3)
+                .ToArrayAsync();
+
+        var topHeroes = topHeroIds.Select(thi => new TopHeroCount
+        {
+            Hero = heroes.First(h => h.Id == thi.HeroId),
+            Count = thi.Count,
+            Wins = thi.Wins,
+            Losses = thi.Losses
+        })
+        .ToArray();
+
+        return new FantasyPlayerTopHeroes
+        {
+            FantasyPlayer = fantasyPlayer,
+            FantasyPlayerId = fantasyPlayer.Id,
+            TopHeroes = topHeroes
+        };
+    }
+
+    public async Task<IEnumerable<FantasyNormalizedAveragesTable>> GetFantasyNormalizedAveragesAsync(long FantasyPlayerId)
+    {
+        _logger.LogInformation($"Getting Player Averages");
+
+        return await _dbContext.FantasyNormalizedAverages
+                .Where(fnp => fnp.FantasyPlayerId == FantasyPlayerId)
+                .ToListAsync();
+    }
+    #endregion FantasyPlayer
+
+    public async Task<IEnumerable<FantasyDraft>> FantasyDraftsByUserLeagueAsync(long UserDiscordAccountId, int FantasyLeagueId)
+    {
+        _logger.LogInformation($"Fetching User {UserDiscordAccountId} Fantasy Draft for Fantasy League Id: {FantasyLeagueId}");
+
+        var fantasyDraftsUserQuery = _dbContext.FantasyDrafts
+            .Where(fd => fd.FantasyLeagueId == FantasyLeagueId && fd.DiscordAccountId == UserDiscordAccountId)
+            .Include(fd => fd.DraftPickPlayers.Where(dpp => dpp.FantasyPlayer != null))
+                .ThenInclude(dpp => dpp.FantasyPlayer)
+                .ThenInclude(fp => fp!.Team)
+            .Include(fd => fd.DraftPickPlayers.Where(dpp => dpp.FantasyPlayer != null))
+                .ThenInclude(dpp => dpp.FantasyPlayer)
+                .ThenInclude(fp => fp!.DotaAccount);
+
+        _logger.LogDebug($"Fantasy Drafts by User and Fantasy League Query: {fantasyDraftsUserQuery.ToQueryString()}");
+
+        return await fantasyDraftsUserQuery.ToListAsync();
     }
 
     public async Task<IEnumerable<FantasyDraftPointTotals>> FantasyDraftPointsByFantasyLeagueAsync(int FantasyLeagueId)
@@ -297,69 +412,4 @@ public class FantasyRepository : IFantasyRepository
         return await matchHighlightsQuery.ToListAsync();
     }
     #endregion Match
-
-    #region Player
-
-    public async Task<IEnumerable<FantasyNormalizedAveragesTable>> GetFantasyNormalizedAveragesAsync(long FantasyPlayerId)
-    {
-        _logger.LogInformation($"Getting Player Averages");
-
-        return await _dbContext.FantasyNormalizedAverages
-                .Where(fnp => fnp.FantasyPlayerId == FantasyPlayerId)
-                .ToListAsync();
-    }
-
-    public async Task<FantasyPlayerTopHeroes> GetFantasyPlayerTopHeroesAsync(long FantasyPlayerId)
-    {
-        _logger.LogInformation($"Getting Player Averages");
-
-        FantasyPlayer? fantasyPlayer = await _dbContext.FantasyPlayers.FindAsync(FantasyPlayerId);
-
-        if (fantasyPlayer == null)
-        {
-            // No player found
-            return new FantasyPlayerTopHeroes();
-        }
-
-        var heroes = await _dbContext.Heroes.ToListAsync();
-
-        var topHeroIds = await _dbContext.FantasyMatches
-                .SelectMany(
-                    md => md.Players,
-                    (left, right) => new { Match = left, MatchPlayer = right }
-                )
-                .Where(mdp => mdp.MatchPlayer.Account != null && mdp.MatchPlayer.Account.Id == fantasyPlayer.DotaAccountId)
-                .Where(mdp => mdp.MatchPlayer.Hero != null)
-                .GroupBy(match => match.MatchPlayer.Hero)
-                .Select(group => new
-                {
-                    HeroId = group.Key!.Id,
-                    Count = group.Count(),
-                    Wins = group.Where(g => (g.Match.RadiantWin != null && g.Match.RadiantWin.Value && !g.MatchPlayer.DotaTeamSide) ||
-                    (g.Match.RadiantWin != null && !g.Match.RadiantWin.Value && g.MatchPlayer.DotaTeamSide)).Count(),
-                    Losses = group.Where(g => (g.Match.RadiantWin != null && !g.Match.RadiantWin.Value && !g.MatchPlayer.DotaTeamSide) ||
-                    (g.Match.RadiantWin != null && g.Match.RadiantWin.Value && g.MatchPlayer.DotaTeamSide)).Count()
-                })
-                .OrderByDescending(group => group.Count)
-                .Take(3)
-                .ToArrayAsync();
-
-        var topHeroes = topHeroIds.Select(thi => new TopHeroCount
-        {
-            Hero = heroes.First(h => h.Id == thi.HeroId),
-            Count = thi.Count,
-            Wins = thi.Wins,
-            Losses = thi.Losses
-        })
-        .ToArray();
-
-        return new FantasyPlayerTopHeroes
-        {
-            FantasyPlayer = fantasyPlayer,
-            FantasyPlayerId = fantasyPlayer.Id,
-            TopHeroes = topHeroes
-        };
-    }
-
-    #endregion Player
 }

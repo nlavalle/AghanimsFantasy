@@ -25,5 +25,27 @@ public class DiscordRepository : IDiscordRepository
 
         return await _dbContext.DiscordUsers.Where(di => di.Id == GetDiscordId).FirstOrDefaultAsync();
     }
+
+    public async Task AddDiscordUserAsync(DiscordUser newDiscordUser)
+    {
+        _logger.LogInformation($"Adding Discord User {newDiscordUser.Username}");
+
+        await _dbContext.DiscordUsers.AddAsync(newDiscordUser);
+        await _dbContext.SaveChangesAsync();
+
+        return;
+    }
+
+    public async Task<bool> IsUserAdminAsync(long UserDiscordId)
+    {
+        _logger.LogDebug($"Checking if Discord ID {UserDiscordId} is admin.");
+
+        var discordUser = await _dbContext.DiscordUsers.FirstOrDefaultAsync(di => di.Id == UserDiscordId);
+        if (discordUser == null) return false;
+
+        if (discordUser.IsAdmin) return true;
+
+        return false;
+    }
     #endregion Discord
 }

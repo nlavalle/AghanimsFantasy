@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import { useAuthStore } from '@/stores/auth';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -31,8 +32,27 @@ const router = createRouter({
       path: '/leaderboard',
       name: 'leaderboard',
       component: () => import('../views/LeaderboardView.vue')
-    }
+    },
+
+    {
+      path: '/admin',
+      name: 'admin',
+      component: () => import('../views/AdminView.vue'),
+      meta: { requiresAdmin: true }
+    },
   ]
 })
+
+router.beforeEach((to, from, next) => {
+  const userStore = useAuthStore();
+
+  userStore.getUser();
+
+  if (to.meta.requiresAdmin && !userStore.user?.isAdmin) {
+    next('/');
+  } else {
+    next();
+  }
+});
 
 export default router

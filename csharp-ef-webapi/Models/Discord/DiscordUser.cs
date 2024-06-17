@@ -12,4 +12,7 @@ public class DiscordUser
 
     [Column("username")]
     public string Username { get; set; } = null!;
+
+    [Column("is_admin")]
+    public bool IsAdmin { get; set; } = false;
 }
