@@ -66,7 +66,7 @@ internal class FantasyMatchContext : DotaOperationContext
 
             // Check for gc match details and update if exists
             List<FantasyMatch> gcMatchDetailsToParse = _dbContext.FantasyMatches.Where(
-                fm => !fm.GcMetadataParsed && _dbContext.GcDotaMatches.Any(md => (long)md.match_id == fm.MatchId))
+                fm => !fm.MatchDetailParsed && _dbContext.GcDotaMatches.Any(md => (long)md.match_id == fm.MatchId))
                 .Take(50)
                 .ToList();
 
