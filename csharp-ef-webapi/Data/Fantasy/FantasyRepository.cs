@@ -156,15 +156,16 @@ public class FantasyRepository : IFantasyRepository
                 )
                 .Where(mdp => mdp.MatchPlayer.Account != null && mdp.MatchPlayer.Account.Id == fantasyPlayer.DotaAccountId)
                 .Where(mdp => mdp.MatchPlayer.Hero != null)
+                .Where(mdp => mdp.Match.RadiantWin != null)
                 .GroupBy(match => match.MatchPlayer.Hero)
                 .Select(group => new
                 {
                     HeroId = group.Key!.Id,
                     Count = group.Count(),
-                    Wins = group.Where(g => (g.Match.RadiantWin != null && g.Match.RadiantWin.Value && !g.MatchPlayer.DotaTeamSide) ||
-                    (g.Match.RadiantWin != null && !g.Match.RadiantWin.Value && g.MatchPlayer.DotaTeamSide)).Count(),
-                    Losses = group.Where(g => (g.Match.RadiantWin != null && !g.Match.RadiantWin.Value && !g.MatchPlayer.DotaTeamSide) ||
-                    (g.Match.RadiantWin != null && g.Match.RadiantWin.Value && g.MatchPlayer.DotaTeamSide)).Count()
+                    Wins = group.Where(g => (g.Match.RadiantWin!.Value && !g.MatchPlayer.DotaTeamSide) ||
+                    (!g.Match.RadiantWin!.Value && g.MatchPlayer.DotaTeamSide)).Count(),
+                    Losses = group.Where(g => (!g.Match.RadiantWin!.Value && !g.MatchPlayer.DotaTeamSide) ||
+                    (g.Match.RadiantWin!.Value && g.MatchPlayer.DotaTeamSide)).Count()
                 })
                 .OrderByDescending(group => group.Count)
                 .Take(3)
