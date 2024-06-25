@@ -3,9 +3,10 @@
     @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave" @mousemove="handleMouseMove">
     <v-card class="card-container" height="100%">
       <v-row :style="{ height: isDesktop ? '130px' : '70px' }">
-        <v-col>
-          <img :height="isDesktop ? '115px' : '58px'" width="38%" :src="props.playerImageSrc" />
-          <img :height="isDesktop ? '115px' : '58px'" width="62%" :src="getImageUrl()" />
+        <v-col v-show="playerImageState && teamImageState">
+          <img :height="isDesktop ? '115px' : '58px'" width="38%" :src="getPlayerImageUrl()"
+            @load="playerImageLoaded" />
+          <img :height="isDesktop ? '115px' : '58px'" width="62%" :src="getTeamImageUrl()" @load="teamImageLoaded" />
         </v-col>
       </v-row>
       <v-row align-content="center" :style="{ height: isDesktop ? '100px' : '50px' }">
@@ -76,13 +77,29 @@ const props = defineProps({
 })
 
 const isDesktop = ref(window.outerWidth >= 600);
+const playerImageState = ref(false);
+const teamImageState = ref(false);
+
+const playerImageLoaded = () => {
+  console.log("player image loaded");
+  playerImageState.value = true;
+}
+const teamImageLoaded = () => {
+  console.log("team image loaded");
+  teamImageState.value = true;
+}
 
 const getPositionIcon = (positionInt: number) => {
-  if (positionInt == 0) return undefined;
+  if (positionInt == 0) return `logos/unknown.png`;
   return `icons/pos_${positionInt}.png`
 }
 
-const getImageUrl = () => {
+const getPlayerImageUrl = () => {
+  if (!props.playerImageSrc) return undefined;
+  return props.playerImageSrc
+}
+
+const getTeamImageUrl = () => {
   if (props.teamImageSrc == 0) return undefined;
   return `logos/teams_logo_${props.teamImageSrc}.png`
 }
