@@ -1,9 +1,4 @@
-drop view if exists nadcl.fantasy_match_metadata;
-drop view if exists nadcl.fantasy_normalized_averages;
-drop view if exists nadcl.match_highlights;
-drop view if exists nadcl.fantasy_player_point_totals;
-drop view if exists nadcl.fantasy_player_points;
-create view nadcl.fantasy_player_points as
+create or replace view nadcl.fantasy_player_points as
 select
 	dfl.id as fantasy_league_id,
 	dfp.id as fantasy_player_id,
@@ -104,7 +99,7 @@ from nadcl.dota_fantasy_leagues dfl
 		on fmp.match_id = fm.match_id and fmp."AccountId" = dfp.dota_account_id
 ;
 
-create view nadcl.match_highlights as
+create or replace view nadcl.match_highlights as
 with stats as (
 select
 	fpp.fantasy_league_id,
@@ -161,7 +156,7 @@ where deviation = true
 order by stats.start_time desc
 ;
 
-create view nadcl.fantasy_player_point_totals as
+create or replace view nadcl.fantasy_player_point_totals as
 SELECT 
 	fantasy_league_id, 
 	fantasy_player_id, 
@@ -226,10 +221,10 @@ group by fantasy_league_id, fantasy_player_id
 order by total_match_fantasy_points desc
 ;
 
-create view nadcl.fantasy_normalized_averages as
+create or replace view nadcl.fantasy_normalized_averages as
 with avg_scores as (
 	select 
-		fantasy_player_id,
+		fp.dota_account_id,
 		count(DISTINCT match_details_player_id) as matches_played,
 		avg(kills_points) as kills_points,
 		avg(deaths_points) as deaths_points,
@@ -260,8 +255,12 @@ with avg_scores as (
 		avg(support_score) as support_score,
 		avg(push_score) as push_score
 	from nadcl.fantasy_player_points fpp
+		join nadcl.dota_fantasy_players fp
+			on fpp.fantasy_player_id = fp.id
+		join nadcl.dota_accounts da
+			on fp.dota_account_id = da.id
 	where fight_score is not null
-	group by fantasy_player_id
+	group by fp.dota_account_id
 ), min_max as (
 	select
 		min(matches_played) as matches_played_min,
@@ -327,7 +326,7 @@ with avg_scores as (
 	from avg_scores
 )
 select
-	fantasy_player_id,
+	fp.id as fantasy_player_id,
 	(matches_played - matches_played_min) / nullif(matches_played_max - matches_played_min, 0)::numeric as matches_played,
 	(kills_points - kills_points_min) / nullif(kills_points_max - kills_points_min, 0) as kills_points,
 	(deaths_points - deaths_points_min) / nullif(deaths_points_max - deaths_points_min, 0) as deaths_points,
@@ -360,9 +359,11 @@ select
 	(push_score - push_score_min) / nullif(push_score_max - push_score_min, 0) as push_score
 from avg_scores
 	cross join min_max
+	join nadcl.dota_fantasy_players fp
+		on avg_scores.dota_account_id = fp.dota_account_id
 ;
 
-create view nadcl.fantasy_match_metadata as
+create or replace view nadcl.fantasy_match_metadata as
 select
 	fl.id as fantasy_league_id,
 	fp.id as fantasy_player_id,

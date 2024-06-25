@@ -78,48 +78,55 @@ watch(selectedPlayer, (newPlayer) => {
 });
 
 
-const formatPlayerAverages = (playerAverages: any) => {
-    var firstPlayerAverages = playerAverages[0];
-    //KDA
-    var killsAverage = firstPlayerAverages.avgKillsPoints;
-    var deathsAverage = firstPlayerAverages.avgDeathsPoints;
-    var assistsAverage = firstPlayerAverages.avgAssistsPoints;
-    var kdaTotal = (killsAverage * 100 + deathsAverage * 100 + assistsAverage * 100) / 3
-    //Farm
-    //last hits
-    var lastHitsAverage = firstPlayerAverages.avgLastHitsPoints;
-    //gold per min
-    var goldPerMinAverage = firstPlayerAverages.avgGoldPerMinPoints;
-    //xp per min
-    var xpPerMinAverage = firstPlayerAverages.avgXpPerMinPoints;
-    var farmTotal = (lastHitsAverage * 100 + goldPerMinAverage * 100 + xpPerMinAverage * 100) / 3
-    //Supp
-    //ob wards placed
-    var obsWardsAverage = firstPlayerAverages.avgObserverWardsPlacedPoints;
-    //camps stacked
-    var campsStacked = firstPlayerAverages.avgCampsStackedPoints;
-    var supportTotal = (obsWardsAverage * 100 + campsStacked * 100) / 2
-    //damage healing
-    //stun damage
-    var damageHealingTotal = firstPlayerAverages.avgStunDurationPoints * 100;
+const formatPlayerAverages = (playerAverages: any[]) => {
+    if (playerAverages.length > 0) {
+        var firstPlayerAverages = playerAverages[0];
+        //KDA
+        var killsAverage = firstPlayerAverages.avgKillsPoints;
+        var deathsAverage = firstPlayerAverages.avgDeathsPoints;
+        var assistsAverage = firstPlayerAverages.avgAssistsPoints;
+        var kdaTotal = (killsAverage * 100 + deathsAverage * 100 + assistsAverage * 100) / 3
+        //Farm
+        //last hits
+        var lastHitsAverage = firstPlayerAverages.avgLastHitsPoints;
+        //gold per min
+        var goldPerMinAverage = firstPlayerAverages.avgGoldPerMinPoints;
+        //xp per min
+        var xpPerMinAverage = firstPlayerAverages.avgXpPerMinPoints;
+        var farmTotal = (lastHitsAverage * 100 + goldPerMinAverage * 100 + xpPerMinAverage * 100) / 3
+        //Supp
+        //ob wards placed
+        var obsWardsAverage = firstPlayerAverages.avgObserverWardsPlacedPoints;
+        //camps stacked
+        var campsStacked = firstPlayerAverages.avgCampsStackedPoints;
+        var supportTotal = (obsWardsAverage * 100 + campsStacked * 100) / 2
+        //damage healing
+        //stun damage
+        var damageHealingTotal = firstPlayerAverages.avgStunDurationPoints * 100;
 
-    var matchesPlayed = firstPlayerAverages.totalMatches * 100;
+        var matchesPlayed = firstPlayerAverages.totalMatches * 100;
 
-    fantasyDataset.value = [
-        kdaTotal,
-        farmTotal,
-        supportTotal,
-        damageHealingTotal,
-        matchesPlayed
-    ]
+        fantasyDataset.value = [
+            kdaTotal,
+            farmTotal,
+            supportTotal,
+            damageHealingTotal,
+            matchesPlayed
+        ]
 
-    //Scores
-    var fightScore = firstPlayerAverages.avgFightScore * 100;
-    var farmScore = firstPlayerAverages.avgFarmScore * 100;
-    var supportScore = firstPlayerAverages.avgSupportScore * 100;
-    var pushScore = firstPlayerAverages.avgPushScore * 100;
+        //Scores
+        var fightScore = firstPlayerAverages.avgFightScore * 100;
+        var farmScore = firstPlayerAverages.avgFarmScore * 100;
+        var supportScore = firstPlayerAverages.avgSupportScore * 100;
+        var pushScore = firstPlayerAverages.avgPushScore * 100;
 
-    scoreDataset.value = [fightScore, farmScore, supportScore, pushScore]
+        scoreDataset.value = [fightScore, farmScore, supportScore, pushScore]
+    } else {
+        // Player has no games yet
+        fantasyDataset.value = [0, 0, 0, 0, 0]
+
+        scoreDataset.value = [0, 0, 0, 0]
+    }
 
 }
 
