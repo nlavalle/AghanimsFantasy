@@ -73,7 +73,7 @@ const currentActiveDraftPlayerCheck = (draftSlot: number) => {
 }
 
 .glow-active-slot {
-    border: 2px solid #ffd700;
+    border: 1px solid #ffd700;
     /* Gold border color */
     box-shadow: 0 0 5px #ffd700, 0 0 10px #ffd700, 0 0 15px #ffd700, 0 0 20px #ffd700;
     border-radius: 10px;
