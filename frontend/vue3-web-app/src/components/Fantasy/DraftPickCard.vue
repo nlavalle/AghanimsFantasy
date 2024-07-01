@@ -37,7 +37,7 @@
 
 <script setup lang="ts">
 import { ref, type PropType } from 'vue';
-import { VCard, VCardTitle, VCardSubtitle, VCardText, VRow } from 'vuetify/components';
+import { VCard, VCardTitle, VCardSubtitle, VCardText } from 'vuetify/components';
 import type { FantasyPlayer } from './fantasyDraft';
 
 const props = defineProps({
@@ -52,17 +52,6 @@ const props = defineProps({
 })
 
 const isDesktop = ref(window.outerWidth >= 600);
-const playerImageState = ref(false);
-const teamImageState = ref(false);
-
-// const playerImageLoaded = () => {
-//   console.log("player image loaded");
-//   playerImageState.value = true;
-// }
-// const teamImageLoaded = () => {
-//   console.log("team image loaded");
-//   teamImageState.value = true;
-// }
 
 const getPositionIcon = (positionInt: number) => {
   if (positionInt == 0) return `logos/unknown.png`;
@@ -75,8 +64,8 @@ const getPlayerLogo = () => {
 }
 
 const getTeamLogo = () => {
-  if (props.fantasyPlayer?.team.logo) return undefined;
-  return `logos/teams_logo_${props.fantasyPlayer?.team.logo}.png`
+  if (!props.fantasyPlayer?.team.id) return undefined;
+  return `logos/teams_logo_${props.fantasyPlayer?.team.id}.png`
 }
 
 </script>
@@ -141,7 +130,7 @@ const getTeamLogo = () => {
 .team-image {
   position: absolute;
   top: 40px;
-  right: 5px;
+  right: 2px;
   max-width: 30%;
   max-height: 30%;
 }
