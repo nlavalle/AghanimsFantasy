@@ -13,7 +13,6 @@
                         :style="{ 'font-size': isDesktop ? '1rem' : '0.8rem', 'max-width': isDesktop ? '120px' : '60px' }">{{
                             fantasyDraftPicks[index].dotaAccount.name }}</v-row>
                 </v-col>
-
             </v-row>
             <v-row v-else @click="changeActiveDraftPlayer(index)">
                 <v-col>
@@ -21,6 +20,8 @@
                         :style="{ 'max-width': isDesktop ? '120px' : '60px', 'min-width': isDesktop ? '120px' : '60px', 'min-height': isDesktop ? '80px' : '40px', 'margin-left': isDesktop ? '5px' : '' }"
                         :class="{ 'glow-active-slot': currentActiveDraftPlayerCheck(index) }">
                     </v-row>
+                    <v-row class="caption" justify="center"
+                        :style="{ 'min-height': isDesktop ? '1.5rem' : '1.2rem', 'max-width': isDesktop ? '120px' : '60px' }"></v-row>
                 </v-col>
             </v-row>
         </v-col>
