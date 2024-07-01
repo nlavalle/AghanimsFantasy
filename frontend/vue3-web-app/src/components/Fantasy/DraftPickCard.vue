@@ -1,76 +1,51 @@
 <template>
-  <div class="draft-card" :style="{ width: isDesktop ? '300px' : '150px', height: isDesktop ? '380px' : '190px' }"
-    @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave" @mousemove="handleMouseMove">
-    <v-card class="card-container" height="100%">
-      <v-row :style="{ height: isDesktop ? '130px' : '70px' }">
-        <v-col v-show="playerImageState && teamImageState">
-          <img :height="isDesktop ? '115px' : '58px'" width="38%" :src="getPlayerImageUrl()"
-            @load="playerImageLoaded" />
-          <img :height="isDesktop ? '115px' : '58px'" width="62%" :src="getTeamImageUrl()" @load="teamImageLoaded" />
-        </v-col>
-      </v-row>
-      <v-row align-content="center" :style="{ height: isDesktop ? '100px' : '50px' }">
-        <v-col class="pa-0">
-          <v-card-title :style="{ 'font-size': isDesktop ? '20px' : '12px' }">
-            <v-row justify="center">
-              {{ props.name }}
-            </v-row>
-          </v-card-title>
-          <v-card-subtitle :style="{ 'font-size': isDesktop ? '18px' : '11px' }">
-            <v-row justify="center">
-              <v-col style="text-align: center;">
-                {{ props.team }}
-                <img :src=getPositionIcon(props.role) height="20px" width="20px" />
-              </v-col>
-            </v-row>
-          </v-card-subtitle>
-        </v-col>
-      </v-row>
-      <v-row style="height:100%">
-        <v-card-text class="draft-body pt-1">
-          <div class="draft-body-main" :style="{ 'font-size': isDesktop ? '1.5rem' : '1rem' }">
-            {{ props.fantasyPoints.toFixed(2) }}
+  <div class="draft-card">
+    <v-card class="card-container">
+      <div class="card-title">
+        <v-card-title class="ma-0 pl-1 pa-0" :style="{ 'font-size': isDesktop ? '1.2rem' : '1rem' }">
+          {{ props.fantasyPlayer?.dotaAccount?.name || '' }}
+        </v-card-title>
+      </div>
+      <div class="card-images">
+        <img class="player-image" :src="getPlayerLogo()" />
+        <img class="team-image" :src="getTeamLogo()" />
+      </div>
+      <div class="draft-body">
+        <v-card-subtitle class="pt-1" :style="{ 'font-size': isDesktop ? '1rem' : '0.8rem' }">
+          <div class="team-title">
+            <span style="min-height: 20px">
+              {{ props.fantasyPlayer?.team?.name || '' }}
+            </span>
+            <img :src=getPositionIcon(props.fantasyPlayer?.teamPosition!) height="20px" width="20px" />
           </div>
-          <div class="draft-body-details" :style="{ 'font-size': isDesktop ? '1rem' : '0.8rem' }">
-            Fantasy Points
+        </v-card-subtitle>
+        <v-card-text class="pt-1" style="min-height: 3rem;">
+          <div v-if="props.fantasyPoints != undefined">
+            <span :style="{ 'font-size': isDesktop ? '1.0rem' : '1rem', 'font-weight': 'bold' }">
+              {{ props.fantasyPoints.toFixed(2) }}
+            </span>
+            <span :style="{ 'font-size': isDesktop ? '0.8rem' : '0.8rem' }">
+              Fantasy Points
+            </span>
           </div>
         </v-card-text>
-      </v-row>
+      </div>
 
     </v-card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { VCard, VCardTitle, VCardSubtitle, VCardText, VRow, VCol } from 'vuetify/components';
+import { ref, type PropType } from 'vue';
+import { VCard, VCardTitle, VCardSubtitle, VCardText, VRow } from 'vuetify/components';
+import type { FantasyPlayer } from './fantasyDraft';
 
 const props = defineProps({
-  name: {
-    type: String,
-    required: true
-  },
-  team: {
-    type: String,
-    required: true
-  },
-  fantasyPoints: {
-    type: Number,
-    required: true
-  },
-  role: {
-    type: Number,
-    required: true
-  },
-  description: {
-    type: String,
-    required: true
-  },
-  playerImageSrc: {
-    type: String,
+  fantasyPlayer: {
+    type: Object as PropType<FantasyPlayer>,
     required: false
   },
-  teamImageSrc: {
+  fantasyPoints: {
     type: Number,
     required: false
   },
@@ -80,55 +55,28 @@ const isDesktop = ref(window.outerWidth >= 600);
 const playerImageState = ref(false);
 const teamImageState = ref(false);
 
-const playerImageLoaded = () => {
-  console.log("player image loaded");
-  playerImageState.value = true;
-}
-const teamImageLoaded = () => {
-  console.log("team image loaded");
-  teamImageState.value = true;
-}
+// const playerImageLoaded = () => {
+//   console.log("player image loaded");
+//   playerImageState.value = true;
+// }
+// const teamImageLoaded = () => {
+//   console.log("team image loaded");
+//   teamImageState.value = true;
+// }
 
 const getPositionIcon = (positionInt: number) => {
   if (positionInt == 0) return `logos/unknown.png`;
   return `icons/pos_${positionInt}.png`
 }
 
-const getPlayerImageUrl = () => {
-  if (!props.playerImageSrc) return undefined;
-  return props.playerImageSrc
+const getPlayerLogo = () => {
+  if (!props.fantasyPlayer?.dotaAccount.steamProfilePicture) return undefined;
+  return props.fantasyPlayer?.dotaAccount.steamProfilePicture;
 }
 
-const getTeamImageUrl = () => {
-  if (props.teamImageSrc == 0) return undefined;
-  return `logos/teams_logo_${props.teamImageSrc}.png`
-}
-
-const cardBoundingRef = ref<DOMRect | null>(null);
-
-const handleMouseEnter = (event: MouseEvent) => {
-  const target = event.currentTarget as HTMLElement;
-  cardBoundingRef.value = target.getBoundingClientRect();
-}
-
-const handleMouseLeave = () => {
-  cardBoundingRef.value = null;
-}
-
-const handleMouseMove = (event: MouseEvent) => {
-  if (!cardBoundingRef.value) return;
-  const x = event.clientX - cardBoundingRef.value.left;
-  const y = event.clientY - cardBoundingRef.value.top;
-  const xPercentage = x / cardBoundingRef.value.width;
-  const yPercentage = y / cardBoundingRef.value.height;
-  const xRotation = (xPercentage - 0.5) * 20;
-  const yRotation = (0.5 - yPercentage) * 20;
-
-  const target = event.currentTarget as HTMLElement;
-  target.style.setProperty("--x-rotation", `${yRotation}deg`);
-  target.style.setProperty("--y-rotation", `${xRotation}deg`);
-  target.style.setProperty("--x", `${xPercentage * 100}%`);
-  target.style.setProperty("--y", `${yPercentage * 100}%`);
+const getTeamLogo = () => {
+  if (props.fantasyPlayer?.team.logo) return undefined;
+  return `logos/teams_logo_${props.fantasyPlayer?.team.logo}.png`
 }
 
 </script>
@@ -136,17 +84,7 @@ const handleMouseMove = (event: MouseEvent) => {
 
 <style scoped>
 .draft-card {
-  perspective: 800px;
-}
-
-.draft-card:hover {
-  transform: rotateX(var(--x-rotation)) rotateY(var(--y-rotation));
-  scale: 1.1;
-}
-
-.card-container:hover {
-  background: radial-gradient(at var(--x) var(--y), rgba(200, 200, 200, 0.1) 10%, transparent 90%);
-  background-color: var(--aghanims-fantasy-blue-1);
+  aspect-ratio: 0.7;
 }
 
 .card-container {
@@ -156,6 +94,7 @@ const handleMouseMove = (event: MouseEvent) => {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   font-family: 'Merriweather', serif;
+  max-height: 100%;
 }
 
 .card-container q-img {
@@ -163,11 +102,21 @@ const handleMouseMove = (event: MouseEvent) => {
   border-top-right-radius: 8px;
 }
 
+.card-title {
+  background-color: var(--aghanims-fantasy-accent-dark);
+}
+
+.card-images {
+  display: flex;
+  justify-content: center;
+}
+
+
 .draft-body {
   background: linear-gradient(to bottom, var(--aghanims-fantasy-accent-dark), var(--aghanims-fantasy-blue-1));
   border-top: 3px solid var(--aghanims-fantasy-accent-dark);
   height: 50%;
-  text-align: center
+  text-align: start;
 }
 
 .draft-body:hover {
@@ -182,5 +131,27 @@ const handleMouseMove = (event: MouseEvent) => {
 
 .draft-body-details {
   margin-top: 8px;
+}
+
+.player-image {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.team-image {
+  position: absolute;
+  top: 40px;
+  right: 5px;
+  max-width: 30%;
+  max-height: 30%;
+}
+
+.team-title {
+  display: flex;
+  align-items: center;
+}
+
+.team-name {
+  color: rgba(var(--v-theme-on-surface), var(--v-high-emphasis-opacity))
 }
 </style>
