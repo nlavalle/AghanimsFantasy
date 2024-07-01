@@ -9,8 +9,8 @@
 
 <script setup lang="ts">
 import { ref, type PropType } from 'vue';
-import type { FantasyPlayer } from '@/types/FantasyPlayer';
 import DraftPickCard from '@/components/Fantasy/DraftPickCard.vue';
+import type { FantasyPlayer } from './fantasyDraft';
 
 const props = defineProps({
   fantasyPlayer: {
