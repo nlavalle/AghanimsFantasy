@@ -17,7 +17,7 @@ import { ref } from 'vue'
 import { VTab, VTabs } from 'vuetify/components'
 import LeagueSelector from '@/components/LeagueSelector.vue'
 
-const tabIndex = ref(0)
+const tabIndex = ref(1)
 </script>
 
 <style scoped>
