@@ -1,17 +1,17 @@
 <template>
-    <v-row class="player-stats-bio">
+    <v-row class="player-stats-bio" v-if="selectedPlayer">
         <v-col class="v-col-auto">
             <v-row>
-                <img style="height:250px;" :src="props.selectedPlayer.dotaAccount.steamProfilePicture"
+                <img style="height:250px;" :src="selectedPlayer!.dotaAccount.steamProfilePicture"
                     :style="{ height: isDesktop ? '180px' : '140px' }" />
             </v-row>
         </v-col>
         <v-col style="width:100%" :class="isDesktop ? 'bio-text-desktop' : 'bio-text-mobile'">
             <v-row class="d-flex flex-column" style="width:100%;height:100%" justify="space-evenly">
-                <span>Name: <b>{{ props.selectedPlayer.dotaAccount.name }}</b></span>
-                <span>Team: <b>{{ props.selectedPlayer.team.name }}</b></span>
-                <span>Role: <img :src=getPositionIcon(props.selectedPlayer.teamPosition) height="20px" width="20px" />
-                    ({{ props.selectedPlayer.teamPosition }})
+                <span>Name: <b>{{ selectedPlayer!.dotaAccount.name }}</b></span>
+                <span>Team: <b>{{ selectedPlayer!.team.name }}</b></span>
+                <span>Role: <img :src=getPositionIcon(selectedPlayer!.teamPosition) height="20px" width="20px" />
+                    ({{ selectedPlayer!.teamPosition }})
                 </span>
             </v-row>
         </v-col>
@@ -19,18 +19,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, type PropType } from 'vue';
+import { ref } from 'vue';
 import { VRow, VCol } from 'vuetify/components';
-import type { FantasyPlayer } from '../fantasyDraft';
+import { fantasyDraftState } from '../fantasyDraft';
 
 const isDesktop = ref(window.outerWidth >= 600);
 
-const props = defineProps({
-    selectedPlayer: {
-        type: Object as PropType<FantasyPlayer>,
-        required: true,
-    }
-})
+const { selectedPlayer } = fantasyDraftState();
 
 const getPositionIcon = (positionInt: number) => {
     if (positionInt == 0) return undefined;

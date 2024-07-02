@@ -35,10 +35,11 @@ import { VRow, VCol } from 'vuetify/components';
 
 const isDesktop = ref(window.outerWidth >= 600);
 
-const { currentDraftSlotSelected, fantasyDraftPicks } = fantasyDraftState();
+const { selectedPlayer, currentDraftSlotSelected, fantasyDraftPicks } = fantasyDraftState();
 
 const changeActiveDraftPlayer = (activeDraftPlayerSlot: number) => {
     currentDraftSlotSelected.value = activeDraftPlayerSlot;
+    selectedPlayer.value = fantasyDraftPicks.value[activeDraftPlayerSlot];
 }
 
 const currentActiveDraftPlayerCheck = (draftSlot: number) => {
