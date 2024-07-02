@@ -1,6 +1,6 @@
 <template>
   <div class="parent" @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave" @mousemove="handleMouseMove">
-    <div class="hover-filter">
+    <div v-if="cardBoundingRef" class="hover-filter">
     </div>
     <draft-pick-card class="draft-pick-card-hover" :fantasyPlayer="props.fantasyPlayer"
       :fantasyPoints="props.fantasyPoints" />
