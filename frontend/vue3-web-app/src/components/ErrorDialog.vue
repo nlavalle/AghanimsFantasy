@@ -11,7 +11,7 @@
                 </v-card-text>
 
                 <v-card-actions align="right">
-                    <v-btn flat label="OK" color="white" @click="onOKClick(isActive)"></v-btn>
+                    <v-btn @click="onOKClick(isActive)">OK</v-btn>
                 </v-card-actions>
             </v-card>
         </template>
@@ -39,5 +39,6 @@ const onOKClick = (isActive: Ref<boolean>) => {
 .alert-dialog {
     background-color: #192038;
     z-index: 1000;
+    max-width: 500px;
 }
 </style>

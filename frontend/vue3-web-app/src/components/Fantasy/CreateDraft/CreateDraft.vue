@@ -34,7 +34,7 @@
             <PlayerPicksAvailable class="picks-available" />
         </div>
         <div v-else style="margin-top:120px;">
-            <PlayerPicksAvailable class="picks-available" @update:model-value="toggleDrawer" />
+            <PlayerPicksAvailable class="picks-available" @click="toggleDrawer" />
         </div>
     </div>
 </template>
@@ -49,7 +49,7 @@ import { fantasyDraftState } from '../fantasyDraft';
 
 const isDesktop = ref(window.outerWidth >= 600);
 
-const mobileDrawer = ref(false)
+const mobileDrawer = ref(false);
 
 const { clearFantasyDraftPicks } = fantasyDraftState();
 
@@ -64,8 +64,9 @@ const clearDraft = () => {
 }
 
 const toggleDrawer = () => {
-    mobileDrawer.value = !mobileDrawer.value
+    mobileDrawer.value = !mobileDrawer.value;
 }
+
 </script>
 
 <style scoped>

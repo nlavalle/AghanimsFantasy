@@ -11,7 +11,8 @@
                 </v-card-text>
 
                 <v-card-actions align="right">
-                    <v-btn flat label="OK" color="white" @click="onOKClick(isActive)"></v-btn>
+                    <v-spacer></v-spacer>
+                    <v-btn @click="onOKClick(isActive)">OK</v-btn>
                 </v-card-actions>
             </v-card>
         </template>
@@ -19,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { VDialog, VCard, VCardText, VCardActions, VBtn } from 'vuetify/components';
+import { VDialog, VCard, VCardText, VCardActions, VBtn, VSpacer } from 'vuetify/components';
 import { type Ref } from 'vue';
 
 const emit = defineEmits(['ok']);
@@ -32,7 +33,7 @@ const onOKClick = (isActive: Ref<boolean>) => {
 
 <style scoped>
 .alert-dialog {
-    background-color: #192038;
     z-index: 1000;
+    max-width: 500px;
 }
 </style>
