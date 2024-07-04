@@ -8,7 +8,8 @@
                     <span>{{ team.name }}</span>
                 </v-row>
                 <v-row>
-                    <v-col class="available-player ma-1" :class="{ 'disabled-player': disabledPlayer(player.id) }"
+                    <v-col class="available-player ma-1"
+                        :class="{ 'disabled-player': disabledPlayer(player.id), 'selected-player': selectedPlayerCheck(player.id) }"
                         v-for="(player, playerIndex) in fantasyPlayersByTeam(team.id)" :key="playerIndex"
                         :style="{ 'min-width': isDesktop ? '110px' : '60px', 'max-width': isDesktop ? '110px' : '60px' }"
                         @click="selectPlayer(player)">
@@ -32,9 +33,7 @@ import { computed, ref } from 'vue';
 import { fantasyDraftState, type FantasyPlayer } from '../fantasyDraft';
 import { VContainer, VRow, VCol } from 'vuetify/components';
 
-const selectedPlayer = defineModel();
-
-const { fantasyPlayersAvailable, fantasyDraftPicks } = fantasyDraftState();
+const { selectedPlayer, fantasyPlayersAvailable, fantasyDraftPicks } = fantasyDraftState();
 
 const isDesktop = ref(window.outerWidth >= 600);
 
@@ -60,6 +59,12 @@ const selectPlayer = (newPlayer: FantasyPlayer) => {
 const disabledPlayer = (fantasyPlayerId: number) => {
     return fantasyDraftPicks.value.filter(picks => picks.id == fantasyPlayerId).length > 0;
 }
+
+const selectedPlayerCheck = (fantasyPlayerId: number) => {
+    if (!selectedPlayer.value) return false;
+    return selectedPlayer.value!.id == fantasyPlayerId;
+}
+
 
 </script>
 
@@ -91,7 +96,19 @@ const disabledPlayer = (fantasyPlayerId: number) => {
 
 .disabled-player {
     background: rgba(122, 122, 122);
-    pointer-events: none;
+    /* pointer-events: none; */
     opacity: 0.5;
+}
+
+.selected-player {
+    border: 1px solid var(--aghanims-fantasy-main-1);
+    background: var(--aghanims-fantasy-main-1);
+    /* opacity: 0.5; */
+    box-shadow:
+        0 0 2px var(--aghanims-fantasy-main-1),
+        0 0 4px var(--aghanims-fantasy-main-1),
+        0 0 6px var(--aghanims-fantasy-main-1),
+        0 0 8px var(--aghanims-fantasy-main-1);
+    border-radius: 2px;
 }
 </style>

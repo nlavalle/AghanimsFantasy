@@ -20,21 +20,21 @@
         <!-- Set up collapsible (on mobile) player stats sidebar -->
         <div v-if="isDesktop">
             <div class="sticky-parent right-0" style="width:450px; margin-top:100px;">
-                <PlayerStats v-model="selectedPlayer" class="sticky-child" style="height:600px;top:50px" />
+                <PlayerStats class="sticky-child" style="height:600px;top:50px" />
             </div>
         </div>
         <div v-else>
             <v-navigation-drawer v-model="mobileDrawer" temporary location="right" :width="300">
-                <PlayerStats v-model="selectedPlayer" />
+                <PlayerStats />
             </v-navigation-drawer>
         </div>
 
 
         <div v-if="isDesktop" style="margin-top:120px;margin-right:450px;">
-            <PlayerPicksAvailable class="picks-available" v-model="selectedPlayer" />
+            <PlayerPicksAvailable class="picks-available" />
         </div>
         <div v-else style="margin-top:120px;">
-            <PlayerPicksAvailable class="picks-available" v-model="selectedPlayer" @update:model-value="toggleDrawer" />
+            <PlayerPicksAvailable class="picks-available" @click="toggleDrawer" />
         </div>
     </div>
 </template>
@@ -45,13 +45,11 @@ import { VBtn, VNavigationDrawer } from 'vuetify/components';
 import CreateDraftPicks from './CreateDraftPicks.vue';
 import PlayerPicksAvailable from './PlayerPicksAvailable.vue';
 import PlayerStats from './PlayerStats.vue';
-import { fantasyDraftState, type FantasyPlayer } from '../fantasyDraft';
-
-const selectedPlayer = ref<FantasyPlayer>();
+import { fantasyDraftState } from '../fantasyDraft';
 
 const isDesktop = ref(window.outerWidth >= 600);
 
-const mobileDrawer = ref(false)
+const mobileDrawer = ref(false);
 
 const { clearFantasyDraftPicks } = fantasyDraftState();
 
@@ -66,8 +64,9 @@ const clearDraft = () => {
 }
 
 const toggleDrawer = () => {
-    mobileDrawer.value = !mobileDrawer.value
+    mobileDrawer.value = !mobileDrawer.value;
 }
+
 </script>
 
 <style scoped>

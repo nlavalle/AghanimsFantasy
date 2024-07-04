@@ -13,7 +13,6 @@
                         :style="{ 'font-size': isDesktop ? '1rem' : '0.8rem', 'max-width': isDesktop ? '120px' : '60px' }">{{
                             fantasyDraftPicks[index].dotaAccount.name }}</v-row>
                 </v-col>
-
             </v-row>
             <v-row v-else @click="changeActiveDraftPlayer(index)">
                 <v-col>
@@ -21,6 +20,8 @@
                         :style="{ 'max-width': isDesktop ? '120px' : '60px', 'min-width': isDesktop ? '120px' : '60px', 'min-height': isDesktop ? '80px' : '40px', 'margin-left': isDesktop ? '5px' : '' }"
                         :class="{ 'glow-active-slot': currentActiveDraftPlayerCheck(index) }">
                     </v-row>
+                    <v-row class="caption" justify="center"
+                        :style="{ 'min-height': isDesktop ? '1.5rem' : '1.2rem', 'max-width': isDesktop ? '120px' : '60px' }"></v-row>
                 </v-col>
             </v-row>
         </v-col>
@@ -34,10 +35,11 @@ import { VRow, VCol } from 'vuetify/components';
 
 const isDesktop = ref(window.outerWidth >= 600);
 
-const { currentDraftSlotSelected, fantasyDraftPicks } = fantasyDraftState();
+const { selectedPlayer, currentDraftSlotSelected, fantasyDraftPicks } = fantasyDraftState();
 
 const changeActiveDraftPlayer = (activeDraftPlayerSlot: number) => {
     currentDraftSlotSelected.value = activeDraftPlayerSlot;
+    selectedPlayer.value = fantasyDraftPicks.value[activeDraftPlayerSlot];
 }
 
 const currentActiveDraftPlayerCheck = (draftSlot: number) => {
@@ -73,7 +75,7 @@ const currentActiveDraftPlayerCheck = (draftSlot: number) => {
 }
 
 .glow-active-slot {
-    border: 2px solid #ffd700;
+    border: 1px solid #ffd700;
     /* Gold border color */
     box-shadow: 0 0 5px #ffd700, 0 0 10px #ffd700, 0 0 15px #ffd700, 0 0 20px #ffd700;
     border-radius: 10px;

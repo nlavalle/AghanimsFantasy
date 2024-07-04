@@ -5,7 +5,8 @@
                 <PlayerStatsBio :selected-player="selectedPlayer">
                 </PlayerStatsBio>
                 <v-row class="mt-4">
-                    <v-btn class="mr-1" style="width:55%;" color="primary" @click="draftPlayer()">Draft Player</v-btn>
+                    <v-btn class="mr-1" style="width:55%;" color="primary" @click="draftPlayer()"
+                        :disabled="draftPlayerValidation()">Draft Player</v-btn>
                     <v-btn class="ml-1" style="width:40%;" color="primary" @click="randomPlayer()">
                         <font-awesome-icon :icon="faDice" />
                         <span class="ml-1">Random</span>
@@ -31,7 +32,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { VContainer, VRow, VCol, VBtn } from 'vuetify/components';
-import type { FantasyPlayer, FantasyPlayerTopHeroes } from '../fantasyDraft';
+import type { FantasyPlayerTopHeroes } from '../fantasyDraft';
 import { localApiService } from '@/services/localApiService'
 import { fantasyDraftState } from '../fantasyDraft';
 import PlayerStatsBio from '@/components/Fantasy/PlayerStats/PlayerStatsBio.vue'
@@ -42,8 +43,7 @@ import { faDice } from '@fortawesome/free-solid-svg-icons';
 
 
 
-const { fantasyPlayersAvailable, fantasyDraftPicks, setFantasyPlayer } = fantasyDraftState();
-const selectedPlayer = defineModel<FantasyPlayer>();
+const { selectedPlayer, fantasyPlayersAvailable, fantasyDraftPicks, setFantasyPlayer } = fantasyDraftState();
 
 
 const fantasyLabels = [
@@ -134,6 +134,11 @@ const draftPlayer = () => {
     if (selectedPlayer.value) {
         setFantasyPlayer(selectedPlayer.value);
     }
+}
+
+const draftPlayerValidation = () => {
+    if (!selectedPlayer.value) return true;
+    return fantasyDraftPicks.value.some(picks => picks.id == selectedPlayer.value!.id)
 }
 
 const randomPlayer = () => {

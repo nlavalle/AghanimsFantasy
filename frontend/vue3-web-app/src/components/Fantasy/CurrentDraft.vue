@@ -1,14 +1,10 @@
 <template>
     <v-container v-if="FantasyPoints?.fantasyDraft">
         <v-row justify="space-evenly">
-            <v-col class="ma-1 pa-1" v-for="fantasyDraftPoints in CombinedFantasyDraftPoints"
-                :key="fantasyDraftPoints.id">
+            <v-col class="ma-1 pa-1" v-for="(fantasyDraftPoints, index) in CombinedFantasyDraftPoints" :key="index">
                 <v-row class="mt-1" justify="center">
-                    <draft-pick-card :name="fantasyDraftPoints.name" :team="fantasyDraftPoints.team"
-                        :fantasyPoints="fantasyDraftPoints.fantasyPoints" :role="fantasyDraftPoints.role"
-                        :description="fantasyDraftPoints.description"
-                        :playerImageSrc="fantasyDraftPoints.playerImageSrc"
-                        :teamImageSrc="fantasyDraftPoints.teamImageSrc" />
+                    <draft-pick-card-hover class="draft-pick-card" :fantasyPlayer="fantasyDraftPoints.fantasyPlayer"
+                        :fantasyPoints="fantasyDraftPoints.fantasyPoints" />
                 </v-row>
             </v-col>
         </v-row>
@@ -17,7 +13,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import DraftPickCard from '@/components/Fantasy/DraftPickCard.vue';
+import DraftPickCardHover from '@/components/Fantasy/DraftPickCardHover.vue';
 import { VContainer, VRow, VCol } from 'vuetify/components';
 
 const props = defineProps({
@@ -30,58 +26,34 @@ const props = defineProps({
 const CombinedFantasyDraftPoints = computed(() => {
     return [
         {
-            id: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 1)[0]?.fantasyPlayer?.id,
-            name: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 1)[0]?.fantasyPlayer?.dotaAccount.name ?? "none",
-            team: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 1)[0]?.fantasyPlayer?.team.name ?? "",
+            fantasyPlayer: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 1)[0]?.fantasyPlayer,
             fantasyPoints: props.FantasyPoints?.draftPickOnePoints ?? 0,
-            role: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 1)[0]?.fantasyPlayer?.teamPosition ?? 0,
-            description: "Stuff",
-            playerImageSrc: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 1)[0]?.fantasyPlayer?.dotaAccount.steamProfilePicture,
-            teamImageSrc: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 1)[0]?.fantasyPlayer?.teamId ?? 0,
         },
         {
-            id: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 2)[0]?.fantasyPlayer?.id,
-            name: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 2)[0]?.fantasyPlayer?.dotaAccount.name ?? "none",
-            team: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 2)[0]?.fantasyPlayer?.team.name ?? "",
+            fantasyPlayer: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 2)[0]?.fantasyPlayer,
             fantasyPoints: props.FantasyPoints?.draftPickTwoPoints ?? 0,
-            role: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 2)[0]?.fantasyPlayer?.teamPosition ?? 0,
-            description: "Stuff",
-            playerImageSrc: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 2)[0]?.fantasyPlayer?.dotaAccount.steamProfilePicture,
-            teamImageSrc: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 2)[0]?.fantasyPlayer?.teamId ?? 0,
         },
         {
-            id: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 3)[0]?.fantasyPlayer?.id,
-            name: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 3)[0]?.fantasyPlayer?.dotaAccount.name ?? "none",
-            team: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 3)[0]?.fantasyPlayer?.team.name ?? "",
+            fantasyPlayer: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 3)[0]?.fantasyPlayer,
             fantasyPoints: props.FantasyPoints?.draftPickThreePoints ?? 0,
-            role: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 3)[0]?.fantasyPlayer?.teamPosition ?? 0,
-            description: "Stuff",
-            playerImageSrc: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 3)[0]?.fantasyPlayer?.dotaAccount.steamProfilePicture,
-            teamImageSrc: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 3)[0]?.fantasyPlayer?.teamId ?? 0,
         },
         {
-            id: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 4)[0]?.fantasyPlayer?.id,
-            name: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 4)[0]?.fantasyPlayer?.dotaAccount.name ?? "none",
-            team: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 4)[0]?.fantasyPlayer?.team.name ?? "",
+            fantasyPlayer: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 4)[0]?.fantasyPlayer,
             fantasyPoints: props.FantasyPoints?.draftPickFourPoints ?? 0,
-            role: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 4)[0]?.fantasyPlayer?.teamPosition ?? 0,
-            description: "Stuff",
-            playerImageSrc: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 4)[0]?.fantasyPlayer?.dotaAccount.steamProfilePicture,
-            teamImageSrc: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 4)[0]?.fantasyPlayer?.teamId ?? 0,
         },
         {
-            id: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 5)[0]?.fantasyPlayer?.id,
-            name: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 5)[0]?.fantasyPlayer?.dotaAccount.name ?? "none",
-            team: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 5)[0]?.fantasyPlayer?.team.name ?? "",
+            fantasyPlayer: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 5)[0]?.fantasyPlayer,
             fantasyPoints: props.FantasyPoints?.draftPickFivePoints ?? 0,
-            role: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 5)[0]?.fantasyPlayer?.teamPosition ?? 0,
-            description: "Stuff",
-            playerImageSrc: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 5)[0]?.fantasyPlayer?.dotaAccount.steamProfilePicture,
-            teamImageSrc: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 5)[0]?.fantasyPlayer?.teamId ?? 0,
         },
     ];
 })
 
 </script>
 
-<style scoped></style>
+<style scoped>
+.draft-pick-card {
+    /* max-height: 350px; */
+    height: 300px;
+    margin: 20px;
+}
+</style>

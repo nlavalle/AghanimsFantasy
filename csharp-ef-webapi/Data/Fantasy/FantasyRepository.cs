@@ -316,7 +316,6 @@ public class FantasyRepository : IFantasyRepository
 
     public async Task<FantasyDraft> AddNewUserFantasyPlayerAsync(long UserDiscordAccountId, int FantasyLeagueId, long? FantasyPlayerId, int DraftOrder)
     {
-        // We will receive a 0 if the user wants to clear the draft pick, so we can avoid nulls
         if (DraftOrder > 5 || DraftOrder < 1)
         {
             throw new Exception("Invalid Draft Order, must be between 1 to 5");

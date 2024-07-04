@@ -1,5 +1,5 @@
 # build frontend
-FROM node:20-alpine as build-frontend
+FROM node:20-alpine AS build-frontend
 ARG build_type=build
 WORKDIR /app
 COPY vue3-web-app/package*.json ./
@@ -8,7 +8,7 @@ COPY vue3-web-app/ .
 RUN npm run $build_type
 
 # production stage
-FROM nginx:stable-alpine as production-stage
+FROM nginx:stable-alpine AS production-stage
 ARG nginx_config=prod-nginx.conf
 COPY --from=build-frontend /app/dist /usr/share/nginx/html
 COPY $nginx_config /etc/nginx/conf.d/default.conf

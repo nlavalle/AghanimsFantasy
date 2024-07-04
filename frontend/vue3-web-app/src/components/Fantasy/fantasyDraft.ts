@@ -118,6 +118,8 @@ export interface DraftPickPlayer {
     draftOrder: number
 }
 
+const selectedPlayer = ref<FantasyPlayer>();
+
 const currentDraftSlotSelected = ref<number>(1);
 
 const fantasyDraftPicks = ref<FantasyPlayer[]>([]);
@@ -167,6 +169,7 @@ export function fantasyDraftState() {
     }
 
     return {
+        selectedPlayer,
         currentDraftSlotSelected,
         fantasyDraftPicks,
         fantasyPlayersAvailable,
