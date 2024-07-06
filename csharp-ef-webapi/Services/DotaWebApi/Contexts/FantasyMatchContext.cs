@@ -10,9 +10,9 @@ namespace csharp_ef_webapi.Services;
 internal class FantasyMatchContext : DotaOperationContext
 {
     private readonly AghanimsFantasyContext _dbContext;
-    private readonly ILogger<MatchDetailsContext> _logger;
+    private readonly ILogger<FantasyMatchContext> _logger;
 
-    public FantasyMatchContext(ILogger<MatchDetailsContext> logger, IServiceScope scope, Config config)
+    public FantasyMatchContext(ILogger<FantasyMatchContext> logger, IServiceScope scope, Config config)
         : base(scope, config)
     {
         _dbContext = scope.ServiceProvider.GetRequiredService<AghanimsFantasyContext>();
