@@ -18,17 +18,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { VTab, VTabs, VSpacer } from 'vuetify/components';
 import FantasyNavbar from '@/components/Fantasy/FantasyNavbar.vue';
 import LoginDiscord from '@/components/LoginDiscord.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faHouse } from '@fortawesome/free-solid-svg-icons';
 import { useAuthStore } from '@/stores/auth';
+import { useRouter } from 'vue-router';
 
 const selectedTab = ref(0)
 
 const authStore = useAuthStore();
+
+const router = useRouter();
+
+onMounted(async () => {
+    // If a user is refreshing the leaderboard page we want to navigate to it and show FantasyNavbar to pick up the league
+    await router.isReady();
+    if (router.currentRoute.value.name == 'fantasy' || router.currentRoute.value.name == 'leaderboard') {
+        selectedTab.value = 1;
+    }
+})
 
 </script>
 

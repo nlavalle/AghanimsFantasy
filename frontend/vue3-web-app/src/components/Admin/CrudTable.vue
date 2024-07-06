@@ -77,7 +77,7 @@
                 </v-dialog>
             </v-toolbar>
         </template>
-        <template v-slot:item.actions="{ item }">
+        <template v-slot:[`item.actions`]="{ item }">
             <font-awesome-icon :icon="faPencil" class="me-2" @click="editItem(item)" />
             <font-awesome-icon :icon="faDeleteLeft" class="me-2" @click="deleteItem(item)" />
         </template>
