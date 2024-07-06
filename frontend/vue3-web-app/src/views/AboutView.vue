@@ -1,32 +1,34 @@
 <!-- eslint-disable vue/valid-v-slot -->
 <template>
   <div class="about">
-    <div>
-      <p class="text-white">
-        Dota 2 Fantasy Draft, click the fantasy tab to get started.
-        <br />
-        Points are calculated using the pattern below trying to follow the TI fantasy scoring.
-        Certain statistics require parsing the .dem replay files to measure, so the unavailable
-        metrics won't be involved in the calculation until that is added to the API service that
-        fetches match data (hopefully by Season 7).
-      </p>
-    </div>
-    <div>
-      <v-data-table class="about-table" :items="statistics" :headers="statsHeaders" hide-default-footer
-        density="compact">
-        <template v-slot:item.value="{ item }">
-          <span :style="getPointsPer(item)">{{ item.value }}</span>
-        </template>
-        <template v-slot:item.available="{ item }">
-          <span :style="getAvailability(item)">{{ item.available }}</span>
-        </template>
-      </v-data-table>
-    </div>
+    <v-container>
+      <div>
+        <p class="text-white">
+          Dota 2 Fantasy Draft, click the fantasy tab to get started.
+          <br />
+          Points are calculated using the pattern below trying to follow the TI fantasy scoring.
+          Certain statistics require parsing the .dem replay files to measure, so the unavailable
+          metrics won't be involved in the calculation until that is added to the API service that
+          fetches match data.
+        </p>
+      </div>
+      <div>
+        <v-data-table class="about-table" :items="statistics" :headers="statsHeaders" hide-default-footer
+          density="compact">
+          <template v-slot:item.value="{ item }">
+            <span :style="getPointsPer(item)">{{ item.value }}</span>
+          </template>
+          <template v-slot:item.available="{ item }">
+            <span :style="getAvailability(item)">{{ item.available }}</span>
+          </template>
+        </v-data-table>
+      </div>
+    </v-container>
   </div>
 </template>
 
 <script setup lang="ts">
-import { VDataTable } from 'vuetify/components'
+import { VContainer, VDataTable } from 'vuetify/components'
 
 const statsHeaders = [
   {
@@ -130,7 +132,7 @@ const getAvailability = (field: { available: string }) => {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .about-table {
-  margin: 20px;
+  margin-top: 20px;
   max-width: 375px;
   border: 2px solid var(--aghanims-fantasy-main-2);
   border-radius: 5px;

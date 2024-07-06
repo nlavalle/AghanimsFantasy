@@ -1,5 +1,5 @@
 <template>
-    <v-dialog class="alert-dialog">
+    <v-dialog class="error-dialog">
         <template v-slot:default="{ isActive }">
             <v-card dark>
                 <v-card-text>
@@ -7,7 +7,8 @@
                 </v-card-text>
 
                 <v-card-text>
-                    <p>There was an issue updating the fantasy draft. Error details: {{ props.error }}</p>
+                    <p>There was an issue updating the fantasy draft. {{ props.error }}
+                    </p>
                 </v-card-text>
 
                 <v-card-actions align="right">
@@ -24,6 +25,8 @@ import { type Ref } from 'vue';
 
 const props = defineProps({
     error: {
+        type: Error,
+        required: false
     }
 })
 
@@ -36,8 +39,7 @@ const onOKClick = (isActive: Ref<boolean>) => {
 </script>
 
 <style scoped>
-.alert-dialog {
-    background-color: #192038;
+.error-dialog {
     z-index: 1000;
     max-width: 500px;
 }

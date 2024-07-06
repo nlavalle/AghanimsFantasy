@@ -9,7 +9,7 @@
                 </v-row>
                 <v-row>
                     <v-col class="available-player ma-1"
-                        :class="{ 'disabled-player': disabledPlayer(player.id), 'selected-player': selectedPlayerCheck(player.id) }"
+                        :class="{ 'disabled-player': disabledPlayer(player), 'selected-player': selectedPlayerCheck(player.id) }"
                         v-for="(player, playerIndex) in fantasyPlayersByTeam(team.id)" :key="playerIndex"
                         :style="{ 'min-width': isDesktop ? '110px' : '60px', 'max-width': isDesktop ? '110px' : '60px' }"
                         @click="selectPlayer(player)">
@@ -33,7 +33,7 @@ import { computed, ref } from 'vue';
 import { fantasyDraftState, type FantasyPlayer } from '../fantasyDraft';
 import { VContainer, VRow, VCol } from 'vuetify/components';
 
-const { selectedPlayer, fantasyPlayersAvailable, fantasyDraftPicks } = fantasyDraftState();
+const { selectedPlayer, fantasyPlayersAvailable, disabledPlayer } = fantasyDraftState();
 
 const isDesktop = ref(window.outerWidth >= 600);
 
@@ -44,7 +44,11 @@ const fantasyTeams = computed(() => {
 })
 
 const fantasyPlayersByTeam = (teamId: number) => {
-    return fantasyPlayersAvailable.value.filter(player => player.teamId == teamId)
+    return fantasyPlayersAvailable.value.filter(player => player.teamId == teamId).sort((playerA: FantasyPlayer, playerB: FantasyPlayer) => {
+        if (playerA.teamPosition < playerB.teamPosition) return -1;
+        if (playerA.teamPosition > playerB.teamPosition) return 1;
+        return 0;
+    })
 }
 
 const getImageUrl = (teamLogoId: number) => {
@@ -54,10 +58,6 @@ const getImageUrl = (teamLogoId: number) => {
 
 const selectPlayer = (newPlayer: FantasyPlayer) => {
     selectedPlayer.value = newPlayer
-}
-
-const disabledPlayer = (fantasyPlayerId: number) => {
-    return fantasyDraftPicks.value.filter(picks => picks.id == fantasyPlayerId).length > 0;
 }
 
 const selectedPlayerCheck = (fantasyPlayerId: number) => {

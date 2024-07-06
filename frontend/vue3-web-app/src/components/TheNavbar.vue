@@ -4,16 +4,16 @@
             <v-tab to="/" min-width="50px" max-width="50px">
                 <font-awesome-icon :icon="faHouse" />
             </v-tab>
-            <v-tab to="/about" min-width="80px" width="80px">About</v-tab>
             <v-tab to="/fantasy" min-width="90px" width="90px">Fantasy</v-tab>
             <v-tab to="/stats" min-width="70px" width="70px">Stats</v-tab>
+            <v-tab to="/about" min-width="80px" width="80px">About</v-tab>
             <v-tab v-show="authStore.user?.isAdmin ?? false" to="/admin" min-width="80px" width="80px">Admin</v-tab>
         </v-tabs>
         <v-spacer />
-        <LoginDiscord class="mt-3 login-discord" />
+        <LoginDiscord class="login-discord" />
     </div>
     <div>
-        <FantasyNavbar v-if="selectedTab === 2" />
+        <FantasyNavbar v-if="selectedTab === 1" />
     </div>
 </template>
 
