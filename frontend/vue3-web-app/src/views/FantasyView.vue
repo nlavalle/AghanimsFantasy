@@ -35,10 +35,11 @@
         </v-row>
       </v-col>
     </v-row>
-    <v-row v-else class="row text-white">
+    <v-row v-else class="ma-2 text-white" justify="center">
       <span class="not-authenticated">
-        Not Authenticated
+        Please log in via Discord to create your fantasy draft.
       </span>
+      <LoginDiscord class="login-discord" />
     </v-row>
   </v-container>
 
@@ -52,6 +53,7 @@ import { VCard, VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowIte
 import { useAuthStore } from '@/stores/auth';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import { localApiService } from '@/services/localApiService';
+import LoginDiscord from '@/components/LoginDiscord.vue';
 import CurrentDraft from '@/components/Fantasy/CurrentDraft.vue';
 import CreateDraft from '@/components/Fantasy/CreateDraft/CreateDraft.vue';
 import { fantasyDraftState, type FantasyDraftPoints, type FantasyPlayer } from '@/components/Fantasy/fantasyDraft';
@@ -163,5 +165,9 @@ const authenticated = computed(() => {
 .not-authenticated {
   margin: 20px;
   font-size: 16px;
+}
+
+.login-discord {
+  cursor: pointer;
 }
 </style>
