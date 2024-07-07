@@ -11,7 +11,13 @@
           <v-select label="League" v-model="selectedLeague" :items="leagueOptions" item-title="name"
             @update:model-value="updateSelectedLeague" density="compact" single-line variant="underlined" return-object>
             <template v-slot:item="{ props, item }">
-              <v-list-item v-bind="props" class="league-selector" :title="item.raw.name"></v-list-item>
+              <v-list-item v-bind="props" class="league-selector" :title="item.raw.name"
+                :variant="isDraftActive(item.raw.leagueEndTime) ? 'plain' : 'text'">
+                <template v-slot:append>
+                  <v-icon v-if="isDraftOpen(item.raw.fantasyDraftLocked)" icon="fa-solid fa-lock"
+                    size="x-small"></v-icon>
+                </template>
+              </v-list-item>
             </template>
           </v-select>
         </v-row>
@@ -24,7 +30,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague'
 import { localApiService } from '@/services/localApiService'
-import { VContainer, VRow, VCol, VSelect, VListItem } from 'vuetify/components'
+import { VContainer, VRow, VCol, VSelect, VListItem, VIcon } from 'vuetify/components'
 import type { FantasyLeague } from '@/types/FantasyLeague';
 
 const leagueStore = useFantasyLeagueStore()
@@ -46,15 +52,21 @@ onMounted(() => {
   localApiService.getFantasyLeagues().then((result: any) => {
     leagueStore.setLeagues(result)
     //default to most recent league
-    selectedLeague.value = leagueStore.activeLeagues.reduce((max, current) => {
-      return current.id > max.id ? current : max
-    }, leagueStore.activeLeagues[0])
+    selectedLeague.value = leagueStore.defaultLeague;
     leagueStore.setSelectedLeague(selectedLeague.value)
   })
 })
 
 function updateSelectedLeague() {
   leagueStore.setSelectedLeague(selectedLeague.value)
+}
+
+function isDraftOpen(draftLockEpochTimestamp: number) {
+  return new Date() > new Date(draftLockEpochTimestamp * 1000);
+}
+
+function isDraftActive(leagueEndTimestamp: number) {
+  return new Date() > new Date(leagueEndTimestamp * 1000);
 }
 </script>
 

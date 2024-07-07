@@ -2,8 +2,6 @@
 vue-microfrontend/aghanims-wager-spa.tar
 environments/development/ssl_certs
 environments/development/*.env
-csharp-ef-webapi/appsettings.Local.json
-csharp-ef-webapi/aghanims-fantasy-webapi.tar
 frontend/prod-nginx.conf
 frontend/quasar-web-app/public/logos/
 frontend/vue3-web-app/public/logos/

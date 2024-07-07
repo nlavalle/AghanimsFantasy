@@ -5,7 +5,10 @@
         headerName="Draft Player" headerValue="Points" :authenticatedUser="user" :boardData="fantasyLeaderboardData" />
     </v-row>
     <v-row v-else>
-      <span class="not-authenticated"> Not Authenticated </span>
+      <span class="not-authenticated">
+        Please log in via Discord to view the Fantasy Leaderboard
+      </span>
+      <LoginDiscord class="login-discord" />
     </v-row>
   </v-container>
 </template>
@@ -16,6 +19,7 @@ import { VContainer, VRow } from 'vuetify/components'
 import { localApiService } from '@/services/localApiService'
 import { useAuthStore, type User } from '@/stores/auth'
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague'
+import LoginDiscord from '@/components/LoginDiscord.vue';
 import LeaderboardComponent from '@/components/Fantasy/LeaderboardComponent.vue'
 import type { LeaderboardItem } from '@/types/LeaderboardItem'
 
@@ -91,6 +95,10 @@ watch(
 </script>
 
 <style scoped>
+.login-discord {
+  cursor: pointer;
+}
+
 .award {
   width: 220px;
   height: 200px;

@@ -6,6 +6,7 @@
           <v-tabs v-model="fantasyTab">
             <v-tab value="current">Current Draft</v-tab>
             <v-tab value="draft">Draft Players</v-tab>
+            <v-tab value="match">Draft Matches</v-tab>
           </v-tabs>
         </v-row>
         <v-row>
@@ -18,8 +19,10 @@
             <v-tabs-window-item value="draft" style="overflow: visible !important">
               <v-col>
                 <v-row v-if="updateDraftVisibility || updateDisabled">
-                  <v-card class="ma-5"
-                    :title="`Drafting for Fantasy League: ${leagueStore.selectedLeague!.name} is locked`" disabled>
+                  <v-card class="ma-5" disabled>
+                    <v-card-title style="text-wrap:wrap">
+                      {{ `Drafting for Fantasy League: ${leagueStore.selectedLeague!.name} is locked` }}
+                    </v-card-title>
                   </v-card>
                 </v-row>
                 <v-row v-else>
@@ -31,13 +34,22 @@
                 </v-row>
               </v-col>
             </v-tabs-window-item>
+            <v-tabs-window-item value="match">
+              <v-col>
+                <v-row v-if="userDraftPoints">
+                  <MatchDataTable v-model:selectedLeague="leagueStore.selectedLeague"
+                    v-model:draftFiltered="draftFiltered">
+                  </MatchDataTable>
+                </v-row>
+              </v-col>
+            </v-tabs-window-item>
           </v-tabs-window>
         </v-row>
       </v-col>
     </v-row>
     <v-row v-else class="ma-2 text-white" justify="center">
       <span class="not-authenticated">
-        Please log in via Discord to create your fantasy draft.
+        Please log in via Discord to create your fantasy draft
       </span>
       <LoginDiscord class="login-discord" />
     </v-row>
@@ -49,13 +61,14 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
-import { VCard, VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem } from 'vuetify/components';
+import { VCard, VCardTitle, VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem } from 'vuetify/components';
 import { useAuthStore } from '@/stores/auth';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import { localApiService } from '@/services/localApiService';
 import LoginDiscord from '@/components/LoginDiscord.vue';
 import CurrentDraft from '@/components/Fantasy/CurrentDraft.vue';
 import CreateDraft from '@/components/Fantasy/CreateDraft/CreateDraft.vue';
+import MatchDataTable from '@/components/Stats/MatchDataTable.vue';
 import { fantasyDraftState, type FantasyDraftPoints, type FantasyPlayer } from '@/components/Fantasy/fantasyDraft';
 import AlertDialog from '@/components/AlertDialog.vue';
 import ErrorDialog from '@/components/ErrorDialog.vue';
@@ -63,6 +76,7 @@ import ErrorDialog from '@/components/ErrorDialog.vue';
 const authStore = useAuthStore();
 const leagueStore = useFantasyLeagueStore();
 const { fantasyDraftPicks, setFantasyDraftPicks, setFantasyPlayers } = fantasyDraftState();
+const draftFiltered = true;
 
 const showSuccessModal = ref(false);
 const showErrorModal = ref(false);

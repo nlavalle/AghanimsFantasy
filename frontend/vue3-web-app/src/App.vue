@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import Navbar from '@/components/TheNavbar.vue'
+import Footer from '@/components/TheFooter.vue'
 import { VApp, VMain } from 'vuetify/components'
 </script>
 
@@ -12,6 +13,9 @@ import { VApp, VMain } from 'vuetify/components'
     <v-main>
       <RouterView />
     </v-main>
+    <footer>
+      <Footer />
+    </footer>
   </v-app>
 </template>
 

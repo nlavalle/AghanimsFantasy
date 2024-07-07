@@ -1,6 +1,46 @@
 <!-- eslint-disable vue/valid-v-slot -->
 <template>
     <v-col>
+        <v-row class="search-input">
+            <v-col style="min-width: 200px">
+                <v-text-field 
+                    v-model="leagueFilter" 
+                    label="Search"
+                    prepend-inner-icon="fa-magnifying-glass"
+                    variant="solo-filled"
+                    clearable
+                    flat
+                    hide-details
+                    single-line
+                />
+            </v-col>
+            <v-col style="min-width: 200px">
+                <v-select
+                    v-model="roleFilter"
+                    label="Filter Role"
+                    :items="roleList"
+                    item-title="name"
+                    item-value="id"
+                    multiple
+                    clearable
+                    hide-details
+                    single-line
+                />
+            </v-col>
+            <v-col style="min-width: 200px">
+                <v-select
+                    v-model="teamFilter"
+                    label="Filter Team"
+                    :items="teamsList"
+                    item-title="name"
+                    item-value="id"
+                    multiple
+                    clearable
+                    hide-details
+                    single-line
+                />
+            </v-col>
+        </v-row>
         <v-row v-if="!isDesktop" dense>
             <v-tabs v-model="leagueTab" density="compact">
                 <v-tab value="kda" min-width="70px" width="70px">K/D/A</v-tab>
@@ -11,7 +51,7 @@
         </v-row>
         <v-row>
             <v-data-table class="league-table" :items="leagueMetadataStatsIndexed" :headers="displayedLeagueColumns"
-                density="compact" :items-per-page="itemsPerPage"
+                density="compact" :items-per-page="itemsPerPage" v-model:page="page"
                 :style="{ 'font-size': isDesktop ? '0.8rem' : '0.7rem' }">
                 <template v-slot:item.leaguePlayer="{ value }">
                     <v-row v-if="isDesktop" class="ma-1 pa-1">
@@ -83,21 +123,55 @@
 
 <script setup lang="ts">
 import { ref, defineModel, onMounted, watch, computed } from 'vue';
-import { VRow, VCol, VDataTable, VPagination, VTabs, VTab } from 'vuetify/components';
+import { VRow, VCol, VDataTable, VPagination, VTabs, VTab, VTextField, VSelect } from 'vuetify/components';
 import { localApiService } from '@/services/localApiService';
 import type { League } from '@/types/League';
+import type { LeagueMetadata } from '@/types/LeagueMetadata';
+import { useDebouncedRef } from '@/services/debounce'
 
 const isDesktop = ref(window.outerWidth >= 600);
+
+const leagueFilter = useDebouncedRef('');
+const roleFilter = ref([]);
+const teamFilter = ref([]);
+
+const roleList = [
+    {
+        id: 1,
+        name: 'Carry',
+    },
+    {
+        id: 2,
+        name: 'Mid',
+    },
+    {
+        id: 3,
+        name: 'Offlane',
+    },
+    {
+        id: 4,
+        name: 'Soft Support',
+    },
+    {
+        id: 5,
+        name: 'Hard Support',
+    },
+]
+
+const teamsList = computed(() => {
+    // We want the distinct teams
+    var teams = leagueMetadataStats.value.map(item => item.fantasyPlayer.team)
+    return [...new Map(teams.map(item => [item['id'], item])).values()]
+})
 
 const selectedLeague = defineModel<League>('selectedLeague');
 
 const page = ref(1)
-const itemsPerPage = 100;
+const itemsPerPage = 15;
 const pageCount = computed(() => {
-    return Math.ceil(leagueMetadataStats.value.length / itemsPerPage);
+    return Math.ceil(leagueMetadataStatsIndexed.value.length / itemsPerPage);
 })
 
-const leagueFilter = ref('');
 // const compareOn = ref(false);
 
 const leagueTab = ref('kda');
@@ -113,7 +187,7 @@ const leagueTab = ref('kda');
 // const selectedLeaguePlayer = ref([]);
 // const compareLeaguePlayers = ref([]);
 
-const leagueMetadataStats = ref([]);
+const leagueMetadataStats = ref<LeagueMetadata[]>([]);
 
 const commonLeagueColumns = [
     {
@@ -131,6 +205,7 @@ const commonLeagueColumns = [
         },
         width: isDesktop.value ? '240px' : '200px',
         sortable: true,
+        sort: (a: any, b: any) => a.playerName > b.playerName
     },
 ];
 const kdaLeagueColumns = [
@@ -309,12 +384,43 @@ const stringifyNested = (obj: Object | string | null): any => {
 
 const leagueMetadataStatsIndexed = computed(() => {
     return leagueMetadataStats.value
-        .map((player: object, index) => ({
+        .map((player: LeagueMetadata, index) => ({
             ...player,
             position: index + 1
-        })).filter(item =>
-            Object.values(item).some(val => stringifyNested(val).toLowerCase().includes(leagueFilter.value.toLowerCase())
-            ));
+        }))
+        .filter(item =>
+            {
+                if(!leagueFilter.value) {
+                    return true;
+                } else {
+                // Search filter
+                return Object.values(item.fantasyPlayer).some(val => stringifyNested(val).toLowerCase().includes(leagueFilter.value.toLowerCase()))
+                }
+            }
+        )
+        .filter(item =>
+            {
+                // Role filter
+                if(roleFilter.value.length == 0) {
+                    return true;
+                }
+                else {
+                    return roleFilter.value.some(role => role == item.fantasyPlayer.teamPosition)
+                }
+            }
+        )
+        .filter(item =>
+            {
+                // Team filter
+                if(teamFilter.value.length == 0) {
+                    return true;
+                }
+                else {
+                    return teamFilter.value.some(team => team == item.fantasyPlayer.team.id)
+                }
+            }
+        )
+        ;
 });
 
 onMounted(() => {
@@ -357,6 +463,11 @@ const getPositionIcon = (positionInt: number) => {
 </script>
 
 <style scoped>
+.search-input {
+    padding: 1rem;
+    padding-top: 0;
+}
+
 .league-table {
     font-family: Avenir, Helvetica, Arial, sans-serif;
 }

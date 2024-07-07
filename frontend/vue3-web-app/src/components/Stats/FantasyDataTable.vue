@@ -1,6 +1,46 @@
 <!-- eslint-disable vue/valid-v-slot -->
 <template>
     <v-col>
+        <v-row class="search-input">
+            <v-col style="min-width: 200px">
+                <v-text-field 
+                    v-model="fantasyFilter" 
+                    label="Search"
+                    prepend-inner-icon="fa-magnifying-glass"
+                    variant="solo-filled"
+                    clearable
+                    flat
+                    hide-details
+                    single-line
+                />
+            </v-col>
+            <v-col style="min-width: 200px">
+                <v-select
+                    v-model="roleFilter"
+                    label="Filter Role"
+                    :items="roleList"
+                    item-title="name"
+                    item-value="id"
+                    multiple
+                    clearable
+                    hide-details
+                    single-line
+                />
+            </v-col>
+            <v-col style="min-width: 200px">
+                <v-select
+                    v-model="teamFilter"
+                    label="Filter Team"
+                    :items="teamsList"
+                    item-title="name"
+                    item-value="id"
+                    multiple
+                    clearable
+                    hide-details
+                    single-line
+                />
+            </v-col>
+        </v-row>
         <v-row v-if="!isDesktop" dense>
             <v-tabs v-model="fantasyTab" density="compact">
                 <v-tab value="kda" min-width="70px" width="70px">K/D/A</v-tab>
@@ -11,7 +51,7 @@
         </v-row>
         <v-row>
             <v-data-table class="fantasy-table" :items="playerFantasyStatsIndexed" :headers="displayedFantasyColumns"
-                density="compact" :items-per-page="itemsPerPage"
+                density="compact" :items-per-page="itemsPerPage" v-model:page="page"
                 :style="{ 'font-size': isDesktop ? '0.8rem' : '0.7rem' }">
                 <template v-slot:item.fantasyPlayer="{ value }">
                     <v-row v-if="isDesktop" class="ma-1 pa-1">
@@ -140,18 +180,51 @@
 
 <script setup lang="ts">
 import { ref, defineModel, onMounted, watch, computed } from 'vue';
-import { VRow, VCol, VDataTable, VPagination, VTabs, VTab } from 'vuetify/components';
+import { VRow, VCol, VDataTable, VPagination, VTabs, VTab, VTextField, VSelect } from 'vuetify/components';
 import { localApiService } from '@/services/localApiService';
 import type { League } from '@/types/League';
+import type { FantasyPlayerPoints } from '../Fantasy/fantasyDraft';
+import { useDebouncedRef } from '@/services/debounce'
 
-const fantasyFilter = ref('');
+const fantasyFilter = useDebouncedRef('');
+const roleFilter = ref([]);
+const teamFilter = ref([]);
 
 const selectedLeague = defineModel<League>('selectedLeague');
 
 const page = ref(1)
-const itemsPerPage = 100;
+const itemsPerPage = 15;
 const pageCount = computed(() => {
-    return Math.ceil(playerFantasyStats.value.length / itemsPerPage);
+    return Math.ceil(playerFantasyStatsIndexed.value.length / itemsPerPage);
+})
+
+const roleList = [
+    {
+        id: 1,
+        name: 'Carry',
+    },
+    {
+        id: 2,
+        name: 'Mid',
+    },
+    {
+        id: 3,
+        name: 'Offlane',
+    },
+    {
+        id: 4,
+        name: 'Soft Support',
+    },
+    {
+        id: 5,
+        name: 'Hard Support',
+    },
+]
+
+const teamsList = computed(() => {
+    // We want the distinct teams
+    var teams = playerFantasyStats.value.map(item => item.fantasyPlayer.team)
+    return [...new Map(teams.map(item => [item['id'], item])).values()]
 })
 
 onMounted(() => {
@@ -174,7 +247,7 @@ const isDesktop = ref(window.outerWidth >= 600);
 
 // const showFantasyFilters = ref(false);
 
-const playerFantasyStats = ref([]);
+const playerFantasyStats = ref<FantasyPlayerPoints[]>([]);
 
 const commonFantasyColumns = [
     {
@@ -461,12 +534,43 @@ const stringifyNested = (obj: Object | string | null): any => {
 
 const playerFantasyStatsIndexed = computed(() => {
     return playerFantasyStats.value
-        .map((player: Object, index) => ({
+        .map((player: FantasyPlayerPoints, index) => ({
             ...player,
             position: index + 1
-        })).filter(item =>
-            Object.values(item).some(val => stringifyNested(val).toLowerCase().includes(fantasyFilter.value.toLowerCase())
-            ));
+        }))
+        .filter(item =>
+            {
+                if(!fantasyFilter.value) {
+                    return true;
+                } else {
+                // Search filter
+                return Object.values(item.fantasyPlayer).some(val => stringifyNested(val).toLowerCase().includes(fantasyFilter.value.toLowerCase()))
+                }
+            }
+        )
+        .filter(item =>
+            {
+                // Role filter
+                if(roleFilter.value.length == 0) {
+                    return true;
+                }
+                else {
+                    return roleFilter.value.some(role => role == item.fantasyPlayer.teamPosition)
+                }
+            }
+        )
+        .filter(item =>
+            {
+                // Team filter
+                if(teamFilter.value.length == 0) {
+                    return true;
+                }
+                else {
+                    return teamFilter.value.some(team => team == item.fantasyPlayer.team.id)
+                }
+            }
+        )
+        ;
 });
 
 const displayedFantasyColumns = computed<any>(() => {
@@ -495,6 +599,11 @@ const getPositionIcon = (positionInt: number) => {
 </script>
 
 <style scoped>
+.search-input {
+    padding: 1rem;
+    padding-top: 0;
+}
+
 .fantasy-table {
     font-family: Avenir, Helvetica, Arial, sans-serif;
 }
