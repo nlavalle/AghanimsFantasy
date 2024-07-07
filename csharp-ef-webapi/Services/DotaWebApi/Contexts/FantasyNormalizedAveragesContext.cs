@@ -8,9 +8,9 @@ internal class FantasyNormalizedAveragesContext : DotaOperationContext
 {
     // private readonly DotaWebApiService _apiService;
     private readonly AghanimsFantasyContext _dbContext;
-    private readonly ILogger<MatchDetailsContext> _logger;
+    private readonly ILogger<FantasyNormalizedAveragesContext> _logger;
 
-    public FantasyNormalizedAveragesContext(ILogger<MatchDetailsContext> logger, IServiceScope scope, Config config)
+    public FantasyNormalizedAveragesContext(ILogger<FantasyNormalizedAveragesContext> logger, IServiceScope scope, Config config)
         : base(scope, config)
     {
         _dbContext = scope.ServiceProvider.GetRequiredService<AghanimsFantasyContext>();

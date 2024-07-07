@@ -16,9 +16,11 @@
             </v-row>
             <v-row v-else @click="changeActiveDraftPlayer(index)">
                 <v-col>
-                    <v-row class="parallelogram"
+                    <v-row class="parallelogram" justify="center" align="center"
                         :style="{ 'max-width': isDesktop ? '120px' : '60px', 'min-width': isDesktop ? '120px' : '60px', 'min-height': isDesktop ? '80px' : '40px', 'margin-left': isDesktop ? '5px' : '' }"
                         :class="{ 'glow-active-slot': currentActiveDraftPlayerCheck(index) }">
+                        <img :style="{ width: isDesktop ? '70px' : '20px', height: isDesktop ? '70px' : '20px' }"
+                            :src="`icons/pos_${index}.png`" />
                     </v-row>
                     <v-row class="caption" justify="center"
                         :style="{ 'min-height': isDesktop ? '1.5rem' : '1.2rem', 'max-width': isDesktop ? '120px' : '60px' }"></v-row>
@@ -65,7 +67,7 @@ const currentActiveDraftPlayerCheck = (draftSlot: number) => {
     overflow: hidden;
     transform: skew(20deg);
     border: 1px solid white;
-    background: radial-gradient(at center, #797979 10%, #323232 90%);
+    background: radial-gradient(at center, #474747 10%, #323232 90%);
 }
 
 .parallelogram img {

@@ -168,6 +168,12 @@ export function fantasyDraftState() {
         fantasyDraftPicks.value = [];
     }
 
+    const disabledPlayer = (fantasyPlayer: FantasyPlayer) => {
+        const pickedPlayer = fantasyDraftPicks.value.filter(picks => picks.id == fantasyPlayer.id).length > 0;
+        const correctDraftSlotRoleSelected = fantasyPlayer.teamPosition == currentDraftSlotSelected.value;
+        return pickedPlayer || !correctDraftSlotRoleSelected;
+    }
+
     return {
         selectedPlayer,
         currentDraftSlotSelected,
@@ -176,6 +182,7 @@ export function fantasyDraftState() {
         setFantasyDraftPicks,
         setFantasyPlayers,
         setFantasyPlayer,
-        clearFantasyDraftPicks
+        clearFantasyDraftPicks,
+        disabledPlayer
     }
 }

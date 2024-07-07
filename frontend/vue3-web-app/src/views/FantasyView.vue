@@ -16,41 +16,44 @@
               </div>
             </v-tabs-window-item>
             <v-tabs-window-item value="draft" style="overflow: visible !important">
-              <v-row v-if="updateDraftVisibility || updateDisabled">
-                <v-spacer />
-                <v-btn class="btn-fantasy" :disabled="updateDisabled" @click="toggleUpdateDraft()">
-                  {{ updateDisabled ? "Draft Locked" : "Update Draft" }}
-                </v-btn>
-              </v-row>
-              <v-row v-else>
-                <v-col>
-                  <v-row>
-                    <CreateDraft @saveDraft="saveDraft" />
-                  </v-row>
-                </v-col>
-              </v-row>
+              <v-col>
+                <v-row v-if="updateDraftVisibility || updateDisabled">
+                  <v-card class="ma-5"
+                    :title="`Drafting for Fantasy League: ${leagueStore.selectedLeague!.name} is locked`" disabled>
+                  </v-card>
+                </v-row>
+                <v-row v-else>
+                  <v-col>
+                    <v-row>
+                      <CreateDraft @saveDraft="saveDraft" />
+                    </v-row>
+                  </v-col>
+                </v-row>
+              </v-col>
             </v-tabs-window-item>
           </v-tabs-window>
         </v-row>
       </v-col>
     </v-row>
-    <v-row v-else class="row text-white">
+    <v-row v-else class="ma-2 text-white" justify="center">
       <span class="not-authenticated">
-        Not Authenticated
+        Please log in via Discord to create your fantasy draft.
       </span>
+      <LoginDiscord class="login-discord" />
     </v-row>
   </v-container>
 
   <AlertDialog v-model="showSuccessModal" @ok="scrollAfterAlertDialog" />
-  <ErrorDialog v-model="showErrorModal" :error="errorDetails" @ok="scrollAfterAlertDialog" />
+  <ErrorDialog v-model="showErrorModal" :error="errorDetails!" @ok="scrollAfterAlertDialog" />
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
-import { VSpacer, VBtn, VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem } from 'vuetify/components';
+import { VCard, VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem } from 'vuetify/components';
 import { useAuthStore } from '@/stores/auth';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import { localApiService } from '@/services/localApiService';
+import LoginDiscord from '@/components/LoginDiscord.vue';
 import CurrentDraft from '@/components/Fantasy/CurrentDraft.vue';
 import CreateDraft from '@/components/Fantasy/CreateDraft/CreateDraft.vue';
 import { fantasyDraftState, type FantasyDraftPoints, type FantasyPlayer } from '@/components/Fantasy/fantasyDraft';
@@ -63,7 +66,7 @@ const { fantasyDraftPicks, setFantasyDraftPicks, setFantasyPlayers } = fantasyDr
 
 const showSuccessModal = ref(false);
 const showErrorModal = ref(false);
-const errorDetails = ref(null);
+const errorDetails = ref<Error>();
 
 const fantasyTab = ref('current')
 const updateDraftVisibility = ref(false);
@@ -122,10 +125,6 @@ const saveDraft = async () => {
     })
 };
 
-const toggleUpdateDraft = () => {
-  updateDraftVisibility.value = !updateDraftVisibility.value
-};
-
 const scrollAfterAlertDialog = () => {
   setTimeout(function () {
     window.scrollTo({
@@ -166,5 +165,9 @@ const authenticated = computed(() => {
 .not-authenticated {
   margin: 20px;
   font-size: 16px;
+}
+
+.login-discord {
+  cursor: pointer;
 }
 </style>

@@ -1,11 +1,14 @@
 <template>
-  <div class="discord-login" style="width:80px">
+  <div class="discord-login" style="width:100px;max-height:48px;display:flex;align-items:center">
     <div v-if="authenticated">
-      <font-awesome-icon class="icon" :icon="faRightFromBracket" />
-      <span @click="logout">Logout</span>
+      <v-btn @click="logout" density="compact" variant="flat" size="x-small" height="40px" style="text-align:left">
+        <span>Logout<font-awesome-icon class="icon" :icon="faRightFromBracket" /></span>
+      </v-btn>
     </div>
     <div v-else>
-      <span @click="login"> <font-awesome-icon class="icon" :icon="faCircleUser" />Login </span>
+      <v-btn @click="login" density="compact" variant="flat" size="x-small" height="40px" style="text-align:left">
+        <span>Login via <br />Discord<font-awesome-icon class="icon" :icon="faDiscord" /></span>
+      </v-btn>
     </div>
   </div>
 </template>
@@ -14,7 +17,9 @@
 import { useAuthStore } from '@/stores/auth'
 import { onMounted, computed } from 'vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faRightFromBracket, faCircleUser } from '@fortawesome/free-solid-svg-icons';
+import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
+import { faDiscord } from '@fortawesome/free-brands-svg-icons';
+import { VBtn } from 'vuetify/components';
 
 
 const authStore = useAuthStore()

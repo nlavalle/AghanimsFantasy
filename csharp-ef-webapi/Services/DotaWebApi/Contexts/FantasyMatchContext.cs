@@ -10,9 +10,9 @@ namespace csharp_ef_webapi.Services;
 internal class FantasyMatchContext : DotaOperationContext
 {
     private readonly AghanimsFantasyContext _dbContext;
-    private readonly ILogger<MatchDetailsContext> _logger;
+    private readonly ILogger<FantasyMatchContext> _logger;
 
-    public FantasyMatchContext(ILogger<MatchDetailsContext> logger, IServiceScope scope, Config config)
+    public FantasyMatchContext(ILogger<FantasyMatchContext> logger, IServiceScope scope, Config config)
         : base(scope, config)
     {
         _dbContext = scope.ServiceProvider.GetRequiredService<AghanimsFantasyContext>();
@@ -123,7 +123,10 @@ internal class FantasyMatchContext : DotaOperationContext
             var gcMatchPlayers = _dbContext.GcDotaMatches
                 .SelectMany(match => match.players,
                 (left, right) => new { Match = left, MatchPlayer = right })
-                .Where(gcmp => !_dbContext.FantasyMatchPlayers.Any(fmp => fmp.MatchId == (long)gcmp.Match.match_id && fmp.Account != null && fmp.Account.Id == gcmp.MatchPlayer.account_id))
+                .Where(gcmp =>
+                    !_dbContext.FantasyMatchPlayers.Any(fmp => fmp.MatchId == (long)gcmp.Match.match_id && fmp.Account != null && fmp.Account.Id == gcmp.MatchPlayer.account_id)
+                    && (gcmp.Match.match_outcome == EMatchOutcome.k_EMatchOutcome_RadVictory || gcmp.Match.match_outcome == EMatchOutcome.k_EMatchOutcome_DireVictory) // Filter out cancelled games
+                )
                 .Take(500) // 10 players per match and 50 matches per pull so this feels equivalent
                 .ToList();
 

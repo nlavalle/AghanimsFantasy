@@ -3,6 +3,7 @@ using System.Diagnostics;
 using csharp_ef_webapi.Data;
 using csharp_ef_webapi.Models.GameCoordinator;
 using ICSharpCode.SharpZipLib.BZip2;
+using Microsoft.EntityFrameworkCore;
 using ProtoBuf;
 using SteamKit2.GC.Dota.Internal;
 
@@ -10,7 +11,7 @@ namespace csharp_ef_webapi.Services;
 internal class MatchMetadataContext : DotaOperationContext
 {
     private readonly AghanimsFantasyContext _dbContext;
-    private readonly ILogger<MatchDetailsContext> _logger;
+    private readonly ILogger<MatchMetadataContext> _logger;
     private readonly HttpClient _httpClient;
 
     // Our match history list: just going to use a locked list, contention should be very low
@@ -21,7 +22,7 @@ internal class MatchMetadataContext : DotaOperationContext
     private int _startedMatches = 0;
     private int _totalMatches = 0;
 
-    public MatchMetadataContext(ILogger<MatchDetailsContext> logger, HttpClient httpClient, IServiceScope scope, Config config)
+    public MatchMetadataContext(ILogger<MatchMetadataContext> logger, HttpClient httpClient, IServiceScope scope, Config config)
         : base(scope, config)
     {
         _dbContext = scope.ServiceProvider.GetRequiredService<AghanimsFantasyContext>();
@@ -35,11 +36,14 @@ internal class MatchMetadataContext : DotaOperationContext
         {
             // Find all the match histories without match detail rows and add tasks to fetch them all
             // Take 50 at a time since this runs every 5 minutes, no reason to blast it all at once
-            List<CMsgDOTAMatch> matchesWithoutDetails = _dbContext.GcDotaMatches
+            // Only look at active leagues otherwise this will look for old missing matches forever
+            List<int> activeLeagueIds = await _dbContext.Leagues.Where(league => league.IsActive).Select(league => league.Id).ToListAsync();
+            List<CMsgDOTAMatch> matchesWithoutDetails = await _dbContext.GcDotaMatches
+                .Where(match => activeLeagueIds.Contains((int)match.leagueid))
                 .Where(gcdm => gcdm.replay_state == CMsgDOTAMatch.ReplayState.REPLAY_AVAILABLE &&
                     !_dbContext.GcMatchMetadata.Any(gcmm => (ulong)gcmm.MatchId == gcdm.match_id))
                 .Take(50)
-                .ToList();
+                .ToListAsync();
 
             if (matchesWithoutDetails.Count() > 0)
             {

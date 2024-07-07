@@ -502,15 +502,14 @@ export const localApiService = {
       .then(
         function (response: any) {
           if (!response.ok) {
-            throw response.status
+            return response.text().then((response: any) => { throw new Error(response) })
           } else {
             return response.json()
           }
         }.bind(this)
       )
       .catch((error) => {
-        console.error('Error fetching data:', error)
-        throw error
+        throw (error)
       })
   }
 }

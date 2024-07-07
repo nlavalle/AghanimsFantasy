@@ -243,6 +243,13 @@ namespace csharp_ef_webapi.Controllers
                 return BadRequest("Draft is locked for this league");
             }
 
+            // Ensure player has posted a draft that is one of each team position, if there's 2 of the same position then reject it as a bad request
+            var fantasyPlayers = await _fantasyRepository.GetFantasyPlayersAsync(fantasyDraft.FantasyLeagueId);
+            if (fantasyPlayers.Where(fp => fantasyDraft.DraftPickPlayers.Any(dpp => dpp.FantasyPlayerId == fp.Id)).GroupBy(fp => fp.TeamPosition).Where(grp => grp.Count() > 1).Count() > 0)
+            {
+                return BadRequest("Can only draft one of each team position");
+            };
+
             object fantasyDraftPostResponse = null;
 
             // Fantasy Draft may be incomplete, so go through and add the IDs passed

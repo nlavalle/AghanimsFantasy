@@ -6,7 +6,7 @@
                 </PlayerStatsBio>
                 <v-row class="mt-4">
                     <v-btn class="mr-1" style="width:55%;" color="primary" @click="draftPlayer()"
-                        :disabled="draftPlayerValidation()">Draft Player</v-btn>
+                        :disabled="disabledPlayer(selectedPlayer)">Draft Player</v-btn>
                     <v-btn class="ml-1" style="width:40%;" color="primary" @click="randomPlayer()">
                         <font-awesome-icon :icon="faDice" />
                         <span class="ml-1">Random</span>
@@ -43,7 +43,7 @@ import { faDice } from '@fortawesome/free-solid-svg-icons';
 
 
 
-const { selectedPlayer, fantasyPlayersAvailable, fantasyDraftPicks, setFantasyPlayer } = fantasyDraftState();
+const { selectedPlayer, fantasyPlayersAvailable, fantasyDraftPicks, setFantasyPlayer, disabledPlayer } = fantasyDraftState();
 
 
 const fantasyLabels = [
@@ -136,19 +136,11 @@ const draftPlayer = () => {
     }
 }
 
-const draftPlayerValidation = () => {
-    if (!selectedPlayer.value) return true;
-    return fantasyDraftPicks.value.some(picks => picks.id == selectedPlayer.value!.id)
-}
-
 const randomPlayer = () => {
-    var availablePicks = fantasyPlayersAvailable.value.filter(pa => !fantasyDraftPicks.value.includes(pa))
+    var availablePicks = fantasyPlayersAvailable.value.filter(pa => !disabledPlayer(pa))
     var randomPick = availablePicks[(Math.floor(Math.random() * availablePicks.length))];
     selectedPlayer.value = randomPick;
 }
-
-
-
 
 </script>
 
