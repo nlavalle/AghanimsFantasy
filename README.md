@@ -1,6 +1,6 @@
 # Aghanim's Fantasy
 
-Work in progress, goal is to have a fantasy league setup primarily for the NADCL.
+Current live, work in progress to create a Fantasy League following TI13's format for other smaller professional Dota Tournaments. Project originally spun off of https://github.com/daveknippers/AghanimsWager
 
 ### Requirements
 This project depends on three things:
