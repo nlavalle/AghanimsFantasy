@@ -2,6 +2,8 @@ namespace csharp_ef_data_loader.Services;
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 public class DotaSteamClientService : BackgroundService
 {

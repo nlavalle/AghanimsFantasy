@@ -6,6 +6,7 @@ using SteamKit2.GC; // brings in the GC related classes
 using SteamKit2.GC.Dota.Internal; // brings in dota specific protobuf messages
 
 using ProtoBuf;
+using Microsoft.Extensions.Logging;
 
 class DotaClient
 {

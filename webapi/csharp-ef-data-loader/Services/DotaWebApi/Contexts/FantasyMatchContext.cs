@@ -5,6 +5,8 @@ using DataAccessLibrary.Models.Fantasy;
 using DataAccessLibrary.Models.WebApi;
 using DataAccessLibrary.Models.ProMetadata;
 using SteamKit2.GC.Dota.Internal;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 internal class FantasyMatchContext : DotaOperationContext
 {

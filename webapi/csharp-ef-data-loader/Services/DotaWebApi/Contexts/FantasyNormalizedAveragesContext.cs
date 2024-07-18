@@ -4,6 +4,8 @@ using DataAccessLibrary.Data;
 using DataAccessLibrary.Models;
 using DataAccessLibrary.Models.Fantasy;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 internal class FantasyNormalizedAveragesContext : DotaOperationContext
 {

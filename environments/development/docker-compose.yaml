@@ -18,7 +18,7 @@ services:
     ports:
       - "5002:5002"
     env_file:
-      - webapi.env
+      - dataloader.env
     volumes:
      - ./ssl_certs:/https/
     depends_on:

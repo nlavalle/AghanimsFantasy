@@ -1,8 +1,15 @@
 using csharp_ef_data_loader.Services;
 using DataAccessLibrary.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = Host.CreateApplicationBuilder(args);
+
+var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
+
+builder.Configuration.SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile($"appsettings.{environment}.json", optional: false);
 
 // Add Database
 builder.Services.AddDbContext<AghanimsFantasyContext>(
@@ -35,7 +42,5 @@ builder.Services.AddHostedService<DotaSteamClientService>();
 
 
 var app = builder.Build();
-
-app.UseHttpsRedirection();
 
 app.Run();

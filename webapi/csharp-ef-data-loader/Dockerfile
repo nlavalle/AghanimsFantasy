@@ -18,6 +18,4 @@ RUN dotnet publish ./csharp-ef-data-loader/csharp-ef-data-loader.csproj -c $conf
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app ./
-EXPOSE 5001
-ENV ASPNETCORE_URLS=https://+:5001
 ENTRYPOINT ["dotnet", "csharp-ef-data-loader.dll"]
