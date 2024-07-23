@@ -8,7 +8,7 @@
     </v-tabs>
   </div>
   <div class="bg-secondary">
-    <LeagueSelector />
+    <LeagueSelector style="max-width:600px" />
   </div>
 </template>
 

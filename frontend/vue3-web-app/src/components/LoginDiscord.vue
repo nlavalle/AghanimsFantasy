@@ -34,7 +34,7 @@ const authenticated = computed(() => {
 
 function login() {
   // Open a new window or popup for OAuth login
-  const loginWindow = window.open('/api/auth/login', 'Login', 'width=500,height=650')
+  const loginWindow = window.open('/api/auth/login', 'Login', 'width=800,height=650')
 
   if (loginWindow) {
     const checkLoginStatus = setInterval(() => {

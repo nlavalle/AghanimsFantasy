@@ -1,4 +1,5 @@
 import type { DotaAccount, DotaTeam } from '@/types/Dota';
+import type { FantasyMatchPlayer } from '@/types/FantasyMatchPlayer';
 import { ref } from 'vue';
 
 export interface FantasyDraftPoints {
@@ -74,6 +75,67 @@ export interface FantasyPlayerPoints {
     totalWardsDewardedPoints: number,
     totalStunDuration: number,
     totalStunDurationPoints: number,
+    totalMatchFantasyPoints: number
+}
+
+export interface FantasyPlayerMatchPoints {
+    fantasyLeagueId: number,
+    fantasyPlayer: FantasyPlayer,
+    fantasyMatchPlayer: FantasyMatchPlayer,
+    kills: number,
+    killsPoints: number,
+    deaths: number,
+    deathsPoints: number,
+    assists: number,
+    assistsPoints: number,
+    lastHits: number,
+    lastHitsPoints: number,
+    goldPerMin: number,
+    goldPerMinPoints: number,
+    xpPerMin: number,
+    xpPerMinPoints: number,
+    networth: number,
+    networthPoints: number,
+    heroDamage: number,
+    heroDamagePoints: number,
+    towerDamage: number,
+    towerDamagePoints: number,
+    heroHealing: number,
+    heroHealingPoints: number,
+    gold: number,
+    goldPoints: number,
+    fightScore: number,
+    fightScorePoints: number,
+    farmScore: number,
+    farmScorePoints: number,
+    supportScore: number,
+    supportScorePoints: number,
+    pushScore: number,
+    pushScorePoints: number,
+    heroXp: number,
+    heroXpPoints: number,
+    campsStacked: number,
+    campsStackedPoints: number,
+    rampages: number,
+    rampagesPoints: number,
+    tripleKills: number,
+    tripleKillsPoints: number,
+    aegisSnatched: number,
+    aegisSnatchedPoints: number,
+    rapiersPurchased: number,
+    rapiersPurchasedPoints: number,
+    couriersKilled: number,
+    couriersKilledPoints: number,
+    supportGoldSpent: number,
+    supportGoldSpentPoints: number,
+    observerWardsPlaced: number,
+    observerWardsPlacedPoints: number,
+    sentryWardsPlaced: number,
+    sentryWardsPlacedPoints: number,
+    wardsDewarded: number,
+    wardsDewardedPoints: number,
+    stunDuration: number,
+    stunDurationPoints: number,
     totalMatchFantasyPoints: number
 }
 

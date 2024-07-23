@@ -14,10 +14,25 @@ import { AghanimsFantasyDarkTheme } from './style/vuetify-themes'
 import { aliases, fa } from 'vuetify/iconsets/fa-svg'
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faChevronLeft, faChevronRight, faCaretDown, faArrowUp, faStepForward, faStepBackward } from '@fortawesome/free-solid-svg-icons';
+import { faSquare } from '@fortawesome/free-regular-svg-icons';
+import {
+  faChevronLeft, faChevronRight, faChevronDown, faCaretDown, faArrowUp, faArrowDown,
+  faStepForward, faStepBackward, faLock, faLockOpen,
+  faMagnifyingGlass, faCheckSquare, faTimesCircle
+} from '@fortawesome/free-solid-svg-icons';
+import { faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons';
 // import { far } from '@fortawesome/free-regular-svg-icons';
 
-library.add(faChevronLeft, faChevronRight, faCaretDown, faArrowUp, faStepForward, faStepBackward);
+library.add(
+  // Regular
+  faSquare,
+  // Solid
+  faChevronLeft, faChevronRight, faChevronDown, faCaretDown, faArrowUp, faArrowDown,
+  faStepForward, faStepBackward, faLock, faLockOpen,
+  faMagnifyingGlass, faCheckSquare, faTimesCircle,
+  // Brand
+  faDiscord, faGithub
+);
 
 const vuetify = createVuetify({
   theme: {

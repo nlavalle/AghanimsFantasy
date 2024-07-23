@@ -7,6 +7,7 @@
           <v-tabs v-model="statsTab">
             <v-tab value="fantasy">Fantasy</v-tab>
             <v-tab value="league">League</v-tab>
+            <v-tab value="match">Matches</v-tab>
           </v-tabs>
         </v-row>
       </v-col>
@@ -26,7 +27,7 @@
         <v-tabs-window-item value="fantasy">
           <v-col>
             <v-row v-if="selectedLeague">
-              <FantasyDataTable class="fantasy-table" v-model:selectedLeague="selectedLeague">
+              <FantasyDataTable v-model:selectedLeague="selectedLeague">
               </FantasyDataTable>
             </v-row>
           </v-col>
@@ -34,8 +35,16 @@
         <v-tabs-window-item value="league">
           <v-col>
             <v-row v-if="selectedLeague">
-              <LeagueDataTable class="league-table" v-model:selectedLeague="selectedLeague">
+              <LeagueDataTable v-model:selectedLeague="selectedLeague">
               </LeagueDataTable>
+            </v-row>
+          </v-col>
+        </v-tabs-window-item>
+        <v-tabs-window-item value="match">
+          <v-col>
+            <v-row v-if="selectedLeague">
+              <MatchDataTable v-model:selectedLeague="selectedLeague" v-model:draftFiltered="draftFiltered">
+              </MatchDataTable>
             </v-row>
           </v-col>
         </v-tabs-window-item>
@@ -51,10 +60,12 @@ import { localApiService } from '@/services/localApiService';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import FantasyDataTable from '@/components/Stats/FantasyDataTable.vue';
 import LeagueDataTable from '@/components/Stats/LeagueDataTable.vue';
+import MatchDataTable from '@/components/Stats/MatchDataTable.vue';
 import type { FantasyLeague } from '@/types/FantasyLeague';
 
 const statsTab = ref('fantasy')
 const leagueStore = useFantasyLeagueStore();
+const draftFiltered = false;
 
 const selectedLeague = ref<FantasyLeague>();
 
@@ -63,9 +74,15 @@ const availableLeagues = computed(() => {
 })
 
 onMounted(() => {
-  localApiService.getFantasyLeagues().then((result: any) => {
+  if(leagueStore.selectedLeague) {
+    selectedLeague.value = leagueStore.selectedLeague;
+  } else {
+    localApiService.getFantasyLeagues().then((result: any) => {
     leagueStore.setLeagues(result);
+    selectedLeague.value = leagueStore.defaultLeague;
+    leagueStore.setSelectedLeague(selectedLeague.value)
   })
+  }
 })
 
 </script>

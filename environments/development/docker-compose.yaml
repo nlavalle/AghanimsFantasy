@@ -9,9 +9,24 @@ services:
      - ../../postgres-db/data:/var/lib/postgresql/data
       # The init script will be executed when the database is first run
      - ../../postgres-db/dotabet_schema.sql:/docker-entrypoint-initdb.d/init.sql
+  dataloader:
+    build:
+      context: ../../webapi
+      dockerfile: ./csharp-ef-data-loader/Dockerfile
+      args:
+        configuration: Development
+    ports:
+      - "5002:5002"
+    env_file:
+      - dataloader.env
+    volumes:
+     - ./ssl_certs:/https/
+    depends_on:
+      - postgres
   webapi:
     build:
-      context: ../../csharp-ef-webapi
+      context: ../../webapi
+      dockerfile: ./csharp-ef-webapi/Dockerfile
       args:
         configuration: Development
     ports:

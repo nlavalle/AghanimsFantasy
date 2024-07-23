@@ -381,6 +381,48 @@ export const localApiService = {
         throw error
       })
   },
+  getPlayerFantasyMatchStats(leagueId: number) {
+    return fetch(`${baseUrl}/fantasy/players/${leagueId}/matches/points?limit=100`)
+      .then(
+        function (response: any) {
+          if (!response.ok) {
+            throw response.status
+          } else {
+            return response.json()
+          }
+        }.bind(this)
+      )
+      .then(
+        function (data: any) {
+          return data
+        }.bind(this)
+      )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
+  getDraftPlayerFantasyMatchStats(leagueId: number) {
+    return fetch(`${baseUrl}/fantasy/draft/${leagueId}/matches/points?limit=100`)
+      .then(
+        function (response: any) {
+          if (!response.ok) {
+            throw response.status
+          } else {
+            return response.json()
+          }
+        }.bind(this)
+      )
+      .then(
+        function (data: any) {
+          return data
+        }.bind(this)
+      )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
   getTopTenDrafts(leagueId: number) {
     return fetch(`${baseUrl}/fantasy/players/${leagueId}/top10`)
       .then(

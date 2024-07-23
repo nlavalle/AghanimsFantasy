@@ -5,7 +5,7 @@ export const useFantasyLeagueStore = defineStore({
   id: 'league',
   state: () => ({
     leagues: null as FantasyLeague[] | null,
-    selectedLeague: null as FantasyLeague | null
+    selectedLeague: undefined as FantasyLeague | undefined
   }),
 
   actions: {
@@ -22,7 +22,7 @@ export const useFantasyLeagueStore = defineStore({
     },
 
     clearSelectedLeague() {
-      this.selectedLeague = null
+      this.selectedLeague = undefined
     }
   },
 
@@ -32,6 +32,11 @@ export const useFantasyLeagueStore = defineStore({
     },
     allLeagues(): FantasyLeague[] {
       return this.leagues ?? []
+    },
+    defaultLeague(): FantasyLeague {
+      return this.activeLeagues.reduce((max, current) => {
+        return current.id > max.id ? current : max
+      }, this.activeLeagues[0])
     }
   }
 })
