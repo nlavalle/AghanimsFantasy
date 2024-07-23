@@ -35,7 +35,7 @@ public class WebApiRepository : IWebApiRepository
 
     public async Task<MatchHistory?> GetMatchHistoryAsync(long matchId)
     {
-        _logger.LogInformation($"Getting Match History {matchId}");
+        _logger.LogDebug($"Getting Match History {matchId}");
 
         return await _dbContext.MatchHistory.FindAsync(matchId);
     }

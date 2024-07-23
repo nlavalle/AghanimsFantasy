@@ -6,7 +6,7 @@
           <v-tabs v-model="fantasyTab">
             <v-tab value="current">Current Draft</v-tab>
             <v-tab value="draft">Draft Players</v-tab>
-            <v-tab value="match">Draft Matches</v-tab>
+            <v-tab value="match">Fantasy Matches</v-tab>
           </v-tabs>
         </v-row>
         <v-row>
@@ -103,7 +103,7 @@ const fetchFantasyData = async () => {
         fantasyPlayers.value = result;
         setFantasyPlayers(fantasyPlayers.value);
       });
-    if (userDraftPoints.value?.fantasyDraft.draftPickPlayers && userDraftPoints.value.fantasyDraft.draftPickPlayers.length > 0) {
+    if (userDraftPoints.value?.fantasyDraft && userDraftPoints.value.fantasyDraft.draftPickPlayers.length > 0) {
       setFantasyDraftPicks(userDraftPoints.value.fantasyDraft.draftPickPlayers);
     }
   }

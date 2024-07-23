@@ -213,7 +213,6 @@ const teamsList = computed(() => {
 })
 
 onMounted(() => {
-    console.log(draftFiltered.value);
     if (selectedLeague.value && !draftFiltered.value) {
         localApiService.getPlayerFantasyMatchStats(selectedLeague.value.id)
             .then(result => playerFantasyMatchStats.value = result);
@@ -224,7 +223,6 @@ onMounted(() => {
 });
 
 watch(selectedLeague, () => {
-    console.log(draftFiltered.value);
     if (selectedLeague.value && !draftFiltered.value) {
         localApiService.getPlayerFantasyMatchStats(selectedLeague.value.id)
             .then(result => playerFantasyMatchStats.value = result);
