@@ -3,7 +3,8 @@
         <v-row justify="space-evenly">
             <v-col class="ma-1 pa-1" v-for="(fantasyDraftPoints, index) in CombinedFantasyDraftPoints" :key="index">
                 <v-row class="mt-1" justify="center">
-                    <draft-pick-card-hover class="draft-pick-card" :fantasyPlayer="fantasyDraftPoints.fantasyPlayer"
+                    <draft-pick-card-hover v-if="fantasyDraftPoints.fantasyPlayer" class="draft-pick-card"
+                        :fantasyPlayer="fantasyDraftPoints.fantasyPlayer"
                         :fantasyPoints="fantasyDraftPoints.fantasyPoints" />
                 </v-row>
             </v-col>

@@ -12,7 +12,7 @@
             @update:model-value="updateSelectedLeague" density="compact" single-line variant="underlined" return-object>
             <template v-slot:item="{ props, item }">
               <v-list-item v-bind="props" class="league-selector" :title="item.raw.name"
-                :variant="isDraftActive(item.raw.leagueEndTime) ? 'plain' : 'text'">
+                :variant="isDraftActive(item.raw.leagueEndTime) ? 'text' : 'plain'">
                 <template v-slot:append>
                   <v-icon v-if="isDraftOpen(item.raw.fantasyDraftLocked)" icon="fa-solid fa-lock"
                     size="x-small"></v-icon>
@@ -66,7 +66,7 @@ function isDraftOpen(draftLockEpochTimestamp: number) {
 }
 
 function isDraftActive(leagueEndTimestamp: number) {
-  return new Date() > new Date(leagueEndTimestamp * 1000);
+  return new Date() < new Date(leagueEndTimestamp * 1000);
 }
 </script>
 

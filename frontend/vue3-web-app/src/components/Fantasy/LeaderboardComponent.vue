@@ -73,7 +73,7 @@ div ::v-deep(.player-header-name) {
     margin-top: 4px;
     margin-left: 40px;
     margin-right: 40px;
-    color: white;
+    color: var(--aghanims-fantasy-white);
     flex: 1 0;
 }
 
@@ -87,7 +87,7 @@ div ::v-deep(.player-header-value) {
     margin-top: 4px;
     margin-left: 40px;
     margin-right: 40px;
-    color: white;
+    color: var(--aghanims-fantasy-white);
     flex: 0.5 1;
 }
 
@@ -120,7 +120,7 @@ div ::v-deep(.ico-cup-reverse) {
 .leaderboard {
     /* background: linear-gradient(to bottom, #3a404d, #181c26); */
     background-color: var(--aghanims-fantasy-main-4);
-    border: 5px solid var(--aghanims-fantasy-accent-dark);
+    border: 5px solid var(--aghanims-fantasy-main-2);
     border-radius: 10px;
     box-shadow: 0 7px 30px rgba(62, 9, 11, 0.3);
     margin-bottom: 10px;
@@ -131,7 +131,7 @@ div ::v-deep(.ico-cup-reverse) {
 }
 
 .leaderboard-header {
-    background-color: var(--aghanims-fantasy-accent-dark);
+    background-color: var(--aghanims-fantasy-main-2);
     padding-bottom: 5px;
     list-style: none;
 }
@@ -183,7 +183,7 @@ div ::v-deep(.ico-cup-reverse) {
     width: 25px;
     height: 25px;
     line-height: 25px;
-    color: var(--gradient-purple-1);
+    color: var(--gradient-blue-6);
     background: #fff;
     border-radius: 25px;
     text-align: center;
@@ -242,49 +242,49 @@ div ::v-deep(.ico-cup-reverse) {
 }
 
 .leaderboard ol li:nth-child(1) {
-    background: var(--gradient-purple-1);
+    background: var(--gradient-blue-3);
 }
 
 .leaderboard ol li:nth-child(1)::after {
-    background: var(--gradient-purple-1);
+    background: var(--gradient-blue-3);
 }
 
 .leaderboard ol li:nth-child(2) {
-    background: var(--gradient-purple-2);
+    background: var(--gradient-blue-4);
 }
 
 .leaderboard ol li:nth-child(2)::after {
-    background: var(--gradient-purple-2);
+    background: var(--gradient-blue-4);
     box-shadow: 0 2px 0 rgba(0, 0, 0, 0.08);
 }
 
 .leaderboard ol li:nth-child(2) span::before,
 .leaderboard ol li:nth-child(2) span::after {
-    border-top: 6px solid var(--gradient-purple-2);
+    border-top: 6px solid var(--gradient-blue-4);
     bottom: -7px;
 }
 
 .leaderboard ol li:nth-child(3) {
-    background: var(--gradient-purple-3);
+    background: var(--gradient-blue-5);
 }
 
 .leaderboard ol li:nth-child(3)::after {
-    background: var(--gradient-purple-3);
+    background: var(--gradient-blue-5);
     box-shadow: 0 1px 0 rgba(0, 0, 0, 0.11);
 }
 
 .leaderboard ol li:nth-child(3) span::before,
 .leaderboard ol li:nth-child(3) span::after {
-    border-top: 2px solid var(--gradient-purple-3);
+    border-top: 2px solid var(--gradient-blue-5);
     bottom: -3px;
 }
 
 .leaderboard ol li:nth-child(4) {
-    background: var(--gradient-purple-4);
+    background: var(--gradient-blue-6);
 }
 
 .leaderboard ol li:nth-child(4)::after {
-    background: var(--gradient-purple-4);
+    background: var(--gradient-blue-6);
     box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.15);
 }
 
@@ -293,15 +293,15 @@ div ::v-deep(.ico-cup-reverse) {
     top: -7px;
     bottom: auto;
     border-top: none;
-    border-bottom: 6px solid var(--gradient-purple-4);
+    border-bottom: 6px solid var(--gradient-blue-6);
 }
 
 .leaderboard ol li:nth-child(n + 5) {
-    background: var(--gradient-purple-5);
+    background: var(--gradient-blue-7);
 }
 
 .leaderboard ol li:nth-child(n + 5)::after {
-    background: var(--gradient-purple-5);
+    background: var(--gradient-blue-7);
     box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.15);
 }
 
@@ -310,16 +310,16 @@ div ::v-deep(.ico-cup-reverse) {
     top: -7px;
     bottom: auto;
     border-top: none;
-    border-bottom: 6px solid var(--gradient-purple-5);
+    border-bottom: 6px solid var(--gradient-blue-7);
 }
 
 .leaderboard ol li:nth-last-child(1) {
-    background: var(--gradient-purple-8);
+    background: var(--gradient-blue-8);
     border-radius: 0 0 10px 10px;
 }
 
 .leaderboard ol li:nth-last-child(1)::after {
-    background: var(--gradient-purple-8);
+    background: var(--gradient-blue-8);
     box-shadow: 0 -2.5px 0 rgba(0, 0, 0, 0.12);
     border-radius: 0 0 10px 10px;
 }
@@ -329,6 +329,6 @@ div ::v-deep(.ico-cup-reverse) {
     top: -9px;
     bottom: auto;
     border-top: none;
-    border-bottom: 8px solid var(--gradient-purple-8);
+    border-bottom: 8px solid var(--gradient-blue-8);
 }
 </style>
