@@ -2,18 +2,27 @@
     <div>
         <!-- Set up the sticky top objects -->
         <div v-if="isDesktop" style="margin-top:40px">
-            <div class="sticky-parent right-0">
+            <div v-if="authenticated" class="sticky-parent right-0">
                 <v-btn class="btn-fantasy sticky-child" @click="clearDraft()">Clear Draft</v-btn>
                 <v-btn class="btn-fantasy sticky-child" @click="saveDraft()">Save Draft</v-btn>
+            </div>
+            <div v-else class="sticky-parent right-0">
+                <v-btn class="btn-fantasy sticky-child" @click="clearDraft()">Clear Draft</v-btn>
+                <v-btn class="btn-fantasy sticky-child" style="pointer-events: none;" disabled @click="saveDraft()">Save Draft</v-btn>
             </div>
             <div class="sticky-parent left-0">
                 <CreateDraftPicks class="sticky-child" style="z-index:10" />
             </div>
         </div>
         <div v-else style="margin-top:20px">
-            <div class="sticky-parent left-0">
+            <div v-if="authenticated" class="sticky-parent left-0">
                 <v-btn class="btn-fantasy sticky-child" style="top:20px;" @click="clearDraft()">Clear Draft</v-btn>
                 <v-btn class="btn-fantasy sticky-child" style="top:20px;" @click="saveDraft()">Save Draft</v-btn>
+                <CreateDraftPicks class="mt-2 sticky-child" style="top:70px;z-index:10" />
+            </div>
+            <div v-else class="sticky-parent left-0">
+                <v-btn class="btn-fantasy sticky-child" style="top:20px;" @click="clearDraft()">Clear Draft</v-btn>
+                <v-btn class="btn-fantasy sticky-child" style="top:20px; pointer-events: none;" disabled @click="saveDraft()">Save Draft</v-btn>
                 <CreateDraftPicks class="mt-2 sticky-child" style="top:70px;z-index:10" />
             </div>
         </div>
@@ -40,14 +49,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { VBtn, VNavigationDrawer } from 'vuetify/components';
 import CreateDraftPicks from './CreateDraftPicks.vue';
 import PlayerPicksAvailable from './PlayerPicksAvailable.vue';
 import PlayerStats from './PlayerStats.vue';
+import { useAuthStore } from '@/stores/auth';
 import { fantasyDraftState } from '../fantasyDraft';
 
 const isDesktop = ref(window.outerWidth >= 600);
+
+const authStore = useAuthStore();
 
 const mobileDrawer = ref(false);
 
@@ -66,6 +78,10 @@ const clearDraft = () => {
 const toggleDrawer = () => {
     mobileDrawer.value = !mobileDrawer.value;
 }
+
+const authenticated = computed(() => {
+  return authStore.authenticated
+})
 
 </script>
 

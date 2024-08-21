@@ -1,12 +1,12 @@
 <template>
   <div class="discord-login" style="width:100px;max-height:48px;display:flex;align-items:center">
     <div v-if="authenticated">
-      <v-btn @click="logout" density="compact" variant="flat" size="x-small" height="40px" style="text-align:left">
+      <v-btn @click="logout" density="compact" variant="outlined" size="x-small" height="40px" style="text-align:left">
         <span>Logout<font-awesome-icon class="icon" :icon="faRightFromBracket" /></span>
       </v-btn>
     </div>
     <div v-else>
-      <v-btn @click="login" density="compact" variant="flat" size="x-small" height="40px" style="text-align:left">
+      <v-btn @click="login" density="compact" variant="outlined" size="x-small" height="40px" style="text-align:left">
         <span>Login via <br />Discord<font-awesome-icon class="icon" :icon="faDiscord" /></span>
       </v-btn>
     </div>
