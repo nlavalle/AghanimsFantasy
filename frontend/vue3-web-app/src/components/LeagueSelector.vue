@@ -29,11 +29,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague'
+import { fantasyDraftState } from '@/components/Fantasy/fantasyDraft';
 import { localApiService } from '@/services/localApiService'
 import { VContainer, VRow, VCol, VSelect, VListItem, VIcon } from 'vuetify/components'
 import type { FantasyLeague } from '@/types/FantasyLeague';
 
 const leagueStore = useFantasyLeagueStore()
+const { clearFantasyDraftPicks } = fantasyDraftState();
 const selectedLeague = ref<FantasyLeague>({
   id: 0,
   leagueId: 0,
@@ -54,11 +56,13 @@ onMounted(() => {
     //default to most recent league
     selectedLeague.value = leagueStore.defaultLeague;
     leagueStore.setSelectedLeague(selectedLeague.value)
+    clearFantasyDraftPicks()
   })
 })
 
 function updateSelectedLeague() {
   leagueStore.setSelectedLeague(selectedLeague.value)
+  clearFantasyDraftPicks()
 }
 
 function isDraftOpen(draftLockEpochTimestamp: number) {
