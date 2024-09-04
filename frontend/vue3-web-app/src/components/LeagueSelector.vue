@@ -12,7 +12,7 @@
             @update:model-value="updateSelectedLeague" density="compact" single-line variant="underlined" return-object>
             <template v-slot:item="{ props, item }">
               <v-list-item v-bind="props" class="league-selector" :title="item.raw.name"
-                :variant="isDraftActive(item.raw.leagueEndTime) ? 'plain' : 'text'">
+                :variant="isDraftActive(item.raw.leagueEndTime) ? 'text' : 'plain'">
                 <template v-slot:append>
                   <v-icon v-if="isDraftOpen(item.raw.fantasyDraftLocked)" icon="fa-solid fa-lock"
                     size="x-small"></v-icon>
@@ -29,11 +29,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague'
+import { fantasyDraftState } from '@/components/Fantasy/fantasyDraft';
 import { localApiService } from '@/services/localApiService'
 import { VContainer, VRow, VCol, VSelect, VListItem, VIcon } from 'vuetify/components'
 import type { FantasyLeague } from '@/types/FantasyLeague';
 
 const leagueStore = useFantasyLeagueStore()
+const { clearFantasyDraftPicks } = fantasyDraftState();
 const selectedLeague = ref<FantasyLeague>({
   id: 0,
   leagueId: 0,
@@ -54,11 +56,13 @@ onMounted(() => {
     //default to most recent league
     selectedLeague.value = leagueStore.defaultLeague;
     leagueStore.setSelectedLeague(selectedLeague.value)
+    clearFantasyDraftPicks()
   })
 })
 
 function updateSelectedLeague() {
   leagueStore.setSelectedLeague(selectedLeague.value)
+  clearFantasyDraftPicks()
 }
 
 function isDraftOpen(draftLockEpochTimestamp: number) {
@@ -66,7 +70,7 @@ function isDraftOpen(draftLockEpochTimestamp: number) {
 }
 
 function isDraftActive(leagueEndTimestamp: number) {
-  return new Date() > new Date(leagueEndTimestamp * 1000);
+  return new Date() < new Date(leagueEndTimestamp * 1000);
 }
 </script>
 

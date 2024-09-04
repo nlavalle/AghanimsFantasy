@@ -1,12 +1,12 @@
 <template>
   <v-container>
-    <v-row v-if="authenticated" style="width:100%">
+    <v-row style="width:100%">
       <v-col>
         <v-row>
           <v-tabs v-model="fantasyTab">
             <v-tab value="current">Current Draft</v-tab>
             <v-tab value="draft">Draft Players</v-tab>
-            <v-tab value="match">Draft Matches</v-tab>
+            <v-tab value="match">Fantasy Matches</v-tab>
           </v-tabs>
         </v-row>
         <v-row>
@@ -18,6 +18,20 @@
             </v-tabs-window-item>
             <v-tabs-window-item value="draft" style="overflow: visible !important">
               <v-col>
+                <v-row v-if="!authenticated">
+                  <v-card class="ma-5">
+                    <v-card-title style="text-wrap:wrap">
+                      <v-row>
+                        <v-col>
+                          <span class="not-authenticated">Please login to save your draft</span>
+                        </v-col>
+                        <v-col cols="4" class="mr-1" align-self="center">
+                          <LoginDiscord class="login-discord" />
+                        </v-col>
+                      </v-row>
+                    </v-card-title>
+                  </v-card>
+                </v-row>
                 <v-row v-if="updateDraftVisibility || updateDisabled">
                   <v-card class="ma-5" disabled>
                     <v-card-title style="text-wrap:wrap">
@@ -25,7 +39,7 @@
                     </v-card-title>
                   </v-card>
                 </v-row>
-                <v-row v-else>
+                <v-row>
                   <v-col>
                     <v-row>
                       <CreateDraft @saveDraft="saveDraft" />
@@ -47,12 +61,6 @@
         </v-row>
       </v-col>
     </v-row>
-    <v-row v-else class="ma-2 text-white" justify="center">
-      <span class="not-authenticated">
-        Please log in via Discord to create your fantasy draft
-      </span>
-      <LoginDiscord class="login-discord" />
-    </v-row>
   </v-container>
 
   <AlertDialog v-model="showSuccessModal" @ok="scrollAfterAlertDialog" />
@@ -65,11 +73,11 @@ import { VCard, VCardTitle, VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VT
 import { useAuthStore } from '@/stores/auth';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import { localApiService } from '@/services/localApiService';
-import LoginDiscord from '@/components/LoginDiscord.vue';
 import CurrentDraft from '@/components/Fantasy/CurrentDraft.vue';
 import CreateDraft from '@/components/Fantasy/CreateDraft/CreateDraft.vue';
 import MatchDataTable from '@/components/Stats/MatchDataTable.vue';
 import { fantasyDraftState, type FantasyDraftPoints, type FantasyPlayer } from '@/components/Fantasy/fantasyDraft';
+import LoginDiscord from '@/components/LoginDiscord.vue';
 import AlertDialog from '@/components/AlertDialog.vue';
 import ErrorDialog from '@/components/ErrorDialog.vue';
 
@@ -97,19 +105,20 @@ const updateDisabled = computed(() => {
 
 const fetchFantasyData = async () => {
   await authStore.checkAuthenticatedAsync();
-  if (authStore.authenticated && leagueStore.selectedLeague) {
+  if (leagueStore.selectedLeague) {
     localApiService.getFantasyPlayers(leagueStore.selectedLeague.id)
       .then((result) => {
         fantasyPlayers.value = result;
         setFantasyPlayers(fantasyPlayers.value);
       });
-    if (userDraftPoints.value?.fantasyDraft.draftPickPlayers && userDraftPoints.value.fantasyDraft.draftPickPlayers.length > 0) {
+    if (authStore.authenticated && userDraftPoints.value?.fantasyDraft && userDraftPoints.value.fantasyDraft.draftPickPlayers.length > 0) {
       setFantasyDraftPicks(userDraftPoints.value.fantasyDraft.draftPickPlayers);
     }
   }
 }
 
 const saveDraft = async () => {
+  if(!authStore.authenticated) return;
   await localApiService.saveFantasyDraft(
     authStore.user,
     leagueStore.selectedLeague,
@@ -155,6 +164,9 @@ onMounted(() => {
       userDraftPoints.value = result;
       fetchFantasyData();
     });
+  } else if (!authStore.authenticated && leagueStore.selectedLeague) {
+    fantasyTab.value = 'draft';
+    fetchFantasyData();
   }
 
 });
@@ -165,6 +177,9 @@ watch([authStore, leagueStore], () => {
       userDraftPoints.value = result;
       fetchFantasyData();
     });
+  } else if (!authStore.authenticated && leagueStore.selectedLeague) {
+    fantasyTab.value = 'draft';
+    fetchFantasyData();
   }
 });
 
@@ -176,8 +191,8 @@ const authenticated = computed(() => {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+
 .not-authenticated {
-  margin: 20px;
   font-size: 16px;
 }
 

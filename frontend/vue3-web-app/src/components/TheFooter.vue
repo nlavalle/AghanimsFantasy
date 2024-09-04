@@ -7,10 +7,10 @@
                     <v-btn size="small" variant="text" href="mailto:support@aghanimsfantasy.com"
                         target="_blank">Support</v-btn>
                 </v-col>
-                <!-- <v-col align="center">
-                    <v-btn size="small" variant="text" href="https://discord.gg/GsybvXj7aE" target="_blank"
+                <v-col align="center">
+                    <v-btn size="small" variant="text" href="https://discord.gg/2Ru2CVgby9" target="_blank"
                         icon="fa-brands fa-discord"></v-btn>
-                </v-col> -->
+                </v-col>
                 <v-col align="center">
                     <v-btn size="small" variant="text" href="https://github.com/nlavalle/AghanimsFantasy"
                         target="_blank" icon="fa-brands fa-github"></v-btn>

@@ -79,7 +79,7 @@ const getTeamLogo = () => {
 .card-container {
   border-radius: 8px;
   background-color: var(--aghanims-fantasy-blue-1);
-  border: 6px solid var(--aghanims-fantasy-accent-dark);
+  border: 6px solid var(--aghanims-fantasy-main-2);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   font-family: 'Merriweather', serif;
@@ -92,7 +92,7 @@ const getTeamLogo = () => {
 }
 
 .card-title {
-  background-color: var(--aghanims-fantasy-accent-dark);
+  background-color: var(--aghanims-fantasy-main-2);
 }
 
 .card-images {
@@ -102,8 +102,8 @@ const getTeamLogo = () => {
 
 
 .draft-body {
-  background: linear-gradient(to bottom, var(--aghanims-fantasy-accent-dark), var(--aghanims-fantasy-blue-1));
-  border-top: 3px solid var(--aghanims-fantasy-accent-dark);
+  background: linear-gradient(to bottom, var(--aghanims-fantasy-main-2), var(--aghanims-fantasy-blue-1));
+  border-top: 3px solid var(--aghanims-fantasy-main-2);
   height: 50%;
   text-align: start;
 }
