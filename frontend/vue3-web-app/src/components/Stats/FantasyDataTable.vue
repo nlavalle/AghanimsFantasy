@@ -182,15 +182,15 @@
 import { ref, defineModel, onMounted, watch, computed } from 'vue';
 import { VRow, VCol, VDataTable, VPagination, VTabs, VTab, VTextField, VSelect } from 'vuetify/components';
 import { localApiService } from '@/services/localApiService';
-import type { League } from '@/types/League';
 import type { FantasyPlayerPoints } from '../Fantasy/fantasyDraft';
 import { useDebouncedRef } from '@/services/debounce'
+import type { FantasyLeague } from '@/types/FantasyLeague';
 
 const fantasyFilter = useDebouncedRef('');
 const roleFilter = ref([]);
 const teamFilter = ref([]);
 
-const selectedLeague = defineModel<League>('selectedLeague');
+const selectedFantasyLeague = defineModel<FantasyLeague>('selectedFantasyLeague');
 
 const page = ref(1)
 const itemsPerPage = 15;
@@ -228,15 +228,15 @@ const teamsList = computed(() => {
 })
 
 onMounted(() => {
-    if (selectedLeague.value) {
-        localApiService.getPlayerFantasyStats(selectedLeague.value.id)
+    if (selectedFantasyLeague.value) {
+        localApiService.getPlayerFantasyStats(selectedFantasyLeague.value.id)
             .then(result => playerFantasyStats.value = result);
     }
 });
 
-watch(selectedLeague, () => {
-    if (selectedLeague.value) {
-        localApiService.getPlayerFantasyStats(selectedLeague.value.id)
+watch(selectedFantasyLeague, () => {
+    if (selectedFantasyLeague.value) {
+        localApiService.getPlayerFantasyStats(selectedFantasyLeague.value.id)
             .then(result => playerFantasyStats.value = result);
     }
 });

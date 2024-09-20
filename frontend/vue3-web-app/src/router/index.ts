@@ -28,11 +28,6 @@ const router = createRouter({
       name: 'fantasy',
       component: () => import('../views/FantasyView.vue')
     },
-    {
-      path: '/leaderboard',
-      name: 'leaderboard',
-      component: () => import('../views/LeaderboardView.vue')
-    },
 
     {
       path: '/admin',

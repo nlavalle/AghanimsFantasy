@@ -13,7 +13,7 @@
       </v-col>
       <v-col>
         <v-row>
-          <v-select label="League" v-model="selectedLeague" :items="availableLeagues" item-title="name" item-value="id"
+          <v-select label="League" v-model="selectedFantasyLeague" :items="availableFantasyLeagues" item-title="name" item-value="id"
             variant="underlined" return-object>
             <template v-slot:item="{ props, item }">
               <v-list-item v-bind="props" class="league-selector" :title="item.raw.name"></v-list-item>
@@ -26,24 +26,24 @@
       <v-tabs-window v-model="statsTab" style="width:100%">
         <v-tabs-window-item value="fantasy">
           <v-col>
-            <v-row v-if="selectedLeague">
-              <FantasyDataTable v-model:selectedLeague="selectedLeague">
+            <v-row v-if="selectedFantasyLeague">
+              <FantasyDataTable v-model:selectedFantasyLeague="selectedFantasyLeague">
               </FantasyDataTable>
             </v-row>
           </v-col>
         </v-tabs-window-item>
         <v-tabs-window-item value="league">
           <v-col>
-            <v-row v-if="selectedLeague">
-              <LeagueDataTable v-model:selectedLeague="selectedLeague">
+            <v-row v-if="selectedFantasyLeague">
+              <LeagueDataTable v-model:selectedFantasyLeague="selectedFantasyLeague">
               </LeagueDataTable>
             </v-row>
           </v-col>
         </v-tabs-window-item>
         <v-tabs-window-item value="match">
           <v-col>
-            <v-row v-if="selectedLeague">
-              <MatchDataTable v-model:selectedLeague="selectedLeague" v-model:draftFiltered="draftFiltered">
+            <v-row v-if="selectedFantasyLeague">
+              <MatchDataTable v-model:selectedFantasyLeague="selectedFantasyLeague" v-model:draftFiltered="draftFiltered">
               </MatchDataTable>
             </v-row>
           </v-col>
@@ -67,20 +67,20 @@ const statsTab = ref('fantasy')
 const leagueStore = useFantasyLeagueStore();
 const draftFiltered = false;
 
-const selectedLeague = ref<FantasyLeague>();
+const selectedFantasyLeague = ref<FantasyLeague>();
 
-const availableLeagues = computed(() => {
-  return leagueStore.activeLeagues
+const availableFantasyLeagues = computed(() => {
+  return leagueStore.activeFantasyLeagues
 })
 
 onMounted(() => {
-  if(leagueStore.selectedLeague) {
-    selectedLeague.value = leagueStore.selectedLeague;
+  if(leagueStore.selectedFantasyLeague) {
+    selectedFantasyLeague.value = leagueStore.selectedFantasyLeague;
   } else {
     localApiService.getFantasyLeagues().then((result: any) => {
-    leagueStore.setLeagues(result);
-    selectedLeague.value = leagueStore.defaultLeague;
-    leagueStore.setSelectedLeague(selectedLeague.value)
+    leagueStore.setFantasyLeagues(result);
+    selectedFantasyLeague.value = leagueStore.defaultFantasyLeague;
+    leagueStore.setSelectedFantasyLeague(selectedFantasyLeague.value)
   })
   }
 })

@@ -41,10 +41,9 @@ import PlayerRadarChart from '@/components/Fantasy/PlayerStats/PlayerRadarChart.
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faDice } from '@fortawesome/free-solid-svg-icons';
 
+const { selectedPlayer, fantasyPlayersAvailable, setFantasyPlayer, disabledPlayer } = fantasyDraftState();
 
-
-const { selectedPlayer, fantasyPlayersAvailable, fantasyDraftPicks, setFantasyPlayer, disabledPlayer } = fantasyDraftState();
-
+const emit = defineEmits(['savePlayer']);
 
 const fantasyLabels = [
     'K/D/A',
@@ -133,6 +132,7 @@ const formatPlayerAverages = (playerAverages: any[]) => {
 const draftPlayer = () => {
     if (selectedPlayer.value) {
         setFantasyPlayer(selectedPlayer.value);
+        emit('savePlayer');
     }
 }
 
