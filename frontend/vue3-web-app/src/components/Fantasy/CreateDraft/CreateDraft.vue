@@ -2,27 +2,22 @@
     <div>
         <!-- Set up the sticky top objects -->
         <div v-if="isDesktop" style="margin-top:40px">
-            <div v-if="authenticated" class="sticky-parent right-0">
+            <div class="sticky-parent right-0">
                 <v-btn class="btn-fantasy sticky-child" @click="clearDraft()">Clear Draft</v-btn>
-                <v-btn class="btn-fantasy sticky-child" @click="saveDraft()">Save Draft</v-btn>
-            </div>
-            <div v-else class="sticky-parent right-0">
-                <v-btn class="btn-fantasy sticky-child" @click="clearDraft()">Clear Draft</v-btn>
-                <v-btn class="btn-fantasy sticky-child" style="pointer-events: none;" disabled @click="saveDraft()">Save Draft</v-btn>
+                <v-btn v-if="authenticated && selectedFantasyLeague && leagueStore.isDraftOpen(selectedFantasyLeague!.fantasyDraftLocked)"
+                    class="btn-fantasy sticky-child" @click="saveDraft()">Save Draft</v-btn>
+                <v-btn v-else class="btn-fantasy sticky-child" style="pointer-events: none;" disabled @click="saveDraft()">Save Draft</v-btn>
             </div>
             <div class="sticky-parent left-0">
                 <CreateDraftPicks class="sticky-child" style="z-index:10" />
             </div>
         </div>
         <div v-else style="margin-top:20px">
-            <div v-if="authenticated" class="sticky-parent left-0">
+            <div class="sticky-parent left-0">
                 <v-btn class="btn-fantasy sticky-child" style="top:20px;" @click="clearDraft()">Clear Draft</v-btn>
-                <v-btn class="btn-fantasy sticky-child" style="top:20px;" @click="saveDraft()">Save Draft</v-btn>
-                <CreateDraftPicks class="mt-2 sticky-child" style="top:70px;z-index:10" />
-            </div>
-            <div v-else class="sticky-parent left-0">
-                <v-btn class="btn-fantasy sticky-child" style="top:20px;" @click="clearDraft()">Clear Draft</v-btn>
-                <v-btn class="btn-fantasy sticky-child" style="top:20px; pointer-events: none;" disabled @click="saveDraft()">Save Draft</v-btn>
+                <v-btn v-if="authenticated && selectedFantasyLeague && leagueStore.isDraftOpen(selectedFantasyLeague!.fantasyDraftLocked)"
+                     class="btn-fantasy sticky-child" style="top:20px;" @click="saveDraft()">Save Draft</v-btn>
+                <v-btn v-else class="btn-fantasy sticky-child" style="top:20px; pointer-events: none;" disabled @click="saveDraft()">Save Draft</v-btn>
                 <CreateDraftPicks class="mt-2 sticky-child" style="top:70px;z-index:10" />
             </div>
         </div>
@@ -34,7 +29,7 @@
         </div>
         <div v-else>
             <v-navigation-drawer v-model="mobileDrawer" temporary location="right" :width="300">
-                <PlayerStats />
+                <PlayerStats @save-player="toggleDrawer" />
             </v-navigation-drawer>
         </div>
 
@@ -56,6 +51,8 @@ import PlayerPicksAvailable from './PlayerPicksAvailable.vue';
 import PlayerStats from './PlayerStats.vue';
 import { useAuthStore } from '@/stores/auth';
 import { fantasyDraftState } from '../fantasyDraft';
+import type { FantasyLeague } from '@/types/FantasyLeague';
+import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 
 const isDesktop = ref(window.outerWidth >= 600);
 
@@ -63,6 +60,8 @@ const authStore = useAuthStore();
 
 const mobileDrawer = ref(false);
 
+const selectedFantasyLeague = defineModel<FantasyLeague>('selectedFantasyLeague');
+const leagueStore = useFantasyLeagueStore();
 const { clearFantasyDraftPicks } = fantasyDraftState();
 
 const emit = defineEmits(['saveDraft']);

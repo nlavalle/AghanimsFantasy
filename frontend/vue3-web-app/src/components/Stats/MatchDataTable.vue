@@ -180,7 +180,7 @@ const groupBy = <VDataTable['groupBy']>[
     }
 ];
 
-const selectedLeague = defineModel<FantasyLeague>('selectedLeague');
+const selectedFantasyLeague = defineModel<FantasyLeague>('selectedFantasyLeague');
 const draftFiltered = defineModel<boolean>('draftFiltered');
 
 const roleList = [
@@ -213,21 +213,21 @@ const teamsList = computed(() => {
 })
 
 onMounted(() => {
-    if (selectedLeague.value && !draftFiltered.value) {
-        localApiService.getPlayerFantasyMatchStats(selectedLeague.value.id)
+    if (selectedFantasyLeague.value && !draftFiltered.value) {
+        localApiService.getPlayerFantasyMatchStats(selectedFantasyLeague.value.id)
             .then(result => playerFantasyMatchStats.value = result);
-    } else if (selectedLeague.value && draftFiltered.value) {
-        localApiService.getDraftPlayerFantasyMatchStats(selectedLeague.value.id)
+    } else if (selectedFantasyLeague.value && draftFiltered.value) {
+        localApiService.getDraftPlayerFantasyMatchStats(selectedFantasyLeague.value.id)
             .then(result => playerFantasyMatchStats.value = result);
     }
 });
 
-watch(selectedLeague, () => {
-    if (selectedLeague.value && !draftFiltered.value) {
-        localApiService.getPlayerFantasyMatchStats(selectedLeague.value.id)
+watch(selectedFantasyLeague, () => {
+    if (selectedFantasyLeague.value && !draftFiltered.value) {
+        localApiService.getPlayerFantasyMatchStats(selectedFantasyLeague.value.id)
             .then(result => playerFantasyMatchStats.value = result);
-    } else if (selectedLeague.value && draftFiltered.value) {
-        localApiService.getDraftPlayerFantasyMatchStats(selectedLeague.value.id)
+    } else if (selectedFantasyLeague.value && draftFiltered.value) {
+        localApiService.getDraftPlayerFantasyMatchStats(selectedFantasyLeague.value.id)
             .then(result => playerFantasyMatchStats.value = result);
     }
 });

@@ -164,7 +164,7 @@ const teamsList = computed(() => {
     return [...new Map(teams.map(item => [item['id'], item])).values()]
 })
 
-const selectedLeague = defineModel<League>('selectedLeague');
+const selectedFantasyLeague = defineModel<League>('selectedFantasyLeague');
 
 const page = ref(1)
 const itemsPerPage = 15;
@@ -424,15 +424,15 @@ const leagueMetadataStatsIndexed = computed(() => {
 });
 
 onMounted(() => {
-    if (selectedLeague.value) {
-        localApiService.getFantasyLeagueMetadataStats(selectedLeague.value.id)
+    if (selectedFantasyLeague.value) {
+        localApiService.getFantasyLeagueMetadataStats(selectedFantasyLeague.value.id)
             .then(result => leagueMetadataStats.value = result);
     }
 });
 
-watch(selectedLeague, () => {
-    if (selectedLeague.value) {
-        localApiService.getFantasyLeagueMetadataStats(selectedLeague.value.id)
+watch(selectedFantasyLeague, () => {
+    if (selectedFantasyLeague.value) {
+        localApiService.getFantasyLeagueMetadataStats(selectedFantasyLeague.value.id)
             .then(result => leagueMetadataStats.value = result);
     }
 });
