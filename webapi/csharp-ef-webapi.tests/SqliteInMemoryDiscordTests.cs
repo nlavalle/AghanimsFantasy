@@ -14,7 +14,6 @@ public class SqliteInMemoryDiscordTests : IDisposable
     private readonly DbConnection _connection;
     private readonly DbContextOptions<AghanimsFantasyContext> _contextOptions;
 
-
     #region ConstructorAndDispose
     public SqliteInMemoryDiscordTests()
     {
@@ -57,7 +56,9 @@ public class SqliteInMemoryDiscordTests : IDisposable
         using var context = CreateContext();
         var httpClient = new HttpClient(new MockHttpMessageHandler(HttpStatusCode.Unauthorized));
         var loggerMock = new Mock<ILogger<DiscordWebApiService>>();
-        var discordApiService = new DiscordWebApiService(loggerMock.Object, context, httpClient);
+        var discordRepositoryLogger = new Mock<ILogger<DiscordRepository>>();
+        var discordRepository = new DiscordRepository(discordRepositoryLogger.Object, context);
+        var discordApiService = new DiscordWebApiService(loggerMock.Object, httpClient, discordRepository);
 
         // Act
         await discordApiService.GetDiscordByIdAsync(1234L);
@@ -83,7 +84,9 @@ public class SqliteInMemoryDiscordTests : IDisposable
         var responseBody = "{\"id\": \"123\"}"; // Missing "id" field
         var httpClient = new HttpClient(new MockHttpMessageHandler(HttpStatusCode.OK, responseBody));
         var loggerMock = new Mock<ILogger<DiscordWebApiService>>();
-        var discordApiService = new DiscordWebApiService(loggerMock.Object, context, httpClient);
+        var discordRepositoryLogger = new Mock<ILogger<DiscordRepository>>();
+        var discordRepository = new DiscordRepository(discordRepositoryLogger.Object, context);
+        var discordApiService = new DiscordWebApiService(loggerMock.Object, httpClient, discordRepository);
 
         // Act
         await discordApiService.GetDiscordByIdAsync(1234L);
@@ -109,7 +112,9 @@ public class SqliteInMemoryDiscordTests : IDisposable
         var responseBody = "{\"id\": \"123\", \"username\": \"pants\"}";
         var httpClient = new HttpClient(new MockHttpMessageHandler(HttpStatusCode.OK, responseBody));
         var loggerMock = new Mock<ILogger<DiscordWebApiService>>();
-        var discordApiService = new DiscordWebApiService(loggerMock.Object, context, httpClient);
+        var discordRepositoryLogger = new Mock<ILogger<DiscordRepository>>();
+        var discordRepository = new DiscordRepository(discordRepositoryLogger.Object, context);
+        var discordApiService = new DiscordWebApiService(loggerMock.Object, httpClient, discordRepository);
 
         // Act
         await discordApiService.GetDiscordByIdAsync(123L);

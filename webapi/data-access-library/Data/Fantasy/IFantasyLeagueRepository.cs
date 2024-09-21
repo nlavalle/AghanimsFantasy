@@ -5,7 +5,7 @@ namespace DataAccessLibrary.Data;
 
 public interface IFantasyLeagueRepository : IRepository<FantasyLeague, int>
 {
-    Task<IEnumerable<FantasyLeague>> GetAccessibleFantasyLeagues(DiscordUser? user);
-    Task<FantasyLeague?> GetAccessibleFantasyLeague(int FantasyLeagueId, DiscordUser? user);
-    Task<DateTime> GetLeagueLockedDate(int FantasyLeagueId);
+    Task<IEnumerable<FantasyLeague>> GetAccessibleFantasyLeaguesAsync(DiscordUser? user);
+    Task<FantasyLeague?> GetAccessibleFantasyLeagueAsync(int FantasyLeagueId, DiscordUser? user);
+    Task<DateTime> GetLeagueLockedDateAsync(int FantasyLeagueId);
 }

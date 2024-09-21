@@ -58,7 +58,6 @@ internal class FantasyNormalizedAveragesContext : DotaOperationContext
                 AvgWardsDewardedPoints = f.AvgWardsDewardedPoints,
                 AvgXpPerMinPoints = f.AvgXpPerMinPoints,
                 FantasyPlayer = f.FantasyPlayer,
-                FantasyPlayerId = f.FantasyPlayerId,
                 TotalMatches = f.TotalMatches
             }
             ).ToList();

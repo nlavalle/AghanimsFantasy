@@ -11,7 +11,7 @@ public interface IFantasyDraftRepository : IRepository<FantasyDraft, long>
     Task ClearPicksAsync(FantasyDraft fantasyDraft);
     Task<FantasyDraft?> GetByUserFantasyLeague(FantasyLeague fantasyLeague, DiscordUser user);
     Task<FantasyDraftPointTotals?> DraftPointTotalAsync(FantasyDraft fantasyDraft);
+    Task<List<FantasyDraftPointTotals>> AllDraftPointTotalsByFantasyLeagueAsync(FantasyLeague FantasyLeague);
     Task<List<FantasyPlayerPointTotals>> FantasyPlayerPointTotalsByFantasyLeagueAsync(FantasyLeague FantasyLeague);
-    Task<List<FantasyDraftPointTotals>> FantasyLeaguePointTotalsAsync(FantasyLeague FantasyLeague);
     Task<IEnumerable<FantasyPlayerPoints>> FantasyPlayerPointsAsync(FantasyDraft FantasyDraft, int limit);
 }

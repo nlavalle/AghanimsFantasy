@@ -145,7 +145,7 @@ public class FantasyDraftRepository : IFantasyDraftRepository
         return fantasyDraftPoints;
     }
 
-    public async Task<List<FantasyDraftPointTotals>> FantasyLeaguePointTotalsAsync(FantasyLeague FantasyLeague)
+    public async Task<List<FantasyDraftPointTotals>> AllDraftPointTotalsByFantasyLeagueAsync(FantasyLeague FantasyLeague)
     {
         _logger.LogInformation($"Fetching Fantasy Points for Fantasy League Id: {FantasyLeague.Id}");
 

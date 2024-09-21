@@ -21,7 +21,7 @@ public class FantasyLeagueRepository : IFantasyLeagueRepository
         _dbContext = dbContext;
     }
 
-    public async Task<IEnumerable<FantasyLeague>> GetAccessibleFantasyLeagues(DiscordUser? user)
+    public async Task<IEnumerable<FantasyLeague>> GetAccessibleFantasyLeaguesAsync(DiscordUser? user)
     {
         return await _dbContext.FantasyLeagues
                 .Include(fl => fl.FantasyPrivateLeaguePlayers)
@@ -29,7 +29,7 @@ public class FantasyLeagueRepository : IFantasyLeagueRepository
                 .ToListAsync();
     }
 
-    public async Task<FantasyLeague?> GetAccessibleFantasyLeague(int FantasyLeagueId, DiscordUser? user)
+    public async Task<FantasyLeague?> GetAccessibleFantasyLeagueAsync(int FantasyLeagueId, DiscordUser? user)
     {
         return await _dbContext.FantasyLeagues
                 .Include(fl => fl.FantasyPrivateLeaguePlayers)
@@ -38,7 +38,7 @@ public class FantasyLeagueRepository : IFantasyLeagueRepository
                 .FirstOrDefaultAsync();
     }
 
-    public async Task<DateTime> GetLeagueLockedDate(int FantasyLeagueId)
+    public async Task<DateTime> GetLeagueLockedDateAsync(int FantasyLeagueId)
     {
         _logger.LogInformation($"Fetching Draft Locked Date for Fantasy League Id: {FantasyLeagueId}");
 

@@ -11,8 +11,6 @@ public class FantasyMatch
     [Key]
     [Column("match_id")]
     public long MatchId { get; set; }
-
-    [Column("league_id")]
     public required League League { get; set; }
 
     [Column("start_time")]

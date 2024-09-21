@@ -9,8 +9,6 @@ public class FantasyLeagueWeight
     [Key]
     [Column("id")]
     public int Id { get; set; }
-
-    [Column("fantasy_league_id")]
     public required FantasyLeague FantasyLeague { get; set; }
 
     [Column("kills_weight")]

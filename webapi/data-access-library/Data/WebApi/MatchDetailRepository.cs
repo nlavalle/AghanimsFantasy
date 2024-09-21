@@ -22,11 +22,11 @@ public class MatchDetailRepository : IMatchDetailRepository
         _dbContext = dbContext;
     }
 
-    public async Task<List<MatchDetailsPlayer>> GetByLeagueAsync(League League)
+    public async Task<List<MatchDetailsPlayer>> GetByLeagueAsync(League? League)
     {
-        _logger.LogInformation($"Getting Match Details Players for League ID: {League.Id}");
+        _logger.LogInformation($"Getting Match Details Players for League ID: {League?.Id ?? 0}");
 
-        var matchDetailPlayerLeagueQuery = QueryLeagueMatchDetails(League.Id)
+        var matchDetailPlayerLeagueQuery = QueryLeagueMatchDetails(League?.Id)
             .SelectMany(md => md.Players)
             .Where(p => p.LeaverStatus != 1); // Filter out games players left (typically false starts)
 

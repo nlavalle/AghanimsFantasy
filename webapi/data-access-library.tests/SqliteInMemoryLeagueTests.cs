@@ -41,26 +41,28 @@ public class SqliteInMemoryLeagueTests : IDisposable
             // viewCommand.ExecuteNonQuery();
         }
 
+        League league1 = new League
+        {
+            Id = 1,
+            Name = "test league 1",
+            IsActive = true,
+        };
+        League league2 = new League
+        {
+            Id = 2,
+            Name = "test league 2",
+            IsActive = false
+        };
         context.Leagues.AddRange(
-            new League
-            {
-                Id = 1,
-                Name = "test league 1",
-                IsActive = true
-            },
-            new League
-            {
-                Id = 2,
-                Name = "test league 2",
-                IsActive = false
-            }
+            league1,
+            league2
         );
 
         context.FantasyLeagues.AddRange(
             new FantasyLeague
             {
                 Id = 1,
-                LeagueId = 1,
+                League = league1,
                 Name = "test league 1",
                 IsActive = true,
                 FantasyDraftLocked = new DateTimeOffset(new DateTime(2024, 1, 1)).ToUnixTimeSeconds(),
@@ -70,7 +72,7 @@ public class SqliteInMemoryLeagueTests : IDisposable
             new FantasyLeague
             {
                 Id = 2,
-                LeagueId = 2,
+                League = league2,
                 Name = "test league 2",
                 IsActive = false,
                 FantasyDraftLocked = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds(),
@@ -122,10 +124,10 @@ public class SqliteInMemoryLeagueTests : IDisposable
     public async void GetLeagueLockedDateTest()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<FantasyRepository>>();
-        var repository = new FantasyRepository(loggerMock.Object, context);
+        var loggerMock = new Mock<ILogger<FantasyLeagueRepository>>();
+        var repository = new FantasyLeagueRepository(loggerMock.Object, context);
 
-        var league = await repository.GetLeagueLockedDate(1);
+        var league = await repository.GetLeagueLockedDateAsync(1);
 
         Assert.Equal(league, new DateTimeOffset(new DateTime(2024, 1, 1)).UtcDateTime);
     }

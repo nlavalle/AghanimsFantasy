@@ -115,7 +115,8 @@ public class AghanimsFantasyContext : DbContext
 
         modelBuilder.Entity<League>()
             .HasMany(l => l.FantasyLeagues)
-            .WithOne(fl => fl.League);
+            .WithOne(fl => fl.League)
+            .HasForeignKey("league_id");
 
         modelBuilder.Entity<FantasyLeague>()
             .HasMany(fl => fl.FantasyDrafts)
@@ -128,6 +129,8 @@ public class AghanimsFantasyContext : DbContext
         modelBuilder.Entity<FantasyLeague>()
             .HasOne(fl => fl.FantasyLeagueWeight)
             .WithOne(flw => flw.FantasyLeague)
+            .HasPrincipalKey<FantasyLeague>(fl => fl.Id)
+            .HasForeignKey<FantasyLeagueWeight>("fantasy_league_id")
             .IsRequired();
 
         modelBuilder.Entity<FantasyDraft>()
@@ -135,8 +138,38 @@ public class AghanimsFantasyContext : DbContext
             .AutoInclude();
 
         modelBuilder.Entity<FantasyMatch>()
+            .HasOne(fm => fm.League)
+            .WithMany()
+            .HasForeignKey("league_id");
+
+        modelBuilder.Entity<FantasyMatch>()
             .HasMany(fm => fm.Players)
             .WithOne();
+
+        modelBuilder.Entity<FantasyMatchPlayer>()
+            .HasOne(fp => fp.Match)
+            .WithMany()
+            .HasForeignKey("match_id");
+
+        modelBuilder.Entity<FantasyMatchPlayer>()
+            .HasOne(fp => fp.Team)
+            .WithMany()
+            .HasPrincipalKey(t => t.Id)
+            .HasForeignKey("team_id")
+            .OnDelete(DeleteBehavior.ClientNoAction);
+
+        modelBuilder.Entity<FantasyMatchPlayer>()
+            .HasOne(fp => fp.Account)
+            .WithMany()
+            .HasForeignKey("account_id");
+
+        modelBuilder.Entity<FantasyMatchPlayer>()
+            .Navigation(fp => fp.Team)
+            .AutoInclude();
+
+        modelBuilder.Entity<FantasyMatchPlayer>()
+            .Navigation(fp => fp.Account)
+            .AutoInclude();
 
         modelBuilder.Entity<FantasyPlayerPoints>().ToView("fantasy_player_points", "nadcl")
             .HasNoKey();
@@ -168,21 +201,29 @@ public class AghanimsFantasyContext : DbContext
 
         modelBuilder.Entity<MatchDetail>()
             .HasMany(md => md.Players)
-            .WithOne();
+            .WithOne()
+            .HasForeignKey("match_id");
 
         modelBuilder.Entity<MatchDetailsPlayer>()
             .HasMany(mdp => mdp.AbilityUpgrades)
             .WithOne();
 
         modelBuilder.Entity<FantasyPlayer>()
+            .HasOne(fp => fp.FantasyLeague)
+            .WithMany()
+            .HasForeignKey("fantasy_league_id");
+
+        modelBuilder.Entity<FantasyPlayer>()
             .HasOne(fp => fp.Team)
             .WithMany()
             .HasPrincipalKey(t => t.Id)
+            .HasForeignKey("team_id")
             .OnDelete(DeleteBehavior.ClientNoAction);
 
         modelBuilder.Entity<FantasyPlayer>()
             .HasOne(fp => fp.DotaAccount)
-            .WithMany();
+            .WithMany()
+            .HasForeignKey("dota_account_id");
 
         modelBuilder.Entity<FantasyPlayer>()
             .Navigation(fp => fp.Team)
@@ -193,7 +234,7 @@ public class AghanimsFantasyContext : DbContext
             .AutoInclude();
 
         modelBuilder.Entity<FantasyDraftPlayer>()
-            .HasKey(fdp => new { fdp.FantasyPlayer!.Id, fdp.FantasyDraftId });
+            .HasKey(fdp => new { fdp.FantasyDraftId, fdp.DraftOrder });
 
         modelBuilder.Entity<FantasyDraftPlayer>()
             .HasOne(fdp => fdp.FantasyPlayer)

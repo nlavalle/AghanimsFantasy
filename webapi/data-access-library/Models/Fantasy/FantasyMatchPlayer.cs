@@ -13,11 +13,9 @@ public class FantasyMatchPlayer
     [JsonIgnore]
     public int Id { get; set; }
 
-    [Column("match_id")]
     [JsonIgnore]
     public required FantasyMatch Match { get; set; }
 
-    [Column("account_id")]
     [JsonProperty("account_id")]
     public required Account Account { get; set; }
     public string AccountFormatted
@@ -28,7 +26,6 @@ public class FantasyMatchPlayer
         }
     }
 
-    [Column("team_id")]
     [JsonProperty("team_id")]
     public Team? Team { get; set; }
     public string TeamFormatted
@@ -93,7 +90,6 @@ public class FantasyMatchPlayer
         }
     }
 
-    [Column("hero_id")]
     [JsonProperty("hero_id")]
     public Hero? Hero { get; set; }
     public string HeroFormatted

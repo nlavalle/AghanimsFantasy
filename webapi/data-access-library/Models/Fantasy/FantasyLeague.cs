@@ -8,8 +8,6 @@ public class FantasyLeague
 {
     [Column("id")]
     public int Id { get; set; }
-
-    [Column("league_id")]
     public required League League { get; set; }
 
     [Column("league_name")]

@@ -9,6 +9,6 @@ public interface IFantasyRepository
     Task<List<FantasyPlayerPoints>> FantasyPlayerPointsByFantasyLeagueAsync(int FantasyLeagueId, int limit);
     Task<FantasyPlayerTopHeroes> GetFantasyPlayerTopHeroesAsync(long FantasyPlayerId);
     Task<List<FantasyNormalizedAveragesTable>> GetFantasyNormalizedAveragesAsync(long FantasyPlayerId);
-    Task<List<MetadataSummary>> MetadataSummariesByFantasyLeagueAsync(int FantasyLeagueId);
+    Task<List<MetadataSummary>> MetadataSummariesByFantasyLeagueAsync(FantasyLeague FantasyLeague);
     Task<List<MatchHighlights>> GetLastNMatchHighlights(int FantasyLeagueId, int MatchCount);
 }

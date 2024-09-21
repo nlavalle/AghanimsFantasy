@@ -123,15 +123,22 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add Repositories to be used by controllers
-builder.Services.AddScoped<FantasyRepository>();
-builder.Services.AddScoped<ProMetadataRepository>();
-builder.Services.AddScoped<WebApiRepository>();
-builder.Services.AddScoped<GameCoordinatorRepository>();
-builder.Services.AddScoped<DiscordRepository>();
+// Add Fantasy Repositories
+builder.Services.AddScoped<IFantasyDraftRepository>();
+builder.Services.AddScoped<IFantasyLeagueRepository>();
+builder.Services.AddScoped<IFantasyPlayerRepository>();
+builder.Services.AddScoped<IFantasyRepository>();
+// Add Game Coordinator Repositories
+builder.Services.AddScoped<IGcMatchMetadataRepository>();
+// Add ProMetadata Repositories
+builder.Services.AddScoped<IProMetadataRepository>();
+// Add WebApi Repositories
+builder.Services.AddScoped<IMatchHistoryRepository>();
+builder.Services.AddScoped<IMatchDetailRepository>();
 
-// Add Scoped Discord service to be used to call new discord users
+// Add Scoped services to be used by controllers to limit direct repository access
 builder.Services.AddScoped<DiscordWebApiService>();
+builder.Services.AddScoped<FantasyService>();
 
 var app = builder.Build();
 

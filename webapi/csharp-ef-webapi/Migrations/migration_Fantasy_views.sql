@@ -96,7 +96,7 @@ from nadcl.dota_fantasy_leagues dfl
 			and dfl.league_start_time <= fm.start_time 
 			and dfl.league_end_time >= fm.start_time
 	left join nadcl.fantasy_match_player fmp 
-		on fmp.match_id = fm.match_id and fmp."AccountId" = dfp.dota_account_id
+		on fmp.match_id = fm.match_id and fmp.account_id = dfp.dota_account_id
 ;
 
 create or replace view nadcl.match_highlights as
@@ -144,7 +144,7 @@ from nadcl.fantasy_match fm
 	join nadcl.fantasy_match_player fmp
 		on fm.match_id = fmp.match_id
 	join nadcl.fantasy_player_points fpp 
-		on fmp.id = fpp.match_details_player_id 
+		on fmp.id = fpp.fantasy_match_player_id 
 )
 select stats.*, da.id
 from stats
@@ -160,7 +160,7 @@ create or replace view nadcl.fantasy_player_point_totals as
 SELECT 
 	fantasy_league_id, 
 	fantasy_player_id, 
-	count(distinct match_details_player_id) as matches,
+	count(distinct fantasy_match_player_id) as matches,
 	coalesce(sum(kills),0) as kills,
 	coalesce(sum(kills_points),0) as kills_points,
 	coalesce(sum(deaths),0) as deaths,
