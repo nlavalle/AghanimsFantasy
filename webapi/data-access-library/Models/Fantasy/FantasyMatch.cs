@@ -13,7 +13,7 @@ public class FantasyMatch
     public long MatchId { get; set; }
 
     [Column("league_id")]
-    public int LeagueId { get; set; }
+    public required League League { get; set; }
 
     [Column("start_time")]
     [JsonProperty("start_time")]

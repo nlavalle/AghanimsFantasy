@@ -9,9 +9,10 @@ public class FantasyNormalizedAveragesTable
     [Key]
     [Column("fantasy_normalized_averages_table_id")]
     public long FantasyNormalizedAveragesTableId { get; set; }
+
     [Column("fantasy_player_id")]
-    public long FantasyPlayerId { get; set; }
     public FantasyPlayer FantasyPlayer { get; set; } = null!;
+
     [Column("matches_played")]
     public decimal? TotalMatches { get; set; }
 

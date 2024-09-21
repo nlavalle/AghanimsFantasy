@@ -10,8 +10,10 @@ public class GcMatchMetadataItemPurchase
     [Key]
     [Column("id")]
     public long Id { get; set; }
+
     [Column("item_id")]
     public uint ItemId { get; set; }
+
     [Column("purchase_time")]
     public uint PurchaseTime { get; set; }
 }

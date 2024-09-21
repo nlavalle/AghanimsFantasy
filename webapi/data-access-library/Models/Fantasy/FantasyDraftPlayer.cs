@@ -10,7 +10,6 @@ public class FantasyDraftPlayer
     public long FantasyDraftId { get; set; }
 
     [Column("fantasy_player_id")]
-    public long? FantasyPlayerId { get; set; }
     public FantasyPlayer? FantasyPlayer { get; set; }
 
     [Column("draft_order")]

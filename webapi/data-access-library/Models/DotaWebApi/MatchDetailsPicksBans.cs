@@ -15,7 +15,7 @@ public class MatchDetailsPicksBans
 
     [Column("match_id")]
     [JsonIgnore]
-    public long MatchId { get; set; }
+    public required MatchDetail Match { get; set; }
 
     [Column("is_pick")]
     [JsonProperty("is_pick")]

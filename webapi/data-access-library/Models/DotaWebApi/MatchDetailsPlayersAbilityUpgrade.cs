@@ -15,7 +15,7 @@ public class MatchDetailsPlayersAbilityUpgrade
 
     [Column("player_id")]
     [JsonIgnore]
-    public int PlayerId { get; set; }
+    public required MatchDetailsPlayer Player { get; set; }
 
     [Column("ability")]
     [JsonProperty("ability")]

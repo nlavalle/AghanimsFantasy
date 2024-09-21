@@ -10,8 +10,10 @@ public class GcMatchMetadataPlayerKill
     [Key]
     [Column("id")]
     public long Id { get; set; }
+
     [Column("victim_slot")]
     public uint VictimSlot { get; set; }
+
     [Column("count")]
     public uint Count { get; set; }
 }

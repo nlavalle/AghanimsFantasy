@@ -9,8 +9,10 @@ public class FantasyLeagueWeight
     [Key]
     [Column("id")]
     public int Id { get; set; }
+
     [Column("fantasy_league_id")]
-    public int FantasyLeagueId { get; set; }
+    public required FantasyLeague FantasyLeague { get; set; }
+
     [Column("kills_weight")]
     public decimal KillsWeight { get; set; } = 0.3M;
     [Column("deaths_weight")]

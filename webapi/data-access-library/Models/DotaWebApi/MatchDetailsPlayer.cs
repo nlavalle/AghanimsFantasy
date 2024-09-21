@@ -15,7 +15,7 @@ public class MatchDetailsPlayer
 
     [Column("match_id")]
     [JsonIgnore]
-    public long MatchId { get; set; }
+    public required MatchDetail Match { get; set; }
 
     [Column("account_id")]
     [JsonProperty("account_id")]

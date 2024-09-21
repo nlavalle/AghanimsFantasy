@@ -15,7 +15,7 @@ public class FantasyMatchPlayer
 
     [Column("match_id")]
     [JsonIgnore]
-    public long MatchId { get; set; }
+    public required FantasyMatch Match { get; set; }
 
     [Column("account_id")]
     [JsonProperty("account_id")]

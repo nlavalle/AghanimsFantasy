@@ -10,12 +10,16 @@ public class GcMatchMetadataTeam
     [Key]
     [Column("id")]
     public long Id { get; set; }
+
     [Column("dota_team")]
     public uint DotaTeam { get; set; }
+
     [Column("cm_first_pick")]
     public bool CmFirstPick { get; set; }
+
     [Column("cm_captain_player_id")]
     public int CmCaptainPlayerId { get; set; }
+
     [Column("cm_penalty")]
     public uint CmPenalty { get; set; }
     public List<GcMatchMetadataPlayer> Players { get; set; } = [];

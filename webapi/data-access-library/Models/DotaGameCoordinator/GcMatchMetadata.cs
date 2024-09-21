@@ -10,12 +10,16 @@ public class GcMatchMetadata
     [Key]
     [Column("id")]
     public long Id { get; set; }
+
     [Column("match_id")]
     public long MatchId { get; set; }
+
     [Column("lobby_id")]
     public ulong LobbyId { get; set; }
+
     [Column("report_until_time")]
     public ulong ReportUntilTime { get; set; }
+
     [Column("primary_event_id")]
     public uint PrimaryEventId { get; set; }
     public List<GcMatchMetadataTeam> Teams { get; set; } = [];

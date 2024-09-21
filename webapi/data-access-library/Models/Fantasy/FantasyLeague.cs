@@ -1,6 +1,7 @@
 namespace DataAccessLibrary.Models.Fantasy;
 
 using System.ComponentModel.DataAnnotations.Schema;
+using DataAccessLibrary.Models.ProMetadata;
 
 [Table("dota_fantasy_leagues")]
 public class FantasyLeague
@@ -9,13 +10,16 @@ public class FantasyLeague
     public int Id { get; set; }
 
     [Column("league_id")]
-    public int LeagueId { get; set; }
+    public required League League { get; set; }
 
     [Column("league_name")]
     public string? Name { get; set; }
 
     [Column("is_active")]
     public bool IsActive { get; set; }
+
+    [Column("is_private")]
+    public bool IsPrivate { get; set; } = false;
 
     [Column("fantasy_draft_locked_date")]
     public long FantasyDraftLocked { get; set; }
@@ -25,7 +29,8 @@ public class FantasyLeague
 
     [Column("league_end_time")]
     public long LeagueEndTime { get; set; }
-    public FantasyLeagueWeight FantasyLeagueWeight { get; set; } = new FantasyLeagueWeight();
+    public FantasyLeagueWeight? FantasyLeagueWeight { get; set; }
     public List<FantasyDraft> FantasyDrafts { get; set; } = new List<FantasyDraft>();
     public List<FantasyPlayer> FantasyPlayers { get; set; } = new List<FantasyPlayer>();
+    public List<FantasyPrivateLeaguePlayer> FantasyPrivateLeaguePlayers { get; set; } = new List<FantasyPrivateLeaguePlayer>();
 }

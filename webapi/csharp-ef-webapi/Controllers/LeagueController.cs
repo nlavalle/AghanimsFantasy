@@ -13,17 +13,24 @@ namespace csharp_ef_webapi.Controllers
     [ApiController]
     public class LeagueController : ControllerBase
     {
-        private readonly DiscordRepository _discordRepository;
-        private readonly ProMetadataRepository _proMetadataRepository;
-        private readonly WebApiRepository _webApiRepository;
-        private readonly GameCoordinatorRepository _gameCoordinatorRepository;
+        private readonly IDiscordRepository _discordRepository;
+        private readonly IProMetadataRepository _proMetadataRepository;
+        private readonly IMatchHistoryRepository _matchHistoryRepository;
+        private readonly IMatchDetailRepository _matchDetailRepository;
+        private readonly IGcMatchMetadataRepository _gcMatchMetadataRepository;
 
-        public LeagueController(DiscordRepository discordRepository, ProMetadataRepository proMetadataRepository, WebApiRepository webApiRepository, GameCoordinatorRepository gameCoordinatorRepository)
+        public LeagueController(
+            IDiscordRepository discordRepository,
+            IProMetadataRepository proMetadataRepository,
+            IMatchHistoryRepository matchHistoryRepository,
+            IMatchDetailRepository matchDetailRepository,
+            IGcMatchMetadataRepository gcMatchMetadataRepository)
         {
             _discordRepository = discordRepository;
             _proMetadataRepository = proMetadataRepository;
-            _webApiRepository = webApiRepository;
-            _gameCoordinatorRepository = gameCoordinatorRepository;
+            _matchHistoryRepository = matchHistoryRepository;
+            _matchDetailRepository = matchDetailRepository;
+            _gcMatchMetadataRepository = gcMatchMetadataRepository;
         }
 
         // GET: api/League
@@ -101,9 +108,16 @@ namespace csharp_ef_webapi.Controllers
 
         // GET: api/League/5/Match/History
         [HttpGet("{leagueId}/match/history")]
-        public async Task<ActionResult<IEnumerable<MatchHistory>>> GetLeagueMatchHistory(int fantasyLeagueId)
+        public async Task<ActionResult<IEnumerable<MatchHistory>>> GetLeagueMatchHistory(int leagueId)
         {
-            var matches = await _webApiRepository.GetMatchHistoryByFantasyLeagueAsync(fantasyLeagueId);
+            League? league = await _proMetadataRepository.GetLeagueAsync(leagueId);
+
+            if (league == null)
+            {
+                return NotFound("League ID not found");
+            }
+
+            var matches = await _matchHistoryRepository.GetByLeagueAsync(league);
 
             if (matches == null || matches.Count() == 0)
             {
@@ -115,9 +129,16 @@ namespace csharp_ef_webapi.Controllers
 
         // GET: api/League/5/Match/Details
         [HttpGet("{leagueId}/match/details")]
-        public async Task<ActionResult<List<MatchDetail>>> GetLeagueMatchDetails(int fantasyLeagueId)
+        public async Task<ActionResult<List<MatchDetail>>> GetLeagueMatchDetails(int leagueId)
         {
-            var matches = await _webApiRepository.GetMatchDetailsByFantasyLeagueAsync(fantasyLeagueId);
+            League? league = await _proMetadataRepository.GetLeagueAsync(leagueId);
+
+            if (league == null)
+            {
+                return NotFound("League ID not found");
+            }
+
+            var matches = await _matchDetailRepository.GetByLeagueAsync(league);
 
             if (matches == null || matches.Count() == 0)
             {
@@ -131,7 +152,14 @@ namespace csharp_ef_webapi.Controllers
         [HttpGet("{leagueId}/match/{matchId}/details")]
         public async Task<ActionResult<MatchDetail>> GetLeagueMatchIdDetails(int leagueId, long matchId)
         {
-            var matches = await _webApiRepository.GetMatchDetailAsync(matchId);
+            League? league = await _proMetadataRepository.GetLeagueAsync(leagueId);
+
+            if (league == null)
+            {
+                return NotFound("League ID not found");
+            }
+
+            var matches = await _matchDetailRepository.GetByIdAsync(matchId);
 
             if (matches == null)
             {
@@ -148,7 +176,14 @@ namespace csharp_ef_webapi.Controllers
             // Limit pageSize max
             if (pageSize > 100) { pageSize = 100; }
 
-            var matches = await _gameCoordinatorRepository.GetLeagueMetadataAsync(leagueId);
+            League? league = await _proMetadataRepository.GetLeagueAsync(leagueId);
+
+            if (league == null)
+            {
+                return NotFound("League ID not found");
+            }
+
+            var matches = await _gcMatchMetadataRepository.GetByLeagueAsync(league);
 
             if (matches == null || matches.Count() == 0)
             {

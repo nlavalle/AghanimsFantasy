@@ -14,14 +14,12 @@ public class FantasyPlayer
     public long Id { get; set; }
 
     [Column("fantasy_league_id")]
-    public int FantasyLeagueId { get; set; }
+    public required FantasyLeague FantasyLeague { get; set; }
 
     [Column("team_id")]
-    public long TeamId { get; set; }
     public required Team Team { get; set; }
 
     [Column("dota_account_id")]
-    public long DotaAccountId { get; set; }
     public required Account DotaAccount { get; set; }
 
     [Column("team_position")]

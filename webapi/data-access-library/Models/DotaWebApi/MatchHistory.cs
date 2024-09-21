@@ -2,6 +2,7 @@ namespace DataAccessLibrary.Models.WebApi;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using DataAccessLibrary.Models.ProMetadata;
 using Newtonsoft.Json;
 
 [Table("dota_match_history")]
@@ -17,7 +18,7 @@ public class MatchHistory
     public int SeriesId { get; set; }
 
     [Column("league_id")]
-    public int LeagueId { get; set; }
+    public required League League { get; set; }
 
     [Column("series_type")]
     [JsonProperty("series_type")]
