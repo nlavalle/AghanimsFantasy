@@ -13,7 +13,6 @@ public class MatchDetailsPicksBans
     [JsonIgnore]
     public int Id { get; set; }
 
-    [Column("match_id")]
     [JsonIgnore]
     public required MatchDetail Match { get; set; }
 

@@ -12,7 +12,6 @@ public class FantasyPlayer
     [Column("id")]
     [JsonIgnore]
     public long Id { get; set; }
-
     public required FantasyLeague FantasyLeague { get; set; }
     public required Team Team { get; set; }
     public required Account DotaAccount { get; set; }

@@ -164,7 +164,7 @@ public class FantasyService
             throw new ArgumentException("Fantasy League Id not found");
         }
 
-        return await _fantasyRepository.FantasyPlayerPointTotalsByFantasyLeagueAsync(fantasyLeague);
+        return await _fantasyDraftRepository.FantasyPlayerPointTotalsByFantasyLeagueAsync(fantasyLeague);
     }
 
     public async Task<IEnumerable<FantasyPlayerPoints>> GetFantasyLeaguePlayerPointsByMatchAsync(DiscordUser? siteUser, int fantasyLeagueId, int limit)

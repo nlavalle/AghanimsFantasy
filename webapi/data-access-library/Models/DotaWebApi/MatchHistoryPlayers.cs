@@ -12,7 +12,6 @@ public class MatchHistoryPlayer
     [JsonIgnore]
     public long Id { get; set; }
 
-    [Column("match_id")]
     [JsonIgnore]
     public required MatchHistory Match { get; set; }
 

@@ -8,11 +8,7 @@ public class FantasyPrivateLeaguePlayer
 {
     [Column("id")]
     public int Id { get; set; }
-
-    [Column("fantasy_league_id")]
     public required FantasyLeague FantasyLeague { get; set; }
-
-    [Column("discord_user_id")]
     public required DiscordUser DiscordUser { get; set; }
 
     [Column("fantasy_league_join_date")]

@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 /// example is to fetch all of the current scores, vs adding a new draft. Controllers should handle none of the business
 /// logic 
 /// </summary>
-public class FantasyRepository
+public class FantasyRepository : IFantasyRepository
 {
     private readonly ILogger<FantasyRepository> _logger;
     private AghanimsFantasyContext _dbContext;
@@ -22,29 +22,29 @@ public class FantasyRepository
 
     #region Fantasy
 
-    // public async Task<List<FantasyPlayerPoints>> FantasyPlayerPointsByFantasyLeagueAsync(int FantasyLeagueId, int limit)
-    // {
-    //     _logger.LogInformation($"Fetching Fantasy Points for Fantasy League Id: {FantasyLeagueId}");
+    public async Task<List<FantasyPlayerPoints>> FantasyPlayerPointsByFantasyLeagueAsync(int FantasyLeagueId, int limit)
+    {
+        _logger.LogInformation($"Fetching Fantasy Points for Fantasy League Id: {FantasyLeagueId}");
 
-    //     var fantasyPlayerPointsByLeagueQuery = _dbContext.FantasyPlayerPointsView
-    //         .Include(fppv => fppv.FantasyPlayer)
-    //             .ThenInclude(fp => fp.DotaAccount)
-    //         .Include(fppv => fppv.FantasyPlayer)
-    //             .ThenInclude(fp => fp.Team)
-    //         .Include(fppv => fppv.FantasyMatchPlayer)
-    //             .ThenInclude(fmp => fmp!.Hero)
-    //         .Where(fpp => fpp.FantasyLeagueId == FantasyLeagueId)
-    //         .Where(fpp => fpp.FantasyMatchPlayer != null)
-    //         .Where(fpp => fpp.FantasyMatchPlayer!.GcMetadataPlayerParsed && fpp.FantasyMatchPlayer!.MatchDetailPlayerParsed)
-    //         .OrderByDescending(fpp => fpp.FantasyMatchPlayer!.Match.MatchId)
-    //         .ThenBy(fpp => fpp.FantasyMatchPlayer!.Team!.Name)
-    //         .ThenBy(fpp => fpp.FantasyPlayer.TeamPosition)
-    //         .Take(limit);
+        var fantasyPlayerPointsByLeagueQuery = _dbContext.FantasyPlayerPointsView
+            .Include(fppv => fppv.FantasyPlayer)
+                .ThenInclude(fp => fp.DotaAccount)
+            .Include(fppv => fppv.FantasyPlayer)
+                .ThenInclude(fp => fp.Team)
+            .Include(fppv => fppv.FantasyMatchPlayer)
+                .ThenInclude(fmp => fmp!.Hero)
+            .Where(fpp => fpp.FantasyLeagueId == FantasyLeagueId)
+            .Where(fpp => fpp.FantasyMatchPlayer != null)
+            .Where(fpp => fpp.FantasyMatchPlayer!.GcMetadataPlayerParsed && fpp.FantasyMatchPlayer!.MatchDetailPlayerParsed)
+            .OrderByDescending(fpp => fpp.FantasyMatchPlayer!.Match.MatchId)
+            .ThenBy(fpp => fpp.FantasyMatchPlayer!.Team!.Name)
+            .ThenBy(fpp => fpp.FantasyPlayer.TeamPosition)
+            .Take(limit);
 
-    //     _logger.LogDebug($"Match Details Query: {fantasyPlayerPointsByLeagueQuery.ToQueryString()}");
+        _logger.LogDebug($"Match Details Query: {fantasyPlayerPointsByLeagueQuery.ToQueryString()}");
 
-    //     return await fantasyPlayerPointsByLeagueQuery.ToListAsync();
-    // }
+        return await fantasyPlayerPointsByLeagueQuery.ToListAsync();
+    }
 
     public async Task<FantasyPlayerTopHeroes> GetFantasyPlayerTopHeroesAsync(long FantasyPlayerId)
     {

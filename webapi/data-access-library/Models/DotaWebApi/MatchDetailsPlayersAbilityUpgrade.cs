@@ -13,7 +13,6 @@ public class MatchDetailsPlayersAbilityUpgrade
     [JsonIgnore]
     public int Id { get; set; }
 
-    [Column("player_id")]
     [JsonIgnore]
     public required MatchDetailsPlayer Player { get; set; }
 
