@@ -10,11 +10,11 @@ public class MatchDetailsPlayersAbilityUpgrade
 {
     [Key]
     [Column("id")]
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     public int Id { get; set; }
 
-    [JsonIgnore]
-    public required MatchDetailsPlayer Player { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public MatchDetailsPlayer Player { get; set; } = null!;
 
     [Column("ability")]
     [JsonProperty("ability")]

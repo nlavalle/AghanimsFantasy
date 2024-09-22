@@ -9,11 +9,11 @@ public class MatchHistoryPlayer
 {
     [Key]
     [Column("id")]
-    [JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     public long Id { get; set; }
 
-    [JsonIgnore]
-    public required MatchHistory Match { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public MatchHistory Match { get; set; } = null!;
 
     [Column("account_id")]
     [JsonProperty("account_id")]

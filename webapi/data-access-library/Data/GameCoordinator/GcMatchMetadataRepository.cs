@@ -50,11 +50,11 @@ public class GcMatchMetadataRepository : IGcMatchMetadataRepository
         return await fantasyLeagueMetadataQuery.ToListAsync();
     }
 
-    public async Task<GcMatchMetadata?> GetByIdAsync(long MetadataId)
+    public async Task<GcMatchMetadata?> GetByIdAsync(long MatchId)
     {
-        _logger.LogInformation($"Fetching Single GcMatchmetadata {MetadataId}");
+        _logger.LogInformation($"Fetching Single GcMatchmetadata {MatchId}");
 
-        return await _dbContext.GcMatchMetadata.FindAsync(MetadataId);
+        return await _dbContext.GcMatchMetadata.FirstOrDefaultAsync(gmm => gmm.MatchId == MatchId);
     }
 
     public async Task<IEnumerable<GcMatchMetadata>> GetAllAsync()

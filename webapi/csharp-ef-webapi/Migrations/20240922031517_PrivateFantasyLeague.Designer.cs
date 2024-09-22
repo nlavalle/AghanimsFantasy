@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace csharp_ef_webapi.Migrations
 {
     [DbContext(typeof(AghanimsFantasyContext))]
-    [Migration("20240922004013_PrivateFantasyLeague")]
+    [Migration("20240922031517_PrivateFantasyLeague")]
     partial class PrivateFantasyLeague
     {
         /// <inheritdoc />
@@ -1351,9 +1351,6 @@ namespace csharp_ef_webapi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<int?>("LeagueId")
-                        .HasColumnType("integer");
-
                     b.Property<decimal>("LobbyId")
                         .HasColumnType("numeric(20,0)")
                         .HasColumnName("lobby_id");
@@ -1370,9 +1367,12 @@ namespace csharp_ef_webapi.Migrations
                         .HasColumnType("numeric(20,0)")
                         .HasColumnName("report_until_time");
 
+                    b.Property<int>("league_id")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("LeagueId");
+                    b.HasIndex("league_id");
 
                     b.ToTable("dota_gc_match_metadata", "nadcl");
                 });
@@ -2845,9 +2845,13 @@ namespace csharp_ef_webapi.Migrations
 
             modelBuilder.Entity("DataAccessLibrary.Models.GameCoordinator.GcMatchMetadata", b =>
                 {
-                    b.HasOne("DataAccessLibrary.Models.ProMetadata.League", null)
+                    b.HasOne("DataAccessLibrary.Models.ProMetadata.League", "League")
                         .WithMany("MatchMetadatas")
-                        .HasForeignKey("LeagueId");
+                        .HasForeignKey("league_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("League");
                 });
 
             modelBuilder.Entity("DataAccessLibrary.Models.GameCoordinator.GcMatchMetadataItemPurchase", b =>

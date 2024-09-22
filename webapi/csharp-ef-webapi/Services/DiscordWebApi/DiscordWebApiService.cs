@@ -42,7 +42,7 @@ public class DiscordWebApiService
         if (!httpContext?.User?.Identity?.IsAuthenticated ?? false)
         {
             // Authorize should take care of this but just in case
-            throw new ArgumentException("User not authenticated");
+            return null;
         }
 
         var nameId = httpContext!.User?.Claims?.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);

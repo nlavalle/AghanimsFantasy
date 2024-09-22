@@ -35,7 +35,7 @@ namespace csharp_ef_webapi.Controllers
 
         // GET: api/League
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<League>>> GetLeagues(bool? is_active = null)
+        public async Task<ActionResult<IEnumerable<League>>> GetLeagues(bool? is_active = true)
         {
             return Ok(await _proMetadataRepository.GetLeaguesAsync(is_active));
         }

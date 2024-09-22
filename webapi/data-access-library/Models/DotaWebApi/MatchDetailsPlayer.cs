@@ -13,8 +13,8 @@ public class MatchDetailsPlayer
     [JsonIgnore]
     public int Id { get; set; }
 
-    [JsonIgnore]
-    public required MatchDetail Match { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public MatchDetail Match { get; set; } = null!;
 
     [Column("account_id")]
     [JsonProperty("account_id")]

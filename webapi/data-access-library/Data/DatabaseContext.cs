@@ -123,6 +123,11 @@ public class AghanimsFantasyContext : DbContext
             .WithOne(fl => fl.League)
             .HasForeignKey("league_id");
 
+        modelBuilder.Entity<League>()
+            .HasMany(l => l.MatchMetadatas)
+            .WithOne(mm => mm.League)
+            .HasForeignKey("league_id");
+
         modelBuilder.Entity<FantasyLeague>()
             .HasMany(fl => fl.FantasyDrafts)
             .WithOne(fd => fd.FantasyLeague)

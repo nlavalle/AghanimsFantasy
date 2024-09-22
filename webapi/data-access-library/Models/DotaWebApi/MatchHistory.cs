@@ -16,7 +16,9 @@ public class MatchHistory
     [Column("series_id")]
     [JsonProperty("series_id")]
     public int SeriesId { get; set; }
-    public required League League { get; set; }
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    public League League { get; set; } = null!;
 
     [Column("series_type")]
     [JsonProperty("series_type")]

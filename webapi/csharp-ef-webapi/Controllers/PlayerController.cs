@@ -10,10 +10,10 @@ namespace csharp_ef_webapi.Controllers
     [ApiController]
     public class PlayerController : ControllerBase
     {
-        private readonly FantasyRepository _fantasyRepository;
-        private readonly ProMetadataRepository _proMetadataRepository;
+        private readonly IFantasyRepository _fantasyRepository;
+        private readonly IProMetadataRepository _proMetadataRepository;
 
-        public PlayerController(FantasyRepository fantasyRepository, ProMetadataRepository proMetadataRepository)
+        public PlayerController(IFantasyRepository fantasyRepository, IProMetadataRepository proMetadataRepository)
         {
             _fantasyRepository = fantasyRepository;
             _proMetadataRepository = proMetadataRepository;

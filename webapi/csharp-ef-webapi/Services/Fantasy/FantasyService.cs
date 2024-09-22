@@ -32,7 +32,13 @@ public class FantasyService
     public async Task<FantasyPlayer?> GetFantasyPlayerAsync(DiscordUser? siteUser, int fantasyPlayerId)
     {
         IEnumerable<FantasyLeague> fantasyLeagues = await _fantasyLeagueRepository.GetAccessibleFantasyLeaguesAsync(siteUser);
-        FantasyPlayer? fantasyPlayer = fantasyLeagues.SelectMany(fl => fl.FantasyPlayers).FirstOrDefault(fp => fp.Id == fantasyPlayerId);
+        FantasyPlayer? fantasyPlayer = await _fantasyPlayerRepository.GetByIdAsync(fantasyPlayerId);
+
+        if (fantasyPlayer != null && !fantasyLeagues.Contains(fantasyPlayer.FantasyLeague))
+        {
+            // User doesn't have access to this player
+            return null;
+        }
 
         return fantasyPlayer;
     }

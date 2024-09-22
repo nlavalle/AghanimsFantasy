@@ -142,6 +142,7 @@ builder.Services.AddScoped<IDiscordRepository, DiscordRepository>();
 // Add Scoped services to be used by controllers to limit direct repository access
 builder.Services.AddScoped<DiscordWebApiService>();
 builder.Services.AddScoped<FantasyService>();
+builder.Services.AddScoped<FantasyServiceAdmin>();
 
 var app = builder.Build();
 
