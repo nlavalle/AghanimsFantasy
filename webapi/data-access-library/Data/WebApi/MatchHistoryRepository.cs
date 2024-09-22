@@ -69,8 +69,10 @@ public class MatchHistoryRepository : IMatchHistoryRepository
     {
         _logger.LogInformation($"Getting new Match Histories not loaded into Fantasy Match");
 
-        var newMatchHistoryQuery = _dbContext.MatchHistory.Where(
-                mh => !_dbContext.FantasyMatches.Any(fm => fm.MatchId == mh.MatchId))
+        var newMatchHistoryQuery = _dbContext.MatchHistory
+                .Include(mh => mh.League)
+                .Where(
+                    mh => !_dbContext.FantasyMatches.Any(fm => fm.MatchId == mh.MatchId))
                 .OrderBy(mh => mh.MatchId)
                 .Take(takeAmount);
 

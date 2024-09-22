@@ -12,12 +12,12 @@ internal class HeroesContext : DotaOperationContext
     private static readonly string AppendedApiPath = "GetHeroes/v1";
     private readonly ILogger<HeroesContext> _logger;
     private readonly HttpClient _httpClient;
-    private readonly ProMetadataRepository _proMetadataRepository;
+    private readonly IProMetadataRepository _proMetadataRepository;
 
     public HeroesContext(
             ILogger<HeroesContext> logger,
             HttpClient httpClient,
-            ProMetadataRepository proMetadataRepository,
+            IProMetadataRepository proMetadataRepository,
             IServiceScope scope,
             Config config
         )

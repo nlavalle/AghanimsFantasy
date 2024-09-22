@@ -128,6 +128,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IFantasyDraftRepository, FantasyDraftRepository>();
 builder.Services.AddScoped<IFantasyLeagueRepository, FantasyLeagueRepository>();
 builder.Services.AddScoped<IFantasyPlayerRepository, FantasyPlayerRepository>();
+builder.Services.AddScoped<IFantasyMatchRepository, FantasyMatchRepository>();
+builder.Services.AddScoped<IFantasyMatchPlayerRepository, FantasyMatchPlayerRepository>();
 builder.Services.AddScoped<IFantasyRepository, FantasyRepository>();
 // Add Game Coordinator Repositories
 builder.Services.AddScoped<IGcMatchMetadataRepository, GcMatchMetadataRepository>();

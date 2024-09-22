@@ -2,6 +2,7 @@ namespace csharp_ef_data_loader.Services;
 
 using System.Collections.Immutable;
 using DataAccessLibrary.Data;
+using DataAccessLibrary.Models.ProMetadata;
 using DataAccessLibrary.Models.WebApi;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -13,8 +14,8 @@ internal class LeagueHistoryContext : DotaOperationContext
     private static readonly string AppendedApiPath = "GetMatchHistory/v1";
     private readonly ILogger<LeagueHistoryContext> _logger;
     private readonly HttpClient _httpClient;
-    private readonly ProMetadataRepository _proMetadataRepository;
-    private readonly WebApiRepository _webApiRepository;
+    private readonly IProMetadataRepository _proMetadataRepository;
+    private readonly IMatchHistoryRepository _matchHistoryRepository;
 
     // Our match history list: just going to use a locked list, contention should be very low
     private readonly List<MatchHistory> _matches = new List<MatchHistory>();
@@ -28,8 +29,8 @@ internal class LeagueHistoryContext : DotaOperationContext
     public LeagueHistoryContext(
             ILogger<LeagueHistoryContext> logger,
             HttpClient httpClient,
-            ProMetadataRepository proMetadataRepository,
-            WebApiRepository webApiRepository,
+            IProMetadataRepository proMetadataRepository,
+            IMatchHistoryRepository matchHistoryRepository,
             IServiceScope scope,
             Config config
         )
@@ -38,7 +39,7 @@ internal class LeagueHistoryContext : DotaOperationContext
         _logger = logger;
         _httpClient = httpClient;
         _proMetadataRepository = proMetadataRepository;
-        _webApiRepository = webApiRepository;
+        _matchHistoryRepository = matchHistoryRepository;
     }
 
     protected override async Task OperateAsync(CancellationToken cancellationToken)
@@ -72,7 +73,7 @@ internal class LeagueHistoryContext : DotaOperationContext
             // _matches is safe to use here, because this location is guaranteed to be the only user
             foreach (MatchHistory match in _matches)
             {
-                if (await _webApiRepository.GetMatchHistoryAsync(match.MatchId) == null)
+                if (await _matchHistoryRepository.GetByIdAsync(match.MatchId) == null)
                 {
                     // Set Players Match IDs since it's not in json
                     foreach (MatchHistoryPlayer player in match.Players)
@@ -90,9 +91,9 @@ internal class LeagueHistoryContext : DotaOperationContext
                             throw new Exception("Hero does not exist.");
                         }
 
-                        player.MatchId = match.MatchId;
+                        player.Match = match;
                     }
-                    await _webApiRepository.AddMatchHistoryAsync(match);
+                    await _matchHistoryRepository.AddAsync(match);
                 }
             }
             _logger.LogInformation($"League Match History fetch done");
@@ -116,6 +117,8 @@ internal class LeagueHistoryContext : DotaOperationContext
         int resultsRemaining;
         bool started = false;
         long? startMatchId = null;
+
+        League league = await _proMetadataRepository.GetLeagueAsync(leagueId) ?? throw new ArgumentException("Unknown League Id");
 
         do
         {
@@ -154,7 +157,7 @@ internal class LeagueHistoryContext : DotaOperationContext
                 var matchId = match.MatchId;
                 startMatchId = Math.Min(startMatchId ?? long.MaxValue, matchId);
 
-                match.LeagueId = leagueId;
+                match.League = league;
             }
 
             // -1 so we don't reprocess the same ending match ID twice

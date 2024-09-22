@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 /// example is to fetch all of the current scores, vs adding a new draft. Controllers should handle none of the business
 /// logic 
 /// </summary>
-public class FantasyMatchPlayerRepository : IRepository<FantasyMatchPlayer, int>
+public class FantasyMatchPlayerRepository : IFantasyMatchPlayerRepository
 {
     private readonly ILogger<FantasyMatchPlayerRepository> _logger;
     private AghanimsFantasyContext _dbContext;

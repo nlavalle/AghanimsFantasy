@@ -1,9 +1,6 @@
 namespace DataAccessLibrary.Data;
 
 using System.Threading.Tasks;
-using DataAccessLibrary.Models.Fantasy;
-using DataAccessLibrary.Models.ProMetadata;
-using DataAccessLibrary.Models.WebApi;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SteamKit2.GC.Dota.Internal;
@@ -13,7 +10,7 @@ using SteamKit2.GC.Dota.Internal;
 /// example is to fetch all of the current scores, vs adding a new draft. Controllers should handle none of the business
 /// logic 
 /// </summary>
-public class GcDotaMatchRepository : IRepository<CMsgDOTAMatch, ulong>
+public class GcDotaMatchRepository : IGcDotaMatchRepository
 {
     private readonly ILogger<GcDotaMatchRepository> _logger;
     private AghanimsFantasyContext _dbContext;
