@@ -44,7 +44,7 @@ const fantasyTeams = computed(() => {
 })
 
 const fantasyPlayersByTeam = (teamId: number) => {
-    return fantasyPlayersAvailable.value.filter(player => player.teamId == teamId).sort((playerA: FantasyPlayer, playerB: FantasyPlayer) => {
+    return fantasyPlayersAvailable.value.filter(player => player.team.id == teamId).sort((playerA: FantasyPlayer, playerB: FantasyPlayer) => {
         if (playerA.teamPosition < playerB.teamPosition) return -1;
         if (playerA.teamPosition > playerB.teamPosition) return 1;
         return 0;
