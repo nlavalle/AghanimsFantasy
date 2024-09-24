@@ -14,7 +14,8 @@ public class MatchHistoryPlayer
 
     [ForeignKey("Match")]
     [Column("match_id")]
-    public required long MatchId { get; set; }
+    [JsonIgnore]
+    public long MatchId { get; set; }
 
     [JsonIgnore]
     public MatchHistory? Match { get; set; }

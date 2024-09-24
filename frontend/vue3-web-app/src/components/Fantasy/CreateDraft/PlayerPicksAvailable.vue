@@ -4,13 +4,13 @@
             <v-col class="available-team ma-2 pa-2" v-for="(team, teamIndex) in fantasyTeams" :key="teamIndex"
                 :style="{ 'min-width': isDesktop ? '600px' : '340px', 'max-width': isDesktop ? '600px' : '340px' }">
                 <v-row class="available-team-title">
-                    <img :src="getImageUrl(team.id)" />
+                    <img :src="getImageUrl(team.teamId)" />
                     <span>{{ team.name }}</span>
                 </v-row>
                 <v-row>
                     <v-col class="available-player ma-1"
                         :class="{ 'disabled-player': disabledPlayer(player), 'selected-player': selectedPlayerCheck(player.id) }"
-                        v-for="(player, playerIndex) in fantasyPlayersByTeam(team.id)" :key="playerIndex"
+                        v-for="(player, playerIndex) in fantasyPlayersByTeam(team.teamId)" :key="playerIndex"
                         :style="{ 'min-width': isDesktop ? '110px' : '60px', 'max-width': isDesktop ? '110px' : '60px' }"
                         @click="selectPlayer(player)">
                         <v-row justify="center">
@@ -39,12 +39,12 @@ const isDesktop = ref(window.outerWidth >= 600);
 
 const fantasyTeams = computed(() => {
     // We want the distinct teams
-    var teams = fantasyPlayersAvailable.value.map(item => item.team)
-    return [...new Map(teams.map(item => [item['id'], item])).values()]
+    let teams = fantasyPlayersAvailable.value.map(item => ({teamId: item.teamId, ...item.team}))
+    return [...new Map(teams.map(item => [item.teamId, item])).values()]
 })
 
 const fantasyPlayersByTeam = (teamId: number) => {
-    return fantasyPlayersAvailable.value.filter(player => player.team.id == teamId).sort((playerA: FantasyPlayer, playerB: FantasyPlayer) => {
+    return fantasyPlayersAvailable.value.filter(player => player.teamId == teamId).sort((playerA: FantasyPlayer, playerB: FantasyPlayer) => {
         if (playerA.teamPosition < playerB.teamPosition) return -1;
         if (playerA.teamPosition > playerB.teamPosition) return 1;
         return 0;

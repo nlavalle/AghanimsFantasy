@@ -175,7 +175,7 @@ const roleFilter = ref([]);
 const teamFilter = ref([]);
 const groupBy = <VDataTable['groupBy']>[
     {
-        key: 'fantasyMatchPlayer.matchId',
+        key: 'fantasyMatchPlayer.fantasyMatchId',
         order: 'desc'
     }
 ];
@@ -208,8 +208,8 @@ const roleList = [
 
 const teamsList = computed(() => {
     // We want the distinct teams
-    var teams = playerFantasyMatchStats.value.map(item => item.fantasyPlayer.team)
-    return [...new Map(teams.map(item => [item['id'], item])).values()]
+    var teams = playerFantasyMatchStats.value.map(item => ({id: item.fantasyPlayer.teamId, ...item.fantasyPlayer.team}))
+    return [...new Map(teams.map(item => [item.id, item])).values()]
 })
 
 onMounted(() => {
@@ -490,8 +490,8 @@ const stringifyNested = (obj: Object | string | null): any => {
 };
 
 const getMatchTeams = (matchId: number): string => {
-    var radiantTeam = playerFantasyMatchStats.value.filter(match => match.fantasyMatchPlayer.matchId == matchId && match.fantasyMatchPlayer.dotaTeamSide == false)[0]?.fantasyMatchPlayer.teamFormatted ?? '';
-    var direTeam = playerFantasyMatchStats.value.filter(match => match.fantasyMatchPlayer.matchId == matchId && match.fantasyMatchPlayer.dotaTeamSide == true)[0]?.fantasyMatchPlayer.teamFormatted ?? '';
+    var radiantTeam = playerFantasyMatchStats.value.filter(match => match.fantasyMatchPlayer.fantasyMatchId == matchId && match.fantasyMatchPlayer.dotaTeamSide == false)[0]?.fantasyMatchPlayer.teamFormatted ?? '';
+    var direTeam = playerFantasyMatchStats.value.filter(match => match.fantasyMatchPlayer.fantasyMatchId == matchId && match.fantasyMatchPlayer.dotaTeamSide == true)[0]?.fantasyMatchPlayer.teamFormatted ?? '';
     return `${radiantTeam} (Radiant) vs ${direTeam} (Dire)`
 }
 

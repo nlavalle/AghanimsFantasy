@@ -49,15 +49,15 @@ public class FantasyMatchPlayer
     }
 
     [Column("match_detail_player_parsed")]
-    [JsonPropertyName("match_detail_player_parsed")]
+    [JsonIgnore]
     public bool MatchDetailPlayerParsed { get; set; }
 
     [Column("gc_metadata_player_parsed")]
-    [JsonPropertyName("gc_metadata_player_parsed")]
+    [JsonIgnore]
     public bool GcMetadataPlayerParsed { get; set; }
 
     [Column("dota_team_side")]
-    [JsonPropertyName("dota_team_side")]
+    [JsonPropertyName("dotaTeamSide")]
     public bool DotaTeamSide { get; set; }
     public string DotaTeamSideFormatted
     {
@@ -68,7 +68,7 @@ public class FantasyMatchPlayer
     }
 
     [Column("player_slot")]
-    [JsonPropertyName("player_slot")]
+    [JsonPropertyName("playerSlot")]
     public int PlayerSlot { get; set; }
     public string PlayerSlotFormatted
     {
@@ -102,7 +102,7 @@ public class FantasyMatchPlayer
         }
     }
 
-    [JsonPropertyName("hero_id")]
+    [JsonPropertyName("hero")]
     public Hero? Hero { get; set; }
     public string HeroFormatted
     {
@@ -125,7 +125,7 @@ public class FantasyMatchPlayer
     public int? Assists { get; set; }
 
     [Column("last_hits")]
-    [JsonPropertyName("last_hits")]
+    [JsonPropertyName("lastHits")]
     public int? LastHits { get; set; }
 
     [Column("denies")]
@@ -133,23 +133,23 @@ public class FantasyMatchPlayer
     public int? Denies { get; set; }
 
     [Column("gold_per_min")]
-    [JsonPropertyName("gold_per_min")]
+    [JsonPropertyName("goldPerMin")]
     public int? GoldPerMin { get; set; }
 
     [Column("xp_per_min")]
-    [JsonPropertyName("xp_per_min")]
+    [JsonPropertyName("xpPerMin")]
     public int? XpPerMin { get; set; }
 
     [Column("support_gold_spent")]
-    [JsonPropertyName("support_gold_spent")]
+    [JsonPropertyName("supportGoldSpent")]
     public int? SupportGoldSpent { get; set; }
 
     [Column("observer_wards_placed")]
-    [JsonPropertyName("observer_wards_placed")]
+    [JsonPropertyName("observerWardsPlaced")]
     public int? ObserverWardsPlaced { get; set; }
 
     [Column("sentry_wards_placed")]
-    [JsonPropertyName("sentry_wards_placed")]
+    [JsonPropertyName("sentryWardsPlaced")]
     public int? SentyWardsPlaced { get; set; }
 
     [Column("dewards")]
@@ -157,11 +157,11 @@ public class FantasyMatchPlayer
     public int? Dewards { get; set; }
 
     [Column("camps_stacked")]
-    [JsonPropertyName("camps_stacked")]
+    [JsonPropertyName("campsStacked")]
     public int? CampsStacked { get; set; }
 
     [Column("stun_duration")]
-    [JsonPropertyName("stun_duration")]
+    [JsonPropertyName("stunDuration")]
     public float? StunDuration { get; set; }
 
     [Column("level")]
@@ -169,19 +169,19 @@ public class FantasyMatchPlayer
     public int? Level { get; set; }
 
     [Column("net_worth")]
-    [JsonPropertyName("net_worth")]
+    [JsonPropertyName("networth")]
     public long? Networth { get; set; }
 
     [Column("hero_damage")]
-    [JsonPropertyName("hero_damage")]
+    [JsonPropertyName("heroDamage")]
     public int? HeroDamage { get; set; }
 
     [Column("tower_damage")]
-    [JsonPropertyName("tower_damage")]
+    [JsonPropertyName("towerDamage")]
     public int? TowerDamage { get; set; }
 
     [Column("hero_healing")]
-    [JsonPropertyName("hero_healing")]
+    [JsonPropertyName("heroHealing")]
     public int? HeroHealing { get; set; }
 
     [Column("gold")]
@@ -191,32 +191,42 @@ public class FantasyMatchPlayer
     // Match Metadata
 
     [Column("fight_score")]
+    [JsonPropertyName("fightScore")]
     public float? FightScore { get; set; }
 
     [Column("farm_score")]
+    [JsonPropertyName("farmScore")]
     public float? FarmScore { get; set; }
 
     [Column("support_score")]
+    [JsonPropertyName("supportScore")]
     public float? SupportScore { get; set; }
 
     [Column("push_score")]
+    [JsonPropertyName("pushScore")]
     public float? PushScore { get; set; }
 
     [Column("hero_xp")]
+    [JsonPropertyName("heroXp")]
     public uint? HeroXp { get; set; }
 
     [Column("rampages")]
+    [JsonPropertyName("rampages")]
     public uint? Rampages { get; set; }
 
     [Column("triple_kills")]
+    [JsonPropertyName("tripleKills")]
     public uint? TripleKills { get; set; }
 
     [Column("aegis_snatched")]
+    [JsonPropertyName("aegisSnatched")]
     public uint? AegisSnatched { get; set; }
 
     [Column("rapiers_purchased")]
+    [JsonPropertyName("rapiersPurchased")]
     public uint? RapiersPurchased { get; set; }
 
     [Column("couriers_killed")]
+    [JsonPropertyName("couriersKilled")]
     public uint? CouriersKilled { get; set; }
 }

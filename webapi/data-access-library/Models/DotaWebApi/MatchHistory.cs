@@ -19,7 +19,8 @@ public class MatchHistory
 
     [ForeignKey("League")]
     [Column("league_id")]
-    public required int LeagueId { get; set; }
+    [JsonIgnore]
+    public int LeagueId { get; set; }
 
     [JsonIgnore]
     public League? League { get; set; }

@@ -404,8 +404,8 @@ export const localApiService = {
         throw error
       })
   },
-  getPlayerFantasyStats(leagueId: number) {
-    return fetch(`${baseUrl}/fantasy/players/${leagueId}/points`)
+  getPlayerFantasyStats(fantasyLeagueId: number) {
+    return fetch(`${baseUrl}/fantasyleague/${fantasyLeagueId}/players/points`)
       .then(
         function (response: any) {
           if (!response.ok) {
@@ -425,8 +425,8 @@ export const localApiService = {
         throw error
       })
   },
-  getFantasyLeagueMetadataStats(leagueId: number) {
-    return fetch(`${baseUrl}/fantasy/league/${leagueId}/metadata`)
+  getFantasyLeagueMetadataStats(fantasyLeagueId: number) {
+    return fetch(`${baseUrl}/fantasyleague/${fantasyLeagueId}/metadata`)
       .then(
         function (response: any) {
           if (!response.ok) {
@@ -446,8 +446,8 @@ export const localApiService = {
         throw error
       })
   },
-  getPlayerFantasyMatchStats(leagueId: number) {
-    return fetch(`${baseUrl}/fantasy/players/${leagueId}/matches/points?limit=100`)
+  getPlayerFantasyMatchStats(fantasyLeagueId: number) {
+    return fetch(`${baseUrl}/fantasyleague/${fantasyLeagueId}/players/matches/points?limit=100`)
       .then(
         function (response: any) {
           if (!response.ok) {
@@ -577,7 +577,7 @@ export const localApiService = {
     for (let i = 1; i < 6; i++) {
       if (draftPickArray[i]) {
         draftPicks.push({
-          FantasyPlayerId: draftPickArray[1].id,
+          FantasyPlayerId: draftPickArray[i].id,
           DraftOrder: i
         })
       }

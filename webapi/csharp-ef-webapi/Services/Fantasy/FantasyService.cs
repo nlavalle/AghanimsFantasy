@@ -111,8 +111,6 @@ public class FantasyService
             throw new ArgumentException("Can only draft one of each team position");
         };
 
-        FantasyDraft fantasyDraftPostResponse = null!;
-
         if (existingUserDraft != null)
         {
             // To handle partial drafts we're going to always clear the current draft then add the picks
@@ -124,7 +122,8 @@ public class FantasyService
             {
                 FantasyLeagueId = fantasyDraft.FantasyLeagueId,
                 DiscordAccountId = siteUser.Id,
-                DraftCreated = DateTime.UtcNow
+                DraftCreated = DateTime.UtcNow,
+                DraftPickPlayers = []
             };
             await _fantasyDraftRepository.AddAsync(existingUserDraft);
         }
@@ -134,12 +133,12 @@ public class FantasyService
         {
             if (fantasyDraft.DraftPickPlayers[i].FantasyPlayer != null)
             {
-                fantasyDraftPostResponse = await _fantasyDraftRepository.AddPlayerPickAsync(existingUserDraft, fantasyDraft.DraftPickPlayers[i].FantasyPlayer!);
+                existingUserDraft = await _fantasyDraftRepository.AddPlayerPickAsync(existingUserDraft, fantasyDraft.DraftPickPlayers[i].FantasyPlayer!);
             }
         }
 
 
-        return fantasyDraftPostResponse;
+        return existingUserDraft;
     }
 
     public async Task<FantasyDraftPointTotals?> GetFantasyDraftPointTotal(DiscordUser siteUser, int fantasyLeagueId)

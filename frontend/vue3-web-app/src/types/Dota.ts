@@ -1,5 +1,4 @@
 export interface DotaTeam {
-    id: number
     name: string,
     tag: string,
     abbreviation: string

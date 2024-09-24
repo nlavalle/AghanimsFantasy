@@ -4,8 +4,7 @@ using DataAccessLibrary.Data;
 using DataAccessLibrary.Models.WebApi;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 internal class MatchDetailsContext : DotaOperationContext
 {
@@ -124,12 +123,13 @@ internal class MatchDetailsContext : DotaOperationContext
             _logger.LogInformation($"Request submitted at {DateTime.Now.Ticks}");
             response.EnsureSuccessStatusCode();
 
-            JToken responseRawJToken = JToken.Parse(await response.Content.ReadAsStringAsync());
+            JsonDocument responseRawJDocument = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
 
             // Read and deserialize the matches from the json response
-            JToken responseObject = responseRawJToken["result"] ?? "{}";
+            JsonElement resultElement;
+            if (!responseRawJDocument.RootElement.TryGetProperty("result", out resultElement)) throw new Exception("Result element not found in response");
 
-            MatchDetail? matchResponse = JsonConvert.DeserializeObject<MatchDetail>(responseObject.ToString());
+            MatchDetail? matchResponse = JsonSerializer.Deserialize<MatchDetail>(resultElement.GetRawText()) ?? throw new Exception("Unable to deserialize response json to MatchDetails");
 
             if (matchResponse != null)
             {

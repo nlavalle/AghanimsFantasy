@@ -4,8 +4,7 @@ using DataAccessLibrary.Data;
 using DataAccessLibrary.Models.ProMetadata;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 internal class TeamsContext : DotaOperationContext
 {
@@ -84,13 +83,15 @@ internal class TeamsContext : DotaOperationContext
         _logger.LogInformation($"Request submitted at {DateTime.Now.Ticks}");
         response.EnsureSuccessStatusCode();
 
-        JToken responseRawJToken = JToken.Parse(await response.Content.ReadAsStringAsync());
+        JsonDocument responseRawJDocument = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
 
         // Read and deserialize the matches from the json response
-        JToken responseObject = responseRawJToken["result"] ?? "{}";
-        JToken teams = responseObject["teams"] ?? "{}";
+        JsonElement resultElement;
+        if (!responseRawJDocument.RootElement.TryGetProperty("result", out resultElement)) throw new Exception("Result element not found in response");
+        JsonElement teamsElement;
+        if (!resultElement.TryGetProperty("teams", out teamsElement)) throw new Exception("Teams element not found in result response");
 
-        List<Team> teamResponse = JsonConvert.DeserializeObject<List<Team>>(teams.ToString()) ?? new List<Team>();
+        List<Team> teamResponse = JsonSerializer.Deserialize<List<Team>>(teamsElement.GetRawText()) ?? throw new Exception("Unable to deserialize response json to Teams");
 
         foreach (Team team in teamResponse)
         {

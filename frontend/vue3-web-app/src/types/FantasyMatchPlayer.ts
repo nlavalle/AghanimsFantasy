@@ -1,11 +1,9 @@
 import type { DotaAccount, DotaTeam } from '@/types/Dota';
 
 export interface FantasyMatchPlayer {
-    id: number,
-    matchId: number,
-    account: DotaAccount,
+    fantasyMatchId: number,
+    accountId: number,
     accountFormatted: string,
-    team: DotaTeam,
     teamFormatted: string,
     matchDetailPlayerParsed: boolean,
     gcMetadataPlayerParsed: boolean,

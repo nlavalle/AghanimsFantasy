@@ -96,6 +96,8 @@ onMounted(() => {
 
 function updateSelectedLeague() {
   leagueStore.setSelectedLeague(selectedLeague.value)
+  selectedFantasyLeague.value = leagueStore.defaultFantasyLeague;
+  leagueStore.setSelectedFantasyLeague(selectedFantasyLeague.value);
   clearFantasyDraftPicks()
 }
 

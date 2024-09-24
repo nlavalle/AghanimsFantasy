@@ -1,8 +1,8 @@
 using System.Net;
 using System.Security.Claims;
+using System.Text.Json;
 using DataAccessLibrary.Data;
 using DataAccessLibrary.Models.Discord;
-using Newtonsoft.Json;
 
 namespace csharp_ef_webapi.Services;
 public class DiscordWebApiService
@@ -71,7 +71,8 @@ public class DiscordWebApiService
             var response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
 
-            var discordObject = JsonConvert.DeserializeObject<DiscordUser>(await response.Content.ReadAsStringAsync());
+            JsonDocument responseRawJDocument = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+            var discordObject = JsonSerializer.Deserialize<DiscordUser>(responseRawJDocument.RootElement.GetRawText(), new JsonSerializerOptions { NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString });
             if (discordObject != null && discordObject.Username != null)
             {
                 await _discordRepository.AddDiscordUserAsync(discordObject);

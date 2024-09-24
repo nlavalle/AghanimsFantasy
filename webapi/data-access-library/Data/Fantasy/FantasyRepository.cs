@@ -65,7 +65,7 @@ public class FantasyRepository : IFantasyRepository
                     md => md.Players,
                     (left, right) => new { Match = left, MatchPlayer = right }
                 )
-                .Where(mdp => mdp.MatchPlayer.Account != null && mdp.MatchPlayer.Account.Id == fantasyPlayer.DotaAccount.Id)
+                .Where(mdp => mdp.MatchPlayer.Account != null && mdp.MatchPlayer.Account.Id == fantasyPlayer.DotaAccount!.Id)
                 .Where(mdp => mdp.MatchPlayer.Hero != null)
                 .Where(mdp => mdp.Match.RadiantWin != null)
                 .GroupBy(match => match.MatchPlayer.Hero)

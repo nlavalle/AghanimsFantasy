@@ -129,7 +129,7 @@ public class MatchHistoryRepository : IMatchHistoryRepository
 
     public async Task<MatchHistory?> GetByIdAsync(long MatchId)
     {
-        _logger.LogInformation($"Fetching Single Match History {MatchId}");
+        _logger.LogDebug($"Fetching Single Match History {MatchId}");
 
         return await _dbContext.MatchHistory.FindAsync(MatchId);
     }

@@ -4,8 +4,7 @@ using DataAccessLibrary.Data;
 using DataAccessLibrary.Models.ProMetadata;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 internal class HeroesContext : DotaOperationContext
 {
@@ -60,13 +59,15 @@ internal class HeroesContext : DotaOperationContext
         _logger.LogInformation($"Request submitted at {DateTime.Now.Ticks}");
         response.EnsureSuccessStatusCode();
 
-        JToken responseRawJToken = JToken.Parse(await response.Content.ReadAsStringAsync());
+        JsonDocument responseRawJDocument = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
 
         // Read and deserialize the matches from the json response
-        JToken responseObject = responseRawJToken["result"] ?? "{}";
-        JToken heroesJson = responseObject["heroes"] ?? "[]";
+        JsonElement resultElement;
+        if (!responseRawJDocument.RootElement.TryGetProperty("result", out resultElement)) throw new Exception("Result element not found in response");
+        JsonElement heroesElement;
+        if (!resultElement.TryGetProperty("heroes", out heroesElement)) throw new Exception("Heroes element not found in result response");
 
-        List<Hero> heroesResponse = JsonConvert.DeserializeObject<List<Hero>>(heroesJson.ToString()) ?? new List<Hero>();
+        List<Hero> heroesResponse = JsonSerializer.Deserialize<List<Hero>>(heroesElement.GetRawText()) ?? throw new Exception("Unable to deserialize response json to Hero");
 
         return heroesResponse;
     }

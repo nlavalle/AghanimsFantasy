@@ -5,8 +5,7 @@ using DataAccessLibrary.Data;
 using DataAccessLibrary.Models.WebApi;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 internal class LeagueHistoryContext : DotaOperationContext
 {
@@ -47,7 +46,7 @@ internal class LeagueHistoryContext : DotaOperationContext
         {
             Dictionary<string, string> query = new Dictionary<string, string>();
 
-            var leagues = (await _proMetadataRepository.GetLeaguesAsync(true)).Distinct().ToArray();
+            var leagues = (await _proMetadataRepository.GetLeaguesAsync(false)).Distinct().ToArray();
             var length = leagues.Length;
 
             // Knowing the length triggers a lot of stuff
@@ -134,14 +133,16 @@ internal class LeagueHistoryContext : DotaOperationContext
             _logger.LogInformation($"Request submitted at {DateTime.Now.Ticks}");
             response.EnsureSuccessStatusCode();
 
-            JToken responseRawJToken = JToken.Parse(await response.Content.ReadAsStringAsync());
+            JsonDocument responseRawJDocument = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
 
             // Read and deserialize the matches from the json response
-            JToken responseObject = responseRawJToken["result"] ?? "{}";
-            resultsRemaining = (responseObject["results_remaining"] ?? 0).Value<int>();
-            JToken matchesJson = responseObject["matches"] ?? "[]";
+            JsonElement resultElement;
+            if (!responseRawJDocument.RootElement.TryGetProperty("result", out resultElement)) throw new Exception("Result element not found in response");
+            resultsRemaining = resultElement.GetProperty("results_remaining").GetInt32();
+            JsonElement matchesElement;
+            if (!resultElement.TryGetProperty("matches", out matchesElement)) throw new Exception("Matches element not found in result response");
 
-            List<MatchHistory> matchResponse = JsonConvert.DeserializeObject<List<MatchHistory>>(matchesJson.ToString()) ?? new List<MatchHistory>();
+            List<MatchHistory> matchResponse = JsonSerializer.Deserialize<List<MatchHistory>>(matchesElement.GetRawText()) ?? throw new Exception("Unable to deserialize response json to MatchHistory");
 
             lock (_matches)
             {
