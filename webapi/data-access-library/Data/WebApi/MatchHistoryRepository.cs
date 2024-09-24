@@ -107,7 +107,7 @@ public class MatchHistoryRepository : IMatchHistoryRepository
             .Where(mh => _dbContext.Leagues
                     .Where(l => l.IsActive == true)
                     .Select(l => l.Id)
-                    .Contains(mh.League.Id)
+                    .Contains(mh.LeagueId)
             )
             .Where(
                 mh => !_dbContext.MatchDetails

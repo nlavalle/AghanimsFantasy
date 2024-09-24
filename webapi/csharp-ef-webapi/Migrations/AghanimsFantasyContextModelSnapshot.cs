@@ -68,12 +68,13 @@ namespace csharp_ef_webapi.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("draft_last_updated");
 
-                    b.Property<int>("fantasy_league_id")
-                        .HasColumnType("integer");
+                    b.Property<int>("FantasyLeagueId")
+                        .HasColumnType("integer")
+                        .HasColumnName("fantasy_league_id");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("fantasy_league_id");
+                    b.HasIndex("FantasyLeagueId");
 
                     b.ToTable("dota_fantasy_drafts", "nadcl");
                 });
@@ -88,12 +89,13 @@ namespace csharp_ef_webapi.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("draft_order");
 
-                    b.Property<long?>("fantasy_player_id")
-                        .HasColumnType("bigint");
+                    b.Property<long>("FantasyPlayerId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("fantasy_player_id");
 
                     b.HasKey("FantasyDraftId", "DraftOrder");
 
-                    b.HasIndex("fantasy_player_id");
+                    b.HasIndex("FantasyPlayerId");
 
                     b.ToTable("dota_fantasy_draft_players", "nadcl");
                 });
@@ -123,6 +125,10 @@ namespace csharp_ef_webapi.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("league_end_time");
 
+                    b.Property<int>("LeagueId")
+                        .HasColumnType("integer")
+                        .HasColumnName("league_id");
+
                     b.Property<long>("LeagueStartTime")
                         .HasColumnType("bigint")
                         .HasColumnName("league_start_time");
@@ -131,12 +137,9 @@ namespace csharp_ef_webapi.Migrations
                         .HasColumnType("text")
                         .HasColumnName("league_name");
 
-                    b.Property<int>("league_id")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("league_id");
+                    b.HasIndex("LeagueId");
 
                     b.ToTable("dota_fantasy_leagues", "nadcl");
                 });
@@ -169,6 +172,10 @@ namespace csharp_ef_webapi.Migrations
                     b.Property<decimal>("DeathsWeight")
                         .HasColumnType("numeric")
                         .HasColumnName("deaths_weight");
+
+                    b.Property<int>("FantasyLeagueId")
+                        .HasColumnType("integer")
+                        .HasColumnName("fantasy_league_id");
 
                     b.Property<decimal>("FarmScoreWeight")
                         .HasColumnType("numeric")
@@ -274,12 +281,9 @@ namespace csharp_ef_webapi.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("xp_per_min_weight");
 
-                    b.Property<int>("fantasy_league_id")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("fantasy_league_id")
+                    b.HasIndex("FantasyLeagueId")
                         .IsUnique();
 
                     b.ToTable("dota_fantasy_league_weights", "nadcl");
@@ -296,68 +300,81 @@ namespace csharp_ef_webapi.Migrations
 
                     b.Property<int?>("DireScore")
                         .HasColumnType("integer")
-                        .HasColumnName("dire_score");
+                        .HasColumnName("dire_score")
+                        .HasAnnotation("Relational:JsonPropertyName", "dire_score");
 
                     b.Property<long?>("DireTeamId")
                         .HasColumnType("bigint");
 
                     b.Property<int?>("Duration")
                         .HasColumnType("integer")
-                        .HasColumnName("duration");
+                        .HasColumnName("duration")
+                        .HasAnnotation("Relational:JsonPropertyName", "duration");
 
                     b.Property<int?>("FirstBloodTime")
                         .HasColumnType("integer")
-                        .HasColumnName("first_blood_time");
+                        .HasColumnName("first_blood_time")
+                        .HasAnnotation("Relational:JsonPropertyName", "first_blood_time");
 
                     b.Property<int?>("GameMode")
                         .HasColumnType("integer")
-                        .HasColumnName("game_mode");
+                        .HasColumnName("game_mode")
+                        .HasAnnotation("Relational:JsonPropertyName", "game_mode");
 
                     b.Property<bool>("GcMetadataParsed")
                         .HasColumnType("boolean")
-                        .HasColumnName("gc_metadata_parsed");
+                        .HasColumnName("gc_metadata_parsed")
+                        .HasAnnotation("Relational:JsonPropertyName", "gc_metadata_parsed");
+
+                    b.Property<int>("LeagueId")
+                        .HasColumnType("integer")
+                        .HasColumnName("league_id");
 
                     b.Property<int>("LobbyType")
                         .HasColumnType("integer")
-                        .HasColumnName("lobby_type");
+                        .HasColumnName("lobby_type")
+                        .HasAnnotation("Relational:JsonPropertyName", "lobby_type");
 
                     b.Property<bool>("MatchDetailParsed")
                         .HasColumnType("boolean")
-                        .HasColumnName("match_detail_parsed");
+                        .HasColumnName("match_detail_parsed")
+                        .HasAnnotation("Relational:JsonPropertyName", "match_detail_parsed");
 
                     b.Property<bool>("MatchHistoryParsed")
                         .HasColumnType("boolean")
-                        .HasColumnName("match_history_parsed");
+                        .HasColumnName("match_history_parsed")
+                        .HasAnnotation("Relational:JsonPropertyName", "match_history_parsed");
 
                     b.Property<int?>("PreGameDuration")
                         .HasColumnType("integer")
-                        .HasColumnName("pre_game_duration");
+                        .HasColumnName("pre_game_duration")
+                        .HasAnnotation("Relational:JsonPropertyName", "pre_game_duration");
 
                     b.Property<int?>("RadiantScore")
                         .HasColumnType("integer")
-                        .HasColumnName("radiant_score");
+                        .HasColumnName("radiant_score")
+                        .HasAnnotation("Relational:JsonPropertyName", "radiant_score");
 
                     b.Property<long?>("RadiantTeamId")
                         .HasColumnType("bigint");
 
                     b.Property<bool?>("RadiantWin")
                         .HasColumnType("boolean")
-                        .HasColumnName("radiant_win");
+                        .HasColumnName("radiant_win")
+                        .HasAnnotation("Relational:JsonPropertyName", "radiant_win");
 
                     b.Property<long>("StartTime")
                         .HasColumnType("bigint")
-                        .HasColumnName("start_time");
-
-                    b.Property<int>("league_id")
-                        .HasColumnType("integer");
+                        .HasColumnName("start_time")
+                        .HasAnnotation("Relational:JsonPropertyName", "start_time");
 
                     b.HasKey("MatchId");
 
                     b.HasIndex("DireTeamId");
 
-                    b.HasIndex("RadiantTeamId");
+                    b.HasIndex("LeagueId");
 
-                    b.HasIndex("league_id");
+                    b.HasIndex("RadiantTeamId");
 
                     b.ToTable("fantasy_match", "nadcl");
                 });
@@ -371,17 +388,23 @@ namespace csharp_ef_webapi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<long>("AccountId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_id");
+
                     b.Property<long?>("AegisSnatched")
                         .HasColumnType("bigint")
                         .HasColumnName("aegis_snatched");
 
                     b.Property<int?>("Assists")
                         .HasColumnType("integer")
-                        .HasColumnName("assists");
+                        .HasColumnName("assists")
+                        .HasAnnotation("Relational:JsonPropertyName", "assists");
 
                     b.Property<int?>("CampsStacked")
                         .HasColumnType("integer")
-                        .HasColumnName("camps_stacked");
+                        .HasColumnName("camps_stacked")
+                        .HasAnnotation("Relational:JsonPropertyName", "camps_stacked");
 
                     b.Property<long?>("CouriersKilled")
                         .HasColumnType("bigint")
@@ -389,19 +412,27 @@ namespace csharp_ef_webapi.Migrations
 
                     b.Property<int?>("Deaths")
                         .HasColumnType("integer")
-                        .HasColumnName("deaths");
+                        .HasColumnName("deaths")
+                        .HasAnnotation("Relational:JsonPropertyName", "deaths");
 
                     b.Property<int?>("Denies")
                         .HasColumnType("integer")
-                        .HasColumnName("denies");
+                        .HasColumnName("denies")
+                        .HasAnnotation("Relational:JsonPropertyName", "denies");
 
                     b.Property<int?>("Dewards")
                         .HasColumnType("integer")
-                        .HasColumnName("dewards");
+                        .HasColumnName("dewards")
+                        .HasAnnotation("Relational:JsonPropertyName", "dewards");
 
                     b.Property<bool>("DotaTeamSide")
                         .HasColumnType("boolean")
-                        .HasColumnName("dota_team_side");
+                        .HasColumnName("dota_team_side")
+                        .HasAnnotation("Relational:JsonPropertyName", "dota_team_side");
+
+                    b.Property<long>("FantasyMatchId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("match_id");
 
                     b.Property<float?>("FarmScore")
                         .HasColumnType("real")
@@ -413,23 +444,28 @@ namespace csharp_ef_webapi.Migrations
 
                     b.Property<bool>("GcMetadataPlayerParsed")
                         .HasColumnType("boolean")
-                        .HasColumnName("gc_metadata_player_parsed");
+                        .HasColumnName("gc_metadata_player_parsed")
+                        .HasAnnotation("Relational:JsonPropertyName", "gc_metadata_player_parsed");
 
                     b.Property<int?>("Gold")
                         .HasColumnType("integer")
-                        .HasColumnName("gold");
+                        .HasColumnName("gold")
+                        .HasAnnotation("Relational:JsonPropertyName", "gold");
 
                     b.Property<int?>("GoldPerMin")
                         .HasColumnType("integer")
-                        .HasColumnName("gold_per_min");
+                        .HasColumnName("gold_per_min")
+                        .HasAnnotation("Relational:JsonPropertyName", "gold_per_min");
 
                     b.Property<int?>("HeroDamage")
                         .HasColumnType("integer")
-                        .HasColumnName("hero_damage");
+                        .HasColumnName("hero_damage")
+                        .HasAnnotation("Relational:JsonPropertyName", "hero_damage");
 
                     b.Property<int?>("HeroHealing")
                         .HasColumnType("integer")
-                        .HasColumnName("hero_healing");
+                        .HasColumnName("hero_healing")
+                        .HasAnnotation("Relational:JsonPropertyName", "hero_healing");
 
                     b.Property<long?>("HeroId")
                         .HasColumnType("bigint");
@@ -440,31 +476,38 @@ namespace csharp_ef_webapi.Migrations
 
                     b.Property<int?>("Kills")
                         .HasColumnType("integer")
-                        .HasColumnName("kills");
+                        .HasColumnName("kills")
+                        .HasAnnotation("Relational:JsonPropertyName", "kills");
 
                     b.Property<int?>("LastHits")
                         .HasColumnType("integer")
-                        .HasColumnName("last_hits");
+                        .HasColumnName("last_hits")
+                        .HasAnnotation("Relational:JsonPropertyName", "last_hits");
 
                     b.Property<int?>("Level")
                         .HasColumnType("integer")
-                        .HasColumnName("level");
+                        .HasColumnName("level")
+                        .HasAnnotation("Relational:JsonPropertyName", "level");
 
                     b.Property<bool>("MatchDetailPlayerParsed")
                         .HasColumnType("boolean")
-                        .HasColumnName("match_detail_player_parsed");
+                        .HasColumnName("match_detail_player_parsed")
+                        .HasAnnotation("Relational:JsonPropertyName", "match_detail_player_parsed");
 
                     b.Property<long?>("Networth")
                         .HasColumnType("bigint")
-                        .HasColumnName("net_worth");
+                        .HasColumnName("net_worth")
+                        .HasAnnotation("Relational:JsonPropertyName", "net_worth");
 
                     b.Property<int?>("ObserverWardsPlaced")
                         .HasColumnType("integer")
-                        .HasColumnName("observer_wards_placed");
+                        .HasColumnName("observer_wards_placed")
+                        .HasAnnotation("Relational:JsonPropertyName", "observer_wards_placed");
 
                     b.Property<int>("PlayerSlot")
                         .HasColumnType("integer")
-                        .HasColumnName("player_slot");
+                        .HasColumnName("player_slot")
+                        .HasAnnotation("Relational:JsonPropertyName", "player_slot");
 
                     b.Property<float?>("PushScore")
                         .HasColumnType("real")
@@ -480,23 +523,31 @@ namespace csharp_ef_webapi.Migrations
 
                     b.Property<int?>("SentyWardsPlaced")
                         .HasColumnType("integer")
-                        .HasColumnName("sentry_wards_placed");
+                        .HasColumnName("sentry_wards_placed")
+                        .HasAnnotation("Relational:JsonPropertyName", "sentry_wards_placed");
 
                     b.Property<float?>("StunDuration")
                         .HasColumnType("real")
-                        .HasColumnName("stun_duration");
+                        .HasColumnName("stun_duration")
+                        .HasAnnotation("Relational:JsonPropertyName", "stun_duration");
 
                     b.Property<int?>("SupportGoldSpent")
                         .HasColumnType("integer")
-                        .HasColumnName("support_gold_spent");
+                        .HasColumnName("support_gold_spent")
+                        .HasAnnotation("Relational:JsonPropertyName", "support_gold_spent");
 
                     b.Property<float?>("SupportScore")
                         .HasColumnType("real")
                         .HasColumnName("support_score");
 
+                    b.Property<long>("TeamId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("team_id");
+
                     b.Property<int?>("TowerDamage")
                         .HasColumnType("integer")
-                        .HasColumnName("tower_damage");
+                        .HasColumnName("tower_damage")
+                        .HasAnnotation("Relational:JsonPropertyName", "tower_damage");
 
                     b.Property<long?>("TripleKills")
                         .HasColumnType("bigint")
@@ -504,26 +555,18 @@ namespace csharp_ef_webapi.Migrations
 
                     b.Property<int?>("XpPerMin")
                         .HasColumnType("integer")
-                        .HasColumnName("xp_per_min");
-
-                    b.Property<long>("account_id")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("match_id")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("team_id")
-                        .HasColumnType("bigint");
+                        .HasColumnName("xp_per_min")
+                        .HasAnnotation("Relational:JsonPropertyName", "xp_per_min");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("FantasyMatchId");
+
                     b.HasIndex("HeroId");
 
-                    b.HasIndex("account_id");
-
-                    b.HasIndex("match_id");
-
-                    b.HasIndex("team_id");
+                    b.HasIndex("TeamId");
 
                     b.ToTable("fantasy_match_player", "nadcl");
                 });
@@ -673,26 +716,29 @@ namespace csharp_ef_webapi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<long>("DotaAccountId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("dota_account_id");
+
+                    b.Property<int>("FantasyLeagueId")
+                        .HasColumnType("integer")
+                        .HasColumnName("fantasy_league_id");
+
+                    b.Property<long>("TeamId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("team_id");
+
                     b.Property<int>("TeamPosition")
                         .HasColumnType("integer")
                         .HasColumnName("team_position");
 
-                    b.Property<long>("dota_account_id")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("fantasy_league_id")
-                        .HasColumnType("integer");
-
-                    b.Property<long>("team_id")
-                        .HasColumnType("bigint");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("dota_account_id");
+                    b.HasIndex("DotaAccountId");
 
-                    b.HasIndex("fantasy_league_id");
+                    b.HasIndex("FantasyLeagueId");
 
-                    b.HasIndex("team_id");
+                    b.HasIndex("TeamId");
 
                     b.ToTable("dota_fantasy_players", "nadcl");
                 });
@@ -706,22 +752,23 @@ namespace csharp_ef_webapi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<long>("DiscordUserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("discord_user_id");
+
+                    b.Property<int>("FantasyLeagueId")
+                        .HasColumnType("integer")
+                        .HasColumnName("fantasy_league_id");
+
                     b.Property<long>("FantasyLeagueJoinDate")
                         .HasColumnType("bigint")
                         .HasColumnName("fantasy_league_join_date");
 
-                    b.Property<long>("discord_user_id")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("fantasy_league_id")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("discord_user_id")
-                        .IsUnique();
+                    b.HasIndex("DiscordUserId");
 
-                    b.HasIndex("fantasy_league_id");
+                    b.HasIndex("FantasyLeagueId");
 
                     b.ToTable("dota_fantasy_private_league_players", "nadcl");
                 });
@@ -1348,6 +1395,10 @@ namespace csharp_ef_webapi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<int>("LeagueId")
+                        .HasColumnType("integer")
+                        .HasColumnName("league_id");
+
                     b.Property<decimal>("LobbyId")
                         .HasColumnType("numeric(20,0)")
                         .HasColumnName("lobby_id");
@@ -1364,12 +1415,9 @@ namespace csharp_ef_webapi.Migrations
                         .HasColumnType("numeric(20,0)")
                         .HasColumnName("report_until_time");
 
-                    b.Property<int>("league_id")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("league_id");
+                    b.HasIndex("LeagueId");
 
                     b.ToTable("dota_gc_match_metadata", "nadcl");
                 });
@@ -2001,6 +2049,8 @@ namespace csharp_ef_webapi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("dota_heroes", "nadcl");
+
+                    b.HasAnnotation("Relational:JsonPropertyName", "hero_id");
                 });
 
             modelBuilder.Entity("DataAccessLibrary.Models.ProMetadata.League", b =>
@@ -2101,6 +2151,8 @@ namespace csharp_ef_webapi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("dota_teams", "nadcl");
+
+                    b.HasAnnotation("Relational:JsonPropertyName", "radiant_team_id");
                 });
 
             modelBuilder.Entity("DataAccessLibrary.Models.WebApi.MatchDetail", b =>
@@ -2206,26 +2258,31 @@ namespace csharp_ef_webapi.Migrations
 
                     b.Property<int>("HeroId")
                         .HasColumnType("integer")
-                        .HasColumnName("hero_id");
+                        .HasColumnName("hero_id")
+                        .HasAnnotation("Relational:JsonPropertyName", "hero_id");
 
                     b.Property<bool>("IsPick")
                         .HasColumnType("boolean")
-                        .HasColumnName("is_pick");
+                        .HasColumnName("is_pick")
+                        .HasAnnotation("Relational:JsonPropertyName", "is_pick");
+
+                    b.Property<long>("MatchId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("match_id");
 
                     b.Property<int>("Order")
                         .HasColumnType("integer")
-                        .HasColumnName("order");
+                        .HasColumnName("order")
+                        .HasAnnotation("Relational:JsonPropertyName", "order");
 
                     b.Property<int>("Team")
                         .HasColumnType("integer")
-                        .HasColumnName("team");
-
-                    b.Property<long>("match_id")
-                        .HasColumnType("bigint");
+                        .HasColumnName("team")
+                        .HasAnnotation("Relational:JsonPropertyName", "team");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("match_id");
+                    b.HasIndex("MatchId");
 
                     b.ToTable("dota_match_details_picks_bans", "nadcl");
                 });
@@ -2241,154 +2298,191 @@ namespace csharp_ef_webapi.Migrations
 
                     b.Property<long>("AccountId")
                         .HasColumnType("bigint")
-                        .HasColumnName("account_id");
+                        .HasColumnName("account_id")
+                        .HasAnnotation("Relational:JsonPropertyName", "account_id");
 
                     b.Property<int?>("AghanimsScepter")
                         .HasColumnType("integer")
-                        .HasColumnName("aghanims_scepter");
+                        .HasColumnName("aghanims_scepter")
+                        .HasAnnotation("Relational:JsonPropertyName", "aghanims_scepter");
 
                     b.Property<int?>("AghanimsShard")
                         .HasColumnType("integer")
-                        .HasColumnName("aghanims_shard");
+                        .HasColumnName("aghanims_shard")
+                        .HasAnnotation("Relational:JsonPropertyName", "aghanims_shard");
 
                     b.Property<int?>("Assists")
                         .HasColumnType("integer")
-                        .HasColumnName("assists");
+                        .HasColumnName("assists")
+                        .HasAnnotation("Relational:JsonPropertyName", "assists");
 
                     b.Property<int?>("Backpack0")
                         .HasColumnType("integer")
-                        .HasColumnName("backpack_0");
+                        .HasColumnName("backpack_0")
+                        .HasAnnotation("Relational:JsonPropertyName", "backpack_0");
 
                     b.Property<int?>("Backpack1")
                         .HasColumnType("integer")
-                        .HasColumnName("backpack_1");
+                        .HasColumnName("backpack_1")
+                        .HasAnnotation("Relational:JsonPropertyName", "backpack_1");
 
                     b.Property<int?>("Backpack2")
                         .HasColumnType("integer")
-                        .HasColumnName("backpack_2");
+                        .HasColumnName("backpack_2")
+                        .HasAnnotation("Relational:JsonPropertyName", "backpack_2");
 
                     b.Property<int?>("Deaths")
                         .HasColumnType("integer")
-                        .HasColumnName("deaths");
+                        .HasColumnName("deaths")
+                        .HasAnnotation("Relational:JsonPropertyName", "deaths");
 
                     b.Property<int?>("Denies")
                         .HasColumnType("integer")
-                        .HasColumnName("denies");
+                        .HasColumnName("denies")
+                        .HasAnnotation("Relational:JsonPropertyName", "denies");
 
                     b.Property<int?>("Gold")
                         .HasColumnType("integer")
-                        .HasColumnName("gold");
+                        .HasColumnName("gold")
+                        .HasAnnotation("Relational:JsonPropertyName", "gold");
 
                     b.Property<int?>("GoldPerMin")
                         .HasColumnType("integer")
-                        .HasColumnName("gold_per_min");
+                        .HasColumnName("gold_per_min")
+                        .HasAnnotation("Relational:JsonPropertyName", "gold_per_min");
 
                     b.Property<int?>("GoldSpent")
                         .HasColumnType("integer")
-                        .HasColumnName("gold_spent");
+                        .HasColumnName("gold_spent")
+                        .HasAnnotation("Relational:JsonPropertyName", "gold_spent");
 
                     b.Property<int?>("HeroDamage")
                         .HasColumnType("integer")
-                        .HasColumnName("hero_damage");
+                        .HasColumnName("hero_damage")
+                        .HasAnnotation("Relational:JsonPropertyName", "hero_damage");
 
                     b.Property<int?>("HeroHealing")
                         .HasColumnType("integer")
-                        .HasColumnName("hero_healing");
+                        .HasColumnName("hero_healing")
+                        .HasAnnotation("Relational:JsonPropertyName", "hero_healing");
 
                     b.Property<int>("HeroId")
                         .HasColumnType("integer")
-                        .HasColumnName("hero_id");
+                        .HasColumnName("hero_id")
+                        .HasAnnotation("Relational:JsonPropertyName", "hero_id");
 
                     b.Property<int?>("Item0")
                         .HasColumnType("integer")
-                        .HasColumnName("item_0");
+                        .HasColumnName("item_0")
+                        .HasAnnotation("Relational:JsonPropertyName", "item_0");
 
                     b.Property<int?>("Item1")
                         .HasColumnType("integer")
-                        .HasColumnName("item_1");
+                        .HasColumnName("item_1")
+                        .HasAnnotation("Relational:JsonPropertyName", "item_1");
 
                     b.Property<int?>("Item2")
                         .HasColumnType("integer")
-                        .HasColumnName("item_2");
+                        .HasColumnName("item_2")
+                        .HasAnnotation("Relational:JsonPropertyName", "item_2");
 
                     b.Property<int?>("Item3")
                         .HasColumnType("integer")
-                        .HasColumnName("item_3");
+                        .HasColumnName("item_3")
+                        .HasAnnotation("Relational:JsonPropertyName", "item_3");
 
                     b.Property<int?>("Item4")
                         .HasColumnType("integer")
-                        .HasColumnName("item_4");
+                        .HasColumnName("item_4")
+                        .HasAnnotation("Relational:JsonPropertyName", "item_4");
 
                     b.Property<int?>("Item5")
                         .HasColumnType("integer")
-                        .HasColumnName("item_5");
+                        .HasColumnName("item_5")
+                        .HasAnnotation("Relational:JsonPropertyName", "item_5");
 
                     b.Property<int?>("ItemNeutral")
                         .HasColumnType("integer")
-                        .HasColumnName("item_neutral");
+                        .HasColumnName("item_neutral")
+                        .HasAnnotation("Relational:JsonPropertyName", "item_neutral");
 
                     b.Property<int?>("Kills")
                         .HasColumnType("integer")
-                        .HasColumnName("kills");
+                        .HasColumnName("kills")
+                        .HasAnnotation("Relational:JsonPropertyName", "kills");
 
                     b.Property<int?>("LastHits")
                         .HasColumnType("integer")
-                        .HasColumnName("last_hits");
+                        .HasColumnName("last_hits")
+                        .HasAnnotation("Relational:JsonPropertyName", "last_hits");
 
                     b.Property<int?>("LeaverStatus")
                         .HasColumnType("integer")
-                        .HasColumnName("leaver_status");
+                        .HasColumnName("leaver_status")
+                        .HasAnnotation("Relational:JsonPropertyName", "leaver_status");
 
                     b.Property<int?>("Level")
                         .HasColumnType("integer")
-                        .HasColumnName("level");
+                        .HasColumnName("level")
+                        .HasAnnotation("Relational:JsonPropertyName", "level");
+
+                    b.Property<long>("MatchId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("match_id");
 
                     b.Property<int?>("Moonshard")
                         .HasColumnType("integer")
-                        .HasColumnName("moonshard");
+                        .HasColumnName("moonshard")
+                        .HasAnnotation("Relational:JsonPropertyName", "moonshard");
 
                     b.Property<long?>("Networth")
                         .HasColumnType("bigint")
-                        .HasColumnName("net_worth");
+                        .HasColumnName("net_worth")
+                        .HasAnnotation("Relational:JsonPropertyName", "net_worth");
 
                     b.Property<int>("PlayerSlot")
                         .HasColumnType("integer")
-                        .HasColumnName("player_slot");
+                        .HasColumnName("player_slot")
+                        .HasAnnotation("Relational:JsonPropertyName", "player_slot");
 
                     b.Property<int?>("ScaledHeroDamage")
                         .HasColumnType("integer")
-                        .HasColumnName("scaled_hero_damage");
+                        .HasColumnName("scaled_hero_damage")
+                        .HasAnnotation("Relational:JsonPropertyName", "scaled_hero_damage");
 
                     b.Property<int?>("ScaledHeroHealing")
                         .HasColumnType("integer")
-                        .HasColumnName("scaled_hero_healing");
+                        .HasColumnName("scaled_hero_healing")
+                        .HasAnnotation("Relational:JsonPropertyName", "scaled_hero_healing");
 
                     b.Property<int?>("ScaledTowerDamage")
                         .HasColumnType("integer")
-                        .HasColumnName("scaled_tower_damage");
+                        .HasColumnName("scaled_tower_damage")
+                        .HasAnnotation("Relational:JsonPropertyName", "scaled_tower_damage");
 
                     b.Property<int?>("TeamNumber")
                         .HasColumnType("integer")
-                        .HasColumnName("team_number");
+                        .HasColumnName("team_number")
+                        .HasAnnotation("Relational:JsonPropertyName", "team_number");
 
                     b.Property<int?>("TeamSlot")
                         .HasColumnType("integer")
-                        .HasColumnName("team_slot");
+                        .HasColumnName("team_slot")
+                        .HasAnnotation("Relational:JsonPropertyName", "team_slot");
 
                     b.Property<int?>("TowerDamage")
                         .HasColumnType("integer")
-                        .HasColumnName("tower_damage");
+                        .HasColumnName("tower_damage")
+                        .HasAnnotation("Relational:JsonPropertyName", "tower_damage");
 
                     b.Property<int?>("XpPerMin")
                         .HasColumnType("integer")
-                        .HasColumnName("xp_per_min");
-
-                    b.Property<long>("match_id")
-                        .HasColumnType("bigint");
+                        .HasColumnName("xp_per_min")
+                        .HasAnnotation("Relational:JsonPropertyName", "xp_per_min");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("match_id");
+                    b.HasIndex("MatchId");
 
                     b.ToTable("dota_match_details_players", "nadcl");
                 });
@@ -2404,24 +2498,30 @@ namespace csharp_ef_webapi.Migrations
 
                     b.Property<int>("Ability")
                         .HasColumnType("integer")
-                        .HasColumnName("ability");
+                        .HasColumnName("ability")
+                        .HasAnnotation("Relational:JsonPropertyName", "ability");
 
                     b.Property<int>("Level")
                         .HasColumnType("integer")
-                        .HasColumnName("level");
+                        .HasColumnName("level")
+                        .HasAnnotation("Relational:JsonPropertyName", "level");
+
+                    b.Property<int>("PlayerId")
+                        .HasColumnType("integer")
+                        .HasColumnName("player_id");
 
                     b.Property<int>("Time")
                         .HasColumnType("integer")
-                        .HasColumnName("time");
-
-                    b.Property<int>("player_id")
-                        .HasColumnType("integer");
+                        .HasColumnName("time")
+                        .HasAnnotation("Relational:JsonPropertyName", "time");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("player_id");
+                    b.HasIndex("PlayerId");
 
                     b.ToTable("dota_match_details_players_ability_upgrades", "nadcl");
+
+                    b.HasAnnotation("Relational:JsonPropertyName", "ability_upgrades");
                 });
 
             modelBuilder.Entity("DataAccessLibrary.Models.WebApi.MatchHistory", b =>
@@ -2429,44 +2529,53 @@ namespace csharp_ef_webapi.Migrations
                     b.Property<long>("MatchId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasColumnName("match_id");
+                        .HasColumnName("match_id")
+                        .HasAnnotation("Relational:JsonPropertyName", "match_id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("MatchId"));
 
                     b.Property<long>("DireTeamId")
                         .HasColumnType("bigint")
-                        .HasColumnName("dire_team_id");
+                        .HasColumnName("dire_team_id")
+                        .HasAnnotation("Relational:JsonPropertyName", "dire_team_id");
+
+                    b.Property<int>("LeagueId")
+                        .HasColumnType("integer")
+                        .HasColumnName("league_id");
 
                     b.Property<int>("LobbyType")
                         .HasColumnType("integer")
-                        .HasColumnName("lobby_type");
+                        .HasColumnName("lobby_type")
+                        .HasAnnotation("Relational:JsonPropertyName", "lobby_type");
 
                     b.Property<long>("MatchSeqNum")
                         .HasColumnType("bigint")
-                        .HasColumnName("match_seq_num");
+                        .HasColumnName("match_seq_num")
+                        .HasAnnotation("Relational:JsonPropertyName", "match_seq_num");
 
                     b.Property<long>("RadiantTeamId")
                         .HasColumnType("bigint")
-                        .HasColumnName("radiant_team_id");
+                        .HasColumnName("radiant_team_id")
+                        .HasAnnotation("Relational:JsonPropertyName", "radiant_team_id");
 
                     b.Property<int>("SeriesId")
                         .HasColumnType("integer")
-                        .HasColumnName("series_id");
+                        .HasColumnName("series_id")
+                        .HasAnnotation("Relational:JsonPropertyName", "series_id");
 
                     b.Property<int>("SeriesType")
                         .HasColumnType("integer")
-                        .HasColumnName("series_type");
+                        .HasColumnName("series_type")
+                        .HasAnnotation("Relational:JsonPropertyName", "series_type");
 
                     b.Property<long>("StartTime")
                         .HasColumnType("bigint")
-                        .HasColumnName("start_time");
-
-                    b.Property<int>("league_id")
-                        .HasColumnType("integer");
+                        .HasColumnName("start_time")
+                        .HasAnnotation("Relational:JsonPropertyName", "start_time");
 
                     b.HasKey("MatchId");
 
-                    b.HasIndex("league_id");
+                    b.HasIndex("LeagueId");
 
                     b.ToTable("dota_match_history", "nadcl");
                 });
@@ -2482,32 +2591,40 @@ namespace csharp_ef_webapi.Migrations
 
                     b.Property<long>("AccountId")
                         .HasColumnType("bigint")
-                        .HasColumnName("account_id");
+                        .HasColumnName("account_id")
+                        .HasAnnotation("Relational:JsonPropertyName", "account_id");
 
                     b.Property<int>("HeroId")
                         .HasColumnType("integer")
-                        .HasColumnName("hero_id");
+                        .HasColumnName("hero_id")
+                        .HasAnnotation("Relational:JsonPropertyName", "hero_id");
+
+                    b.Property<long>("MatchId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("match_id");
 
                     b.Property<int>("PlayerSlot")
                         .HasColumnType("integer")
-                        .HasColumnName("player_slot");
+                        .HasColumnName("player_slot")
+                        .HasAnnotation("Relational:JsonPropertyName", "player_slot");
 
                     b.Property<int>("TeamNumber")
                         .HasColumnType("integer")
-                        .HasColumnName("team_number");
+                        .HasColumnName("team_number")
+                        .HasAnnotation("Relational:JsonPropertyName", "team_number");
 
                     b.Property<int>("TeamSlot")
                         .HasColumnType("integer")
-                        .HasColumnName("team_slot");
-
-                    b.Property<long>("match_id")
-                        .HasColumnType("bigint");
+                        .HasColumnName("team_slot")
+                        .HasAnnotation("Relational:JsonPropertyName", "team_slot");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("match_id");
+                    b.HasIndex("MatchId");
 
                     b.ToTable("dota_match_history_players", "nadcl");
+
+                    b.HasAnnotation("Relational:JsonPropertyName", "players");
                 });
 
             modelBuilder.Entity("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch", b =>
@@ -2645,7 +2762,7 @@ namespace csharp_ef_webapi.Migrations
                 {
                     b.HasOne("DataAccessLibrary.Models.Fantasy.FantasyLeague", "FantasyLeague")
                         .WithMany("FantasyDrafts")
-                        .HasForeignKey("fantasy_league_id")
+                        .HasForeignKey("FantasyLeagueId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -2662,7 +2779,9 @@ namespace csharp_ef_webapi.Migrations
 
                     b.HasOne("DataAccessLibrary.Models.Fantasy.FantasyPlayer", "FantasyPlayer")
                         .WithMany()
-                        .HasForeignKey("fantasy_player_id");
+                        .HasForeignKey("FantasyPlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("FantasyPlayer");
                 });
@@ -2671,7 +2790,7 @@ namespace csharp_ef_webapi.Migrations
                 {
                     b.HasOne("DataAccessLibrary.Models.ProMetadata.League", "League")
                         .WithMany("FantasyLeagues")
-                        .HasForeignKey("league_id")
+                        .HasForeignKey("LeagueId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -2682,7 +2801,7 @@ namespace csharp_ef_webapi.Migrations
                 {
                     b.HasOne("DataAccessLibrary.Models.Fantasy.FantasyLeague", "FantasyLeague")
                         .WithOne("FantasyLeagueWeight")
-                        .HasForeignKey("DataAccessLibrary.Models.Fantasy.FantasyLeagueWeight", "fantasy_league_id")
+                        .HasForeignKey("DataAccessLibrary.Models.Fantasy.FantasyLeagueWeight", "FantasyLeagueId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -2695,15 +2814,15 @@ namespace csharp_ef_webapi.Migrations
                         .WithMany()
                         .HasForeignKey("DireTeamId");
 
+                    b.HasOne("DataAccessLibrary.Models.ProMetadata.League", "League")
+                        .WithMany()
+                        .HasForeignKey("LeagueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("DataAccessLibrary.Models.ProMetadata.Team", "RadiantTeam")
                         .WithMany()
                         .HasForeignKey("RadiantTeamId");
-
-                    b.HasOne("DataAccessLibrary.Models.ProMetadata.League", "League")
-                        .WithMany()
-                        .HasForeignKey("league_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.Navigation("DireTeam");
 
@@ -2714,26 +2833,27 @@ namespace csharp_ef_webapi.Migrations
 
             modelBuilder.Entity("DataAccessLibrary.Models.Fantasy.FantasyMatchPlayer", b =>
                 {
-                    b.HasOne("DataAccessLibrary.Models.ProMetadata.Hero", "Hero")
-                        .WithMany()
-                        .HasForeignKey("HeroId");
-
                     b.HasOne("DataAccessLibrary.Models.ProMetadata.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("account_id")
+                        .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("DataAccessLibrary.Models.Fantasy.FantasyMatch", "Match")
                         .WithMany("Players")
-                        .HasForeignKey("match_id")
+                        .HasForeignKey("FantasyMatchId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("DataAccessLibrary.Models.ProMetadata.Hero", "Hero")
+                        .WithMany()
+                        .HasForeignKey("HeroId");
+
                     b.HasOne("DataAccessLibrary.Models.ProMetadata.Team", "Team")
                         .WithMany()
-                        .HasForeignKey("team_id")
-                        .OnDelete(DeleteBehavior.ClientNoAction);
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Account");
 
@@ -2759,20 +2879,20 @@ namespace csharp_ef_webapi.Migrations
                 {
                     b.HasOne("DataAccessLibrary.Models.ProMetadata.Account", "DotaAccount")
                         .WithMany()
-                        .HasForeignKey("dota_account_id")
+                        .HasForeignKey("DotaAccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("DataAccessLibrary.Models.Fantasy.FantasyLeague", "FantasyLeague")
                         .WithMany("FantasyPlayers")
-                        .HasForeignKey("fantasy_league_id")
+                        .HasForeignKey("FantasyLeagueId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("DataAccessLibrary.Models.ProMetadata.Team", "Team")
                         .WithMany()
-                        .HasForeignKey("team_id")
-                        .OnDelete(DeleteBehavior.ClientNoAction)
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("DotaAccount");
@@ -2785,14 +2905,14 @@ namespace csharp_ef_webapi.Migrations
             modelBuilder.Entity("DataAccessLibrary.Models.Fantasy.FantasyPrivateLeaguePlayer", b =>
                 {
                     b.HasOne("DataAccessLibrary.Models.Discord.DiscordUser", "DiscordUser")
-                        .WithOne()
-                        .HasForeignKey("DataAccessLibrary.Models.Fantasy.FantasyPrivateLeaguePlayer", "discord_user_id")
+                        .WithMany()
+                        .HasForeignKey("DiscordUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("DataAccessLibrary.Models.Fantasy.FantasyLeague", "FantasyLeague")
                         .WithMany("FantasyPrivateLeaguePlayers")
-                        .HasForeignKey("fantasy_league_id")
+                        .HasForeignKey("FantasyLeagueId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -2844,7 +2964,7 @@ namespace csharp_ef_webapi.Migrations
                 {
                     b.HasOne("DataAccessLibrary.Models.ProMetadata.League", "League")
                         .WithMany("MatchMetadatas")
-                        .HasForeignKey("league_id")
+                        .HasForeignKey("LeagueId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -2928,7 +3048,7 @@ namespace csharp_ef_webapi.Migrations
                 {
                     b.HasOne("DataAccessLibrary.Models.WebApi.MatchDetail", "Match")
                         .WithMany("PicksBans")
-                        .HasForeignKey("match_id")
+                        .HasForeignKey("MatchId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -2939,7 +3059,7 @@ namespace csharp_ef_webapi.Migrations
                 {
                     b.HasOne("DataAccessLibrary.Models.WebApi.MatchDetail", "Match")
                         .WithMany("Players")
-                        .HasForeignKey("match_id")
+                        .HasForeignKey("MatchId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -2950,7 +3070,7 @@ namespace csharp_ef_webapi.Migrations
                 {
                     b.HasOne("DataAccessLibrary.Models.WebApi.MatchDetailsPlayer", "Player")
                         .WithMany("AbilityUpgrades")
-                        .HasForeignKey("player_id")
+                        .HasForeignKey("PlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -2961,7 +3081,7 @@ namespace csharp_ef_webapi.Migrations
                 {
                     b.HasOne("DataAccessLibrary.Models.ProMetadata.League", "League")
                         .WithMany("MatchHistories")
-                        .HasForeignKey("league_id")
+                        .HasForeignKey("LeagueId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -2972,7 +3092,7 @@ namespace csharp_ef_webapi.Migrations
                 {
                     b.HasOne("DataAccessLibrary.Models.WebApi.MatchHistory", "Match")
                         .WithMany("Players")
-                        .HasForeignKey("match_id")
+                        .HasForeignKey("MatchId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -2981,7 +3101,7 @@ namespace csharp_ef_webapi.Migrations
 
             modelBuilder.Entity("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch", b =>
                 {
-                    b.OwnsMany("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player", "players", b1 =>
+                    b.OwnsMany("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch.players#SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player", "players", b1 =>
                         {
                             b1.Property<int>("Id")
                                 .ValueGeneratedOnAdd()
@@ -3202,7 +3322,7 @@ namespace csharp_ef_webapi.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("MatchId");
 
-                            b1.OwnsMany("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player+HeroDamageReceived", "hero_damage_dealt", b2 =>
+                            b1.OwnsMany("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch.players#SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player.hero_damage_dealt#SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player+HeroDamageReceived", "hero_damage_dealt", b2 =>
                                 {
                                     b2.Property<int>("Id")
                                         .ValueGeneratedOnAdd()
@@ -3232,7 +3352,7 @@ namespace csharp_ef_webapi.Migrations
                                         .HasForeignKey("MatchPlayerId");
                                 });
 
-                            b1.OwnsMany("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player+HeroDamageReceived", "hero_damage_received", b2 =>
+                            b1.OwnsMany("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch.players#SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player.hero_damage_received#SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player+HeroDamageReceived", "hero_damage_received", b2 =>
                                 {
                                     b2.Property<int>("Id")
                                         .ValueGeneratedOnAdd()

@@ -8,6 +8,7 @@ public interface IProMetadataRepository
     Task<League?> GetLeagueAsync(int LeagueId);
     Task<List<League>> GetLeaguesAsync(bool? IsActive);
     Task AddLeagueAsync(League newLeague);
+    Task UpdateLeagueAsync(League updateLeague);
     Task DeleteLeagueAsync(League deleteLeague);
 
     // Teams

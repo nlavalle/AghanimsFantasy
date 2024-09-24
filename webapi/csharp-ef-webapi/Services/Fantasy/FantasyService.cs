@@ -25,8 +25,6 @@ public class FantasyService
         _fantasyDraftRepository = fantasyDraftRepository;
         _fantasyPlayerRepository = fantasyPlayerRepository;
         _fantasyRepository = fantasyRepository;
-
-        _logger.LogInformation("Fantasy Service constructed");
     }
 
     public async Task<FantasyPlayer?> GetFantasyPlayerAsync(DiscordUser? siteUser, int fantasyPlayerId)
@@ -84,8 +82,14 @@ public class FantasyService
 
     public async Task<FantasyDraft> UpdateFantasyDraft(DiscordUser siteUser, FantasyDraft fantasyDraft)
     {
-        FantasyDraft? existingUserDraft = await _fantasyDraftRepository.GetByUserFantasyLeague(fantasyDraft.FantasyLeague, siteUser);
-        var draftLockedDate = await _fantasyLeagueRepository.GetLeagueLockedDateAsync(fantasyDraft.FantasyLeague.Id);
+        FantasyLeague? fantasyLeague = await _fantasyLeagueRepository.GetByIdAsync(fantasyDraft.FantasyLeagueId);
+        if (fantasyLeague == null)
+        {
+            throw new ArgumentException("Draft created for invalid Fantasy League Id");
+        }
+
+        FantasyDraft? existingUserDraft = await _fantasyDraftRepository.GetByUserFantasyLeague(fantasyLeague, siteUser);
+        var draftLockedDate = await _fantasyLeagueRepository.GetLeagueLockedDateAsync(fantasyLeague.Id);
         if (DateTime.UtcNow > draftLockedDate)
         {
             // TODO: Set this up so that a user can draft late, but then the points only count starting from that time
@@ -94,7 +98,7 @@ public class FantasyService
         }
 
         // Ensure player has posted a draft that is one of each team position, if there's 2 of the same position then reject it as a bad request
-        var fantasyPlayers = await _fantasyPlayerRepository.GetFantasyLeaguePlayersAsync(fantasyDraft.FantasyLeague);
+        var fantasyPlayers = await _fantasyPlayerRepository.GetFantasyLeaguePlayersAsync(fantasyLeague);
         if (fantasyPlayers.Where(fp => fantasyDraft.DraftPickPlayers.Where(dpp => dpp.FantasyPlayer != null).Any(dpp => dpp.FantasyPlayer!.Id == fp.Id)).GroupBy(fp => fp.TeamPosition).Where(grp => grp.Count() > 1).Count() > 0)
         {
             throw new ArgumentException("Can only draft one of each team position");
@@ -245,6 +249,7 @@ public class FantasyService
                     Id = lb.FantasyDraft.Id,
                     DraftCreated = lb.FantasyDraft.DraftCreated,
                     DraftLastUpdated = lb.FantasyDraft.DraftLastUpdated,
+                    FantasyLeagueId = lb.FantasyDraft.FantasyLeagueId,
                     FantasyLeague = lb.FantasyDraft.FantasyLeague,
                     DraftPickPlayers = lb.FantasyDraft.DraftPickPlayers
                 },

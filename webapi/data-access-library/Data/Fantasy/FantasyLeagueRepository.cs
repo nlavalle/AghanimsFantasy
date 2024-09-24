@@ -26,7 +26,10 @@ public class FantasyLeagueRepository : IFantasyLeagueRepository
         return await _dbContext.FantasyLeagues
                 .Include(fl => fl.FantasyPrivateLeaguePlayers)
                 .Include(fl => fl.League)
-                .Where(fl => !fl.IsPrivate || (user != null && fl.FantasyPrivateLeaguePlayers.Any(p => p.DiscordUser == user)))
+                .Where(fl =>
+                    !fl.IsPrivate ||
+                    (user != null && fl.FantasyPrivateLeaguePlayers.Any(p => p.DiscordUser == user)) ||
+                    (user != null && user.IsAdmin))
                 .ToListAsync();
     }
 
@@ -35,7 +38,11 @@ public class FantasyLeagueRepository : IFantasyLeagueRepository
         return await _dbContext.FantasyLeagues
                 .Include(fl => fl.FantasyPrivateLeaguePlayers)
                 .Include(fl => fl.League)
-                .Where(fl => !fl.IsPrivate || (user != null && fl.FantasyPrivateLeaguePlayers.Any(p => p.DiscordUser == user)))
+                .Where(fl =>
+                    !fl.IsPrivate ||
+                    (user != null && fl.FantasyPrivateLeaguePlayers.Any(p => p.DiscordUser == user)) ||
+                    (user != null && user.IsAdmin)
+                )
                 .Where(fl => fl.Id == FantasyLeagueId)
                 .FirstOrDefaultAsync();
     }

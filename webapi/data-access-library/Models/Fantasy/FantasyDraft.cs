@@ -2,6 +2,7 @@ namespace DataAccessLibrary.Models.Fantasy;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 [Table("dota_fantasy_drafts")]
 public class FantasyDraft
@@ -9,7 +10,13 @@ public class FantasyDraft
     [Key]
     [Column("id")]
     public long Id { get; set; }
-    public required FantasyLeague FantasyLeague { get; set; }
+
+    [ForeignKey("FantasyLeague")]
+    [Column("fantasy_league_id")]
+    public required int FantasyLeagueId { get; set; }
+
+    [JsonIgnore]
+    public FantasyLeague? FantasyLeague { get; set; }
 
     [Column("discord_account_id")]
     public long? DiscordAccountId { get; set; }

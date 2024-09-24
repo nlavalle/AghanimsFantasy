@@ -2,8 +2,8 @@ namespace DataAccessLibrary.Models.Fantasy;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using DataAccessLibrary.Models.ProMetadata;
-using Newtonsoft.Json;
 
 [Table("fantasy_match_player")]
 public class FantasyMatchPlayer
@@ -13,11 +13,19 @@ public class FantasyMatchPlayer
     [JsonIgnore]
     public int Id { get; set; }
 
-    [JsonIgnore]
-    public required FantasyMatch Match { get; set; }
+    [ForeignKey("FantasyMatch")]
+    [Column("match_id")]
+    public required long FantasyMatchId { get; set; }
 
-    [JsonProperty("account_id")]
-    public required Account Account { get; set; }
+    [JsonIgnore]
+    public FantasyMatch? Match { get; set; }
+
+    [ForeignKey("Account")]
+    [Column("account_id")]
+    public required long AccountId { get; set; }
+
+    [JsonIgnore]
+    public Account? Account { get; set; }
     public string AccountFormatted
     {
         get
@@ -26,7 +34,11 @@ public class FantasyMatchPlayer
         }
     }
 
-    [JsonProperty("team_id")]
+    [ForeignKey("Team")]
+    [Column("team_id")]
+    public required long TeamId { get; set; }
+
+    [JsonIgnore]
     public Team? Team { get; set; }
     public string TeamFormatted
     {
@@ -37,15 +49,15 @@ public class FantasyMatchPlayer
     }
 
     [Column("match_detail_player_parsed")]
-    [JsonProperty("match_detail_player_parsed")]
+    [JsonPropertyName("match_detail_player_parsed")]
     public bool MatchDetailPlayerParsed { get; set; }
 
     [Column("gc_metadata_player_parsed")]
-    [JsonProperty("gc_metadata_player_parsed")]
+    [JsonPropertyName("gc_metadata_player_parsed")]
     public bool GcMetadataPlayerParsed { get; set; }
 
     [Column("dota_team_side")]
-    [JsonProperty("dota_team_side")]
+    [JsonPropertyName("dota_team_side")]
     public bool DotaTeamSide { get; set; }
     public string DotaTeamSideFormatted
     {
@@ -56,7 +68,7 @@ public class FantasyMatchPlayer
     }
 
     [Column("player_slot")]
-    [JsonProperty("player_slot")]
+    [JsonPropertyName("player_slot")]
     public int PlayerSlot { get; set; }
     public string PlayerSlotFormatted
     {
@@ -90,7 +102,7 @@ public class FantasyMatchPlayer
         }
     }
 
-    [JsonProperty("hero_id")]
+    [JsonPropertyName("hero_id")]
     public Hero? Hero { get; set; }
     public string HeroFormatted
     {
@@ -101,79 +113,79 @@ public class FantasyMatchPlayer
     }
 
     [Column("kills")]
-    [JsonProperty("kills")]
+    [JsonPropertyName("kills")]
     public int? Kills { get; set; }
 
     [Column("deaths")]
-    [JsonProperty("deaths")]
+    [JsonPropertyName("deaths")]
     public int? Deaths { get; set; }
 
     [Column("assists")]
-    [JsonProperty("assists")]
+    [JsonPropertyName("assists")]
     public int? Assists { get; set; }
 
     [Column("last_hits")]
-    [JsonProperty("last_hits")]
+    [JsonPropertyName("last_hits")]
     public int? LastHits { get; set; }
 
     [Column("denies")]
-    [JsonProperty("denies")]
+    [JsonPropertyName("denies")]
     public int? Denies { get; set; }
 
     [Column("gold_per_min")]
-    [JsonProperty("gold_per_min")]
+    [JsonPropertyName("gold_per_min")]
     public int? GoldPerMin { get; set; }
 
     [Column("xp_per_min")]
-    [JsonProperty("xp_per_min")]
+    [JsonPropertyName("xp_per_min")]
     public int? XpPerMin { get; set; }
 
     [Column("support_gold_spent")]
-    [JsonProperty("support_gold_spent")]
+    [JsonPropertyName("support_gold_spent")]
     public int? SupportGoldSpent { get; set; }
 
     [Column("observer_wards_placed")]
-    [JsonProperty("observer_wards_placed")]
+    [JsonPropertyName("observer_wards_placed")]
     public int? ObserverWardsPlaced { get; set; }
 
     [Column("sentry_wards_placed")]
-    [JsonProperty("sentry_wards_placed")]
+    [JsonPropertyName("sentry_wards_placed")]
     public int? SentyWardsPlaced { get; set; }
 
     [Column("dewards")]
-    [JsonProperty("dewards")]
+    [JsonPropertyName("dewards")]
     public int? Dewards { get; set; }
 
     [Column("camps_stacked")]
-    [JsonProperty("camps_stacked")]
+    [JsonPropertyName("camps_stacked")]
     public int? CampsStacked { get; set; }
 
     [Column("stun_duration")]
-    [JsonProperty("stun_duration")]
+    [JsonPropertyName("stun_duration")]
     public float? StunDuration { get; set; }
 
     [Column("level")]
-    [JsonProperty("level")]
+    [JsonPropertyName("level")]
     public int? Level { get; set; }
 
     [Column("net_worth")]
-    [JsonProperty("net_worth")]
+    [JsonPropertyName("net_worth")]
     public long? Networth { get; set; }
 
     [Column("hero_damage")]
-    [JsonProperty("hero_damage")]
+    [JsonPropertyName("hero_damage")]
     public int? HeroDamage { get; set; }
 
     [Column("tower_damage")]
-    [JsonProperty("tower_damage")]
+    [JsonPropertyName("tower_damage")]
     public int? TowerDamage { get; set; }
 
     [Column("hero_healing")]
-    [JsonProperty("hero_healing")]
+    [JsonPropertyName("hero_healing")]
     public int? HeroHealing { get; set; }
 
     [Column("gold")]
-    [JsonProperty("gold")]
+    [JsonPropertyName("gold")]
     public int? Gold { get; set; }
 
     // Match Metadata

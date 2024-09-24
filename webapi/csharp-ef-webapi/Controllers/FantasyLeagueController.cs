@@ -200,7 +200,7 @@ namespace csharp_ef_webapi.Controllers
                 }
 
                 await _fantasyServiceAdmin.AddFantasyLeagueAsync(discordUser, fantasyLeague);
-                return CreatedAtAction("GetFantasyLeague", new { id = fantasyLeague.Id }, fantasyLeague);
+                return CreatedAtAction("GetFantasyLeague", new { fantasyLeagueId = fantasyLeague.Id }, fantasyLeague);
             }
             catch (UnauthorizedAccessException)
             {

@@ -31,7 +31,12 @@ public class FantasyDraftRepository : IFantasyDraftRepository
         if (updateFantasyDraftPlayer == null)
         {
             // Create FantasyDraftPlayer join table record if it doesn't exist
-            updateFantasyDraftPlayer = new FantasyDraftPlayer() { FantasyPlayer = fantasyPlayerPick, DraftOrder = fantasyPlayerPick.TeamPosition };
+            updateFantasyDraftPlayer = new FantasyDraftPlayer()
+            {
+                FantasyPlayerId = fantasyPlayerPick.Id,
+                FantasyPlayer = fantasyPlayerPick,
+                DraftOrder = fantasyPlayerPick.TeamPosition
+            };
         }
         else
         {
@@ -96,7 +101,7 @@ public class FantasyDraftRepository : IFantasyDraftRepository
 
     public async Task<IEnumerable<FantasyPlayerPoints>> FantasyPlayerPointsAsync(FantasyDraft FantasyDraft, int limit)
     {
-        _logger.LogInformation($"Fetching Fantasy Points for Fantasy League Id: {FantasyDraft.FantasyLeague.Id}");
+        _logger.LogInformation($"Fetching Fantasy Points for Fantasy League Id: {FantasyDraft.FantasyLeagueId}");
 
         List<FantasyPlayer> fantasyDraftPlayers = FantasyDraft.DraftPickPlayers
             .Where(dpp => dpp.FantasyPlayer != null)
@@ -110,10 +115,10 @@ public class FantasyDraftRepository : IFantasyDraftRepository
                 .ThenInclude(fp => fp.Team)
             .Include(fppv => fppv.FantasyMatchPlayer)
                 .ThenInclude(fmp => fmp!.Hero)
-            .Where(fpp => fpp.FantasyLeagueId == FantasyDraft.FantasyLeague.Id)
+            .Where(fpp => fpp.FantasyLeagueId == FantasyDraft.FantasyLeagueId)
             .Where(fpp => fantasyDraftPlayers.Contains(fpp.FantasyPlayer))
             .Where(fpp => fpp.FantasyMatchPlayer != null)
-            .OrderByDescending(fpp => fpp.FantasyMatchPlayer!.Match.MatchId)
+            .OrderByDescending(fpp => fpp.FantasyMatchPlayer!.FantasyMatchId)
             .ThenBy(fpp => fpp.FantasyMatchPlayer!.Team!.Name)
             .ThenBy(fpp => fpp.FantasyPlayer.TeamPosition)
             .Take(limit);
@@ -125,9 +130,11 @@ public class FantasyDraftRepository : IFantasyDraftRepository
 
     public async Task<FantasyDraftPointTotals?> DraftPointTotalAsync(FantasyDraft fantasyDraft)
     {
-        _logger.LogInformation($"Fetching Fantasy Points for LeagueID: {fantasyDraft.FantasyLeague.Id}");
+        _logger.LogInformation($"Fetching Fantasy Points for LeagueID: {fantasyDraft.FantasyLeagueId}");
 
-        var playerTotals = await FantasyPlayerPointTotalsByFantasyLeagueAsync(fantasyDraft.FantasyLeague);
+        var fantasyLeague = fantasyDraft.FantasyLeague ?? await _dbContext.FantasyLeagues.FindAsync(fantasyDraft.FantasyLeagueId) ?? throw new ArgumentException("Fantasy Draft has invalid fantasy league ID");
+
+        var playerTotals = await FantasyPlayerPointTotalsByFantasyLeagueAsync(fantasyLeague);
 
         var fantasyDraftPoints = new FantasyDraftPointTotals
         {
@@ -152,7 +159,7 @@ public class FantasyDraftRepository : IFantasyDraftRepository
         var playerTotals = await FantasyPlayerPointTotalsByFantasyLeagueAsync(FantasyLeague);
 
         var fantasyDraftPointsByLeagueQuery = await _dbContext.FantasyDrafts
-            .Where(fl => fl.FantasyLeague.Id == FantasyLeague.Id)
+            .Where(fl => fl.FantasyLeagueId == FantasyLeague.Id)
             .ToListAsync();
 
         var fantasyDraftPoints = fantasyDraftPointsByLeagueQuery
@@ -180,7 +187,7 @@ public class FantasyDraftRepository : IFantasyDraftRepository
 
         var userFantasyDraftQuery = _dbContext.FantasyDrafts
                     .Include(fd => fd.DraftPickPlayers)
-                    .Where(fd => fd.FantasyLeague.Id == fantasyLeague.Id && fd.DiscordAccountId == user.Id);
+                    .Where(fd => fd.FantasyLeagueId == fantasyLeague.Id && fd.DiscordAccountId == user.Id);
 
         return await userFantasyDraftQuery.FirstOrDefaultAsync();
     }

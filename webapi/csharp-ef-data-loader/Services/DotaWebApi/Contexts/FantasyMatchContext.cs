@@ -64,6 +64,7 @@ internal class FantasyMatchContext : DotaOperationContext
                         FirstBloodTime = null,
                         GameMode = null,
                         GcMetadataParsed = false,
+                        LeagueId = newMatchHistory.LeagueId,
                         League = newMatchHistory.League,
                         LobbyType = newMatchHistory.LobbyType,
                         MatchDetailParsed = false,
@@ -170,6 +171,7 @@ internal class FantasyMatchContext : DotaOperationContext
 
                     FantasyMatchPlayer newPlayer = new FantasyMatchPlayer()
                     {
+                        AccountId = accountLookup.Id,
                         Account = accountLookup,
                         Assists = (int)gcMatchDetailPlayer.Item2.assists,
                         // CampsStacked = ,
@@ -186,6 +188,7 @@ internal class FantasyMatchContext : DotaOperationContext
                         LastHits = (int)gcMatchDetailPlayer.Item2.last_hits,
                         Level = (int)gcMatchDetailPlayer.Item2.level,
                         MatchDetailPlayerParsed = true,
+                        FantasyMatchId = fantasyMatch.MatchId,
                         Match = fantasyMatch,
                         Networth = (int)gcMatchDetailPlayer.Item2.net_worth,
                         // ObserverWardsPlaced = ,
@@ -193,6 +196,7 @@ internal class FantasyMatchContext : DotaOperationContext
                         // SentyWardsPlaced = ,
                         // StunDuration = ,
                         SupportGoldSpent = (int)gcMatchDetailPlayer.Item2.support_gold,
+                        TeamId = teamLookup.Id,
                         Team = teamLookup,
                         TowerDamage = (int)gcMatchDetailPlayer.Item2.tower_damage,
                         XpPerMin = (int)gcMatchDetailPlayer.Item2.xp_per_min,

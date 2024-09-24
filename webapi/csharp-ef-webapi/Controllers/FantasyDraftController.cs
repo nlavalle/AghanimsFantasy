@@ -23,7 +23,7 @@ namespace csharp_ef_webapi.Controllers
             _fantasyService = fantasyService;
         }
 
-        // GET: api/draft/5
+        // GET: api/fantasydraft/5
         [Authorize]
         [HttpGet("{fantasyLeagueId}")]
         public async Task<IActionResult> GetUserDraft(int fantasyLeagueId)
@@ -45,7 +45,7 @@ namespace csharp_ef_webapi.Controllers
             }
         }
 
-        // GET: api/draft/5/points
+        // GET: api/fantasydraft/5/points
         [Authorize]
         [HttpGet("{fantasyLeagueId}/points")]
         public async Task<IActionResult> GetUserDraftFantasyPoints(int fantasyLeagueId)
@@ -73,7 +73,7 @@ namespace csharp_ef_webapi.Controllers
             }
         }
 
-        // GET: api/draft/5/matches/points
+        // GET: api/fantasydraft/5/matches/points
         [Authorize]
         [HttpGet("{fantasyLeagueId}/matches/points")]
         public async Task<ActionResult<List<FantasyPlayerPoints>>> GetDraftFantasyPlayersPointsByMatch(int? fantasyLeagueId, [FromQuery] int? limit)
@@ -104,7 +104,7 @@ namespace csharp_ef_webapi.Controllers
             }
         }
 
-        // POST: api/draft
+        // POST: api/fantasydraft
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [Authorize]
         [HttpPost("")]
@@ -120,7 +120,7 @@ namespace csharp_ef_webapi.Controllers
                 }
 
                 var fantasyDraftPostResponse = await _fantasyService.UpdateFantasyDraft(discordUser, fantasyDraft);
-                return CreatedAtAction(nameof(GetUserDraft), new { fantasyLeagueId = fantasyDraft.FantasyLeague.Id }, fantasyDraftPostResponse);
+                return CreatedAtAction(nameof(GetUserDraft), new { fantasyLeagueId = fantasyDraft.FantasyLeagueId }, fantasyDraftPostResponse);
             }
             catch (ArgumentException ex)
             {

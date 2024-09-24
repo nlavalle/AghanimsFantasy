@@ -25,7 +25,7 @@ public class FantasyMatchPlayerRepository : IFantasyMatchPlayerRepository
         _logger.LogInformation($"Getting Fantasy Match Players not GC Match Detail Parsed");
 
         var matchDetailsToParse = _dbContext.FantasyMatchPlayers.Where(
-                fm => !fm.GcMetadataPlayerParsed && _dbContext.GcMatchMetadata.Any(md => md.MatchId == fm.Match.MatchId))
+                fm => !fm.GcMetadataPlayerParsed && _dbContext.GcMatchMetadata.Any(md => md.MatchId == fm.FantasyMatchId))
                 .Take(takeAmount);
 
         _logger.LogDebug($"GetFantasyMatchPlayersNotGcDetailParsed SQL Query: {matchDetailsToParse.ToQueryString()}");
@@ -49,7 +49,7 @@ public class FantasyMatchPlayerRepository : IFantasyMatchPlayerRepository
 
     public async Task AddAsync(FantasyMatchPlayer addFantasyMatchPlayer)
     {
-        _logger.LogInformation($"Adding new Fantasy Match Player {addFantasyMatchPlayer.Account.Name} for Match {addFantasyMatchPlayer.Match.MatchId}");
+        _logger.LogInformation($"Adding new Fantasy Match Player {addFantasyMatchPlayer.AccountId} for Match {addFantasyMatchPlayer.FantasyMatchId}");
 
         await _dbContext.FantasyMatchPlayers.AddAsync(addFantasyMatchPlayer);
         await _dbContext.SaveChangesAsync();

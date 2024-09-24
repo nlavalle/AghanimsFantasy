@@ -36,7 +36,7 @@ public class FantasyRepository : IFantasyRepository
             .Where(fpp => fpp.FantasyLeagueId == FantasyLeagueId)
             .Where(fpp => fpp.FantasyMatchPlayer != null)
             .Where(fpp => fpp.FantasyMatchPlayer!.GcMetadataPlayerParsed && fpp.FantasyMatchPlayer!.MatchDetailPlayerParsed)
-            .OrderByDescending(fpp => fpp.FantasyMatchPlayer!.Match.MatchId)
+            .OrderByDescending(fpp => fpp.FantasyMatchPlayer!.FantasyMatchId)
             .ThenBy(fpp => fpp.FantasyMatchPlayer!.Team!.Name)
             .ThenBy(fpp => fpp.FantasyPlayer.TeamPosition)
             .Take(limit);

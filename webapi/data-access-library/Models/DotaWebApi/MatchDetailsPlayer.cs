@@ -2,7 +2,7 @@ namespace DataAccessLibrary.Models.WebApi;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 // https://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/v1?
 [Table("dota_match_details_players")]
@@ -13,153 +13,157 @@ public class MatchDetailsPlayer
     [JsonIgnore]
     public int Id { get; set; }
 
-    [System.Text.Json.Serialization.JsonIgnore]
-    public MatchDetail Match { get; set; } = null!;
+    [ForeignKey("Match")]
+    [Column("match_id")]
+    public required long MatchId { get; set; }
+
+    [JsonIgnore]
+    public MatchDetail? Match { get; set; }
 
     [Column("account_id")]
-    [JsonProperty("account_id")]
+    [JsonPropertyName("account_id")]
     public long AccountId { get; set; }
 
     [Column("player_slot")]
-    [JsonProperty("player_slot")]
+    [JsonPropertyName("player_slot")]
     public int PlayerSlot { get; set; }
 
     [Column("team_number")]
-    [JsonProperty("team_number")]
+    [JsonPropertyName("team_number")]
     public int? TeamNumber { get; set; }
 
     [Column("team_slot")]
-    [JsonProperty("team_slot")]
+    [JsonPropertyName("team_slot")]
     public int? TeamSlot { get; set; }
 
     [Column("hero_id")]
-    [JsonProperty("hero_id")]
+    [JsonPropertyName("hero_id")]
     public int HeroId { get; set; }
 
     [Column("item_0")]
-    [JsonProperty("item_0")]
+    [JsonPropertyName("item_0")]
     public int? Item0 { get; set; }
 
     [Column("item_1")]
-    [JsonProperty("item_1")]
+    [JsonPropertyName("item_1")]
     public int? Item1 { get; set; }
 
     [Column("item_2")]
-    [JsonProperty("item_2")]
+    [JsonPropertyName("item_2")]
     public int? Item2 { get; set; }
 
     [Column("item_3")]
-    [JsonProperty("item_3")]
+    [JsonPropertyName("item_3")]
     public int? Item3 { get; set; }
 
     [Column("item_4")]
-    [JsonProperty("item_4")]
+    [JsonPropertyName("item_4")]
     public int? Item4 { get; set; }
 
     [Column("item_5")]
-    [JsonProperty("item_5")]
+    [JsonPropertyName("item_5")]
     public int? Item5 { get; set; }
 
     [Column("backpack_0")]
-    [JsonProperty("backpack_0")]
+    [JsonPropertyName("backpack_0")]
     public int? Backpack0 { get; set; }
 
     [Column("backpack_1")]
-    [JsonProperty("backpack_1")]
+    [JsonPropertyName("backpack_1")]
     public int? Backpack1 { get; set; }
 
     [Column("backpack_2")]
-    [JsonProperty("backpack_2")]
+    [JsonPropertyName("backpack_2")]
     public int? Backpack2 { get; set; }
 
     [Column("item_neutral")]
-    [JsonProperty("item_neutral")]
+    [JsonPropertyName("item_neutral")]
     public int? ItemNeutral { get; set; }
 
     [Column("kills")]
-    [JsonProperty("kills")]
+    [JsonPropertyName("kills")]
     public int? Kills { get; set; }
 
     [Column("deaths")]
-    [JsonProperty("deaths")]
+    [JsonPropertyName("deaths")]
     public int? Deaths { get; set; }
 
     [Column("assists")]
-    [JsonProperty("assists")]
+    [JsonPropertyName("assists")]
     public int? Assists { get; set; }
 
     [Column("leaver_status")]
-    [JsonProperty("leaver_status")]
+    [JsonPropertyName("leaver_status")]
     public int? LeaverStatus { get; set; }
 
     [Column("last_hits")]
-    [JsonProperty("last_hits")]
+    [JsonPropertyName("last_hits")]
     public int? LastHits { get; set; }
 
     [Column("denies")]
-    [JsonProperty("denies")]
+    [JsonPropertyName("denies")]
     public int? Denies { get; set; }
 
     [Column("gold_per_min")]
-    [JsonProperty("gold_per_min")]
+    [JsonPropertyName("gold_per_min")]
     public int? GoldPerMin { get; set; }
 
     [Column("xp_per_min")]
-    [JsonProperty("xp_per_min")]
+    [JsonPropertyName("xp_per_min")]
     public int? XpPerMin { get; set; }
 
     [Column("level")]
-    [JsonProperty("level")]
+    [JsonPropertyName("level")]
     public int? Level { get; set; }
 
     [Column("net_worth")]
-    [JsonProperty("net_worth")]
+    [JsonPropertyName("net_worth")]
     public long? Networth { get; set; }
 
     [Column("aghanims_scepter")]
-    [JsonProperty("aghanims_scepter")]
+    [JsonPropertyName("aghanims_scepter")]
     public int? AghanimsScepter { get; set; }
 
     [Column("aghanims_shard")]
-    [JsonProperty("aghanims_shard")]
+    [JsonPropertyName("aghanims_shard")]
     public int? AghanimsShard { get; set; }
 
     [Column("moonshard")]
-    [JsonProperty("moonshard")]
+    [JsonPropertyName("moonshard")]
     public int? Moonshard { get; set; }
 
     [Column("hero_damage")]
-    [JsonProperty("hero_damage")]
+    [JsonPropertyName("hero_damage")]
     public int? HeroDamage { get; set; }
 
     [Column("tower_damage")]
-    [JsonProperty("tower_damage")]
+    [JsonPropertyName("tower_damage")]
     public int? TowerDamage { get; set; }
 
     [Column("hero_healing")]
-    [JsonProperty("hero_healing")]
+    [JsonPropertyName("hero_healing")]
     public int? HeroHealing { get; set; }
 
     [Column("gold")]
-    [JsonProperty("gold")]
+    [JsonPropertyName("gold")]
     public int? Gold { get; set; }
 
     [Column("gold_spent")]
-    [JsonProperty("gold_spent")]
+    [JsonPropertyName("gold_spent")]
     public int? GoldSpent { get; set; }
 
     [Column("scaled_hero_damage")]
-    [JsonProperty("scaled_hero_damage")]
+    [JsonPropertyName("scaled_hero_damage")]
     public int? ScaledHeroDamage { get; set; }
 
     [Column("scaled_tower_damage")]
-    [JsonProperty("scaled_tower_damage")]
+    [JsonPropertyName("scaled_tower_damage")]
     public int? ScaledTowerDamage { get; set; }
 
     [Column("scaled_hero_healing")]
-    [JsonProperty("scaled_hero_healing")]
+    [JsonPropertyName("scaled_hero_healing")]
     public int? ScaledHeroHealing { get; set; }
 
-    [JsonProperty("ability_upgrades")]
+    [JsonPropertyName("ability_upgrades")]
     public List<MatchDetailsPlayersAbilityUpgrade> AbilityUpgrades { get; set; } = new List<MatchDetailsPlayersAbilityUpgrade>();
 }

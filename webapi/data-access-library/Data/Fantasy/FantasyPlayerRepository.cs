@@ -28,9 +28,9 @@ public class FantasyPlayerRepository : IFantasyPlayerRepository
             .Include(fp => fp.FantasyLeague)
             .Include(fp => fp.Team)
             .Include(fp => fp.DotaAccount)
-            .Where(fp => fp.FantasyLeague.Id == FantasyLeague.Id)
-            .OrderBy(fp => fp.Team.Name)
-                .ThenBy(fp => fp.DotaAccount.Name);
+            .Where(fp => fp.FantasyLeagueId == FantasyLeague.Id)
+            .OrderBy(fp => fp.Team!.Name)
+                .ThenBy(fp => fp.DotaAccount!.Name);
 
         _logger.LogDebug($"Get Fantasy Players by Fantasy League Query: {fantasyPlayerLeagueQuery.ToQueryString()}");
 
@@ -51,8 +51,8 @@ public class FantasyPlayerRepository : IFantasyPlayerRepository
         var fantasyPlayerLeagueQuery = _dbContext.FantasyPlayers
             .Include(fp => fp.Team)
             .Include(fp => fp.DotaAccount)
-            .OrderBy(fp => fp.Team.Name)
-                .ThenBy(fp => fp.DotaAccount.Name);
+            .OrderBy(fp => fp.Team!.Name)
+                .ThenBy(fp => fp.DotaAccount!.Name);
 
         _logger.LogDebug($"Get Fantasy Players by Fantasy League Query: {fantasyPlayerLeagueQuery.ToQueryString()}");
 
@@ -61,7 +61,7 @@ public class FantasyPlayerRepository : IFantasyPlayerRepository
 
     public async Task AddAsync(FantasyPlayer addFantasyPlayer)
     {
-        _logger.LogInformation($"Adding new Fantasy Player {addFantasyPlayer.DotaAccount.Name}");
+        _logger.LogInformation($"Adding new Fantasy Player {addFantasyPlayer.DotaAccountId}");
 
         await _dbContext.FantasyPlayers.AddAsync(addFantasyPlayer);
         await _dbContext.SaveChangesAsync();
@@ -71,7 +71,7 @@ public class FantasyPlayerRepository : IFantasyPlayerRepository
 
     public async Task DeleteAsync(FantasyPlayer deleteFantasyPlayer)
     {
-        _logger.LogInformation($"Removing Fantasy Player {deleteFantasyPlayer.DotaAccount.Name}");
+        _logger.LogInformation($"Removing Fantasy Player {deleteFantasyPlayer.DotaAccountId}");
 
         _dbContext.FantasyPlayers.Remove(deleteFantasyPlayer);
         await _dbContext.SaveChangesAsync();
@@ -81,7 +81,7 @@ public class FantasyPlayerRepository : IFantasyPlayerRepository
 
     public async Task UpdateAsync(FantasyPlayer updateFantasyPlayer)
     {
-        _logger.LogInformation($"Updating Fantasy Player {updateFantasyPlayer.DotaAccount.Name}");
+        _logger.LogInformation($"Updating Fantasy Player {updateFantasyPlayer.DotaAccountId}");
 
         _dbContext.Entry(updateFantasyPlayer).State = EntityState.Modified;
         await _dbContext.SaveChangesAsync();

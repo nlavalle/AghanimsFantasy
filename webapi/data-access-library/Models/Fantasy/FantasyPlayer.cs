@@ -10,13 +10,25 @@ public class FantasyPlayer
 {
     [Key]
     [Column("id")]
-    [JsonIgnore]
+    [JsonPropertyName("id")]
     public long Id { get; set; }
 
+    [ForeignKey("FantasyLeague")]
+    [Column("fantasy_league_id")]
+    public required int FantasyLeagueId { get; set; }
+
     [JsonIgnore]
-    public FantasyLeague FantasyLeague { get; set; } = null!;
-    public required Team Team { get; set; }
-    public required Account DotaAccount { get; set; }
+    public FantasyLeague? FantasyLeague { get; set; }
+
+    [ForeignKey("Team")]
+    [Column("team_id")]
+    public required long TeamId { get; set; }
+    public Team? Team { get; set; }
+
+    [ForeignKey("DotaAccount")]
+    [Column("dota_account_id")]
+    public required long DotaAccountId { get; set; }
+    public Account? DotaAccount { get; set; }
 
     [Column("team_position")]
     public int TeamPosition { get; set; }

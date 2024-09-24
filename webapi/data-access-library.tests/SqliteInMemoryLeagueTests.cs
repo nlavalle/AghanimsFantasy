@@ -62,7 +62,7 @@ public class SqliteInMemoryLeagueTests : IDisposable
             new FantasyLeague
             {
                 Id = 1,
-                League = league1,
+                LeagueId = league1.Id,
                 Name = "test league 1",
                 IsActive = true,
                 FantasyDraftLocked = new DateTimeOffset(new DateTime(2024, 1, 1)).ToUnixTimeSeconds(),
@@ -72,7 +72,7 @@ public class SqliteInMemoryLeagueTests : IDisposable
             new FantasyLeague
             {
                 Id = 2,
-                League = league2,
+                LeagueId = league2.Id,
                 Name = "test league 2",
                 IsActive = false,
                 FantasyDraftLocked = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds(),
@@ -97,7 +97,7 @@ public class SqliteInMemoryLeagueTests : IDisposable
         var loggerMock = new Mock<ILogger<ProMetadataRepository>>();
         var repository = new ProMetadataRepository(loggerMock.Object, context);
 
-        var leagues = await repository.GetLeaguesAsync(null);
+        var leagues = await repository.GetLeaguesAsync(true);
 
         Assert.Collection(
             leagues,
@@ -112,7 +112,7 @@ public class SqliteInMemoryLeagueTests : IDisposable
         var loggerMock = new Mock<ILogger<ProMetadataRepository>>();
         var repository = new ProMetadataRepository(loggerMock.Object, context);
 
-        var leagues = await repository.GetLeaguesAsync(true);
+        var leagues = await repository.GetLeaguesAsync(false);
 
         Assert.Collection(
             leagues,

@@ -121,7 +121,7 @@ internal class MatchMetadataContext : DotaOperationContext
                 Debug.Assert(matchMetadata != null);
             }
 
-            var matchResponse = CastGcToModel(matchMetadata.metadata);
+            var matchResponse = CastGcToModel(matchMetadata.metadata, (int)match.leagueid);
 
             matchResponse.MatchId = (long)match.match_id;
 
@@ -157,10 +157,11 @@ internal class MatchMetadataContext : DotaOperationContext
         return $"{completeLeagues} of {totalMatches} missing match details fetched";
     }
 
-    private GcMatchMetadata CastGcToModel(CDOTAMatchMetadata matchMetadata)
+    private GcMatchMetadata CastGcToModel(CDOTAMatchMetadata matchMetadata, int leagueId)
     {
         GcMatchMetadata gcMatchMetadata = new GcMatchMetadata
         {
+            LeagueId = leagueId,
             LobbyId = matchMetadata.lobby_id,
             ReportUntilTime = matchMetadata.report_until_time,
             PrimaryEventId = matchMetadata.primary_event_id,

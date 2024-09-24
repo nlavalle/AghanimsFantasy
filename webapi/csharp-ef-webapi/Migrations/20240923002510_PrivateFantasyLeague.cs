@@ -12,6 +12,16 @@ namespace csharp_ef_webapi.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
+                name: "FK_dota_fantasy_draft_players_dota_fantasy_players_fantasy_pla~",
+                schema: "nadcl",
+                table: "dota_fantasy_draft_players");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_dota_fantasy_players_dota_teams_team_id",
+                schema: "nadcl",
+                table: "dota_fantasy_players");
+
+            migrationBuilder.DropForeignKey(
                 name: "FK_dota_gc_match_metadata_dota_leagues_LeagueId",
                 schema: "nadcl",
                 table: "dota_gc_match_metadata");
@@ -27,11 +37,6 @@ namespace csharp_ef_webapi.Migrations
                 table: "fantasy_match_player");
 
             migrationBuilder.DropIndex(
-                name: "IX_dota_gc_match_metadata_LeagueId",
-                schema: "nadcl",
-                table: "dota_gc_match_metadata");
-
-            migrationBuilder.DropIndex(
                 name: "IX_dota_fantasy_normalized_averages_fantasy_player_id",
                 schema: "nadcl",
                 table: "dota_fantasy_normalized_averages");
@@ -45,11 +50,6 @@ namespace csharp_ef_webapi.Migrations
                 name: "IX_dota_fantasy_draft_players_fantasy_draft_id",
                 schema: "nadcl",
                 table: "dota_fantasy_draft_players");
-
-            migrationBuilder.DropColumn(
-                name: "LeagueId",
-                schema: "nadcl",
-                table: "dota_gc_match_metadata");
 
             migrationBuilder.RenameColumn(
                 name: "TeamId",
@@ -75,13 +75,39 @@ namespace csharp_ef_webapi.Migrations
                 table: "fantasy_match_player",
                 newName: "IX_fantasy_match_player_account_id");
 
-            migrationBuilder.AddColumn<int>(
+            migrationBuilder.RenameColumn(
+                name: "LeagueId",
+                schema: "nadcl",
+                table: "dota_gc_match_metadata",
+                newName: "league_id");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_dota_gc_match_metadata_LeagueId",
+                schema: "nadcl",
+                table: "dota_gc_match_metadata",
+                newName: "IX_dota_gc_match_metadata_league_id");
+
+            migrationBuilder.AlterColumn<long>(
+                name: "team_id",
+                schema: "nadcl",
+                table: "fantasy_match_player",
+                type: "bigint",
+                nullable: false,
+                defaultValue: 0L,
+                oldClrType: typeof(long),
+                oldType: "bigint",
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<int>(
                 name: "league_id",
                 schema: "nadcl",
                 table: "dota_gc_match_metadata",
                 type: "integer",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0,
+                oldClrType: typeof(int),
+                oldType: "integer",
+                oldNullable: true);
 
             migrationBuilder.AddColumn<bool>(
                 name: "is_private",
@@ -90,15 +116,6 @@ namespace csharp_ef_webapi.Migrations
                 type: "boolean",
                 nullable: false,
                 defaultValue: false);
-
-            migrationBuilder.AlterColumn<long>(
-                name: "fantasy_player_id",
-                schema: "nadcl",
-                table: "dota_fantasy_draft_players",
-                type: "bigint",
-                nullable: true,
-                oldClrType: typeof(long),
-                oldType: "bigint");
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_dota_fantasy_draft_players",
@@ -143,12 +160,6 @@ namespace csharp_ef_webapi.Migrations
                 column: "league_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_dota_gc_match_metadata_league_id",
-                schema: "nadcl",
-                table: "dota_gc_match_metadata",
-                column: "league_id");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_dota_fantasy_normalized_averages_fantasy_player_id",
                 schema: "nadcl",
                 table: "dota_fantasy_normalized_averages",
@@ -165,14 +176,33 @@ namespace csharp_ef_webapi.Migrations
                 name: "IX_dota_fantasy_private_league_players_discord_user_id",
                 schema: "nadcl",
                 table: "dota_fantasy_private_league_players",
-                column: "discord_user_id",
-                unique: true);
+                column: "discord_user_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_dota_fantasy_private_league_players_fantasy_league_id",
                 schema: "nadcl",
                 table: "dota_fantasy_private_league_players",
                 column: "fantasy_league_id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_dota_fantasy_draft_players_dota_fantasy_players_fantasy_pla~",
+                schema: "nadcl",
+                table: "dota_fantasy_draft_players",
+                column: "fantasy_player_id",
+                principalSchema: "nadcl",
+                principalTable: "dota_fantasy_players",
+                principalColumn: "id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_dota_fantasy_players_dota_teams_team_id",
+                schema: "nadcl",
+                table: "dota_fantasy_players",
+                column: "team_id",
+                principalSchema: "nadcl",
+                principalTable: "dota_teams",
+                principalColumn: "id",
+                onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_dota_gc_match_metadata_dota_leagues_league_id",
@@ -211,12 +241,23 @@ namespace csharp_ef_webapi.Migrations
                 column: "team_id",
                 principalSchema: "nadcl",
                 principalTable: "dota_teams",
-                principalColumn: "id");
+                principalColumn: "id",
+                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_dota_fantasy_draft_players_dota_fantasy_players_fantasy_pla~",
+                schema: "nadcl",
+                table: "dota_fantasy_draft_players");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_dota_fantasy_players_dota_teams_team_id",
+                schema: "nadcl",
+                table: "dota_fantasy_players");
+
             migrationBuilder.DropForeignKey(
                 name: "FK_dota_gc_match_metadata_dota_leagues_league_id",
                 schema: "nadcl",
@@ -247,11 +288,6 @@ namespace csharp_ef_webapi.Migrations
                 table: "fantasy_match");
 
             migrationBuilder.DropIndex(
-                name: "IX_dota_gc_match_metadata_league_id",
-                schema: "nadcl",
-                table: "dota_gc_match_metadata");
-
-            migrationBuilder.DropIndex(
                 name: "IX_dota_fantasy_normalized_averages_fantasy_player_id",
                 schema: "nadcl",
                 table: "dota_fantasy_normalized_averages");
@@ -265,11 +301,6 @@ namespace csharp_ef_webapi.Migrations
                 name: "IX_dota_fantasy_draft_players_fantasy_player_id",
                 schema: "nadcl",
                 table: "dota_fantasy_draft_players");
-
-            migrationBuilder.DropColumn(
-                name: "league_id",
-                schema: "nadcl",
-                table: "dota_gc_match_metadata");
 
             migrationBuilder.DropColumn(
                 name: "is_private",
@@ -300,35 +331,41 @@ namespace csharp_ef_webapi.Migrations
                 table: "fantasy_match_player",
                 newName: "IX_fantasy_match_player_AccountId");
 
-            migrationBuilder.AddColumn<int>(
+            migrationBuilder.RenameColumn(
+                name: "league_id",
+                schema: "nadcl",
+                table: "dota_gc_match_metadata",
+                newName: "LeagueId");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_dota_gc_match_metadata_league_id",
+                schema: "nadcl",
+                table: "dota_gc_match_metadata",
+                newName: "IX_dota_gc_match_metadata_LeagueId");
+
+            migrationBuilder.AlterColumn<long>(
+                name: "TeamId",
+                schema: "nadcl",
+                table: "fantasy_match_player",
+                type: "bigint",
+                nullable: true,
+                oldClrType: typeof(long),
+                oldType: "bigint");
+
+            migrationBuilder.AlterColumn<int>(
                 name: "LeagueId",
                 schema: "nadcl",
                 table: "dota_gc_match_metadata",
                 type: "integer",
-                nullable: true);
-
-            migrationBuilder.AlterColumn<long>(
-                name: "fantasy_player_id",
-                schema: "nadcl",
-                table: "dota_fantasy_draft_players",
-                type: "bigint",
-                nullable: false,
-                defaultValue: 0L,
-                oldClrType: typeof(long),
-                oldType: "bigint",
-                oldNullable: true);
+                nullable: true,
+                oldClrType: typeof(int),
+                oldType: "integer");
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_dota_fantasy_draft_players",
                 schema: "nadcl",
                 table: "dota_fantasy_draft_players",
                 columns: new[] { "fantasy_player_id", "fantasy_draft_id" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_dota_gc_match_metadata_LeagueId",
-                schema: "nadcl",
-                table: "dota_gc_match_metadata",
-                column: "LeagueId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_dota_fantasy_normalized_averages_fantasy_player_id",
@@ -341,6 +378,24 @@ namespace csharp_ef_webapi.Migrations
                 schema: "nadcl",
                 table: "dota_fantasy_draft_players",
                 column: "fantasy_draft_id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_dota_fantasy_draft_players_dota_fantasy_players_fantasy_pla~",
+                schema: "nadcl",
+                table: "dota_fantasy_draft_players",
+                column: "fantasy_player_id",
+                principalSchema: "nadcl",
+                principalTable: "dota_fantasy_players",
+                principalColumn: "id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_dota_fantasy_players_dota_teams_team_id",
+                schema: "nadcl",
+                table: "dota_fantasy_players",
+                column: "team_id",
+                principalSchema: "nadcl",
+                principalTable: "dota_teams",
+                principalColumn: "id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_dota_gc_match_metadata_dota_leagues_LeagueId",

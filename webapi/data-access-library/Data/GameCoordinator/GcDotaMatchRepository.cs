@@ -28,7 +28,7 @@ public class GcDotaMatchRepository : IGcDotaMatchRepository
                 .SelectMany(match => match.players,
                 (left, right) => new { Match = left, MatchPlayer = right })
                 .Where(gcmp =>
-                    !_dbContext.FantasyMatchPlayers.Any(fmp => fmp.Match.MatchId == (long)gcmp.Match.match_id && fmp.Account != null && fmp.Account.Id == gcmp.MatchPlayer.account_id)
+                    !_dbContext.FantasyMatchPlayers.Any(fmp => fmp.FantasyMatchId == (long)gcmp.Match.match_id && fmp.Account != null && fmp.Account.Id == gcmp.MatchPlayer.account_id)
                     && (gcmp.Match.match_outcome == EMatchOutcome.k_EMatchOutcome_RadVictory || gcmp.Match.match_outcome == EMatchOutcome.k_EMatchOutcome_DireVictory) // Filter out cancelled games
                 )
                 .Take(takeAmount);

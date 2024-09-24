@@ -2,7 +2,7 @@ namespace DataAccessLibrary.Models.WebApi;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 // https://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/v1?
 [Table("dota_match_details_players_ability_upgrades")]
@@ -10,21 +10,25 @@ public class MatchDetailsPlayersAbilityUpgrade
 {
     [Key]
     [Column("id")]
-    [System.Text.Json.Serialization.JsonIgnore]
+    [JsonIgnore]
     public int Id { get; set; }
 
-    [System.Text.Json.Serialization.JsonIgnore]
-    public MatchDetailsPlayer Player { get; set; } = null!;
+    [ForeignKey("Player")]
+    [Column("player_id")]
+    public required int PlayerId { get; set; }
+
+    [JsonIgnore]
+    public MatchDetailsPlayer? Player { get; set; }
 
     [Column("ability")]
-    [JsonProperty("ability")]
+    [JsonPropertyName("ability")]
     public int Ability { get; set; }
 
     [Column("time")]
-    [JsonProperty("time")]
+    [JsonPropertyName("time")]
     public int Time { get; set; }
 
     [Column("level")]
-    [JsonProperty("level")]
+    [JsonPropertyName("level")]
     public int Level { get; set; }
 }

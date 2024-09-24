@@ -46,7 +46,6 @@ namespace csharp_ef_webapi.Controllers
             {
                 return BadRequest(ex.Message);
             }
-
         }
 
         // POST: api/FantasyPlayer

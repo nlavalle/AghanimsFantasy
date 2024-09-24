@@ -39,12 +39,12 @@ public class GameCoordinatorRepository
         _logger.LogInformation($"Getting Match Metadata Player for FantasyMatchPlayer: {fantasyMatchPlayer.Id}");
 
         var matchMetadataPlayerQuery = _dbContext.GcMatchMetadata
-            .Where(md => md.MatchId == fantasyMatchPlayer.Match.MatchId)
+            .Where(md => md.MatchId == fantasyMatchPlayer.FantasyMatchId)
             .SelectMany(md => md.Teams,
             (left, right) => new { Match = left, Team = right })
             .SelectMany(mdt => mdt.Team.Players,
             (left, right) => new { Match = left.Match, Team = left.Team, Player = right })
-            .Where(mdp => mdp.Match.MatchId == fantasyMatchPlayer.Match.MatchId && mdp.Player.PlayerSlot == fantasyMatchPlayer.PlayerSlot)
+            .Where(mdp => mdp.Match.MatchId == fantasyMatchPlayer.FantasyMatchId && mdp.Player.PlayerSlot == fantasyMatchPlayer.PlayerSlot)
             .Select(result => result.Player);
 
         _logger.LogDebug($"GetMatchMetadataPlayerAsync SQL Query: {matchMetadataPlayerQuery.ToQueryString()}");
