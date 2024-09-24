@@ -99,22 +99,45 @@ public class FantasyService
 
         // Ensure player has posted a draft that is one of each team position, if there's 2 of the same position then reject it as a bad request
         var fantasyPlayers = await _fantasyPlayerRepository.GetFantasyLeaguePlayersAsync(fantasyLeague);
+
+        // Populate fantasy players by ID for draft picks
+        foreach (FantasyDraftPlayer pick in fantasyDraft.DraftPickPlayers)
+        {
+            pick.FantasyPlayer = pick.FantasyPlayer ?? fantasyPlayers.FirstOrDefault(fp => fp.Id == pick.FantasyPlayerId);
+        }
+
         if (fantasyPlayers.Where(fp => fantasyDraft.DraftPickPlayers.Where(dpp => dpp.FantasyPlayer != null).Any(dpp => dpp.FantasyPlayer!.Id == fp.Id)).GroupBy(fp => fp.TeamPosition).Where(grp => grp.Count() > 1).Count() > 0)
         {
             throw new ArgumentException("Can only draft one of each team position");
         };
 
-        FantasyDraft fantasyDraftPostResponse = fantasyDraft;
+        FantasyDraft fantasyDraftPostResponse = null!;
+
+        if (existingUserDraft != null)
+        {
+            // To handle partial drafts we're going to always clear the current draft then add the picks
+            await _fantasyDraftRepository.ClearPicksAsync(existingUserDraft);
+        }
+        else
+        {
+            existingUserDraft = new FantasyDraft
+            {
+                FantasyLeagueId = fantasyDraft.FantasyLeagueId,
+                DiscordAccountId = siteUser.Id,
+                DraftCreated = DateTime.UtcNow
+            };
+            await _fantasyDraftRepository.AddAsync(existingUserDraft);
+        }
 
         // Fantasy Draft may be incomplete, so go through and add the IDs passed
-        await _fantasyDraftRepository.ClearPicksAsync(fantasyDraft);
-        for (int i = 0; i <= 4; i++)
+        for (int i = 0; i < fantasyDraft.DraftPickPlayers.Count(); i++)
         {
             if (fantasyDraft.DraftPickPlayers[i].FantasyPlayer != null)
             {
-                fantasyDraftPostResponse = await _fantasyDraftRepository.AddPlayerPickAsync(fantasyDraft, fantasyDraft.DraftPickPlayers[i].FantasyPlayer!);
+                fantasyDraftPostResponse = await _fantasyDraftRepository.AddPlayerPickAsync(existingUserDraft, fantasyDraft.DraftPickPlayers[i].FantasyPlayer!);
             }
         }
+
 
         return fantasyDraftPostResponse;
     }
@@ -205,7 +228,7 @@ public class FantasyService
             throw new ArgumentException("Metadata not found for Fantasy League Id");
         }
 
-        return matchSummary = matchSummary.OrderBy(m => m.FantasyPlayer?.DotaAccount.Name).ToList();
+        return matchSummary = matchSummary.OrderBy(m => m.FantasyPlayer?.DotaAccount!.Name).ToList();
     }
 
     public async Task<IEnumerable<FantasyDraftPointTotals>?> GetTop10FantasyDraftsAsync(DiscordUser siteUser, int fantasyLeagueId)

@@ -2,7 +2,6 @@ namespace csharp_ef_data_loader.Services;
 
 using System.Collections.Immutable;
 using DataAccessLibrary.Data;
-using DataAccessLibrary.Models.ProMetadata;
 using DataAccessLibrary.Models.WebApi;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -91,7 +90,7 @@ internal class LeagueHistoryContext : DotaOperationContext
                             throw new Exception("Hero does not exist.");
                         }
 
-                        player.Match = match;
+                        player.MatchId = match.MatchId;
                     }
                     await _matchHistoryRepository.AddAsync(match);
                 }
@@ -117,8 +116,6 @@ internal class LeagueHistoryContext : DotaOperationContext
         int resultsRemaining;
         bool started = false;
         long? startMatchId = null;
-
-        League league = await _proMetadataRepository.GetLeagueAsync(leagueId) ?? throw new ArgumentException("Unknown League Id");
 
         do
         {
@@ -157,7 +154,7 @@ internal class LeagueHistoryContext : DotaOperationContext
                 var matchId = match.MatchId;
                 startMatchId = Math.Min(startMatchId ?? long.MaxValue, matchId);
 
-                match.League = league;
+                match.LeagueId = leagueId;
             }
 
             // -1 so we don't reprocess the same ending match ID twice
