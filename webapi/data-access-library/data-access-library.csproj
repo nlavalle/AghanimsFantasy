@@ -15,7 +15,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
-    <PackageReference Include="SteamKit2" Version="2.5.0" />
+    <PackageReference Include="SteamKit2" Version="3.0.0-Beta.3" />
   </ItemGroup>
 
 </Project>

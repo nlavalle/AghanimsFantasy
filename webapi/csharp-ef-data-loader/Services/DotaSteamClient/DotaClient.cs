@@ -5,7 +5,6 @@ using SteamKit2.Internal; // brings in our protobuf client messages
 using SteamKit2.GC; // brings in the GC related classes
 using SteamKit2.GC.Dota.Internal; // brings in dota specific protobuf messages
 
-using ProtoBuf;
 using Microsoft.Extensions.Logging;
 
 class DotaClient
@@ -193,6 +192,7 @@ class DotaClient
         {
             // this will happen when we recieve some GC messages that we're not handling
             // this is okay because we're handling every essential message, and the rest can be ignored
+            _logger.LogDebug(callback.EMsg.ToString());
             return;
         }
 

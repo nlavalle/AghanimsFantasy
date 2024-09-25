@@ -11,20 +11,17 @@ internal class SteamClientMatchDetailsContext : DotaOperationContext
     private readonly DotaClient _dotaClient;
     private readonly IMatchHistoryRepository _matchHistoryRepository;
     private readonly IGcDotaMatchRepository _gcDotaMatchRepository;
-    private readonly GameCoordinatorRepository _gameCoordinatorRepository;
 
     public SteamClientMatchDetailsContext(
             ILogger<SteamClientMatchDetailsContext> logger,
             IMatchHistoryRepository matchHistoryRepository,
             IGcDotaMatchRepository gcDotaMatchRepository,
-            GameCoordinatorRepository gameCoordinatorRepository,
             IServiceScope scope,
             Config config)
         : base(scope, config)
     {
         _matchHistoryRepository = matchHistoryRepository;
         _gcDotaMatchRepository = gcDotaMatchRepository;
-        _gameCoordinatorRepository = gameCoordinatorRepository;
         _logger = logger;
         _dotaClient = scope.ServiceProvider.GetRequiredService<DotaClient>();
     }
