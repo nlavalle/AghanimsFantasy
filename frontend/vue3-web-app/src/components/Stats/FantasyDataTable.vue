@@ -223,8 +223,8 @@ const roleList = [
 
 const teamsList = computed(() => {
     // We want the distinct teams
-    var teams = playerFantasyStats.value.map(item => item.fantasyPlayer.team)
-    return [...new Map(teams.map(item => [item['id'], item])).values()]
+    var teams = playerFantasyStats.value.map(item => ({id: item.fantasyPlayer.teamId, ...item.fantasyPlayer.team}))
+    return [...new Map(teams.map(item => [item.id, item])).values()]
 })
 
 onMounted(() => {
@@ -566,7 +566,7 @@ const playerFantasyStatsIndexed = computed(() => {
                     return true;
                 }
                 else {
-                    return teamFilter.value.some(team => team == item.fantasyPlayer.team.id)
+                    return teamFilter.value.some(team => team == item.fantasyPlayer.teamId)
                 }
             }
         )

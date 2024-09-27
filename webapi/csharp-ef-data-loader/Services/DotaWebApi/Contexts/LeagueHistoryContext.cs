@@ -113,6 +113,7 @@ internal class LeagueHistoryContext : DotaOperationContext
 
         int resultsPrevious = 0;
         int resultsRemaining;
+        bool matchesReturned;
         bool started = false;
         long? startMatchId = null;
 
@@ -151,13 +152,14 @@ internal class LeagueHistoryContext : DotaOperationContext
 
             foreach (MatchHistory match in matchResponse)
             {
-                // Steam returns the matches descending so we want the min then -1
                 var matchId = match.MatchId;
-                startMatchId = Math.Min(startMatchId ?? long.MaxValue, matchId);
+                // startMatchId = Math.Min(startMatchId ?? long.MaxValue, matchId);
 
                 match.LeagueId = leagueId;
             }
 
+            // matches aren't chronological or ordered by ID so get the last from the array as the start_match_id for the next call
+            startMatchId = matchResponse.LastOrDefault()?.MatchId;
             // -1 so we don't reprocess the same ending match ID twice
             startMatchId--;
 
@@ -173,7 +175,8 @@ internal class LeagueHistoryContext : DotaOperationContext
             }
 
             resultsPrevious = resultsRemaining;
-        } while (resultsRemaining > 0);
+            matchesReturned = matchResponse.Count() > 0;
+        } while (matchesReturned);
 
         Interlocked.Decrement(ref _remainingLeagues);
 
