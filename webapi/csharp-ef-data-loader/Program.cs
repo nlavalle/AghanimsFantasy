@@ -19,19 +19,31 @@ builder.Services.AddDbContext<AghanimsFantasyContext>(
         conn_string = conn_string?.Replace("{SQL_HOST}", Environment.GetEnvironmentVariable("SQL_HOST")) ?? "Host=localhost;Port=5432;Database=postgres;";
         conn_string = conn_string.Replace("{SQL_USER}", Environment.GetEnvironmentVariable("SQL_USER"));
         conn_string = conn_string.Replace("{SQL_PASSWORD}", Environment.GetEnvironmentVariable("SQL_PASSWORD"));
-        options.UseNpgsql(conn_string);
+        options.UseNpgsql(conn_string, b => b.MigrationsAssembly("csharp-ef-webapi"));
     }
 );
 
 // Add persistent HttpClient
 builder.Services.AddHttpClient();
 
-// Add Repositories to be used by controllers
-builder.Services.AddScoped<FantasyRepository>();
-builder.Services.AddScoped<ProMetadataRepository>();
-builder.Services.AddScoped<WebApiRepository>();
+// Add Fantasy Repositories
+builder.Services.AddScoped<IFantasyDraftRepository, FantasyDraftRepository>();
+builder.Services.AddScoped<IFantasyLeagueRepository, FantasyLeagueRepository>();
+builder.Services.AddScoped<IFantasyPlayerRepository, FantasyPlayerRepository>();
+builder.Services.AddScoped<IFantasyMatchRepository, FantasyMatchRepository>();
+builder.Services.AddScoped<IFantasyMatchPlayerRepository, FantasyMatchPlayerRepository>();
+builder.Services.AddScoped<IFantasyRepository, FantasyRepository>();
+// Add Game Coordinator Repositories
+builder.Services.AddScoped<IGcMatchMetadataRepository, GcMatchMetadataRepository>();
+builder.Services.AddScoped<IGcDotaMatchRepository, GcDotaMatchRepository>();
 builder.Services.AddScoped<GameCoordinatorRepository>();
-builder.Services.AddScoped<DiscordRepository>();
+// Add ProMetadata Repositories
+builder.Services.AddScoped<IProMetadataRepository, ProMetadataRepository>();
+// Add WebApi Repositories
+builder.Services.AddScoped<IMatchHistoryRepository, MatchHistoryRepository>();
+builder.Services.AddScoped<IMatchDetailRepository, MatchDetailRepository>();
+// Add Discord Repositories
+builder.Services.AddScoped<IDiscordRepository, DiscordRepository>();
 
 // Add Scoped Dota Client to be called for Dota Client Background Service
 builder.Services.AddScoped<DotaClient>();

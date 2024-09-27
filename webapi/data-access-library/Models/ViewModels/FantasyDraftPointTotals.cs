@@ -5,7 +5,7 @@ using DataAccessLibrary.Models.Fantasy;
 // This is a view model and isn't saved in the db (in case we change the scoring)
 public class FantasyDraftPointTotals
 {
-    public FantasyDraft FantasyDraft { get; set; } = new FantasyDraft();
+    public required FantasyDraft FantasyDraft { get; set; }
     public bool IsTeam { get; set; }
     public long? TeamId { get; set; }
     public string DiscordName { get; set; } = "";
@@ -18,7 +18,7 @@ public class FantasyDraftPointTotals
                 .Where(fpp =>
                     fpp.FantasyPlayer.Id == FantasyDraft.DraftPickPlayers
                         .Where(fdp => fdp.DraftOrder == 1)
-                        .FirstOrDefault()?.FantasyPlayerId
+                        .FirstOrDefault()?.FantasyPlayer!.Id
                 )
                 .FirstOrDefault()?.TotalMatchFantasyPoints ?? 0;
         }
@@ -31,7 +31,7 @@ public class FantasyDraftPointTotals
                 .Where(fpp =>
                     fpp.FantasyPlayer.Id == FantasyDraft.DraftPickPlayers
                         .Where(fdp => fdp.DraftOrder == 2)
-                        .FirstOrDefault()?.FantasyPlayerId
+                        .FirstOrDefault()?.FantasyPlayer!.Id
                 )
                 .FirstOrDefault()?.TotalMatchFantasyPoints ?? 0;
         }
@@ -44,7 +44,7 @@ public class FantasyDraftPointTotals
                 .Where(fpp =>
                     fpp.FantasyPlayer.Id == FantasyDraft.DraftPickPlayers
                         .Where(fdp => fdp.DraftOrder == 3)
-                        .FirstOrDefault()?.FantasyPlayerId
+                        .FirstOrDefault()?.FantasyPlayer!.Id
                 )
                 .FirstOrDefault()?.TotalMatchFantasyPoints ?? 0;
         }
@@ -57,7 +57,7 @@ public class FantasyDraftPointTotals
                 .Where(fpp =>
                     fpp.FantasyPlayer.Id == FantasyDraft.DraftPickPlayers
                         .Where(fdp => fdp.DraftOrder == 4)
-                        .FirstOrDefault()?.FantasyPlayerId
+                        .FirstOrDefault()?.FantasyPlayer!.Id
                 )
                 .FirstOrDefault()?.TotalMatchFantasyPoints ?? 0;
         }
@@ -70,7 +70,7 @@ public class FantasyDraftPointTotals
                 .Where(fpp =>
                     fpp.FantasyPlayer.Id == FantasyDraft.DraftPickPlayers
                         .Where(fdp => fdp.DraftOrder == 5)
-                        .FirstOrDefault()?.FantasyPlayerId
+                        .FirstOrDefault()?.FantasyPlayer!.Id
                 )
                 .FirstOrDefault()?.TotalMatchFantasyPoints ?? 0;
         }

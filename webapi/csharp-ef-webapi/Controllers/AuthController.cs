@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using DataAccessLibrary.Data;
+using csharp_ef_webapi.Services;
 
 namespace csharp_ef_webapi.Controllers
 {
@@ -10,10 +10,10 @@ namespace csharp_ef_webapi.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly DiscordRepository _discordRepository;
-        public AuthController(DiscordRepository discordRepository)
+        private readonly DiscordWebApiService _discordService;
+        public AuthController(DiscordWebApiService discordService)
         {
-            _discordRepository = discordRepository;
+            _discordService = discordService;
         }
 
 
@@ -39,7 +39,7 @@ namespace csharp_ef_webapi.Controllers
             if (nameId == null) return BadRequest("Invalid User Claims please contact admin");
 
             bool getAccountId = long.TryParse(nameId.Value, out long userDiscordAccountId);
-            var discordUser = await _discordRepository.GetDiscordUserAsync(userDiscordAccountId);
+            var discordUser = await _discordService.GetDiscordUserAsync(userDiscordAccountId);
 
             if (discordUser != null && discordUser.IsAdmin)
             {

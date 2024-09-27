@@ -1,25 +1,63 @@
 using System.Net;
+using System.Security.Claims;
+using System.Text.Json;
 using DataAccessLibrary.Data;
 using DataAccessLibrary.Models.Discord;
-using Newtonsoft.Json;
 
 namespace csharp_ef_webapi.Services;
 public class DiscordWebApiService
 {
     private readonly string _discordToken;
-    private readonly HttpClient _httpClient;
     private readonly ILogger<DiscordWebApiService> _logger;
-    private readonly AghanimsFantasyContext _dbContext;
+    private readonly HttpClient _httpClient;
+    private readonly IDiscordRepository _discordRepository;
 
-    public DiscordWebApiService(ILogger<DiscordWebApiService> logger, AghanimsFantasyContext dbContext, HttpClient httpClient)
+    public DiscordWebApiService(
+        ILogger<DiscordWebApiService> logger,
+        HttpClient httpClient,
+        IDiscordRepository discordRepository
+    )
     {
         _logger = logger;
-        _dbContext = dbContext;
         _httpClient = httpClient;
+        _discordRepository = discordRepository;
 
         _discordToken = Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN") ?? "";
 
         _logger.LogInformation("Discord WebApi Service constructed");
+    }
+
+    public async Task<bool> CheckAdminUser(HttpContext httpContext)
+    {
+        // Admin only operation
+        var nameId = httpContext.User?.Claims?.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+        if (nameId == null) throw new ArgumentException("Invalid User Claims please contact admin");
+
+        bool getAccountId = long.TryParse(nameId.Value, out long userDiscordAccountId);
+        return await _discordRepository.IsUserAdminAsync(userDiscordAccountId);
+    }
+
+    public async Task<DiscordUser?> LookupHttpContextUser(HttpContext httpContext)
+    {
+        if (!httpContext?.User?.Identity?.IsAuthenticated ?? false)
+        {
+            // Authorize should take care of this but just in case
+            return null;
+        }
+
+        var nameId = httpContext!.User?.Claims?.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+        bool getAccountId = long.TryParse(httpContext!.User!.Claims!.Where(c => c.Type == ClaimTypes.NameIdentifier).FirstOrDefault()!.Value, out long userDiscordAccountId);
+        if (!getAccountId)
+        {
+            throw new ArgumentException("Could not retrieve user discord ID");
+        }
+
+        return nameId != null ? await _discordRepository.GetDiscordUserAsync(userDiscordAccountId) : null;
+    }
+
+    public async Task<DiscordUser?> GetDiscordUserAsync(long userId)
+    {
+        return await _discordRepository.GetDiscordUserAsync(userId);
     }
 
     public async Task GetDiscordByIdAsync(long DiscordId)
@@ -33,11 +71,11 @@ public class DiscordWebApiService
             var response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
 
-            var discordObject = JsonConvert.DeserializeObject<DiscordUser>(await response.Content.ReadAsStringAsync());
+            JsonDocument responseRawJDocument = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+            var discordObject = JsonSerializer.Deserialize<DiscordUser>(responseRawJDocument.RootElement.GetRawText(), new JsonSerializerOptions { NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString });
             if (discordObject != null && discordObject.Username != null)
             {
-                _dbContext.DiscordUsers.Add(discordObject);
-                await _dbContext.SaveChangesAsync();
+                await _discordRepository.AddDiscordUserAsync(discordObject);
             }
             else
             {

@@ -9,19 +9,19 @@ internal class SteamClientMatchDetailsContext : DotaOperationContext
 {
     private readonly ILogger<SteamClientMatchDetailsContext> _logger;
     private readonly DotaClient _dotaClient;
-    private readonly WebApiRepository _webApiRepository;
-    private readonly GameCoordinatorRepository _gameCoordinatorRepository;
+    private readonly IMatchHistoryRepository _matchHistoryRepository;
+    private readonly IGcDotaMatchRepository _gcDotaMatchRepository;
 
     public SteamClientMatchDetailsContext(
             ILogger<SteamClientMatchDetailsContext> logger,
-            WebApiRepository webApiRepository,
-            GameCoordinatorRepository gameCoordinatorRepository,
+            IMatchHistoryRepository matchHistoryRepository,
+            IGcDotaMatchRepository gcDotaMatchRepository,
             IServiceScope scope,
             Config config)
         : base(scope, config)
     {
-        _webApiRepository = webApiRepository;
-        _gameCoordinatorRepository = gameCoordinatorRepository;
+        _matchHistoryRepository = matchHistoryRepository;
+        _gcDotaMatchRepository = gcDotaMatchRepository;
         _logger = logger;
         _dotaClient = scope.ServiceProvider.GetRequiredService<DotaClient>();
     }
@@ -49,7 +49,7 @@ internal class SteamClientMatchDetailsContext : DotaOperationContext
 
             // Find all the match histories without match detail rows and add tasks to fetch them all
 
-            List<MatchHistory> matchesWithoutDetails = await _webApiRepository.GetMatchHistoriesNotInGcMatches(50);
+            List<MatchHistory> matchesWithoutDetails = await _matchHistoryRepository.GetNotInGcMatches(50);
 
             if (matchesWithoutDetails.Count() > 0)
             {
@@ -65,7 +65,14 @@ internal class SteamClientMatchDetailsContext : DotaOperationContext
 
                     if (matchDetails != null)
                     {
-                        await _gameCoordinatorRepository.UpsertGcDotaMatch(matchDetails);
+                        if (await _gcDotaMatchRepository.GetByIdAsync(matchDetails.match_id) != null)
+                        {
+                            await _gcDotaMatchRepository.UpdateAsync(matchDetails);
+                        }
+                        else
+                        {
+                            await _gcDotaMatchRepository.AddAsync(matchDetails);
+                        }
                     }
                 }
 

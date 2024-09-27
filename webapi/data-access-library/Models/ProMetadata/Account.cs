@@ -2,7 +2,7 @@ namespace DataAccessLibrary.Models.ProMetadata;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 [Table("dota_accounts")]
 public class Account
@@ -13,10 +13,10 @@ public class Account
     public long Id { get; set; }
 
     [Column("name")]
-    [JsonProperty("name")]
+    [JsonPropertyName("name")]
     public string? Name { get; set; }
 
     [Column("steam_profile_picture")]
-    [JsonProperty("steam_profile_picture")]
+    [JsonPropertyName("steamProfilePicture")]
     public string? SteamProfilePicture { get; set; }
 }

@@ -2,8 +2,8 @@ namespace DataAccessLibrary.Models.Fantasy;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using DataAccessLibrary.Models.ProMetadata;
-using Newtonsoft.Json;
 
 [Table("fantasy_match_player")]
 public class FantasyMatchPlayer
@@ -13,13 +13,19 @@ public class FantasyMatchPlayer
     [JsonIgnore]
     public int Id { get; set; }
 
+    [ForeignKey("FantasyMatch")]
     [Column("match_id")]
-    [JsonIgnore]
-    public long MatchId { get; set; }
+    public required long FantasyMatchId { get; set; }
 
+    [JsonIgnore]
+    public FantasyMatch? Match { get; set; }
+
+    [ForeignKey("Account")]
     [Column("account_id")]
-    [JsonProperty("account_id")]
-    public required Account Account { get; set; }
+    public required long AccountId { get; set; }
+
+    [JsonIgnore]
+    public Account? Account { get; set; }
     public string AccountFormatted
     {
         get
@@ -28,8 +34,11 @@ public class FantasyMatchPlayer
         }
     }
 
+    [ForeignKey("Team")]
     [Column("team_id")]
-    [JsonProperty("team_id")]
+    public required long TeamId { get; set; }
+
+    [JsonIgnore]
     public Team? Team { get; set; }
     public string TeamFormatted
     {
@@ -40,15 +49,15 @@ public class FantasyMatchPlayer
     }
 
     [Column("match_detail_player_parsed")]
-    [JsonProperty("match_detail_player_parsed")]
+    [JsonIgnore]
     public bool MatchDetailPlayerParsed { get; set; }
 
     [Column("gc_metadata_player_parsed")]
-    [JsonProperty("gc_metadata_player_parsed")]
+    [JsonIgnore]
     public bool GcMetadataPlayerParsed { get; set; }
 
     [Column("dota_team_side")]
-    [JsonProperty("dota_team_side")]
+    [JsonPropertyName("dotaTeamSide")]
     public bool DotaTeamSide { get; set; }
     public string DotaTeamSideFormatted
     {
@@ -59,7 +68,7 @@ public class FantasyMatchPlayer
     }
 
     [Column("player_slot")]
-    [JsonProperty("player_slot")]
+    [JsonPropertyName("playerSlot")]
     public int PlayerSlot { get; set; }
     public string PlayerSlotFormatted
     {
@@ -93,8 +102,7 @@ public class FantasyMatchPlayer
         }
     }
 
-    [Column("hero_id")]
-    [JsonProperty("hero_id")]
+    [JsonPropertyName("hero")]
     public Hero? Hero { get; set; }
     public string HeroFormatted
     {
@@ -105,110 +113,120 @@ public class FantasyMatchPlayer
     }
 
     [Column("kills")]
-    [JsonProperty("kills")]
+    [JsonPropertyName("kills")]
     public int? Kills { get; set; }
 
     [Column("deaths")]
-    [JsonProperty("deaths")]
+    [JsonPropertyName("deaths")]
     public int? Deaths { get; set; }
 
     [Column("assists")]
-    [JsonProperty("assists")]
+    [JsonPropertyName("assists")]
     public int? Assists { get; set; }
 
     [Column("last_hits")]
-    [JsonProperty("last_hits")]
+    [JsonPropertyName("lastHits")]
     public int? LastHits { get; set; }
 
     [Column("denies")]
-    [JsonProperty("denies")]
+    [JsonPropertyName("denies")]
     public int? Denies { get; set; }
 
     [Column("gold_per_min")]
-    [JsonProperty("gold_per_min")]
+    [JsonPropertyName("goldPerMin")]
     public int? GoldPerMin { get; set; }
 
     [Column("xp_per_min")]
-    [JsonProperty("xp_per_min")]
+    [JsonPropertyName("xpPerMin")]
     public int? XpPerMin { get; set; }
 
     [Column("support_gold_spent")]
-    [JsonProperty("support_gold_spent")]
+    [JsonPropertyName("supportGoldSpent")]
     public int? SupportGoldSpent { get; set; }
 
     [Column("observer_wards_placed")]
-    [JsonProperty("observer_wards_placed")]
+    [JsonPropertyName("observerWardsPlaced")]
     public int? ObserverWardsPlaced { get; set; }
 
     [Column("sentry_wards_placed")]
-    [JsonProperty("sentry_wards_placed")]
+    [JsonPropertyName("sentryWardsPlaced")]
     public int? SentyWardsPlaced { get; set; }
 
     [Column("dewards")]
-    [JsonProperty("dewards")]
+    [JsonPropertyName("dewards")]
     public int? Dewards { get; set; }
 
     [Column("camps_stacked")]
-    [JsonProperty("camps_stacked")]
+    [JsonPropertyName("campsStacked")]
     public int? CampsStacked { get; set; }
 
     [Column("stun_duration")]
-    [JsonProperty("stun_duration")]
+    [JsonPropertyName("stunDuration")]
     public float? StunDuration { get; set; }
 
     [Column("level")]
-    [JsonProperty("level")]
+    [JsonPropertyName("level")]
     public int? Level { get; set; }
 
     [Column("net_worth")]
-    [JsonProperty("net_worth")]
+    [JsonPropertyName("networth")]
     public long? Networth { get; set; }
 
     [Column("hero_damage")]
-    [JsonProperty("hero_damage")]
+    [JsonPropertyName("heroDamage")]
     public int? HeroDamage { get; set; }
 
     [Column("tower_damage")]
-    [JsonProperty("tower_damage")]
+    [JsonPropertyName("towerDamage")]
     public int? TowerDamage { get; set; }
 
     [Column("hero_healing")]
-    [JsonProperty("hero_healing")]
+    [JsonPropertyName("heroHealing")]
     public int? HeroHealing { get; set; }
 
     [Column("gold")]
-    [JsonProperty("gold")]
+    [JsonPropertyName("gold")]
     public int? Gold { get; set; }
 
     // Match Metadata
 
     [Column("fight_score")]
+    [JsonPropertyName("fightScore")]
     public float? FightScore { get; set; }
 
     [Column("farm_score")]
+    [JsonPropertyName("farmScore")]
     public float? FarmScore { get; set; }
 
     [Column("support_score")]
+    [JsonPropertyName("supportScore")]
     public float? SupportScore { get; set; }
 
     [Column("push_score")]
+    [JsonPropertyName("pushScore")]
     public float? PushScore { get; set; }
 
     [Column("hero_xp")]
+    [JsonPropertyName("heroXp")]
     public uint? HeroXp { get; set; }
 
     [Column("rampages")]
+    [JsonPropertyName("rampages")]
     public uint? Rampages { get; set; }
 
     [Column("triple_kills")]
+    [JsonPropertyName("tripleKills")]
     public uint? TripleKills { get; set; }
 
     [Column("aegis_snatched")]
+    [JsonPropertyName("aegisSnatched")]
     public uint? AegisSnatched { get; set; }
 
     [Column("rapiers_purchased")]
+    [JsonPropertyName("rapiersPurchased")]
     public uint? RapiersPurchased { get; set; }
 
     [Column("couriers_killed")]
+    [JsonPropertyName("couriersKilled")]
     public uint? CouriersKilled { get; set; }
 }

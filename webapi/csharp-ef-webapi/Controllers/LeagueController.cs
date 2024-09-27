@@ -6,6 +6,8 @@ using DataAccessLibrary.Data;
 using DataAccessLibrary.Models.ProMetadata;
 using DataAccessLibrary.Models.WebApi;
 using DataAccessLibrary.Models.GameCoordinator;
+using csharp_ef_webapi.Services;
+using DataAccessLibrary.Models.Discord;
 
 namespace csharp_ef_webapi.Controllers
 {
@@ -13,24 +15,34 @@ namespace csharp_ef_webapi.Controllers
     [ApiController]
     public class LeagueController : ControllerBase
     {
-        private readonly DiscordRepository _discordRepository;
-        private readonly ProMetadataRepository _proMetadataRepository;
-        private readonly WebApiRepository _webApiRepository;
-        private readonly GameCoordinatorRepository _gameCoordinatorRepository;
+        private readonly DiscordWebApiService _discordWebApiService;
+        private readonly FantasyServiceAdmin _fantasyServiceAdmin;
+        private readonly IProMetadataRepository _proMetadataRepository;
+        private readonly IMatchHistoryRepository _matchHistoryRepository;
+        private readonly IMatchDetailRepository _matchDetailRepository;
+        private readonly IGcMatchMetadataRepository _gcMatchMetadataRepository;
 
-        public LeagueController(DiscordRepository discordRepository, ProMetadataRepository proMetadataRepository, WebApiRepository webApiRepository, GameCoordinatorRepository gameCoordinatorRepository)
+        public LeagueController(
+            DiscordWebApiService discordWebApiService,
+            FantasyServiceAdmin fantasyServiceAdmin,
+            IProMetadataRepository proMetadataRepository,
+            IMatchHistoryRepository matchHistoryRepository,
+            IMatchDetailRepository matchDetailRepository,
+            IGcMatchMetadataRepository gcMatchMetadataRepository)
         {
-            _discordRepository = discordRepository;
+            _discordWebApiService = discordWebApiService;
+            _fantasyServiceAdmin = fantasyServiceAdmin;
             _proMetadataRepository = proMetadataRepository;
-            _webApiRepository = webApiRepository;
-            _gameCoordinatorRepository = gameCoordinatorRepository;
+            _matchHistoryRepository = matchHistoryRepository;
+            _matchDetailRepository = matchDetailRepository;
+            _gcMatchMetadataRepository = gcMatchMetadataRepository;
         }
 
         // GET: api/League
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<League>>> GetLeagues(bool? is_active = null)
+        public async Task<ActionResult<IEnumerable<League>>> GetLeagues(bool include_inactive = false)
         {
-            return Ok(await _proMetadataRepository.GetLeaguesAsync(is_active));
+            return Ok(await _proMetadataRepository.GetLeaguesAsync(include_inactive));
         }
 
         // GET: api/League/5
@@ -54,56 +66,105 @@ namespace csharp_ef_webapi.Controllers
         public async Task<ActionResult<League>> PostLeague(League league)
         {
             // Admin only operation
-            var nameId = HttpContext.User?.Claims?.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-            if (nameId == null) return BadRequest("Invalid User Claims please contact admin");
-
-            bool getAccountId = long.TryParse(nameId.Value, out long userDiscordAccountId);
-            bool AdminCheck = await _discordRepository.IsUserAdminAsync(userDiscordAccountId);
-
-            if (!AdminCheck)
+            if (!await _discordWebApiService.CheckAdminUser(HttpContext))
             {
                 return Unauthorized();
             }
 
+            try
+            {
+                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
+                if (discordUser == null)
+                {
+                    return Unauthorized();
+                }
 
-            await _proMetadataRepository.AddLeagueAsync(league);
+                await _fantasyServiceAdmin.AddLeagueAsync(discordUser, league);
+                return CreatedAtAction("GetLeague", new { id = league.Id }, league);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+        }
 
-            return CreatedAtAction("GetLeague", new { id = league.Id }, league);
+        // PUT: api/League/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize]
+        [HttpPut("{leagueId}")]
+        public async Task<IActionResult> PutFantasyLeague(int leagueId, League league)
+        {
+            // Admin only operation
+            if (!await _discordWebApiService.CheckAdminUser(HttpContext))
+            {
+                return Unauthorized();
+            }
+
+            try
+            {
+                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
+                if (discordUser == null)
+                {
+                    return Unauthorized();
+                }
+
+                await _fantasyServiceAdmin.UpdateLeagueAsync(discordUser, leagueId, league);
+                return NoContent();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // DELETE: api/League/5
         [Authorize]
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteLeague(int id)
+        [HttpDelete("{leagueId}")]
+        public async Task<IActionResult> DeleteLeague(int leagueId)
         {
             // Admin only operation
-            var nameId = HttpContext.User?.Claims?.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-            if (nameId == null) return BadRequest("Invalid User Claims please contact admin");
-
-            bool getAccountId = long.TryParse(nameId.Value, out long userDiscordAccountId);
-            bool AdminCheck = await _discordRepository.IsUserAdminAsync(userDiscordAccountId);
-
-            if (!AdminCheck)
+            if (!await _discordWebApiService.CheckAdminUser(HttpContext))
             {
                 return Unauthorized();
             }
 
-            var league = await _proMetadataRepository.GetLeagueAsync(id);
-            if (league == null)
+            try
             {
-                return NotFound();
+                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
+                if (discordUser == null)
+                {
+                    return Unauthorized();
+                }
+
+                await _fantasyServiceAdmin.DeleteLeagueAsync(discordUser, leagueId);
+                return NoContent();
             }
-
-            await _proMetadataRepository.DeleteLeagueAsync(league);
-
-            return NoContent();
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // GET: api/League/5/Match/History
         [HttpGet("{leagueId}/match/history")]
-        public async Task<ActionResult<IEnumerable<MatchHistory>>> GetLeagueMatchHistory(int fantasyLeagueId)
+        public async Task<ActionResult<IEnumerable<MatchHistory>>> GetLeagueMatchHistory(int leagueId)
         {
-            var matches = await _webApiRepository.GetMatchHistoryByFantasyLeagueAsync(fantasyLeagueId);
+            League? league = await _proMetadataRepository.GetLeagueAsync(leagueId);
+
+            if (league == null)
+            {
+                return NotFound("League ID not found");
+            }
+
+            var matches = await _matchHistoryRepository.GetByLeagueAsync(league);
 
             if (matches == null || matches.Count() == 0)
             {
@@ -115,9 +176,16 @@ namespace csharp_ef_webapi.Controllers
 
         // GET: api/League/5/Match/Details
         [HttpGet("{leagueId}/match/details")]
-        public async Task<ActionResult<List<MatchDetail>>> GetLeagueMatchDetails(int fantasyLeagueId)
+        public async Task<ActionResult<List<MatchDetail>>> GetLeagueMatchDetails(int leagueId)
         {
-            var matches = await _webApiRepository.GetMatchDetailsByFantasyLeagueAsync(fantasyLeagueId);
+            League? league = await _proMetadataRepository.GetLeagueAsync(leagueId);
+
+            if (league == null)
+            {
+                return NotFound("League ID not found");
+            }
+
+            var matches = await _matchDetailRepository.GetByLeagueAsync(league);
 
             if (matches == null || matches.Count() == 0)
             {
@@ -131,7 +199,14 @@ namespace csharp_ef_webapi.Controllers
         [HttpGet("{leagueId}/match/{matchId}/details")]
         public async Task<ActionResult<MatchDetail>> GetLeagueMatchIdDetails(int leagueId, long matchId)
         {
-            var matches = await _webApiRepository.GetMatchDetailAsync(matchId);
+            League? league = await _proMetadataRepository.GetLeagueAsync(leagueId);
+
+            if (league == null)
+            {
+                return NotFound("League ID not found");
+            }
+
+            var matches = await _matchDetailRepository.GetByIdAsync(matchId);
 
             if (matches == null)
             {
@@ -148,7 +223,14 @@ namespace csharp_ef_webapi.Controllers
             // Limit pageSize max
             if (pageSize > 100) { pageSize = 100; }
 
-            var matches = await _gameCoordinatorRepository.GetLeagueMetadataAsync(leagueId);
+            League? league = await _proMetadataRepository.GetLeagueAsync(leagueId);
+
+            if (league == null)
+            {
+                return NotFound("League ID not found");
+            }
+
+            var matches = await _gcMatchMetadataRepository.GetByLeagueAsync(league);
 
             if (matches == null || matches.Count() == 0)
             {

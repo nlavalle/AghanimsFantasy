@@ -69,7 +69,7 @@ const selectedFantasyLeague = ref<FantasyLeague>({
 })
 
 const leagueOptions = computed(() => {
-  return leagueStore.activeLeagues.sort((a, b) => a.id - b.id)
+  return leagueStore.activeLeagues.sort((a, b) => b.id - a.id)
 })
 
 const fantasyLeagueOptions = computed(() => {
@@ -96,6 +96,8 @@ onMounted(() => {
 
 function updateSelectedLeague() {
   leagueStore.setSelectedLeague(selectedLeague.value)
+  selectedFantasyLeague.value = leagueStore.defaultFantasyLeague;
+  leagueStore.setSelectedFantasyLeague(selectedFantasyLeague.value);
   clearFantasyDraftPicks()
 }
 

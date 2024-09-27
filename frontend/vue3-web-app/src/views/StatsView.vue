@@ -13,10 +13,13 @@
       </v-col>
       <v-col>
         <v-row>
-          <v-select label="League" v-model="selectedFantasyLeague" :items="availableFantasyLeagues" item-title="name" item-value="id"
+          <v-select label="League" v-model="selectedFantasyLeague" :items="availableFantasyLeagues" item-value="id"
             variant="underlined" return-object>
+            <template v-slot:selection="{item}" slot-scope="data">
+              <p>{{ fullFantasyName(item.raw.leagueId,item.raw.name) }}</p>
+            </template>
             <template v-slot:item="{ props, item }">
-              <v-list-item v-bind="props" class="league-selector" :title="item.raw.name"></v-list-item>
+              <v-list-item v-bind="props" class="league-selector" :title="fullFantasyName(item.raw.leagueId,item.raw.name)"></v-list-item>
             </template>
           </v-select>
         </v-row>
@@ -77,13 +80,21 @@ onMounted(() => {
   if(leagueStore.selectedFantasyLeague) {
     selectedFantasyLeague.value = leagueStore.selectedFantasyLeague;
   } else {
-    localApiService.getFantasyLeagues().then((result: any) => {
-    leagueStore.setFantasyLeagues(result);
-    selectedFantasyLeague.value = leagueStore.defaultFantasyLeague;
-    leagueStore.setSelectedFantasyLeague(selectedFantasyLeague.value)
-  })
+    localApiService.getLeagues().then((result: any) => {
+      leagueStore.setLeagues(result);
+      localApiService.getFantasyLeagues().then((result: any) => {
+        leagueStore.setFantasyLeagues(result);
+        selectedFantasyLeague.value = leagueStore.defaultFantasyLeague;
+        leagueStore.setSelectedFantasyLeague(selectedFantasyLeague.value)
+      })
+    })
   }
 })
+
+function fullFantasyName(fantasyLeagueId: number, fantasyLeagueName: string) {
+  const league = leagueStore.activeLeagues.find(l => l.id === fantasyLeagueId);
+  return `${league?.name ?? ''} - ${fantasyLeagueName}`
+}
 
 </script>
 

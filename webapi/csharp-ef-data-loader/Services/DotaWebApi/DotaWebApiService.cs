@@ -14,7 +14,7 @@ public class DotaWebApiService : BackgroundService
     private TaskCompletionSource _tcsReadyForRequests;
     private readonly ILogger<DotaWebApiService> _logger;
     internal CancellationToken StoppingToken { get; private set; }
-    internal RateLimiter RateLimiter { get; } = new RateLimiter(_delayBetweenRequests);
+    internal RateLimiter RateLimiter { get; } = new RateLimiter(_delayBetweenRequests * 2);
     private const long _delayBetweenRequests = 10_000_000; // Constant for ticks in a second
     IConfiguration _configuration;
     IServiceProvider _serviceProvider;

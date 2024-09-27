@@ -8,15 +8,15 @@ namespace csharp_ef_webapi.Controllers
     [ApiController]
     public class TeamController : ControllerBase
     {
-        private readonly ProMetadataRepository _proMetadataRepository;
+        private readonly IProMetadataRepository _proMetadataRepository;
 
-        public TeamController(ProMetadataRepository proMetadataRepository)
+        public TeamController(IProMetadataRepository proMetadataRepository)
         {
             _proMetadataRepository = proMetadataRepository;
         }
 
-        // GET: api/Team/teams
-        [HttpGet("teams")]
+        // GET: api/Team
+        [HttpGet("")]
         public async Task<ActionResult<IEnumerable<Team>>> GetTeams()
         {
             return Ok(await _proMetadataRepository.GetTeamsAsync());

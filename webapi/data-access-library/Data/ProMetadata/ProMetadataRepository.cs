@@ -19,12 +19,12 @@ public class ProMetadataRepository : IProMetadataRepository
     }
 
     #region League
-    public async Task<List<League>> GetLeaguesAsync(bool? IsActive)
+    public async Task<List<League>> GetLeaguesAsync(bool? IncludeInactive)
     {
         _logger.LogInformation($"Fetching All Leagues");
 
         return await _dbContext.Leagues
-                .Where(l => IsActive == null || l.IsActive == IsActive)
+                .Where(l => IncludeInactive == true || l.IsActive)
                 .ToListAsync();
     }
 
@@ -40,6 +40,16 @@ public class ProMetadataRepository : IProMetadataRepository
         _logger.LogInformation($"Adding new League {newLeague.Name}");
 
         await _dbContext.Leagues.AddAsync(newLeague);
+        await _dbContext.SaveChangesAsync();
+
+        return;
+    }
+
+    public async Task UpdateLeagueAsync(League updateLeague)
+    {
+        _logger.LogInformation($"Updating League {updateLeague.Name}");
+
+        _dbContext.Entry(updateLeague).State = EntityState.Modified;
         await _dbContext.SaveChangesAsync();
 
         return;
@@ -144,7 +154,7 @@ public class ProMetadataRepository : IProMetadataRepository
 
         await _dbContext.SaveChangesAsync();
 
-        return; 
+        return;
     }
     #endregion Hero
 

@@ -1,3 +1,4 @@
+using csharp_ef_webapi.Migrations;
 using csharp_ef_webapi.Services;
 using DataAccessLibrary.Data;
 using Microsoft.AspNetCore.Authentication;
@@ -55,9 +56,9 @@ builder.Services.AddDbContext<AghanimsFantasyContext>(
     {
         var conn_string = builder.Configuration.GetConnectionString("AghanimsFantasyDatabase");
         conn_string = conn_string?.Replace("{SQL_HOST}", Environment.GetEnvironmentVariable("SQL_HOST")) ?? "Host=localhost;Port=5432;Database=postgres;";
-        conn_string = conn_string.Replace("{SQL_USER}", Environment.GetEnvironmentVariable("SQL_USER"));
-        conn_string = conn_string.Replace("{SQL_PASSWORD}", Environment.GetEnvironmentVariable("SQL_PASSWORD"));
-        options.UseNpgsql(conn_string);
+        conn_string = conn_string.Replace("{SQL_USER}", Environment.GetEnvironmentVariable("SQL_USER") ?? "postgres");
+        conn_string = conn_string.Replace("{SQL_PASSWORD}", Environment.GetEnvironmentVariable("SQL_PASSWORD") ?? "postgres");
+        options.UseNpgsql(conn_string, b => b.MigrationsAssembly("csharp-ef-webapi"));
     }
 );
 
@@ -123,15 +124,27 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add Repositories to be used by controllers
-builder.Services.AddScoped<FantasyRepository>();
-builder.Services.AddScoped<ProMetadataRepository>();
-builder.Services.AddScoped<WebApiRepository>();
-builder.Services.AddScoped<GameCoordinatorRepository>();
-builder.Services.AddScoped<DiscordRepository>();
+// Add Fantasy Repositories
+builder.Services.AddScoped<IFantasyDraftRepository, FantasyDraftRepository>();
+builder.Services.AddScoped<IFantasyLeagueRepository, FantasyLeagueRepository>();
+builder.Services.AddScoped<IFantasyPlayerRepository, FantasyPlayerRepository>();
+builder.Services.AddScoped<IFantasyMatchRepository, FantasyMatchRepository>();
+builder.Services.AddScoped<IFantasyMatchPlayerRepository, FantasyMatchPlayerRepository>();
+builder.Services.AddScoped<IFantasyRepository, FantasyRepository>();
+// Add Game Coordinator Repositories
+builder.Services.AddScoped<IGcMatchMetadataRepository, GcMatchMetadataRepository>();
+// Add ProMetadata Repositories
+builder.Services.AddScoped<IProMetadataRepository, ProMetadataRepository>();
+// Add WebApi Repositories
+builder.Services.AddScoped<IMatchHistoryRepository, MatchHistoryRepository>();
+builder.Services.AddScoped<IMatchDetailRepository, MatchDetailRepository>();
+// Add Discord Repositories
+builder.Services.AddScoped<IDiscordRepository, DiscordRepository>();
 
-// Add Scoped Discord service to be used to call new discord users
+// Add Scoped services to be used by controllers to limit direct repository access
 builder.Services.AddScoped<DiscordWebApiService>();
+builder.Services.AddScoped<FantasyService>();
+builder.Services.AddScoped<FantasyServiceAdmin>();
 
 var app = builder.Build();
 

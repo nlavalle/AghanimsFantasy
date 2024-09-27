@@ -4,8 +4,7 @@ using DataAccessLibrary.Data;
 using DataAccessLibrary.Models.WebApi;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 internal class MatchDetailsContext : DotaOperationContext
 {
@@ -13,7 +12,8 @@ internal class MatchDetailsContext : DotaOperationContext
     // private readonly DotaWebApiService _apiService;
     private readonly ILogger<MatchDetailsContext> _logger;
     private readonly HttpClient _httpClient;
-    private readonly WebApiRepository _webApiRepository;
+    private readonly IMatchHistoryRepository _matchHistoryRepository;
+    private readonly IMatchDetailRepository _matchDetailRepository;
 
     // Our match history list: just going to use a locked list, contention should be very low
     private readonly List<MatchDetail> _matches = new List<MatchDetail>();
@@ -26,7 +26,8 @@ internal class MatchDetailsContext : DotaOperationContext
     public MatchDetailsContext(
             ILogger<MatchDetailsContext> logger,
             HttpClient httpClient,
-            WebApiRepository webApiRepository,
+            IMatchHistoryRepository matchHistoryRepository,
+            IMatchDetailRepository matchDetailRepository,
             IServiceScope scope,
             Config config
         )
@@ -34,7 +35,8 @@ internal class MatchDetailsContext : DotaOperationContext
     {
         _logger = logger;
         _httpClient = httpClient;
-        _webApiRepository = webApiRepository;
+        _matchHistoryRepository = matchHistoryRepository;
+        _matchDetailRepository = matchDetailRepository;
     }
 
     protected override async Task OperateAsync(CancellationToken cancellationToken)
@@ -42,7 +44,7 @@ internal class MatchDetailsContext : DotaOperationContext
         try
         {
             // Find all the match histories without match detail rows and add tasks to fetch them all
-            List<MatchHistory> matchesWithoutDetails = await _webApiRepository.GetMatchHistoriesNotInMatchDetails(50);
+            List<MatchHistory> matchesWithoutDetails = await _matchHistoryRepository.GetNotInMatchDetails(50);
 
             if (matchesWithoutDetails.Count() > 0)
             {
@@ -68,27 +70,27 @@ internal class MatchDetailsContext : DotaOperationContext
 
                 foreach (MatchDetail matchDetail in _matches)
                 {
-                    if (await _webApiRepository.GetMatchDetailAsync(matchDetail.MatchId) == null)
+                    if (await _matchDetailRepository.GetByIdAsync(matchDetail.MatchId) == null)
                     {
 
                         // Set PicksBans Match IDs since it's not in json
                         foreach (MatchDetailsPicksBans picksBans in matchDetail.PicksBans)
                         {
-                            picksBans.MatchId = matchDetail.MatchId;
+                            picksBans.Match = matchDetail;
                         }
 
                         // Set Players Match IDs since it's not in json
                         foreach (MatchDetailsPlayer player in matchDetail.Players)
                         {
-                            player.MatchId = matchDetail.MatchId;
+                            player.Match = matchDetail;
                             // Set Players Ability Upgrade PlayerIDs since it's not in json
                             foreach (MatchDetailsPlayersAbilityUpgrade abilities in player.AbilityUpgrades)
                             {
-                                abilities.PlayerId = player.Id;
+                                abilities.Player = player;
                             }
                         }
 
-                        await _webApiRepository.AddMatchDetailAsync(matchDetail);
+                        await _matchDetailRepository.AddAsync(matchDetail);
                     }
                 }
 
@@ -121,12 +123,13 @@ internal class MatchDetailsContext : DotaOperationContext
             _logger.LogInformation($"Request submitted at {DateTime.Now.Ticks}");
             response.EnsureSuccessStatusCode();
 
-            JToken responseRawJToken = JToken.Parse(await response.Content.ReadAsStringAsync());
+            JsonDocument responseRawJDocument = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
 
             // Read and deserialize the matches from the json response
-            JToken responseObject = responseRawJToken["result"] ?? "{}";
+            JsonElement resultElement;
+            if (!responseRawJDocument.RootElement.TryGetProperty("result", out resultElement)) throw new Exception("Result element not found in response");
 
-            MatchDetail? matchResponse = JsonConvert.DeserializeObject<MatchDetail>(responseObject.ToString());
+            MatchDetail? matchResponse = JsonSerializer.Deserialize<MatchDetail>(resultElement.GetRawText()) ?? throw new Exception("Unable to deserialize response json to MatchDetails");
 
             if (matchResponse != null)
             {

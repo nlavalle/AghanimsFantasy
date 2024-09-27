@@ -25,7 +25,7 @@ internal class FantasyNormalizedAveragesContext : DotaOperationContext
         {
             // Clear the fantasy normalized averages table and load it with the current view
             await _dbContext.FantasyNormalizedAverages.ExecuteDeleteAsync();
-            List<FantasyNormalizedAverages> fantasyNormalizedAverages = await _dbContext.FantasyNormalizedAveragesView.ToListAsync();
+            List<FantasyNormalizedAverages> fantasyNormalizedAverages = await _dbContext.FantasyNormalizedAveragesView.Include(fnav => fnav.FantasyPlayer).ToListAsync();
 
             List<FantasyNormalizedAveragesTable> convertedTableRows = fantasyNormalizedAverages.Select(f => new FantasyNormalizedAveragesTable()
             {
@@ -58,7 +58,6 @@ internal class FantasyNormalizedAveragesContext : DotaOperationContext
                 AvgWardsDewardedPoints = f.AvgWardsDewardedPoints,
                 AvgXpPerMinPoints = f.AvgXpPerMinPoints,
                 FantasyPlayer = f.FantasyPlayer,
-                FantasyPlayerId = f.FantasyPlayerId,
                 TotalMatches = f.TotalMatches
             }
             ).ToList();

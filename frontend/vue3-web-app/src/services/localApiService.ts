@@ -7,8 +7,11 @@ import type { League } from "@/types/League"
 const baseUrl = '/api'
 
 export const localApiService = {
-  getLeagues() {
-    return fetch(`${baseUrl}/league`)
+  getLeagues(include_inactive = 'false') {
+    let url = `${baseUrl}/league?` + new URLSearchParams({
+      include_inactive: include_inactive
+    })
+    return fetch(url)
       .then(
         function (response: Response) {
           if (!response.ok) {
@@ -29,7 +32,7 @@ export const localApiService = {
       })
   },
   postLeague(newLeague: League) {
-    return fetch(`${baseUrl}/League`, {
+    return fetch(`${baseUrl}/league`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -41,6 +44,28 @@ export const localApiService = {
           throw response.status
         } else {
           return response.json()
+        }
+      }.bind(this)
+    )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
+  putLeague(newLeague: League) {
+    if (!newLeague.id) return;
+    return fetch(`${baseUrl}/League/${newLeague.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newLeague)
+    }).then(
+      function (response: Response) {
+        if (!response.ok) {
+          throw response.status
+        } else {
+          return response.status
         }
       }.bind(this)
     )
@@ -109,6 +134,28 @@ export const localApiService = {
         throw error
       })
   },
+  putFantasyLeague(updateLeague: FantasyLeague) {
+    if (!updateLeague.id) return;
+    return fetch(`${baseUrl}/FantasyLeague/${updateLeague.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(updateLeague)
+    }).then(
+      function (response: Response) {
+        if (!response.ok) {
+          throw response.status
+        } else {
+          return response.status
+        }
+      }.bind(this)
+    )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
   deleteFantasyLeague(deleteFantasyLeague: League) {
     if (!deleteFantasyLeague.id) return;
     return fetch(`${baseUrl}/FantasyLeague/${deleteFantasyLeague.id}`, {
@@ -128,11 +175,7 @@ export const localApiService = {
       })
   },
   getFantasyPlayers(fantasyLeagueId: number = 0) {
-    let url = `${baseUrl}/FantasyPlayer`
-    if (fantasyLeagueId != 0) {
-      url = url + `?FantasyLeagueId=${fantasyLeagueId}`
-    }
-    return fetch(url)
+    return fetch(`${baseUrl}/FantasyLeague/${fantasyLeagueId}/players`)
       .then(
         function (response: Response) {
           if (!response.ok) {
@@ -165,6 +208,28 @@ export const localApiService = {
           throw response.status
         } else {
           return response.json()
+        }
+      }.bind(this)
+    )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
+  putFantasyPlayer(updateFantasyPlayer: FantasyPlayer) {
+    if (!updateFantasyPlayer.id) return;
+    return fetch(`${baseUrl}/FantasyPlayer/${updateFantasyPlayer.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(updateFantasyPlayer)
+    }).then(
+      function (response: Response) {
+        if (!response.ok) {
+          throw response.status
+        } else {
+          return response.status
         }
       }.bind(this)
     )
@@ -318,8 +383,8 @@ export const localApiService = {
         throw error
       })
   },
-  getUserDraftPoints(leagueId: number) {
-    return fetch(`${baseUrl}/fantasy/draft/${leagueId}/points`)
+  getUserDraftPoints(fantasyLeagueId: number) {
+    return fetch(`${baseUrl}/fantasydraft/${fantasyLeagueId}/points`)
       .then(
         function (response: any) {
           if (!response.ok) {
@@ -339,8 +404,8 @@ export const localApiService = {
         throw error
       })
   },
-  getPlayerFantasyStats(leagueId: number) {
-    return fetch(`${baseUrl}/fantasy/players/${leagueId}/points`)
+  getPlayerFantasyStats(fantasyLeagueId: number) {
+    return fetch(`${baseUrl}/fantasyleague/${fantasyLeagueId}/players/points`)
       .then(
         function (response: any) {
           if (!response.ok) {
@@ -360,8 +425,8 @@ export const localApiService = {
         throw error
       })
   },
-  getFantasyLeagueMetadataStats(leagueId: number) {
-    return fetch(`${baseUrl}/fantasy/league/${leagueId}/metadata`)
+  getFantasyLeagueMetadataStats(fantasyLeagueId: number) {
+    return fetch(`${baseUrl}/fantasyleague/${fantasyLeagueId}/metadata`)
       .then(
         function (response: any) {
           if (!response.ok) {
@@ -381,8 +446,8 @@ export const localApiService = {
         throw error
       })
   },
-  getPlayerFantasyMatchStats(leagueId: number) {
-    return fetch(`${baseUrl}/fantasy/players/${leagueId}/matches/points?limit=100`)
+  getPlayerFantasyMatchStats(fantasyLeagueId: number) {
+    return fetch(`${baseUrl}/fantasyleague/${fantasyLeagueId}/players/matches/points?limit=100`)
       .then(
         function (response: any) {
           if (!response.ok) {
@@ -402,8 +467,8 @@ export const localApiService = {
         throw error
       })
   },
-  getDraftPlayerFantasyMatchStats(leagueId: number) {
-    return fetch(`${baseUrl}/fantasy/draft/${leagueId}/matches/points?limit=100`)
+  getDraftPlayerFantasyMatchStats(fantasyLeagueId: number) {
+    return fetch(`${baseUrl}/fantasydraft/${fantasyLeagueId}/matches/points?limit=100`)
       .then(
         function (response: any) {
           if (!response.ok) {
@@ -423,8 +488,8 @@ export const localApiService = {
         throw error
       })
   },
-  getTopTenDrafts(leagueId: number) {
-    return fetch(`${baseUrl}/fantasy/players/${leagueId}/top10`)
+  getTopTenDrafts(fantasyLeagueId: number) {
+    return fetch(`${baseUrl}/fantasyleague/${fantasyLeagueId}/drafters/top10`)
       .then(
         function (response: any) {
           if (!response.ok) {
@@ -508,33 +573,21 @@ export const localApiService = {
       })
   },
   saveFantasyDraft(user: any, league: any, draftPickArray: FantasyPlayer[]) {
+    let draftPicks = [];
+    for (let i = 1; i < 6; i++) {
+      if (draftPickArray[i]) {
+        draftPicks.push({
+          FantasyPlayerId: draftPickArray[i].id,
+          DraftOrder: i
+        })
+      }
+    }
     const updateRequest = {
       FantasyLeagueId: league.id,
       DisordAccountId: user.id,
-      DraftPickPlayers: [
-        {
-          FantasyPlayerId: draftPickArray[1]?.id,
-          DraftOrder: 1
-        },
-        {
-          FantasyPlayerId: draftPickArray[2]?.id,
-          DraftOrder: 2
-        },
-        {
-          FantasyPlayerId: draftPickArray[3]?.id,
-          DraftOrder: 3
-        },
-        {
-          FantasyPlayerId: draftPickArray[4]?.id,
-          DraftOrder: 4
-        },
-        {
-          FantasyPlayerId: draftPickArray[5]?.id,
-          DraftOrder: 5
-        }
-      ]
+      DraftPickPlayers: draftPicks
     }
-    return fetch(`${baseUrl}/fantasy/draft`, {
+    return fetch(`${baseUrl}/fantasydraft`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

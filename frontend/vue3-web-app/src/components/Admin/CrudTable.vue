@@ -7,7 +7,7 @@
                     single-line></v-text-field>
                 <v-divider class="mx-4" inset vertical></v-divider>
                 <v-spacer></v-spacer>
-                <v-dialog v-model="dialog" max-width="500px">
+                <v-dialog v-model="dialog" max-width="800px">
                     <template v-slot:activator="{ props }">
                         <v-btn class="mb-2" dark v-bind="props">
                             New Item
@@ -21,7 +21,7 @@
                         <v-card-text>
                             <v-container>
                                 <v-row>
-                                    <textarea v-model="jsonInput" rows="10" cols="50"
+                                    <textarea v-model="jsonInput" rows="10" cols="256"
                                         placeholder="Paste your JSON here..."></textarea>
                                 </v-row>
                             </v-container>
@@ -38,7 +38,7 @@
                         </v-card-actions>
                     </v-card>
                 </v-dialog>
-                <v-dialog v-model="dialogEdit" max-width="1200px">
+                <v-dialog v-model="dialogEdit" max-width="800px">
                     <v-card>
                         <v-card-title>
                             <span class="text-h5">{{ formTitle }}</span>

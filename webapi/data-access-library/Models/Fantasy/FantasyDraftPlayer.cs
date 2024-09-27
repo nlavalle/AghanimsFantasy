@@ -9,8 +9,9 @@ public class FantasyDraftPlayer
     [Column("fantasy_draft_id")]
     public long FantasyDraftId { get; set; }
 
+    [ForeignKey("FantasyPlayer")]
     [Column("fantasy_player_id")]
-    public long? FantasyPlayerId { get; set; }
+    public required long FantasyPlayerId { get; set; }
     public FantasyPlayer? FantasyPlayer { get; set; }
 
     [Column("draft_order")]

@@ -5,16 +5,15 @@ using DataAccessLibrary.Data;
 using DataAccessLibrary.Models.WebApi;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 internal class LeagueHistoryContext : DotaOperationContext
 {
     private static readonly string AppendedApiPath = "GetMatchHistory/v1";
     private readonly ILogger<LeagueHistoryContext> _logger;
     private readonly HttpClient _httpClient;
-    private readonly ProMetadataRepository _proMetadataRepository;
-    private readonly WebApiRepository _webApiRepository;
+    private readonly IProMetadataRepository _proMetadataRepository;
+    private readonly IMatchHistoryRepository _matchHistoryRepository;
 
     // Our match history list: just going to use a locked list, contention should be very low
     private readonly List<MatchHistory> _matches = new List<MatchHistory>();
@@ -28,8 +27,8 @@ internal class LeagueHistoryContext : DotaOperationContext
     public LeagueHistoryContext(
             ILogger<LeagueHistoryContext> logger,
             HttpClient httpClient,
-            ProMetadataRepository proMetadataRepository,
-            WebApiRepository webApiRepository,
+            IProMetadataRepository proMetadataRepository,
+            IMatchHistoryRepository matchHistoryRepository,
             IServiceScope scope,
             Config config
         )
@@ -38,7 +37,7 @@ internal class LeagueHistoryContext : DotaOperationContext
         _logger = logger;
         _httpClient = httpClient;
         _proMetadataRepository = proMetadataRepository;
-        _webApiRepository = webApiRepository;
+        _matchHistoryRepository = matchHistoryRepository;
     }
 
     protected override async Task OperateAsync(CancellationToken cancellationToken)
@@ -47,7 +46,7 @@ internal class LeagueHistoryContext : DotaOperationContext
         {
             Dictionary<string, string> query = new Dictionary<string, string>();
 
-            var leagues = (await _proMetadataRepository.GetLeaguesAsync(true)).Distinct().ToArray();
+            var leagues = (await _proMetadataRepository.GetLeaguesAsync(false)).Distinct().ToArray();
             var length = leagues.Length;
 
             // Knowing the length triggers a lot of stuff
@@ -72,7 +71,7 @@ internal class LeagueHistoryContext : DotaOperationContext
             // _matches is safe to use here, because this location is guaranteed to be the only user
             foreach (MatchHistory match in _matches)
             {
-                if (await _webApiRepository.GetMatchHistoryAsync(match.MatchId) == null)
+                if (await _matchHistoryRepository.GetByIdAsync(match.MatchId) == null)
                 {
                     // Set Players Match IDs since it's not in json
                     foreach (MatchHistoryPlayer player in match.Players)
@@ -92,7 +91,7 @@ internal class LeagueHistoryContext : DotaOperationContext
 
                         player.MatchId = match.MatchId;
                     }
-                    await _webApiRepository.AddMatchHistoryAsync(match);
+                    await _matchHistoryRepository.AddAsync(match);
                 }
             }
             _logger.LogInformation($"League Match History fetch done");
@@ -134,14 +133,16 @@ internal class LeagueHistoryContext : DotaOperationContext
             _logger.LogInformation($"Request submitted at {DateTime.Now.Ticks}");
             response.EnsureSuccessStatusCode();
 
-            JToken responseRawJToken = JToken.Parse(await response.Content.ReadAsStringAsync());
+            JsonDocument responseRawJDocument = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
 
             // Read and deserialize the matches from the json response
-            JToken responseObject = responseRawJToken["result"] ?? "{}";
-            resultsRemaining = (responseObject["results_remaining"] ?? 0).Value<int>();
-            JToken matchesJson = responseObject["matches"] ?? "[]";
+            JsonElement resultElement;
+            if (!responseRawJDocument.RootElement.TryGetProperty("result", out resultElement)) throw new Exception("Result element not found in response");
+            resultsRemaining = resultElement.GetProperty("results_remaining").GetInt32();
+            JsonElement matchesElement;
+            if (!resultElement.TryGetProperty("matches", out matchesElement)) throw new Exception("Matches element not found in result response");
 
-            List<MatchHistory> matchResponse = JsonConvert.DeserializeObject<List<MatchHistory>>(matchesJson.ToString()) ?? new List<MatchHistory>();
+            List<MatchHistory> matchResponse = JsonSerializer.Deserialize<List<MatchHistory>>(matchesElement.GetRawText()) ?? throw new Exception("Unable to deserialize response json to MatchHistory");
 
             lock (_matches)
             {

@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using DataAccessLibrary.Data;
-using DataAccessLibrary.Models.WebApi;
 using DataAccessLibrary.Models.GameCoordinator;
 
 namespace csharp_ef_webapi.Controllers
@@ -9,27 +8,20 @@ namespace csharp_ef_webapi.Controllers
     [ApiController]
     public class MatchController : ControllerBase
     {
-        private readonly WebApiRepository _webApiRepository;
-        private readonly GameCoordinatorRepository _gameCoordinatorRepository;
+        private readonly IGcMatchMetadataRepository _gcMatchMetadataRepository;
 
-        public MatchController(WebApiRepository webApiRepository, GameCoordinatorRepository gameCoordinatorRepository)
+        public MatchController(
+            IGcMatchMetadataRepository gcMatchMetadataRepository
+        )
         {
-            _webApiRepository = webApiRepository;
-            _gameCoordinatorRepository = gameCoordinatorRepository;
-        }
-
-        // GET: api/Match/5/players
-        [HttpGet("{leagueId}/players")]
-        public async Task<ActionResult<IEnumerable<MatchDetailsPlayer>>> GetMatchPlayers(int? leagueId)
-        {
-            return Ok(await _webApiRepository.GetMatchDetailPlayersByLeagueAsync(leagueId));
+            _gcMatchMetadataRepository = gcMatchMetadataRepository;
         }
 
         // GET: api/Match/5/Metadata
         [HttpGet("{matchId}/metadata")]
         public async Task<ActionResult<GcMatchMetadata>> GetLeagueMatchIdMetadata(long matchId)
         {
-            var match = await _gameCoordinatorRepository.GetMatchMetadataAsync(matchId);
+            var match = await _gcMatchMetadataRepository.GetByIdAsync(matchId);
 
             if (match == null)
             {

@@ -2,18 +2,18 @@ namespace DataAccessLibrary.Models.ProMetadata;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 [Table("dota_heroes")]
 public class Hero
 {
     [Key]
     [Column("id")]
-    [JsonProperty("id")]
+    [JsonPropertyName("id")]
     public long Id { get; set; }
 
     [Column("name")]
-    [JsonProperty("name")]
+    [JsonPropertyName("name")]
     public string? Name { get; set; }
 
 }

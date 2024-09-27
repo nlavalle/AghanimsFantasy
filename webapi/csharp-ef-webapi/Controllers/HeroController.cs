@@ -8,15 +8,15 @@ namespace csharp_ef_webapi.Controllers
     [ApiController]
     public class HeroController : ControllerBase
     {
-        private readonly ProMetadataRepository _proMetadataRepository;
+        private readonly IProMetadataRepository _proMetadataRepository;
 
-        public HeroController(ProMetadataRepository proMetadataRepository)
+        public HeroController(IProMetadataRepository proMetadataRepository)
         {
             _proMetadataRepository = proMetadataRepository;
         }
 
-        // GET: api/Hero/Heroes
-        [HttpGet("heroes")]
+        // GET: api/Hero
+        [HttpGet("")]
         public async Task<ActionResult<IEnumerable<Hero>>> GetHeroes()
         {
             return Ok(await _proMetadataRepository.GetHeroesAsync());
