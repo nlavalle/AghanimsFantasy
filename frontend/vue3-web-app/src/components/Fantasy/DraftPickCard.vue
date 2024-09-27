@@ -64,8 +64,8 @@ const getPlayerLogo = () => {
 }
 
 const getTeamLogo = () => {
-  if (!props.fantasyPlayer?.team.id) return undefined;
-  return `logos/teams_logo_${props.fantasyPlayer?.team.id}.png`
+  if (!props.fantasyPlayer?.teamId) return undefined;
+  return `logos/teams_logo_${props.fantasyPlayer?.teamId}.png`
 }
 
 </script>
