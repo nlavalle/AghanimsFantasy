@@ -69,7 +69,7 @@ namespace csharp_ef_webapi.Controllers
                 }
 
                 await _fantasyServiceAdmin.AddFantasyPlayerAsync(discordUser, fantasyPlayer);
-                return CreatedAtAction("GetFantasyPlayer", new { id = fantasyPlayer.Id }, fantasyPlayer);
+                return CreatedAtAction("GetFantasyPlayer", new { fantasyPlayerId = fantasyPlayer.Id }, fantasyPlayer);
             }
             catch (UnauthorizedAccessException)
             {
@@ -77,10 +77,10 @@ namespace csharp_ef_webapi.Controllers
             }
         }
 
-        // PUT: api/FantasyLeague/5
+        // PUT: api/FantasyPlayer/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [Authorize]
-        [HttpPut("{fantasyLeagueId}")]
+        [HttpPut("{fantasyPlayerId}")]
         public async Task<IActionResult> PutFantasyPlayer(int fantasyPlayerId, FantasyPlayer fantasyPlayer)
         {
             // Admin only operation
@@ -110,10 +110,43 @@ namespace csharp_ef_webapi.Controllers
             }
         }
 
+        // PUT: api/FantasyPlayer
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize]
+        [HttpPut]
+        public async Task<IActionResult> PutFantasyPlayers(IEnumerable<FantasyPlayer> fantasyPlayers)
+        {
+            // Admin only operation
+            if (!await _discordWebApiService.CheckAdminUser(HttpContext))
+            {
+                return Unauthorized();
+            }
+
+            try
+            {
+                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
+                if (discordUser == null)
+                {
+                    return Unauthorized();
+                }
+
+                await _fantasyServiceAdmin.UpdateFantasyPlayersAsync(discordUser, fantasyPlayers);
+                return NoContent();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         // DELETE: api/FantasyPlayer/5
         [Authorize]
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteFantasyPlayer(int fantasyPlayerId)
+        [HttpDelete("{fantasyPlayerId}")]
+        public async Task<IActionResult> DeleteFantasyPlayer(long fantasyPlayerId)
         {
             // Admin only operation
             if (!await _discordWebApiService.CheckAdminUser(HttpContext))

@@ -8,6 +8,7 @@ public class FantasyService
 {
     private readonly ILogger<FantasyService> _logger;
     private readonly IFantasyLeagueRepository _fantasyLeagueRepository;
+    private readonly IFantasyLeagueWeightRepository _fantasyLeagueWeightRepository;
     private readonly IFantasyDraftRepository _fantasyDraftRepository;
     private readonly IFantasyPlayerRepository _fantasyPlayerRepository;
     private readonly IFantasyRepository _fantasyRepository;
@@ -15,6 +16,7 @@ public class FantasyService
     public FantasyService(
         ILogger<FantasyService> logger,
         IFantasyLeagueRepository fantasyLeagueRepository,
+        IFantasyLeagueWeightRepository fantasyLeagueWeightRepository,
         IFantasyDraftRepository fantasyDraftRepository,
         IFantasyPlayerRepository fantasyPlayerRepository,
         IFantasyRepository fantasyRepository
@@ -22,6 +24,7 @@ public class FantasyService
     {
         _logger = logger;
         _fantasyLeagueRepository = fantasyLeagueRepository;
+        _fantasyLeagueWeightRepository = fantasyLeagueWeightRepository;
         _fantasyDraftRepository = fantasyDraftRepository;
         _fantasyPlayerRepository = fantasyPlayerRepository;
         _fantasyRepository = fantasyRepository;
@@ -39,6 +42,28 @@ public class FantasyService
         }
 
         return fantasyPlayer;
+    }
+
+    public async Task<FantasyLeagueWeight?> GetFantasyLeagueWeightAsync(DiscordUser? siteUser, int fantasyLeagueWeightId)
+    {
+        IEnumerable<FantasyLeague> fantasyLeagues = await _fantasyLeagueRepository.GetAccessibleFantasyLeaguesAsync(siteUser);
+        FantasyLeagueWeight? fantasyLeagueWeight = await _fantasyLeagueWeightRepository.GetByIdAsync(fantasyLeagueWeightId);
+
+        if (fantasyLeagueWeight != null && !fantasyLeagues.Contains(fantasyLeagueWeight.FantasyLeague))
+        {
+            // User doesn't have access to this player
+            return null;
+        }
+
+        return fantasyLeagueWeight;
+    }
+
+    public async Task<List<FantasyLeagueWeight>> GetFantasyLeagueWeightsAsync(DiscordUser? siteUser)
+    {
+        IEnumerable<FantasyLeague> fantasyLeagues = await _fantasyLeagueRepository.GetAccessibleFantasyLeaguesAsync(siteUser);
+        IEnumerable<FantasyLeagueWeight> fantasyLeagueWeights = await _fantasyLeagueWeightRepository.GetAllAsync();
+
+        return fantasyLeagueWeights.Where(flw => fantasyLeagues.Contains(flw.FantasyLeague)).ToList();
     }
 
     public async Task<FantasyLeague> GetAccessibleFantasyLeagueAsync(DiscordUser? siteUser, int fantasyLeagueId)
