@@ -103,10 +103,11 @@ public class FantasyDraftRepository : IFantasyDraftRepository
     {
         _logger.LogInformation($"Fetching Fantasy Points for Fantasy League Id: {FantasyDraft.FantasyLeagueId}");
 
-        List<FantasyPlayer> fantasyDraftPlayers = FantasyDraft.DraftPickPlayers
+        List<FantasyPlayer> fantasyDraftPlayers = await _dbContext.FantasyDraftPlayers
+            .Where(dpp => dpp.FantasyDraftId == FantasyDraft.Id)
             .Where(dpp => dpp.FantasyPlayer != null)
             .Select(dpp => dpp.FantasyPlayer!)
-            .ToList();
+            .ToListAsync();
 
         var fantasyPlayerPointsByLeagueQuery = _dbContext.FantasyPlayerPointsView
             .Include(fppv => fppv.FantasyPlayer)
