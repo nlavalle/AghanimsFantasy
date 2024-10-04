@@ -47,7 +47,6 @@ namespace csharp_ef_webapi.Controllers
         }
 
         // GET: api/fantasydraft/5/points
-        [Authorize]
         [HttpGet("{fantasyLeagueId}/points")]
         public async Task<IActionResult> GetUserDraftFantasyPoints(int fantasyLeagueId)
         {
@@ -57,7 +56,7 @@ namespace csharp_ef_webapi.Controllers
 
                 if (discordUser == null)
                 {
-                    return NotFound();
+                    return Ok(new { });
                 }
 
                 FantasyDraftPointTotals? fantasyDraftPointTotals = await _fantasyService.GetFantasyDraftPointTotal(discordUser, fantasyLeagueId);
@@ -117,22 +116,7 @@ namespace csharp_ef_webapi.Controllers
 
                 if (discordUser == null)
                 {
-                    if (!HttpContext?.User?.Identity?.IsAuthenticated ?? false)
-                    {
-                        // Authorize should take care of this but just in case
-                        return NotFound();
-                    }
-
-                    var nameId = HttpContext!.User?.Claims?.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-                    bool getAccountId = long.TryParse(HttpContext!.User!.Claims!.Where(c => c.Type == ClaimTypes.NameIdentifier).FirstOrDefault()!.Value, out long userDiscordAccountId);
-                    await _discordWebApiService.GetDiscordByIdAsync(userDiscordAccountId);
-
-                }
-
-                discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-
-                if (discordUser == null)
-                {
+                    // If we still don't have a discord user something failed and we need to throw a not found to the site user
                     return NotFound();
                 }
 
