@@ -4,6 +4,7 @@ using DataAccessLibrary.Models;
 using DataAccessLibrary.Models.Discord;
 using DataAccessLibrary.Models.Fantasy;
 using csharp_ef_webapi.Services;
+using System.Security.Claims;
 
 namespace csharp_ef_webapi.Controllers
 {
@@ -46,7 +47,6 @@ namespace csharp_ef_webapi.Controllers
         }
 
         // GET: api/fantasydraft/5/points
-        [Authorize]
         [HttpGet("{fantasyLeagueId}/points")]
         public async Task<IActionResult> GetUserDraftFantasyPoints(int fantasyLeagueId)
         {
@@ -56,7 +56,7 @@ namespace csharp_ef_webapi.Controllers
 
                 if (discordUser == null)
                 {
-                    return NotFound();
+                    return Ok(new { });
                 }
 
                 FantasyDraftPointTotals? fantasyDraftPointTotals = await _fantasyService.GetFantasyDraftPointTotal(discordUser, fantasyLeagueId);
@@ -107,7 +107,7 @@ namespace csharp_ef_webapi.Controllers
         // POST: api/fantasydraft
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [Authorize]
-        [HttpPost("")]
+        [HttpPost]
         public async Task<ActionResult> PostUserDraft(FantasyDraft fantasyDraft)
         {
             try
@@ -116,6 +116,7 @@ namespace csharp_ef_webapi.Controllers
 
                 if (discordUser == null)
                 {
+                    // If we still don't have a discord user something failed and we need to throw a not found to the site user
                     return NotFound();
                 }
 

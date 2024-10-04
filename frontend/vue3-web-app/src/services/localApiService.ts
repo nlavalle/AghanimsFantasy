@@ -1,7 +1,9 @@
 // apiService.js
 
 import type { FantasyPlayer } from "@/components/Fantasy/fantasyDraft"
+import type { DotaAccount, DotaTeam } from "@/types/Dota"
 import type { FantasyLeague } from "@/types/FantasyLeague"
+import type { FantasyLeagueWeight } from "@/types/FantasyLeagueWeight"
 import type { League } from "@/types/League"
 
 const baseUrl = '/api'
@@ -134,14 +136,14 @@ export const localApiService = {
         throw error
       })
   },
-  putFantasyLeague(updateLeague: FantasyLeague) {
-    if (!updateLeague.id) return;
-    return fetch(`${baseUrl}/FantasyLeague/${updateLeague.id}`, {
+  putFantasyLeague(updateFantasyLeague: FantasyLeague) {
+    if (!updateFantasyLeague.id) return;
+    return fetch(`${baseUrl}/FantasyLeague/${updateFantasyLeague.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(updateLeague)
+      body: JSON.stringify(updateFantasyLeague)
     }).then(
       function (response: Response) {
         if (!response.ok) {
@@ -159,6 +161,88 @@ export const localApiService = {
   deleteFantasyLeague(deleteFantasyLeague: League) {
     if (!deleteFantasyLeague.id) return;
     return fetch(`${baseUrl}/FantasyLeague/${deleteFantasyLeague.id}`, {
+      method: 'DELETE'
+    }).then(
+      function (response: Response) {
+        if (!response.ok) {
+          throw response.status
+        } else {
+          return response.status
+        }
+      }.bind(this)
+    )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
+  getFantasyLeagueWeights() {
+    return fetch(`${baseUrl}/FantasyLeagueWeight`)
+      .then(
+        function (response: Response) {
+          if (!response.ok) {
+            throw response.status
+          } else {
+            return response.json()
+          }
+        }.bind(this)
+      )
+      .then(
+        function (data: any) {
+          return data.sort((a: any, b: any) => b.id - a.id)
+        }.bind(this)
+      )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
+  postFantasyLeagueWeight(newFantasyLeagueWeight: FantasyLeagueWeight) {
+    return fetch(`${baseUrl}/FantasyLeagueWeight`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newFantasyLeagueWeight)
+    }).then(
+      function (response: Response) {
+        if (!response.ok) {
+          throw response.status
+        } else {
+          return response.json()
+        }
+      }.bind(this)
+    )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
+  putFantasyLeagueWeight(updateFantasyLeagueWeight: FantasyLeagueWeight) {
+    if (!updateFantasyLeagueWeight.id) return;
+    return fetch(`${baseUrl}/FantasyLeagueWeight/${updateFantasyLeagueWeight.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(updateFantasyLeagueWeight)
+    }).then(
+      function (response: Response) {
+        if (!response.ok) {
+          throw response.status
+        } else {
+          return response.status
+        }
+      }.bind(this)
+    )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
+  deleteFantasyLeagueWeight(deleteFantasyLeagueWeight: League) {
+    if (!deleteFantasyLeagueWeight.id) return;
+    return fetch(`${baseUrl}/FantasyLeagueWeight/${deleteFantasyLeagueWeight.id}`, {
       method: 'DELETE'
     }).then(
       function (response: Response) {
@@ -195,7 +279,7 @@ export const localApiService = {
         throw error
       })
   },
-  postFantasyPlayer(newFantasyPlayer: FantasyPlayer) {
+  postFantasyPlayer(newFantasyPlayer: Partial<FantasyPlayer>) {
     return fetch(`${baseUrl}/FantasyPlayer`, {
       method: 'POST',
       headers: {
@@ -256,7 +340,6 @@ export const localApiService = {
         throw error
       })
   },
-
   getLeagueMatchHistory(leagueId: number) {
     return fetch(`${baseUrl}/league/${leagueId}/match/history`)
       .then(
@@ -300,7 +383,7 @@ export const localApiService = {
       })
   },
   getTeams() {
-    return fetch(`${baseUrl}/Team/teams`)
+    return fetch(`${baseUrl}/Team`)
       .then(
         function (response: any) {
           if (!response.ok) {
@@ -315,6 +398,67 @@ export const localApiService = {
           return data.sort((a: any, b: any) => b.id - a.id)
         }.bind(this)
       )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
+  postTeam(newTeam: DotaTeam) {
+    return fetch(`${baseUrl}/Team`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newTeam)
+    }).then(
+      function (response: Response) {
+        if (!response.ok) {
+          throw response.status
+        } else {
+          return response.json()
+        }
+      }.bind(this)
+    )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
+  putTeam(updateTeam: DotaTeam) {
+    if (!updateTeam.id) return;
+    return fetch(`${baseUrl}/Team/${updateTeam.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(updateTeam)
+    }).then(
+      function (response: Response) {
+        if (!response.ok) {
+          throw response.status
+        } else {
+          return response.status
+        }
+      }.bind(this)
+    )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
+  deleteTeam(deleteTeam: DotaTeam) {
+    if (!deleteTeam.id) return;
+    return fetch(`${baseUrl}/Team/${deleteTeam.id}`, {
+      method: 'DELETE'
+    }).then(
+      function (response: Response) {
+        if (!response.ok) {
+          throw response.status
+        } else {
+          return response.status
+        }
+      }.bind(this)
+    )
       .catch((error) => {
         console.error('Error fetching data:', error)
         throw error
@@ -357,6 +501,67 @@ export const localApiService = {
           return data.sort((a: any, b: any) => b.id - a.id)
         }.bind(this)
       )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
+  postAccount(newAccount: DotaAccount) {
+    return fetch(`${baseUrl}/Player`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newAccount)
+    }).then(
+      function (response: Response) {
+        if (!response.ok) {
+          throw response.status
+        } else {
+          return response.json()
+        }
+      }.bind(this)
+    )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
+  putAccount(updateAccount: DotaAccount) {
+    if (!updateAccount.id) return;
+    return fetch(`${baseUrl}/Player/${updateAccount.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(updateAccount)
+    }).then(
+      function (response: Response) {
+        if (!response.ok) {
+          throw response.status
+        } else {
+          return response.status
+        }
+      }.bind(this)
+    )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
+  deleteAccount(deleteAccount: DotaAccount) {
+    if (!deleteAccount.id) return;
+    return fetch(`${baseUrl}/Player/${deleteAccount.id}`, {
+      method: 'DELETE'
+    }).then(
+      function (response: Response) {
+        if (!response.ok) {
+          throw response.status
+        } else {
+          return response.status
+        }
+      }.bind(this)
+    )
       .catch((error) => {
         console.error('Error fetching data:', error)
         throw error
@@ -490,6 +695,27 @@ export const localApiService = {
   },
   getTopTenDrafts(fantasyLeagueId: number) {
     return fetch(`${baseUrl}/fantasyleague/${fantasyLeagueId}/drafters/top10`)
+      .then(
+        function (response: any) {
+          if (!response.ok) {
+            throw response.status
+          } else {
+            return response.json()
+          }
+        }.bind(this)
+      )
+      .then(
+        function (data: any) {
+          return data
+        }.bind(this)
+      )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
+  getLeaderboardStats(fantasyLeagueId: number) {
+    return fetch(`${baseUrl}/fantasyleague/${fantasyLeagueId}/drafters/stats`)
       .then(
         function (response: any) {
           if (!response.ok) {

@@ -94,6 +94,26 @@ public class ProMetadataRepository : IProMetadataRepository
         return;
     }
 
+    public async Task UpdateTeamAsync(Team updateTeam)
+    {
+        _logger.LogInformation($"Updating Team {updateTeam.Name}");
+
+        _dbContext.Entry(updateTeam).State = EntityState.Modified;
+        await _dbContext.SaveChangesAsync();
+
+        return;
+    }
+
+    public async Task DeleteTeamAsync(Team deleteTeam)
+    {
+        _logger.LogInformation($"Removing Team {deleteTeam.Name}");
+
+        _dbContext.Teams.Remove(deleteTeam);
+        await _dbContext.SaveChangesAsync();
+
+        return;
+    }
+
     public async Task<List<long>> GetUnknownTeamIds()
     {
         _logger.LogInformation($"Getting Unknown Team Ids in match history");
@@ -165,12 +185,43 @@ public class ProMetadataRepository : IProMetadataRepository
 
         return await _dbContext.Accounts.FindAsync(id);
     }
+
     public async Task<List<Account>> GetPlayerAccounts()
     {
         _logger.LogInformation($"Getting Player Accounts");
 
         return await _dbContext.Accounts
                 .ToListAsync();
+    }
+
+    public async Task AddAccountAsync(Account newAccount)
+    {
+        _logger.LogInformation($"Adding new Account {newAccount.Name}");
+
+        await _dbContext.Accounts.AddAsync(newAccount);
+        await _dbContext.SaveChangesAsync();
+
+        return;
+    }
+
+    public async Task UpdateAccountAsync(Account updateAccount)
+    {
+        _logger.LogInformation($"Updating Account {updateAccount.Name}");
+
+        _dbContext.Entry(updateAccount).State = EntityState.Modified;
+        await _dbContext.SaveChangesAsync();
+
+        return;
+    }
+
+    public async Task DeleteAccountAsync(Account deleteAccount)
+    {
+        _logger.LogInformation($"Removing Account {deleteAccount.Name}");
+
+        _dbContext.Accounts.Remove(deleteAccount);
+        await _dbContext.SaveChangesAsync();
+
+        return;
     }
     #endregion Player
 }

@@ -16,7 +16,7 @@ namespace csharp_ef_webapi.Controllers
         }
 
         // GET: api/Hero
-        [HttpGet("")]
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<Hero>>> GetHeroes()
         {
             return Ok(await _proMetadataRepository.GetHeroesAsync());

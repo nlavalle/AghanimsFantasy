@@ -163,6 +163,38 @@ namespace csharp_ef_webapi.Controllers
             }
         }
 
+        // GET: api/fantasyleague/5/drafters/stats
+        [Authorize]
+        [HttpGet("{fantasyLeagueId}/drafters/stats")]
+        public async Task<ActionResult<LeaderboardStats>> GetLeaderboardStats(int? fantasyLeagueId)
+        {
+            try
+            {
+                if (fantasyLeagueId == null || !fantasyLeagueId.HasValue)
+                {
+                    return BadRequest("Please provide a League ID to fetch a draft of");
+                }
+
+                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
+
+                if (discordUser == null)
+                {
+                    return NotFound();
+                }
+
+                LeaderboardStats leaderboardStats = await _fantasyService.GetLeaderboardStatsAsync(discordUser!, fantasyLeagueId.Value);
+                if (leaderboardStats == null)
+                {
+                    return Ok(new { });
+                }
+                return Ok(leaderboardStats);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         // GET: api/fantasyleague/5/highlights/3
         [HttpGet("{fantasyLeagueId}/highlights/{matchCount}")]
         public async Task<ActionResult<List<MatchHighlights>>> GetMatchHighlights(int fantasyLeagueId, int matchCount)

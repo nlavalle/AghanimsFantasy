@@ -208,7 +208,7 @@ const roleList = [
 
 const teamsList = computed(() => {
     // We want the distinct teams
-    var teams = playerFantasyMatchStats.value.map(item => ({id: item.fantasyPlayer.teamId, ...item.fantasyPlayer.team}))
+    var teams = playerFantasyMatchStats.value.map(item => item.fantasyPlayer.team)
     return [...new Map(teams.map(item => [item.id, item])).values()]
 })
 

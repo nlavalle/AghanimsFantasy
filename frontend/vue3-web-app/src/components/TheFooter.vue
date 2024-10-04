@@ -11,10 +11,10 @@
                     <v-btn size="small" variant="text" href="https://discord.gg/2Ru2CVgby9" target="_blank"
                         icon="fa-brands fa-discord"></v-btn>
                 </v-col>
-                <v-col align="center">
+                <!-- <v-col align="center">
                     <v-btn size="small" variant="text" href="https://github.com/nlavalle/AghanimsFantasy"
                         target="_blank" icon="fa-brands fa-github"></v-btn>
-                </v-col>
+                </v-col> -->
                 <v-spacer />
             </v-row>
             <v-row justify="center" align="center" no-gutters>

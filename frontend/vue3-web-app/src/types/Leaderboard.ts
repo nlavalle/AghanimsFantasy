@@ -7,3 +7,8 @@ export interface Leaderboard {
     teamId: number,
     draftTotalFantasyPoints: number
 }
+
+export interface LeaderboardStats {
+    totalDrafts: number,
+    drafterPercentile: number
+}

@@ -1,5 +1,3 @@
-import type { League } from "./League";
-
 export interface FantasyLeague {
     id: number,
     leagueId: number,

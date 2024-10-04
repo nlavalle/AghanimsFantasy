@@ -52,7 +52,14 @@ public class DiscordWebApiService
             throw new ArgumentException("Could not retrieve user discord ID");
         }
 
-        return nameId != null ? await _discordRepository.GetDiscordUserAsync(userDiscordAccountId) : null;
+        DiscordUser? discordUser = await _discordRepository.GetDiscordUserAsync(userDiscordAccountId);
+
+        if (discordUser == null)
+        {
+            discordUser = await AddNewDiscordUserByIdAsync(userDiscordAccountId);
+        }
+
+        return discordUser;
     }
 
     public async Task<DiscordUser?> GetDiscordUserAsync(long userId)
@@ -60,7 +67,7 @@ public class DiscordWebApiService
         return await _discordRepository.GetDiscordUserAsync(userId);
     }
 
-    public async Task GetDiscordByIdAsync(long DiscordId)
+    public async Task<DiscordUser?> AddNewDiscordUserByIdAsync(long DiscordId)
     {
         _logger.LogInformation("Fetching new user from Discord API");
 
@@ -76,10 +83,12 @@ public class DiscordWebApiService
             if (discordObject != null && discordObject.Username != null)
             {
                 await _discordRepository.AddDiscordUserAsync(discordObject);
+                return discordObject;
             }
             else
             {
                 _logger.LogError($"Malformed or missing Discord response for user ID {DiscordId}");
+                return null;
             }
         }
         catch (HttpRequestException ex)
@@ -92,6 +101,7 @@ public class DiscordWebApiService
             {
                 _logger.LogError($"{ex.StatusCode} error on Discord call. Full message: {ex.Message}");
             }
+            return null;
         }
     }
 }

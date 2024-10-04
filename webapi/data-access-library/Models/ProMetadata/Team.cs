@@ -9,7 +9,7 @@ public class Team
 {
     [Key]
     [Column("id")]
-    [JsonIgnore]
+    [JsonPropertyName("id")]
     public long Id { get; set; }
 
     [Column("name")]

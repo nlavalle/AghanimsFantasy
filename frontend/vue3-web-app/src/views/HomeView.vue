@@ -10,14 +10,14 @@
         </v-card-title>
       </v-card>
     </v-row>
-    <v-row>
+    <!-- <v-row>
       <v-card class="ma-2 pa-1 bg-surface" variant="flat">
         <v-card-title>
           <h2 class="attentionTitle">How to Play</h2>
         </v-card-title>
       </v-card>
-    </v-row>
-    <v-row class="pa-2" justify="start">
+    </v-row> -->
+    <!-- <v-row class="pa-2" justify="start">
       <div>
         <v-card class="mx-auto" elevation="24" :width="isDesktop ? '768' : '352'" :height="isDesktop ? '432' : '198'">
           <v-carousel height="100%" width="100%" progress="primary" hide-delimiters show-arrows="hover"
@@ -55,7 +55,7 @@
           </v-carousel>
         </v-card>
       </div>
-    </v-row>
+    </v-row> -->
   </v-container>
 </template>
 

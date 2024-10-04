@@ -15,11 +15,16 @@ public interface IProMetadataRepository
     Task<List<Team>> GetTeamsAsync();
     Task<Team?> GetTeamAsync(long teamId);
     Task AddTeamAsync(Team newTeam);
+    Task UpdateTeamAsync(Team updateTeam);
+    Task DeleteTeamAsync(Team deleteTeam);
     Task<List<long>> GetUnknownTeamIds();
 
     // Players
     Task<List<Account>> GetPlayerAccounts();
     Task<Account?> GetPlayerAccount(long id);
+    Task AddAccountAsync(Account newAccount);
+    Task UpdateAccountAsync(Account updateAccount);
+    Task DeleteAccountAsync(Account deleteAccount);
 
     // Heroes
     Task<List<Hero>> GetHeroesAsync();

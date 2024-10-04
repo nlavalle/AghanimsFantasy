@@ -8,6 +8,7 @@ public class FantasyService
 {
     private readonly ILogger<FantasyService> _logger;
     private readonly IFantasyLeagueRepository _fantasyLeagueRepository;
+    private readonly IFantasyLeagueWeightRepository _fantasyLeagueWeightRepository;
     private readonly IFantasyDraftRepository _fantasyDraftRepository;
     private readonly IFantasyPlayerRepository _fantasyPlayerRepository;
     private readonly IFantasyRepository _fantasyRepository;
@@ -15,6 +16,7 @@ public class FantasyService
     public FantasyService(
         ILogger<FantasyService> logger,
         IFantasyLeagueRepository fantasyLeagueRepository,
+        IFantasyLeagueWeightRepository fantasyLeagueWeightRepository,
         IFantasyDraftRepository fantasyDraftRepository,
         IFantasyPlayerRepository fantasyPlayerRepository,
         IFantasyRepository fantasyRepository
@@ -22,6 +24,7 @@ public class FantasyService
     {
         _logger = logger;
         _fantasyLeagueRepository = fantasyLeagueRepository;
+        _fantasyLeagueWeightRepository = fantasyLeagueWeightRepository;
         _fantasyDraftRepository = fantasyDraftRepository;
         _fantasyPlayerRepository = fantasyPlayerRepository;
         _fantasyRepository = fantasyRepository;
@@ -39,6 +42,28 @@ public class FantasyService
         }
 
         return fantasyPlayer;
+    }
+
+    public async Task<FantasyLeagueWeight?> GetFantasyLeagueWeightAsync(DiscordUser? siteUser, int fantasyLeagueWeightId)
+    {
+        IEnumerable<FantasyLeague> fantasyLeagues = await _fantasyLeagueRepository.GetAccessibleFantasyLeaguesAsync(siteUser);
+        FantasyLeagueWeight? fantasyLeagueWeight = await _fantasyLeagueWeightRepository.GetByIdAsync(fantasyLeagueWeightId);
+
+        if (fantasyLeagueWeight != null && !fantasyLeagues.Contains(fantasyLeagueWeight.FantasyLeague))
+        {
+            // User doesn't have access to this player
+            return null;
+        }
+
+        return fantasyLeagueWeight;
+    }
+
+    public async Task<List<FantasyLeagueWeight>> GetFantasyLeagueWeightsAsync(DiscordUser? siteUser)
+    {
+        IEnumerable<FantasyLeague> fantasyLeagues = await _fantasyLeagueRepository.GetAccessibleFantasyLeaguesAsync(siteUser);
+        IEnumerable<FantasyLeagueWeight> fantasyLeagueWeights = await _fantasyLeagueWeightRepository.GetAllAsync();
+
+        return fantasyLeagueWeights.Where(flw => fantasyLeagues.Contains(flw.FantasyLeague)).ToList();
     }
 
     public async Task<FantasyLeague> GetAccessibleFantasyLeagueAsync(DiscordUser? siteUser, int fantasyLeagueId)
@@ -285,6 +310,36 @@ public class FantasyService
         .ToList();
 
         return unionedLeaderboard;
+    }
+
+    public async Task<LeaderboardStats> GetLeaderboardStatsAsync(DiscordUser siteUser, int fantasyLeagueId)
+    {
+        FantasyLeague? fantasyLeague = await _fantasyLeagueRepository.GetAccessibleFantasyLeagueAsync(fantasyLeagueId, siteUser);
+
+        if (fantasyLeague == null)
+        {
+            throw new ArgumentException("Fantasy League Id not found");
+        }
+
+        List<FantasyDraftPointTotals> fantasyPoints = await _fantasyDraftRepository.AllDraftPointTotalsByFantasyLeagueAsync(fantasyLeague);
+        if (fantasyPoints.Count() == 0)
+        {
+            // League doesn't have fantasy players/points yet
+            return new LeaderboardStats
+            {
+                DrafterPercentile = 0,
+                TotalDrafts = 0
+            };
+        }
+
+        LeaderboardStats leaderboardStats = new LeaderboardStats();
+
+        leaderboardStats.TotalDrafts = fantasyPoints.Count();
+        // Percentile = (Number of Values Below “x” / Total Number of Values) × 100
+        var siteUserPoints = fantasyPoints.FirstOrDefault(fp => fp.DiscordName == siteUser.Username)?.DraftTotalFantasyPoints ?? 0;
+        leaderboardStats.DrafterPercentile = decimal.Divide(fantasyPoints.Count(fp => fp.DraftTotalFantasyPoints < siteUserPoints), fantasyPoints.Count()) * 100;
+
+        return leaderboardStats;
     }
 
     public async Task<IEnumerable<MatchHighlights>> GetMatchHighlightsAsync(DiscordUser? siteUser, int fantasyLeagueId, int limit)
