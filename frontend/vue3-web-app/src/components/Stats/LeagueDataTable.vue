@@ -3,42 +3,16 @@
     <v-col>
         <v-row class="search-input">
             <v-col style="min-width: 200px">
-                <v-text-field 
-                    v-model="leagueFilter" 
-                    label="Search"
-                    prepend-inner-icon="fa-magnifying-glass"
-                    variant="solo-filled"
-                    clearable
-                    flat
-                    hide-details
-                    single-line
-                />
+                <v-text-field v-model="leagueFilter" label="Search" prepend-inner-icon="fa-magnifying-glass"
+                    variant="solo-filled" clearable flat hide-details single-line />
             </v-col>
             <v-col style="min-width: 200px">
-                <v-select
-                    v-model="roleFilter"
-                    label="Filter Role"
-                    :items="roleList"
-                    item-title="name"
-                    item-value="id"
-                    multiple
-                    clearable
-                    hide-details
-                    single-line
-                />
+                <v-select v-model="roleFilter" label="Filter Role" :items="roleList" item-title="name" item-value="id"
+                    multiple clearable hide-details single-line />
             </v-col>
             <v-col style="min-width: 200px">
-                <v-select
-                    v-model="teamFilter"
-                    label="Filter Team"
-                    :items="teamsList"
-                    item-title="name"
-                    item-value="id"
-                    multiple
-                    clearable
-                    hide-details
-                    single-line
-                />
+                <v-select v-model="teamFilter" label="Filter Team" :items="teamsList" item-title="name" item-value="id"
+                    multiple clearable hide-details single-line />
             </v-col>
         </v-row>
         <v-row v-if="!isDesktop" dense>
@@ -160,7 +134,7 @@ const roleList = [
 
 const teamsList = computed(() => {
     // We want the distinct teams
-    var teams = leagueMetadataStats.value.map(item => ({id: item.fantasyPlayer.teamId, ...item.fantasyPlayer.team}))
+    var teams = leagueMetadataStats.value.map(item => item.fantasyPlayer.team)
     return [...new Map(teams.map(item => [item['id'], item])).values()]
 })
 
@@ -388,37 +362,34 @@ const leagueMetadataStatsIndexed = computed(() => {
             ...player,
             position: index + 1
         }))
-        .filter(item =>
-            {
-                if(!leagueFilter.value) {
-                    return true;
-                } else {
+        .filter(item => {
+            if (!leagueFilter.value) {
+                return true;
+            } else {
                 // Search filter
                 return Object.values(item.fantasyPlayer).some(val => stringifyNested(val).toLowerCase().includes(leagueFilter.value.toLowerCase()))
-                }
             }
+        }
         )
-        .filter(item =>
-            {
-                // Role filter
-                if(roleFilter.value.length == 0) {
-                    return true;
-                }
-                else {
-                    return roleFilter.value.some(role => role == item.fantasyPlayer.teamPosition)
-                }
+        .filter(item => {
+            // Role filter
+            if (roleFilter.value.length == 0) {
+                return true;
             }
+            else {
+                return roleFilter.value.some(role => role == item.fantasyPlayer.teamPosition)
+            }
+        }
         )
-        .filter(item =>
-            {
-                // Team filter
-                if(teamFilter.value.length == 0) {
-                    return true;
-                }
-                else {
-                    return teamFilter.value.some(team => team == item.fantasyPlayer.teamId)
-                }
+        .filter(item => {
+            // Team filter
+            if (teamFilter.value.length == 0) {
+                return true;
             }
+            else {
+                return teamFilter.value.some(team => team == item.fantasyPlayer.teamId)
+            }
+        }
         )
         ;
 });

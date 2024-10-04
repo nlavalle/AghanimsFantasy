@@ -4,6 +4,7 @@ using DataAccessLibrary.Models;
 using DataAccessLibrary.Models.Discord;
 using DataAccessLibrary.Models.Fantasy;
 using csharp_ef_webapi.Services;
+using System.Security.Claims;
 
 namespace csharp_ef_webapi.Controllers
 {
@@ -113,6 +114,22 @@ namespace csharp_ef_webapi.Controllers
             try
             {
                 DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
+
+                if (discordUser == null)
+                {
+                    if (!HttpContext?.User?.Identity?.IsAuthenticated ?? false)
+                    {
+                        // Authorize should take care of this but just in case
+                        return NotFound();
+                    }
+
+                    var nameId = HttpContext!.User?.Claims?.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+                    bool getAccountId = long.TryParse(HttpContext!.User!.Claims!.Where(c => c.Type == ClaimTypes.NameIdentifier).FirstOrDefault()!.Value, out long userDiscordAccountId);
+                    await _discordWebApiService.GetDiscordByIdAsync(userDiscordAccountId);
+
+                }
+
+                discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
 
                 if (discordUser == null)
                 {

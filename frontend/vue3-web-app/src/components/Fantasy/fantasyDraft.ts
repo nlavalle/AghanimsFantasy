@@ -224,7 +224,6 @@ export function fantasyDraftState() {
         if (currentDraftSlotSelected.value > 5) {
             currentDraftSlotSelected.value = 1;
         }
-        console.log(fantasyDraftPicks.value)
     }
 
     const clearFantasyDraftPicks = () => {

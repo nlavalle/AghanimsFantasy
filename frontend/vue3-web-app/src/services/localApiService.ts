@@ -714,6 +714,27 @@ export const localApiService = {
         throw error
       })
   },
+  getLeaderboardStats(fantasyLeagueId: number) {
+    return fetch(`${baseUrl}/fantasyleague/${fantasyLeagueId}/drafters/stats`)
+      .then(
+        function (response: any) {
+          if (!response.ok) {
+            throw response.status
+          } else {
+            return response.json()
+          }
+        }.bind(this)
+      )
+      .then(
+        function (data: any) {
+          return data
+        }.bind(this)
+      )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
   getHighlights(leagueId: number, numberOfHighlights: number) {
     return fetch(`${baseUrl}/fantasy/${leagueId}/highlights/${numberOfHighlights}`)
       .then(

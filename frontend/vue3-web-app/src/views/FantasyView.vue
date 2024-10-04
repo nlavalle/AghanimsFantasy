@@ -43,35 +43,48 @@
                 <v-row>
                   <v-col>
                     <v-row>
-                      <CreateDraft v-model:selectedFantasyLeague="leagueStore.selectedFantasyLeague" @saveDraft="saveDraft" />
+                      <CreateDraft v-model:selectedFantasyLeague="leagueStore.selectedFantasyLeague"
+                        @saveDraft="saveDraft" />
                     </v-row>
                   </v-col>
                 </v-row>
               </v-col>
             </v-tabs-window-item>
             <v-tabs-window-item value="leaderboard">
-              <v-col>
-                <v-row v-if="authenticated" class="mt-1">
+              <v-col v-if="authenticated">
+                <v-row class="mt-1">
                   <leaderboard-component class="leaderboardComponent" leaderboardTitle="Fantasy Leaderboard"
-                    headerName="Draft Player" headerValue="Points" :authenticatedUser="user" :boardData="fantasyLeaderboardData" />
+                    headerName="Draft Player" headerValue="Points" :authenticatedUser="user"
+                    :boardData="fantasyLeaderboardData" />
                 </v-row>
-                <v-card v-else class="ma-5">
-                    <v-card-title style="text-wrap:wrap">
-                      <v-row>
-                        <v-col>
-                          <span class="not-authenticated">Please login to save your draft</span>
-                        </v-col>
-                        <v-col cols="4" class="mr-1" align-self="center">
-                          <LoginDiscord class="login-discord" />
-                        </v-col>
-                      </v-row>
-                    </v-card-title>
-                  </v-card>
+                <v-row class="ma-1" style="max-width: 600px">
+                  <v-col>
+                    <p>Total Drafts: {{ fantasyLeaderboardStats?.totalDrafts ?? 0 }}</p>
+                  </v-col>
+                  <v-col>
+                    <p>You're in the {{ fantasyLeaderboardStats?.drafterPercentile.toFixed(0) ?? 0 }}th percentile
+                    </p>
+                  </v-col>
+                </v-row>
+              </v-col>
+              <v-col v-else>
+                <v-card class="ma-5">
+                  <v-card-title style="text-wrap:wrap">
+                    <v-row>
+                      <v-col>
+                        <span class="not-authenticated">Please login to view the leaderboard</span>
+                      </v-col>
+                      <v-col cols="4" class="mr-1" align-self="center">
+                        <LoginDiscord class="login-discord" />
+                      </v-col>
+                    </v-row>
+                  </v-card-title>
+                </v-card>
               </v-col>
             </v-tabs-window-item>
             <v-tabs-window-item value="match">
               <v-col>
-                <v-row v-if="userDraftPoints && fantasyTab =='match'">
+                <v-row v-if="userDraftPoints && fantasyTab == 'match'">
                   <MatchDataTable v-model:selectedFantasyLeague="leagueStore.selectedFantasyLeague"
                     v-model:draftFiltered="draftFiltered">
                   </MatchDataTable>
@@ -102,7 +115,7 @@ import { fantasyDraftState, type FantasyDraftPoints, type FantasyPlayer } from '
 import LoginDiscord from '@/components/LoginDiscord.vue';
 import AlertDialog from '@/components/AlertDialog.vue';
 import ErrorDialog from '@/components/ErrorDialog.vue';
-import type { Leaderboard } from '@/types/Leaderboard';
+import type { LeaderboardStats, Leaderboard } from '@/types/Leaderboard';
 import type { LeaderboardItem } from '@/types/LeaderboardItem';
 
 const authStore = useAuthStore();
@@ -119,6 +132,7 @@ const updateDraftVisibility = ref(false);
 const fantasyPlayers = ref<FantasyPlayer[]>([]);
 const userDraftPoints = ref<FantasyDraftPoints>();
 const fantasyLeaderboard = ref([]);
+const fantasyLeaderboardStats = ref<LeaderboardStats>();
 
 const user = computed(() => {
   return authStore.user as User
@@ -149,18 +163,24 @@ const fetchFantasyData = async () => {
   await authStore.checkAuthenticatedAsync();
   if (leagueStore.selectedFantasyLeague) {
     localApiService.getFantasyPlayers(leagueStore.selectedFantasyLeague.id)
-      .then((result) => {
+      .then((result: any) => {
         fantasyPlayers.value = result;
         setFantasyPlayers(fantasyPlayers.value);
       });
-    if (authStore.authenticated && userDraftPoints.value?.fantasyDraft && userDraftPoints.value.fantasyDraft.draftPickPlayers.length > 0) {
-      setFantasyDraftPicks(userDraftPoints.value.fantasyDraft.draftPickPlayers);
+    if (authStore.authenticated) {
+      localApiService.getLeaderboardStats(leagueStore.selectedFantasyLeague.id)
+        .then((result: any) => {
+          fantasyLeaderboardStats.value = result;
+        })
+      if (userDraftPoints.value?.fantasyDraft && userDraftPoints.value.fantasyDraft.draftPickPlayers.length > 0) {
+        setFantasyDraftPicks(userDraftPoints.value.fantasyDraft.draftPickPlayers);
+      }
     }
   }
 }
 
 const saveDraft = async () => {
-  if(!authStore.authenticated) return;
+  if (!authStore.authenticated) return;
   await localApiService.saveFantasyDraft(
     authStore.user,
     leagueStore.selectedFantasyLeague,
@@ -201,10 +221,10 @@ const scrollAfterAlertDialog = () => {
 }
 
 if (authStore.authenticated && leagueStore.selectedFantasyLeague) {
-    localApiService
-      .getTopTenDrafts(leagueStore.selectedFantasyLeague.id)
-      .then((result) => (fantasyLeaderboard.value = result))
-  }
+  localApiService
+    .getTopTenDrafts(leagueStore.selectedFantasyLeague.id)
+    .then((result) => (fantasyLeaderboard.value = result))
+}
 
 onMounted(() => {
   if (authStore.authenticated && leagueStore.selectedFantasyLeague) {
@@ -229,8 +249,8 @@ watch([authStore, leagueStore], () => {
       fetchFantasyData();
     });
     localApiService
-          .getTopTenDrafts(leagueStore.selectedFantasyLeague.id)
-          .then((result) => (fantasyLeaderboard.value = result))
+      .getTopTenDrafts(leagueStore.selectedFantasyLeague.id)
+      .then((result) => (fantasyLeaderboard.value = result))
   } else if (!authStore.authenticated && leagueStore.selectedFantasyLeague) {
     fantasyTab.value = 'draft';
     fetchFantasyData();
@@ -245,7 +265,6 @@ const authenticated = computed(() => {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
 .not-authenticated {
   font-size: 16px;
 }
@@ -255,6 +274,6 @@ const authenticated = computed(() => {
 }
 
 .leaderboardComponent {
-  max-width: 700px;
+  max-width: 600px;
 }
 </style>

@@ -312,6 +312,36 @@ public class FantasyService
         return unionedLeaderboard;
     }
 
+    public async Task<LeaderboardStats> GetLeaderboardStatsAsync(DiscordUser siteUser, int fantasyLeagueId)
+    {
+        FantasyLeague? fantasyLeague = await _fantasyLeagueRepository.GetAccessibleFantasyLeagueAsync(fantasyLeagueId, siteUser);
+
+        if (fantasyLeague == null)
+        {
+            throw new ArgumentException("Fantasy League Id not found");
+        }
+
+        List<FantasyDraftPointTotals> fantasyPoints = await _fantasyDraftRepository.AllDraftPointTotalsByFantasyLeagueAsync(fantasyLeague);
+        if (fantasyPoints.Count() == 0)
+        {
+            // League doesn't have fantasy players/points yet
+            return new LeaderboardStats
+            {
+                DrafterPercentile = 0,
+                TotalDrafts = 0
+            };
+        }
+
+        LeaderboardStats leaderboardStats = new LeaderboardStats();
+
+        leaderboardStats.TotalDrafts = fantasyPoints.Count();
+        // Percentile = (Number of Values Below “x” / Total Number of Values) × 100
+        var siteUserPoints = fantasyPoints.FirstOrDefault(fp => fp.DiscordName == siteUser.Username)?.DraftTotalFantasyPoints ?? 0;
+        leaderboardStats.DrafterPercentile = decimal.Divide(fantasyPoints.Count(fp => fp.DraftTotalFantasyPoints < siteUserPoints), fantasyPoints.Count()) * 100;
+
+        return leaderboardStats;
+    }
+
     public async Task<IEnumerable<MatchHighlights>> GetMatchHighlightsAsync(DiscordUser? siteUser, int fantasyLeagueId, int limit)
     {
         FantasyLeague? fantasyLeague = await _fantasyLeagueRepository.GetAccessibleFantasyLeagueAsync(fantasyLeagueId, siteUser);
