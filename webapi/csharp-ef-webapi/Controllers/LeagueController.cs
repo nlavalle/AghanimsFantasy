@@ -258,7 +258,7 @@ namespace csharp_ef_webapi.Controllers
 
                 if (discordUser == null)
                 {
-                    return Ok(new { });
+                    return Ok(new List<FantasyDraftPointTotals>());
                 }
 
                 IEnumerable<FantasyDraftPointTotals> fantasyDraftPointTotals = await _fantasyService.GetFantasyDraftPointTotals(discordUser, leagueId);

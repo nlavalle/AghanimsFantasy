@@ -120,7 +120,7 @@ import { useFantasyDraftStore } from '@/stores/fantasyDraft';
 const authStore = useAuthStore();
 const leagueStore = useFantasyLeagueStore();
 const fantasyDraftStore = useFantasyDraftStore();
-const { fantasyDraftPicks, setFantasyDraftPicks, setFantasyPlayers } = fantasyDraftState();
+const { fantasyDraftPicks, setFantasyDraftPicks, setFantasyPlayers, clearFantasyDraftPicks } = fantasyDraftState();
 const draftFiltered = true;
 
 const showSuccessModal = ref(false);
@@ -142,12 +142,6 @@ const updateDisabled = computed(() => {
   return currentDate > lockDate;
 });
 
-const fetchFantasyData = async () => {
-  if (authStore.authenticated && leagueStore.selectedFantasyDraftPoints?.fantasyDraft && leagueStore.selectedFantasyDraftPoints.fantasyDraft.draftPickPlayers.length > 0) {
-    setFantasyDraftPicks(leagueStore.selectedFantasyDraftPoints.fantasyDraft.draftPickPlayers);
-  }
-}
-
 const saveDraft = async () => {
   if (!authStore.authenticated) return;
   fantasyDraftStore.saveFantasyDraft(authStore.user!, fantasyDraftPicks.value)
@@ -158,8 +152,7 @@ const saveDraft = async () => {
         left: 0,
         behavior: 'smooth'
       });
-      leagueStore.fetchFantasyDraftPoints();
-      fetchFantasyData();
+      leagueStore.fetchFantasyDraftPoints()?.then(() => fantasyDraftStore.fetchLeaderboard());
       fantasyTab.value = 'current';
     })
     .catch(error => {
@@ -183,29 +176,29 @@ const scrollAfterAlertDialog = () => {
   }, 200);
 }
 
-if (authStore.authenticated && leagueStore.selectedFantasyLeague) {
-  fantasyDraftStore.fetchLeaderboard();
-}
-
 onMounted(() => {
+  leagueStore.fetchFantasyPlayers()?.then(() => setFantasyPlayers(leagueStore.fantasyPlayers))
   if (authStore.authenticated && leagueStore.selectedFantasyLeague) {
     fantasyDraftStore.fetchLeaderboard();
   } else if (!authStore.authenticated && leagueStore.selectedFantasyLeague) {
     fantasyTab.value = 'draft';
   }
-  fetchFantasyData();
 });
 
-watch([authStore, leagueStore], () => {
-  if (authStore.authenticated && leagueStore.selectedFantasyLeague) {
-    fantasyDraftStore.fetchLeaderboard();
-    fetchFantasyData();
-  } else if (!authStore.authenticated && leagueStore.selectedFantasyLeague) {
-    fantasyTab.value = 'draft';
-    fetchFantasyData();
+watch(() => leagueStore.selectedFantasyLeague, () => {
+  leagueStore.fetchFantasyPlayers()?.then(() => setFantasyPlayers(leagueStore.fantasyPlayers))
+    .then(() => {
+      if (authStore.authenticated) fantasyDraftStore.fetchLeaderboard()
+    })
+})
+
+watch(() => leagueStore.selectedFantasyDraftPoints, () => {
+  if (authStore.authenticated && leagueStore.selectedFantasyDraftPoints?.fantasyDraft && leagueStore.selectedFantasyDraftPoints.fantasyDraft.draftPickPlayers.length > 0) {
+    setFantasyDraftPicks(leagueStore.selectedFantasyDraftPoints.fantasyDraft.draftPickPlayers);
+  } else {
+    clearFantasyDraftPicks()
   }
-  setFantasyPlayers(leagueStore.fantasyPlayers);
-});
+})
 
 const authenticated = computed(() => {
   return authStore.authenticated

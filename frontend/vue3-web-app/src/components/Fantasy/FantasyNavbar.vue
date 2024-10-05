@@ -30,8 +30,7 @@
     <v-tabs v-model="leagueStore.selectedFantasyLeague">
       <v-tab class="pa-0 ma-0" style="min-width: 0px" />
       <v-tab v-for="fantasyLeague in fantasyLeagueOptions" :value="fantasyLeague"
-        :variant="leagueStore.isDraftActive(fantasyLeague.leagueEndTime) ? 'text' : 'plain'"
-        @click="updateSelectedFantasyLeague">
+        :variant="leagueStore.isDraftActive(fantasyLeague.leagueEndTime) ? 'text' : 'plain'">
         {{ fantasyLeague.name }} ({{ leagueStore.fantasyDraftPoints.find(draft => draft?.fantasyDraft?.fantasyLeagueId
           ==
           fantasyLeague.id)?.fantasyPlayerPoints.length ?? 0 }}/5)
@@ -44,17 +43,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, watch } from 'vue';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import { useAuthStore } from '@/stores/auth';
-import { fantasyDraftState } from '@/components/Fantasy/fantasyDraft';
 import { VContainer, VRow, VCol, VSelect, VListItem, VIcon, VTab, VTabs } from 'vuetify/components'
-import { useFantasyDraftStore } from '@/stores/fantasyDraft';
 
 const authStore = useAuthStore()
 const leagueStore = useFantasyLeagueStore()
-const fantasyDraftStore = useFantasyDraftStore()
-const { clearFantasyDraftPicks } = fantasyDraftState();
 
 const leagueOptions = computed(() => {
   return leagueStore.activeLeagues.sort((a, b) => b.id - a.id)
@@ -67,36 +62,27 @@ const fantasyLeagueOptions = computed(() => {
 })
 
 onMounted(() => {
-  authStore.checkAuthenticatedAsync().then(() => {
-    leagueStore.fetchLeagues();
-    leagueStore.fetchFantasyLeagues();
-    leagueStore.fetchFantasyPlayers();
-    if (authStore.authenticated) {
-      leagueStore.fetchFantasyDraftPoints()
-    }
-    clearFantasyDraftPicks()
-  });
+  authStore.checkAuthenticatedAsync()
+    .then(() => leagueStore.fetchLeagues())
+    .then(() => leagueStore.fetchFantasyLeagues())
+    .then(() => {
+      if (authStore.authenticated) {
+        leagueStore.fetchFantasyDraftPoints()
+      }
+    });
+})
+
+watch(() => authStore.authenticated, () => {
+  leagueStore.fetchLeagues()
+    .then(() => leagueStore.fetchFantasyLeagues())
+    .then(() => leagueStore.fetchFantasyDraftPoints());
 })
 
 function updateSelectedLeague() {
-  authStore.checkAuthenticatedAsync().then(() => {
-    if (authStore.authenticated) {
-      leagueStore.fetchFantasyDraftPoints()
-    }
-    leagueStore.selectedFantasyLeague = leagueStore.defaultFantasyLeague;
-    leagueStore.fetchFantasyPlayers();
-    clearFantasyDraftPicks()
-  });
-}
-
-function updateSelectedFantasyLeague() {
-  authStore.checkAuthenticatedAsync().then(() => {
-    clearFantasyDraftPicks()
-    leagueStore.fetchFantasyPlayers()
-    if (authStore.authenticated) {
-      fantasyDraftStore.fetchLeaderboardStats()
-    }
-  })
+  if (authStore.authenticated) {
+    leagueStore.fetchFantasyDraftPoints()
+  }
+  leagueStore.selectedFantasyLeague = leagueStore.defaultFantasyLeague;
 }
 
 </script>

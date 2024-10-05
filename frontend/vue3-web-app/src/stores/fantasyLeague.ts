@@ -29,7 +29,7 @@ export const useFantasyLeagueStore = defineStore({
 
   actions: {
     fetchLeagues() {
-      localApiService.getLeagues().then((leagueResult: any) => {
+      return localApiService.getLeagues().then((leagueResult: any) => {
         this.setLeagues(leagueResult);
         this.setSelectedLeague(this.defaultLeague);
       })
@@ -37,7 +37,7 @@ export const useFantasyLeagueStore = defineStore({
 
     fetchFantasyLeagues() {
       if (this.leagues.length == 0) this.fetchLeagues();
-      localApiService.getFantasyLeagues()
+      return localApiService.getFantasyLeagues()
         .then((fantasyLeagueResult: any) => {
           this.setFantasyLeagues(fantasyLeagueResult);
           this.setSelectedFantasyLeague(this.defaultFantasyLeague);
@@ -49,7 +49,7 @@ export const useFantasyLeagueStore = defineStore({
 
     fetchFantasyDraftPoints() {
       if (this.selectedLeague) {
-        localApiService.getUserDraftPoints(this.selectedLeague.id).then((draftResult: FantasyDraftPoints[]) => {
+        return localApiService.getUserDraftPoints(this.selectedLeague.id).then((draftResult: FantasyDraftPoints[]) => {
           this.fantasyDraftPoints = draftResult;
         })
       }
@@ -57,7 +57,7 @@ export const useFantasyLeagueStore = defineStore({
 
     fetchFantasyPlayers() {
       if (this.selectedFantasyLeague.id) {
-        localApiService.getFantasyPlayers(this.selectedFantasyLeague.id)
+        return localApiService.getFantasyPlayers(this.selectedFantasyLeague.id)
           .then((result: any) => {
             this.fantasyPlayers = result;
           });
