@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using csharp_ef_webapi.Utilities;
@@ -8,6 +7,7 @@ using DataAccessLibrary.Models.WebApi;
 using DataAccessLibrary.Models.GameCoordinator;
 using csharp_ef_webapi.Services;
 using DataAccessLibrary.Models.Discord;
+using DataAccessLibrary.Models;
 
 namespace csharp_ef_webapi.Controllers
 {
@@ -16,6 +16,7 @@ namespace csharp_ef_webapi.Controllers
     public class LeagueController : ControllerBase
     {
         private readonly DiscordWebApiService _discordWebApiService;
+        private readonly FantasyService _fantasyService;
         private readonly FantasyServiceAdmin _fantasyServiceAdmin;
         private readonly IProMetadataRepository _proMetadataRepository;
         private readonly IMatchHistoryRepository _matchHistoryRepository;
@@ -24,6 +25,7 @@ namespace csharp_ef_webapi.Controllers
 
         public LeagueController(
             DiscordWebApiService discordWebApiService,
+            FantasyService fantasyService,
             FantasyServiceAdmin fantasyServiceAdmin,
             IProMetadataRepository proMetadataRepository,
             IMatchHistoryRepository matchHistoryRepository,
@@ -31,6 +33,7 @@ namespace csharp_ef_webapi.Controllers
             IGcMatchMetadataRepository gcMatchMetadataRepository)
         {
             _discordWebApiService = discordWebApiService;
+            _fantasyService = fantasyService;
             _fantasyServiceAdmin = fantasyServiceAdmin;
             _proMetadataRepository = proMetadataRepository;
             _matchHistoryRepository = matchHistoryRepository;
@@ -243,6 +246,29 @@ namespace csharp_ef_webapi.Controllers
             var paginatedMatches = PaginatedList<GcMatchMetadata>.Create(matches, pageIndex, pageSize);
 
             return Ok(paginatedMatches);
+        }
+
+        // GET: api/league/5/drafts/points
+        [HttpGet("{leagueId}/drafts/points")]
+        public async Task<ActionResult<IEnumerable<FantasyDraftPointTotals>>> GetUserDraftFantasyPoints(int leagueId)
+        {
+            try
+            {
+                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
+
+                if (discordUser == null)
+                {
+                    return Ok(new { });
+                }
+
+                IEnumerable<FantasyDraftPointTotals> fantasyDraftPointTotals = await _fantasyService.GetFantasyDraftPointTotals(discordUser, leagueId);
+
+                return Ok(fantasyDraftPointTotals);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

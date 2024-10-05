@@ -4,7 +4,6 @@ using DataAccessLibrary.Models;
 using DataAccessLibrary.Models.Discord;
 using DataAccessLibrary.Models.Fantasy;
 using csharp_ef_webapi.Services;
-using System.Security.Claims;
 
 namespace csharp_ef_webapi.Controllers
 {
@@ -39,33 +38,6 @@ namespace csharp_ef_webapi.Controllers
                 }
 
                 return Ok(await _fantasyService.GetFantasyDraft(discordUser, fantasyLeagueId));
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        // GET: api/fantasydraft/5/points
-        [HttpGet("{fantasyLeagueId}/points")]
-        public async Task<IActionResult> GetUserDraftFantasyPoints(int fantasyLeagueId)
-        {
-            try
-            {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-
-                if (discordUser == null)
-                {
-                    return Ok(new { });
-                }
-
-                FantasyDraftPointTotals? fantasyDraftPointTotals = await _fantasyService.GetFantasyDraftPointTotal(discordUser, fantasyLeagueId);
-                if (fantasyDraftPointTotals == null)
-                {
-                    return Ok(new { });
-                }
-
-                return Ok(fantasyDraftPointTotals);
             }
             catch (ArgumentException ex)
             {

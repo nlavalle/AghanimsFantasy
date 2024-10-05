@@ -9,7 +9,7 @@
         </v-col>
         <v-col>
           <v-row>
-            <v-select label="League" v-model="selectedLeague" :items="leagueOptions" item-title="name"
+            <v-select label="League" v-model="leagueStore.selectedLeague" :items="leagueOptions" item-title="name"
               @update:model-value="updateSelectedLeague" density="compact" single-line variant="underlined"
               return-object>
               <template v-slot:item="{ props, item }">
@@ -27,12 +27,13 @@
     </v-container>
   </div>
   <div class="bg-secondary">
-    <v-tabs v-model="selectedFantasyLeague">
+    <v-tabs v-model="leagueStore.selectedFantasyLeague">
       <v-tab class="pa-0 ma-0" style="min-width: 0px" />
       <v-tab v-for="fantasyLeague in fantasyLeagueOptions" :value="fantasyLeague"
         :variant="leagueStore.isDraftActive(fantasyLeague.leagueEndTime) ? 'text' : 'plain'"
         @click="updateSelectedFantasyLeague">
-        {{ fantasyLeague.name }} ({{ currentFantasyDrafts.find(draft => draft?.fantasyDraft?.fantasyLeagueId ==
+        {{ fantasyLeague.name }} ({{ leagueStore.fantasyDraftPoints.find(draft => draft?.fantasyDraft?.fantasyLeagueId
+          ==
           fantasyLeague.id)?.fantasyPlayerPoints.length ?? 0 }}/5)
         <v-icon v-if="!leagueStore.isDraftOpen(fantasyLeague.fantasyDraftLocked)" class="ml-1" icon="fa-solid fa-lock"
           size="x-small">
@@ -43,33 +44,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import { useAuthStore } from '@/stores/auth';
-import { fantasyDraftState, type FantasyDraftPoints } from '@/components/Fantasy/fantasyDraft';
-import { localApiService } from '@/services/localApiService'
+import { fantasyDraftState } from '@/components/Fantasy/fantasyDraft';
 import { VContainer, VRow, VCol, VSelect, VListItem, VIcon, VTab, VTabs } from 'vuetify/components'
-import type { FantasyLeague } from '@/types/FantasyLeague';
-import type { League } from '@/types/League';
+import { useFantasyDraftStore } from '@/stores/fantasyDraft';
 
 const authStore = useAuthStore()
 const leagueStore = useFantasyLeagueStore()
-const { fantasyPlayersAvailable, clearFantasyDraftPicks } = fantasyDraftState();
-const selectedLeague = ref<League>({
-  id: 0,
-  isActive: false,
-  name: ''
-})
-const selectedFantasyLeague = ref<FantasyLeague>({
-  id: 0,
-  leagueId: 0,
-  isActive: false,
-  name: '',
-  fantasyDraftLocked: 0,
-  leagueStartTime: 0,
-  leagueEndTime: 0
-})
-const currentFantasyDrafts = ref<Array<FantasyDraftPoints | undefined>>([]);
+const fantasyDraftStore = useFantasyDraftStore()
+const { clearFantasyDraftPicks } = fantasyDraftState();
 
 const leagueOptions = computed(() => {
   return leagueStore.activeLeagues.sort((a, b) => b.id - a.id)
@@ -77,61 +62,41 @@ const leagueOptions = computed(() => {
 
 const fantasyLeagueOptions = computed(() => {
   return leagueStore.activeFantasyLeagues
-    .filter(fantasyLeague => fantasyLeague.leagueId == selectedLeague.value.id)
+    .filter(fantasyLeague => fantasyLeague.leagueId == leagueStore.selectedLeague.id)
     .sort((a, b) => a.id - b.id)
 })
 
 onMounted(() => {
-  localApiService.getLeagues().then((leagueResult: any) => {
-    leagueStore.setLeagues(leagueResult);
-    //default to most recent league
-    selectedLeague.value = leagueStore.defaultLeague;
-    leagueStore.setSelectedLeague(selectedLeague.value);
-
-    localApiService.getFantasyLeagues().then((fantasyLeagueResult: any) => {
-      leagueStore.setFantasyLeagues(fantasyLeagueResult);
-      selectedFantasyLeague.value = leagueStore.defaultFantasyLeague;
-      leagueStore.setSelectedFantasyLeague(selectedFantasyLeague.value);
-      getDraftCount()
-    })
+  authStore.checkAuthenticatedAsync().then(() => {
+    leagueStore.fetchLeagues();
+    leagueStore.fetchFantasyLeagues();
+    leagueStore.fetchFantasyPlayers();
+    if (authStore.authenticated) {
+      leagueStore.fetchFantasyDraftPoints()
+    }
     clearFantasyDraftPicks()
-  })
-})
-
-watch((fantasyPlayersAvailable), () => {
-  getDraftCount()
+  });
 })
 
 function updateSelectedLeague() {
-  leagueStore.setSelectedLeague(selectedLeague.value)
-  selectedFantasyLeague.value = leagueStore.defaultFantasyLeague;
-  leagueStore.setSelectedFantasyLeague(selectedFantasyLeague.value);
-  getDraftCount()
-  clearFantasyDraftPicks()
+  authStore.checkAuthenticatedAsync().then(() => {
+    if (authStore.authenticated) {
+      leagueStore.fetchFantasyDraftPoints()
+    }
+    leagueStore.selectedFantasyLeague = leagueStore.defaultFantasyLeague;
+    leagueStore.fetchFantasyPlayers();
+    clearFantasyDraftPicks()
+  });
 }
 
 function updateSelectedFantasyLeague() {
-  leagueStore.setSelectedFantasyLeague(selectedFantasyLeague.value)
-  clearFantasyDraftPicks()
-}
-
-function getDraftCount() {
-  if (authStore.authenticated) {
-    let tempFantasyDrafts = <Array<FantasyDraftPoints | undefined>>[];
-    let promises = <any>[];
-    fantasyLeagueOptions.value.forEach(fantasyLeague => {
-      promises.push(new Promise<void>((resolve) => {
-        localApiService.getUserDraftPoints(fantasyLeague.id).then((draftResult: FantasyDraftPoints | undefined) => {
-          tempFantasyDrafts.push(draftResult);
-          resolve();
-        });
-      }))
-    })
-
-    Promise.all(promises).then(() => {
-      currentFantasyDrafts.value = tempFantasyDrafts;
-    })
-  }
+  authStore.checkAuthenticatedAsync().then(() => {
+    clearFantasyDraftPicks()
+    leagueStore.fetchFantasyPlayers()
+    if (authStore.authenticated) {
+      fantasyDraftStore.fetchLeaderboardStats()
+    }
+  })
 }
 
 </script>

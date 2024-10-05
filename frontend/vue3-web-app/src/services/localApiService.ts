@@ -588,8 +588,8 @@ export const localApiService = {
         throw error
       })
   },
-  getUserDraftPoints(fantasyLeagueId: number) {
-    return fetch(`${baseUrl}/fantasydraft/${fantasyLeagueId}/points`)
+  getUserDraftPoints(leagueId: number) {
+    return fetch(`${baseUrl}/league/${leagueId}/drafts/points`)
       .then(
         function (response: any) {
           if (!response.ok) {
