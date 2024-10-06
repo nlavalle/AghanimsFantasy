@@ -28,7 +28,6 @@
   </div>
   <div class="bg-secondary">
     <v-tabs v-model="leagueStore.selectedFantasyLeague">
-      <v-tab class="pa-0 ma-0" style="min-width: 0px" />
       <v-tab v-for="fantasyLeague in fantasyLeagueOptions" :value="fantasyLeague"
         :variant="leagueStore.isDraftActive(fantasyLeague.leagueEndTime) ? 'text' : 'plain'">
         {{ fantasyLeague.name }} ({{ leagueStore.fantasyDraftPoints.find(draft => draft?.fantasyDraft?.fantasyLeagueId

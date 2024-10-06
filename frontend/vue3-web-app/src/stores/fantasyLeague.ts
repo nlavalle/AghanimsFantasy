@@ -31,7 +31,7 @@ export const useFantasyLeagueStore = defineStore({
     fetchLeagues() {
       return localApiService.getLeagues().then((leagueResult: any) => {
         this.setLeagues(leagueResult);
-        this.setSelectedLeague(this.defaultLeague);
+        if (this.selectedLeague.id == 0) this.setSelectedLeague(this.defaultLeague);
       })
     },
 
@@ -40,7 +40,9 @@ export const useFantasyLeagueStore = defineStore({
       return localApiService.getFantasyLeagues()
         .then((fantasyLeagueResult: any) => {
           this.setFantasyLeagues(fantasyLeagueResult);
-          this.setSelectedFantasyLeague(this.defaultFantasyLeague);
+          if (this.selectedFantasyLeague.id == 0) {
+            this.setSelectedFantasyLeague(this.defaultFantasyLeague);
+          }
         })
         .then(() => {
           this.fetchFantasyPlayers();
@@ -147,7 +149,7 @@ export const useFantasyLeagueStore = defineStore({
     },
     defaultFantasyLeague(): FantasyLeague {
       let filteredLeagues = this.activeFantasyLeagues
-        .filter(fantasyLeague => fantasyLeague.leagueId == this.selectedLeague?.id ?? true);
+        .filter(fantasyLeague => fantasyLeague.leagueId == this.selectedLeague?.id);
       return filteredLeagues
         .reduce((max, current) => {
           return current.fantasyDraftLocked > max.fantasyDraftLocked ? current : max
