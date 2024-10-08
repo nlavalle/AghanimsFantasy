@@ -13,8 +13,8 @@
         <v-row>
           <v-tabs-window v-model="fantasyTab" style="width:100%;overflow: visible">
             <v-tabs-window-item value="current">
-              <div v-if="userDraftPoints">
-                <CurrentDraft :FantasyPoints="userDraftPoints" />
+              <div v-if="leagueStore.selectedFantasyDraftPoints">
+                <CurrentDraft :FantasyPoints="leagueStore.selectedFantasyDraftPoints" />
               </div>
             </v-tabs-window-item>
             <v-tabs-window-item value="draft" style="overflow: visible !important">
@@ -42,7 +42,7 @@
                 </v-row>
                 <v-row>
                   <v-col>
-                    <v-row>
+                    <v-row v-if="leagueStore.selectedFantasyLeague">
                       <CreateDraft v-model:selectedFantasyLeague="leagueStore.selectedFantasyLeague"
                         @saveDraft="saveDraft" />
                     </v-row>
@@ -55,14 +55,15 @@
                 <v-row class="mt-1">
                   <leaderboard-component class="leaderboardComponent" leaderboardTitle="Fantasy Leaderboard"
                     headerName="Draft Player" headerValue="Points" :authenticatedUser="user"
-                    :boardData="fantasyLeaderboardData" />
+                    :boardData="fantasyDraftStore.fantasyLeaderboardData" />
                 </v-row>
                 <v-row class="ma-1" style="max-width: 600px">
                   <v-col>
-                    <p>Total Drafts: {{ fantasyLeaderboardStats?.totalDrafts ?? 0 }}</p>
+                    <p>Total Drafts: {{ fantasyDraftStore.fantasyLeaderboardStats?.totalDrafts ?? 0 }}</p>
                   </v-col>
                   <v-col>
-                    <p>You're in the {{ fantasyLeaderboardStats?.drafterPercentile.toFixed(0) ?? 0 }}th percentile
+                    <p>You're in the {{ fantasyDraftStore.fantasyLeaderboardStats?.drafterPercentile?.toFixed(0) ?? 0
+                      }}th percentile
                     </p>
                   </v-col>
                 </v-row>
@@ -84,7 +85,7 @@
             </v-tabs-window-item>
             <v-tabs-window-item value="match">
               <v-col>
-                <v-row v-if="userDraftPoints && fantasyTab == 'match'">
+                <v-row v-if="leagueStore.selectedFantasyDraftPoints && fantasyTab == 'match'">
                   <MatchDataTable v-model:selectedFantasyLeague="leagueStore.selectedFantasyLeague"
                     v-model:draftFiltered="draftFiltered">
                   </MatchDataTable>
@@ -106,21 +107,20 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { VCard, VCardTitle, VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem } from 'vuetify/components';
 import { useAuthStore, type User } from '@/stores/auth';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
-import { localApiService } from '@/services/localApiService';
 import CurrentDraft from '@/components/Fantasy/CurrentDraft.vue';
 import CreateDraft from '@/components/Fantasy/CreateDraft/CreateDraft.vue';
 import MatchDataTable from '@/components/Stats/MatchDataTable.vue';
 import LeaderboardComponent from '@/components/Fantasy/LeaderboardComponent.vue'
-import { fantasyDraftState, type FantasyDraftPoints, type FantasyPlayer } from '@/components/Fantasy/fantasyDraft';
+import { fantasyDraftState } from '@/components/Fantasy/fantasyDraft';
 import LoginDiscord from '@/components/LoginDiscord.vue';
 import AlertDialog from '@/components/AlertDialog.vue';
 import ErrorDialog from '@/components/ErrorDialog.vue';
-import type { LeaderboardStats, Leaderboard } from '@/types/Leaderboard';
-import type { LeaderboardItem } from '@/types/LeaderboardItem';
+import { useFantasyDraftStore } from '@/stores/fantasyDraft';
 
 const authStore = useAuthStore();
 const leagueStore = useFantasyLeagueStore();
-const { fantasyDraftPicks, setFantasyDraftPicks, setFantasyPlayers } = fantasyDraftState();
+const fantasyDraftStore = useFantasyDraftStore();
+const { fantasyDraftPicks, setFantasyDraftPicks, setFantasyPlayers, clearFantasyDraftPicks } = fantasyDraftState();
 const draftFiltered = true;
 
 const showSuccessModal = ref(false);
@@ -129,10 +129,6 @@ const errorDetails = ref<Error>();
 
 const fantasyTab = ref('current')
 const updateDraftVisibility = ref(false);
-const fantasyPlayers = ref<FantasyPlayer[]>([]);
-const userDraftPoints = ref<FantasyDraftPoints>();
-const fantasyLeaderboard = ref([]);
-const fantasyLeaderboardStats = ref<LeaderboardStats>();
 
 const user = computed(() => {
   return authStore.user as User
@@ -146,46 +142,9 @@ const updateDisabled = computed(() => {
   return currentDate > lockDate;
 });
 
-const fantasyLeaderboardData = computed(() => {
-  if (!fantasyLeaderboard.value || Object.keys(fantasyLeaderboard.value).length === 0) {
-    return []
-  }
-  return fantasyLeaderboard.value.map((leaderboard: Leaderboard) => ({
-    id: leaderboard.fantasyDraft.id,
-    isTeam: leaderboard.isTeam,
-    teamId: leaderboard.teamId,
-    description: leaderboard.discordName,
-    value: leaderboard.draftTotalFantasyPoints
-  } as LeaderboardItem))
-})
-
-const fetchFantasyData = async () => {
-  await authStore.checkAuthenticatedAsync();
-  if (leagueStore.selectedFantasyLeague) {
-    localApiService.getFantasyPlayers(leagueStore.selectedFantasyLeague.id)
-      .then((result: any) => {
-        fantasyPlayers.value = result;
-        setFantasyPlayers(fantasyPlayers.value);
-      });
-    if (authStore.authenticated) {
-      localApiService.getLeaderboardStats(leagueStore.selectedFantasyLeague.id)
-        .then((result: any) => {
-          fantasyLeaderboardStats.value = result;
-        })
-      if (userDraftPoints.value?.fantasyDraft && userDraftPoints.value.fantasyDraft.draftPickPlayers.length > 0) {
-        setFantasyDraftPicks(userDraftPoints.value.fantasyDraft.draftPickPlayers);
-      }
-    }
-  }
-}
-
 const saveDraft = async () => {
   if (!authStore.authenticated) return;
-  await localApiService.saveFantasyDraft(
-    authStore.user,
-    leagueStore.selectedFantasyLeague,
-    fantasyDraftPicks.value
-  )
+  fantasyDraftStore.saveFantasyDraft(authStore.user!, fantasyDraftPicks.value)
     .then(() => {
       showSuccessModal.value = true;
       window.scrollTo({
@@ -193,10 +152,7 @@ const saveDraft = async () => {
         left: 0,
         behavior: 'smooth'
       });
-      localApiService.getUserDraftPoints(leagueStore.selectedFantasyLeague!.id).then(result => {
-        userDraftPoints.value = result;
-        fetchFantasyData();
-      });
+      leagueStore.fetchFantasyDraftPoints()?.then(() => fantasyDraftStore.fetchLeaderboard());
       fantasyTab.value = 'current';
     })
     .catch(error => {
@@ -220,42 +176,29 @@ const scrollAfterAlertDialog = () => {
   }, 200);
 }
 
-if (authStore.authenticated && leagueStore.selectedFantasyLeague) {
-  localApiService
-    .getTopTenDrafts(leagueStore.selectedFantasyLeague.id)
-    .then((result) => (fantasyLeaderboard.value = result))
-}
-
 onMounted(() => {
+  leagueStore.fetchFantasyPlayers()?.then(() => setFantasyPlayers(leagueStore.fantasyPlayers))
   if (authStore.authenticated && leagueStore.selectedFantasyLeague) {
-    localApiService.getUserDraftPoints(leagueStore.selectedFantasyLeague.id).then(result => {
-      userDraftPoints.value = result;
-      fetchFantasyData();
-    });
-    localApiService
-      .getTopTenDrafts(leagueStore.selectedFantasyLeague.id)
-      .then((result) => (fantasyLeaderboard.value = result));
+    fantasyDraftStore.fetchLeaderboard();
   } else if (!authStore.authenticated && leagueStore.selectedFantasyLeague) {
     fantasyTab.value = 'draft';
-    fetchFantasyData();
-  }
-
-});
-
-watch([authStore, leagueStore], () => {
-  if (authStore.authenticated && leagueStore.selectedFantasyLeague) {
-    localApiService.getUserDraftPoints(leagueStore.selectedFantasyLeague.id).then(result => {
-      userDraftPoints.value = result;
-      fetchFantasyData();
-    });
-    localApiService
-      .getTopTenDrafts(leagueStore.selectedFantasyLeague.id)
-      .then((result) => (fantasyLeaderboard.value = result))
-  } else if (!authStore.authenticated && leagueStore.selectedFantasyLeague) {
-    fantasyTab.value = 'draft';
-    fetchFantasyData();
   }
 });
+
+watch(() => leagueStore.selectedFantasyLeague, () => {
+  leagueStore.fetchFantasyPlayers()?.then(() => setFantasyPlayers(leagueStore.fantasyPlayers))
+    .then(() => {
+      if (authStore.authenticated) fantasyDraftStore.fetchLeaderboard()
+    })
+})
+
+watch(() => leagueStore.selectedFantasyDraftPoints, () => {
+  if (authStore.authenticated && leagueStore.selectedFantasyDraftPoints?.fantasyDraft && leagueStore.selectedFantasyDraftPoints.fantasyDraft.draftPickPlayers.length > 0) {
+    setFantasyDraftPicks(leagueStore.selectedFantasyDraftPoints.fantasyDraft.draftPickPlayers);
+  } else {
+    clearFantasyDraftPicks()
+  }
+})
 
 const authenticated = computed(() => {
   return authStore.authenticated

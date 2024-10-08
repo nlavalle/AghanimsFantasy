@@ -1,17 +1,71 @@
+import { defineStore } from 'pinia'
 import type { FantasyLeague } from '@/types/FantasyLeague'
 import type { League } from '@/types/League'
-import { defineStore } from 'pinia'
+import { localApiService } from '@/services/localApiService'
+import type { FantasyDraftPoints, FantasyPlayer } from '@/components/Fantasy/fantasyDraft'
 
 export const useFantasyLeagueStore = defineStore({
   id: 'league',
   state: () => ({
-    leagues: null as League[] | null,
-    fantasyLeagues: null as FantasyLeague[] | null,
-    selectedLeague: undefined as League | undefined,
-    selectedFantasyLeague: undefined as FantasyLeague | undefined
+    leagues: [] as League[],
+    fantasyLeagues: [] as FantasyLeague[],
+    selectedLeague: {
+      id: 0,
+      isActive: false,
+      name: ''
+    } as League,
+    selectedFantasyLeague: {
+      id: 0,
+      leagueId: 0,
+      isActive: false,
+      name: '',
+      fantasyDraftLocked: 0,
+      leagueStartTime: 0,
+      leagueEndTime: 0
+    } as FantasyLeague,
+    fantasyDraftPoints: [] as FantasyDraftPoints[],
+    fantasyPlayers: [] as FantasyPlayer[]
   }),
 
   actions: {
+    fetchLeagues() {
+      return localApiService.getLeagues().then((leagueResult: any) => {
+        this.setLeagues(leagueResult);
+        if (this.selectedLeague.id == 0) this.setSelectedLeague(this.defaultLeague);
+      })
+    },
+
+    fetchFantasyLeagues() {
+      if (this.leagues.length == 0) this.fetchLeagues();
+      return localApiService.getFantasyLeagues()
+        .then((fantasyLeagueResult: any) => {
+          this.setFantasyLeagues(fantasyLeagueResult);
+          if (this.selectedFantasyLeague.id == 0) {
+            this.setSelectedFantasyLeague(this.defaultFantasyLeague);
+          }
+        })
+        .then(() => {
+          this.fetchFantasyPlayers();
+        })
+    },
+
+    fetchFantasyDraftPoints() {
+      if (this.selectedLeague) {
+        return localApiService.getUserDraftPoints(this.selectedLeague.id).then((draftResult: FantasyDraftPoints[]) => {
+          this.fantasyDraftPoints = draftResult;
+        })
+      }
+    },
+
+    fetchFantasyPlayers() {
+      if (this.selectedFantasyLeague.id) {
+        return localApiService.getFantasyPlayers(this.selectedFantasyLeague.id)
+          .then((result: any) => {
+            this.fantasyPlayers = result;
+          });
+      }
+    },
+
     setLeagues(leagues: League[]) {
       this.leagues = leagues
     },
@@ -21,11 +75,11 @@ export const useFantasyLeagueStore = defineStore({
     },
 
     clearLeagues() {
-      this.leagues = null
+      this.leagues = []
     },
 
     clearFantasyLeagues() {
-      this.fantasyLeagues = null
+      this.fantasyLeagues = []
     },
 
     setSelectedLeague(league: League) {
@@ -37,11 +91,23 @@ export const useFantasyLeagueStore = defineStore({
     },
 
     clearSelectedLeague() {
-      this.selectedLeague = undefined
+      this.selectedLeague = {
+        id: 0,
+        isActive: false,
+        name: ''
+      }
     },
 
     clearSelectedFantasyLeague() {
-      this.selectedFantasyLeague = undefined
+      this.selectedFantasyLeague = {
+        id: 0,
+        leagueId: 0,
+        isActive: false,
+        name: '',
+        fantasyDraftLocked: 0,
+        leagueStartTime: 0,
+        leagueEndTime: 0
+      }
     },
 
     // Validation methods
@@ -83,11 +149,14 @@ export const useFantasyLeagueStore = defineStore({
     },
     defaultFantasyLeague(): FantasyLeague {
       let filteredLeagues = this.activeFantasyLeagues
-        .filter(fantasyLeague => fantasyLeague.leagueId == this.selectedLeague?.id ?? true);
+        .filter(fantasyLeague => fantasyLeague.leagueId == this.selectedLeague?.id);
       return filteredLeagues
         .reduce((max, current) => {
           return current.fantasyDraftLocked > max.fantasyDraftLocked ? current : max
         }, filteredLeagues[0])
+    },
+    selectedFantasyDraftPoints(): FantasyDraftPoints | undefined {
+      return this.fantasyDraftPoints.find(fdp => fdp.fantasyDraft.fantasyLeagueId == this.selectedFantasyLeague.id)
     }
   }
 })

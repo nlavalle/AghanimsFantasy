@@ -166,29 +166,25 @@ public class FantasyService
         return existingUserDraft;
     }
 
-    public async Task<FantasyDraftPointTotals?> GetFantasyDraftPointTotal(DiscordUser siteUser, int fantasyLeagueId)
+    public async Task<IEnumerable<FantasyDraftPointTotals>> GetFantasyDraftPointTotals(DiscordUser siteUser, int leagueId)
     {
-        FantasyLeague? fantasyLeague = await _fantasyLeagueRepository.GetAccessibleFantasyLeagueAsync(fantasyLeagueId, siteUser);
+        IEnumerable<FantasyLeague> fantasyLeagues = await _fantasyLeagueRepository.GetAccessibleFantasyLeaguesByLeagueIdAsync(siteUser, leagueId);
 
-        if (fantasyLeague == null)
+        List<FantasyDraftPointTotals> fantasyDraftPointsTotals = new List<FantasyDraftPointTotals>();
+        foreach (FantasyLeague fantasyLeague in fantasyLeagues)
         {
-            throw new ArgumentException("Fantasy League Id not found.");
+            FantasyDraft? fantasyDraft = await _fantasyDraftRepository.GetByUserFantasyLeague(fantasyLeague, siteUser);
+            if (fantasyDraft != null)
+            {
+                FantasyDraftPointTotals? fantasyPointTotal = await _fantasyDraftRepository.DraftPointTotalAsync(fantasyDraft);
+                if (fantasyPointTotal != null)
+                {
+                    fantasyDraftPointsTotals.Add(fantasyPointTotal);
+                }
+            }
         }
 
-        var fantasyPoints = await _fantasyPlayerRepository.GetFantasyLeaguePlayersAsync(fantasyLeague);
-        if (fantasyPoints.Count() == 0)
-        {
-            // League doesn't have fantasy players/points yet
-            return null;
-        }
-
-        FantasyDraft? fantasyDraft = await _fantasyDraftRepository.GetByUserFantasyLeague(fantasyLeague, siteUser);
-        if (fantasyDraft == null)
-        {
-            return null;
-        }
-
-        return await _fantasyDraftRepository.DraftPointTotalAsync(fantasyDraft);
+        return fantasyDraftPointsTotals;
     }
 
     public async Task<IEnumerable<FantasyPlayerPoints>> GetFantasyPlayerPoints(DiscordUser siteUser, int fantasyLeagueId, int limit)

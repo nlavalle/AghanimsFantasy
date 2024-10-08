@@ -33,6 +33,19 @@ public class FantasyLeagueRepository : IFantasyLeagueRepository
                 .ToListAsync();
     }
 
+    public async Task<IEnumerable<FantasyLeague>> GetAccessibleFantasyLeaguesByLeagueIdAsync(DiscordUser? user, int leagueId)
+    {
+        return await _dbContext.FantasyLeagues
+                .Include(fl => fl.FantasyPrivateLeaguePlayers)
+                .Include(fl => fl.League)
+                .Where(fl =>
+                    !fl.IsPrivate ||
+                    (user != null && fl.FantasyPrivateLeaguePlayers.Any(p => p.DiscordUser == user)) ||
+                    (user != null && user.IsAdmin))
+                .Where(fl => fl.LeagueId == leagueId)
+                .ToListAsync();
+    }
+
     public async Task<FantasyLeague?> GetAccessibleFantasyLeagueAsync(int FantasyLeagueId, DiscordUser? user)
     {
         return await _dbContext.FantasyLeagues

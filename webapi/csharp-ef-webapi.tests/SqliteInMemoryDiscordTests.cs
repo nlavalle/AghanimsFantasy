@@ -61,7 +61,7 @@ public class SqliteInMemoryDiscordTests : IDisposable
         var discordApiService = new DiscordWebApiService(loggerMock.Object, httpClient, discordRepository);
 
         // Act
-        await discordApiService.GetDiscordByIdAsync(1234L);
+        await discordApiService.AddNewDiscordUserByIdAsync(1234L);
 
         // Assert
         loggerMock.Verify(
@@ -89,7 +89,7 @@ public class SqliteInMemoryDiscordTests : IDisposable
         var discordApiService = new DiscordWebApiService(loggerMock.Object, httpClient, discordRepository);
 
         // Act
-        await discordApiService.GetDiscordByIdAsync(1234L);
+        await discordApiService.AddNewDiscordUserByIdAsync(1234L);
 
         // Assert
         loggerMock.Verify(
@@ -117,7 +117,7 @@ public class SqliteInMemoryDiscordTests : IDisposable
         var discordApiService = new DiscordWebApiService(loggerMock.Object, httpClient, discordRepository);
 
         // Act
-        await discordApiService.GetDiscordByIdAsync(123L);
+        await discordApiService.AddNewDiscordUserByIdAsync(123L);
 
         // Assert
         Assert.True(context.DiscordUsers.Where(di => di.Id == 123).Count() == 1);

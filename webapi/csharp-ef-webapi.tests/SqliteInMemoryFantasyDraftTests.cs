@@ -247,13 +247,15 @@ public class SqliteInMemoryFantasyDraftTests : IDisposable
         var loggerMock = new Mock<ILogger<FantasyService>>();
         var fantasyLeagueRepositoryLogger = new Mock<ILogger<FantasyLeagueRepository>>();
         var fantasyLeagueRepository = new FantasyLeagueRepository(fantasyLeagueRepositoryLogger.Object, context);
+        var fantasyLeagueWeightRepositoryLogger = new Mock<ILogger<FantasyLeagueWeightRepository>>();
+        var fantasyLeagueWeightRepository = new FantasyLeagueWeightRepository(fantasyLeagueWeightRepositoryLogger.Object, context);
         var fantasyDraftRepositoryLogger = new Mock<ILogger<FantasyDraftRepository>>();
         var fantasyDraftRepository = new FantasyDraftRepository(fantasyDraftRepositoryLogger.Object, context);
         var fantasyPlayerRepositoryLogger = new Mock<ILogger<FantasyPlayerRepository>>();
         var fantasyPlayerRepository = new FantasyPlayerRepository(fantasyPlayerRepositoryLogger.Object, context);
         var fantasyRepositoryLogger = new Mock<ILogger<FantasyRepository>>();
         var fantasyRepository = new FantasyRepository(fantasyRepositoryLogger.Object, context);
-        var fantasyService = new FantasyService(loggerMock.Object, fantasyLeagueRepository, fantasyDraftRepository, fantasyPlayerRepository, fantasyRepository);
+        var fantasyService = new FantasyService(loggerMock.Object, fantasyLeagueRepository, fantasyLeagueWeightRepository, fantasyDraftRepository, fantasyPlayerRepository, fantasyRepository);
 
         var discordUser = await context.DiscordUsers.FirstAsync();
         var fantasyLeague = await context.FantasyLeagues.FirstAsync();
@@ -276,13 +278,15 @@ public class SqliteInMemoryFantasyDraftTests : IDisposable
         var loggerMock = new Mock<ILogger<FantasyService>>();
         var fantasyLeagueRepositoryLogger = new Mock<ILogger<FantasyLeagueRepository>>();
         var fantasyLeagueRepository = new FantasyLeagueRepository(fantasyLeagueRepositoryLogger.Object, context);
+        var fantasyLeagueWeightRepositoryLogger = new Mock<ILogger<FantasyLeagueWeightRepository>>();
+        var fantasyLeagueWeightRepository = new FantasyLeagueWeightRepository(fantasyLeagueWeightRepositoryLogger.Object, context);
         var fantasyDraftRepositoryLogger = new Mock<ILogger<FantasyDraftRepository>>();
         var fantasyDraftRepository = new FantasyDraftRepository(fantasyDraftRepositoryLogger.Object, context);
         var fantasyPlayerRepositoryLogger = new Mock<ILogger<FantasyPlayerRepository>>();
         var fantasyPlayerRepository = new FantasyPlayerRepository(fantasyPlayerRepositoryLogger.Object, context);
         var fantasyRepositoryLogger = new Mock<ILogger<FantasyRepository>>();
         var fantasyRepository = new FantasyRepository(fantasyRepositoryLogger.Object, context);
-        var fantasyService = new FantasyService(loggerMock.Object, fantasyLeagueRepository, fantasyDraftRepository, fantasyPlayerRepository, fantasyRepository);
+        var fantasyService = new FantasyService(loggerMock.Object, fantasyLeagueRepository, fantasyLeagueWeightRepository, fantasyDraftRepository, fantasyPlayerRepository, fantasyRepository);
 
         var discordUser = await context.DiscordUsers.FirstAsync();
         var fantasyLeague = await context.FantasyLeagues.FirstAsync();
@@ -316,13 +320,15 @@ public class SqliteInMemoryFantasyDraftTests : IDisposable
         var loggerMock = new Mock<ILogger<FantasyService>>();
         var fantasyLeagueRepositoryLogger = new Mock<ILogger<FantasyLeagueRepository>>();
         var fantasyLeagueRepository = new FantasyLeagueRepository(fantasyLeagueRepositoryLogger.Object, context);
+        var fantasyLeagueWeightRepositoryLogger = new Mock<ILogger<FantasyLeagueWeightRepository>>();
+        var fantasyLeagueWeightRepository = new FantasyLeagueWeightRepository(fantasyLeagueWeightRepositoryLogger.Object, context);
         var fantasyDraftRepositoryLogger = new Mock<ILogger<FantasyDraftRepository>>();
         var fantasyDraftRepository = new FantasyDraftRepository(fantasyDraftRepositoryLogger.Object, context);
         var fantasyPlayerRepositoryLogger = new Mock<ILogger<FantasyPlayerRepository>>();
         var fantasyPlayerRepository = new FantasyPlayerRepository(fantasyPlayerRepositoryLogger.Object, context);
         var fantasyRepositoryLogger = new Mock<ILogger<FantasyRepository>>();
         var fantasyRepository = new FantasyRepository(fantasyRepositoryLogger.Object, context);
-        var fantasyService = new FantasyService(loggerMock.Object, fantasyLeagueRepository, fantasyDraftRepository, fantasyPlayerRepository, fantasyRepository);
+        var fantasyService = new FantasyService(loggerMock.Object, fantasyLeagueRepository, fantasyLeagueWeightRepository, fantasyDraftRepository, fantasyPlayerRepository, fantasyRepository);
 
         var discordUser = await context.DiscordUsers.FirstAsync();
         var fantasyLeague = await context.FantasyLeagues.FirstAsync();

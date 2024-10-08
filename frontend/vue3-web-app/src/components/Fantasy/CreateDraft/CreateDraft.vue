@@ -4,9 +4,11 @@
         <div v-if="isDesktop" style="margin-top:40px">
             <div class="sticky-parent right-0">
                 <v-btn class="btn-fantasy sticky-child" @click="clearDraft()">Clear Draft</v-btn>
-                <v-btn v-if="authenticated && selectedFantasyLeague && leagueStore.isDraftOpen(selectedFantasyLeague!.fantasyDraftLocked)"
+                <v-btn
+                    v-if="authenticated && selectedFantasyLeague && leagueStore.isDraftOpen(selectedFantasyLeague!.fantasyDraftLocked)"
                     class="btn-fantasy sticky-child" @click="saveDraft()">Save Draft</v-btn>
-                <v-btn v-else class="btn-fantasy sticky-child" style="pointer-events: none;" disabled @click="saveDraft()">Save Draft</v-btn>
+                <v-btn v-else class="btn-fantasy sticky-child" style="pointer-events: none;" disabled
+                    @click="saveDraft()">Save Draft</v-btn>
             </div>
             <div class="sticky-parent left-0">
                 <CreateDraftPicks class="sticky-child" style="z-index:10" />
@@ -15,9 +17,11 @@
         <div v-else style="margin-top:20px">
             <div class="sticky-parent left-0">
                 <v-btn class="btn-fantasy sticky-child" style="top:20px;" @click="clearDraft()">Clear Draft</v-btn>
-                <v-btn v-if="authenticated && selectedFantasyLeague && leagueStore.isDraftOpen(selectedFantasyLeague!.fantasyDraftLocked)"
-                     class="btn-fantasy sticky-child" style="top:20px;" @click="saveDraft()">Save Draft</v-btn>
-                <v-btn v-else class="btn-fantasy sticky-child" style="top:20px; pointer-events: none;" disabled @click="saveDraft()">Save Draft</v-btn>
+                <v-btn
+                    v-if="authenticated && selectedFantasyLeague && leagueStore.isDraftOpen(selectedFantasyLeague!.fantasyDraftLocked)"
+                    class="btn-fantasy sticky-child" style="top:20px;" @click="saveDraft()">Save Draft</v-btn>
+                <v-btn v-else class="btn-fantasy sticky-child" style="top:20px; pointer-events: none;" disabled
+                    @click="saveDraft()">Save Draft</v-btn>
                 <CreateDraftPicks class="mt-2 sticky-child" style="top:70px;z-index:10" />
             </div>
         </div>
@@ -44,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { VBtn, VNavigationDrawer } from 'vuetify/components';
 import CreateDraftPicks from './CreateDraftPicks.vue';
 import PlayerPicksAvailable from './PlayerPicksAvailable.vue';
@@ -62,7 +66,11 @@ const mobileDrawer = ref(false);
 
 const selectedFantasyLeague = defineModel<FantasyLeague>('selectedFantasyLeague');
 const leagueStore = useFantasyLeagueStore();
-const { clearFantasyDraftPicks } = fantasyDraftState();
+const { selectedPlayer, clearFantasyDraftPicks } = fantasyDraftState();
+
+watch(() => leagueStore.selectedFantasyLeague, () => {
+    selectedPlayer.value = undefined;
+})
 
 const emit = defineEmits(['saveDraft']);
 
@@ -79,7 +87,7 @@ const toggleDrawer = () => {
 }
 
 const authenticated = computed(() => {
-  return authStore.authenticated
+    return authStore.authenticated
 })
 
 </script>
