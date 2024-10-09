@@ -5,7 +5,12 @@ export interface Leaderboard {
     isTeam: boolean,
     discordName: string,
     teamId: number,
-    draftTotalFantasyPoints: number
+    draftTotalFantasyPoints: number,
+    draftPickOnePoints: number,
+    draftPickTwoPoints: number,
+    draftPickThreePoints: number,
+    draftPickFourPoints: number,
+    draftPickFivePoints: number
 }
 
 export interface LeaderboardStats {
