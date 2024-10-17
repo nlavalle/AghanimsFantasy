@@ -23,7 +23,8 @@
                         {{ item.value.toFixed(2).toLocaleString() }}</span>
                 </div>
                 <div class="leaderboard-details bg-surface">
-                    <p v-for="pick in item.fantasyDraft.draftPickPlayers" style="text-align:right">
+                    <p v-for="pick in item.fantasyDraft.draftPickPlayers.sort((a, b) => a.draftOrder - b.draftOrder)"
+                        style="text-align:right">
                         {{ pick.fantasyPlayer.dotaAccount.name }}: {{ item.playerPoints[pick.draftOrder - 1].toFixed(2)
                             ?? 0 }}
                     </p>
@@ -331,8 +332,8 @@ div ::v-deep(.player-data) {
 .leaderboard-details {
     display: none;
     position: absolute;
-    top: 40px;
-    left: 60px;
+    top: 20px;
+    right: 140px;
     background-color: white;
     z-index: 10;
     padding: 10px;

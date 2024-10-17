@@ -23,6 +23,11 @@
                         </v-row>
                     </v-col>
                 </v-row>
+                <v-overlay :model-value="disabledTeam(team.teamId)"
+                    class="ma-6 align-center justify-center disabled-team" contained persistent no-click-animation
+                    z-index="2">
+                    <span>Max 2 players per team</span>
+                </v-overlay>
             </v-col>
         </v-row>
     </v-container>
@@ -31,15 +36,15 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { fantasyDraftState, type FantasyPlayer } from '../fantasyDraft';
-import { VContainer, VRow, VCol } from 'vuetify/components';
+import { VContainer, VRow, VCol, VOverlay } from 'vuetify/components';
 
-const { selectedPlayer, fantasyPlayersAvailable, disabledPlayer } = fantasyDraftState();
+const { selectedPlayer, fantasyPlayersAvailable, disabledPlayer, disabledTeam } = fantasyDraftState();
 
 const isDesktop = ref(window.outerWidth >= 600);
 
 const fantasyTeams = computed(() => {
     // We want the distinct teams
-    let teams = fantasyPlayersAvailable.value.map(item => ({teamId: item.teamId, ...item.team}))
+    let teams = fantasyPlayersAvailable.value.map(item => ({ teamId: item.teamId, ...item.team }))
     return [...new Map(teams.map(item => [item.teamId, item])).values()]
 })
 
@@ -69,6 +74,15 @@ const selectedPlayerCheck = (fantasyPlayerId: number) => {
 </script>
 
 <style scoped>
+.available-team {
+    position: relative;
+}
+
+.disabled-team {
+    pointer-events: none;
+    border-radius: 10px;
+}
+
 .available-team-title {
     margin-right: 5px;
     margin-top: 5px;

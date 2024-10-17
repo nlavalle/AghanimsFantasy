@@ -231,9 +231,28 @@ export function fantasyDraftState() {
     }
 
     const disabledPlayer = (fantasyPlayer: FantasyPlayer) => {
+        // Disable currently selected player
         const pickedPlayer = fantasyDraftPicks.value.filter(picks => picks.id == fantasyPlayer.id).length > 0;
+
+        // Can't draft a player that isn't the valid position of what's currently selected
         const correctDraftSlotRoleSelected = fantasyPlayer.teamPosition == currentDraftSlotSelected.value;
-        return pickedPlayer || !correctDraftSlotRoleSelected;
+
+        // Can only draft 2 players from a given team
+        const teamCounts = fantasyDraftPicks.value.reduce((acc: any, fp: FantasyPlayer) => {
+            acc[fp.teamId] = (acc[fp.teamId] || 0) + 1;
+            return acc;
+        }, {})
+        const maxTeamCheck = fantasyPlayersAvailable.value.filter(player => player.id == fantasyPlayer.id && (teamCounts[player.teamId] ?? 0) < 2).length == 0;
+        return pickedPlayer || !correctDraftSlotRoleSelected || maxTeamCheck;
+    }
+
+    const disabledTeam = (teamId: any) => {
+        const teamCounts = fantasyDraftPicks.value.reduce((acc: any, fp: FantasyPlayer) => {
+            acc[fp.teamId] = (acc[fp.teamId] || 0) + 1;
+            return acc;
+        }, {})
+        const maxTeamCheck = (teamCounts[teamId] ?? 0) >= 2;
+        return maxTeamCheck;
     }
 
     return {
@@ -245,6 +264,7 @@ export function fantasyDraftState() {
         setFantasyPlayers,
         setFantasyPlayer,
         clearFantasyDraftPicks,
-        disabledPlayer
+        disabledPlayer,
+        disabledTeam
     }
 }
