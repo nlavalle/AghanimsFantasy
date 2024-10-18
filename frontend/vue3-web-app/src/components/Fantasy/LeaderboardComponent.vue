@@ -22,7 +22,8 @@
                         :style="{ fontWeight: item.description == props.authenticatedUser?.name ? 'bold' : 'normal' }">
                         {{ item.value.toFixed(2).toLocaleString() }}</span>
                 </div>
-                <div class="leaderboard-details bg-surface">
+                <div class="leaderboard-details bg-surface"
+                    v-if="!fantasyLeagueStore.isDraftOpen(fantasyLeagueStore.selectedFantasyLeague.fantasyDraftLocked)">
                     <p v-for="pick in item.fantasyDraft.draftPickPlayers.sort((a, b) => a.draftOrder - b.draftOrder)"
                         style="text-align:right">
                         {{ pick.fantasyPlayer.dotaAccount.name }}: {{ item.playerPoints[pick.draftOrder - 1].toFixed(2)
@@ -40,6 +41,7 @@ import type { User } from '@/stores/auth';
 import type { LeaderboardItem } from '@/types/LeaderboardItem';
 import TrophySvg from '@/components/icons/TrophySvg.vue'
 import { VRow } from 'vuetify/components';
+import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 
 const props = defineProps({
     leaderboardTitle: {
@@ -60,6 +62,8 @@ const props = defineProps({
         required: false
     }
 })
+
+const fantasyLeagueStore = useFantasyLeagueStore();
 
 const getImageUrl = (teamId: number) => {
     if (teamId == 0) return undefined
