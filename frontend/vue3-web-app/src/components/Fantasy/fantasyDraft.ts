@@ -243,7 +243,8 @@ export function fantasyDraftState() {
             return acc;
         }, {})
         const maxTeamCheck = fantasyPlayersAvailable.value.filter(player => player.id == fantasyPlayer.id && (teamCounts[player.teamId] ?? 0) < 2).length == 0;
-        return pickedPlayer || !correctDraftSlotRoleSelected || maxTeamCheck;
+        const minTeamsCheck = new Set(fantasyPlayersAvailable.value.flatMap(player => player.teamId)).size > 2;
+        return pickedPlayer || !correctDraftSlotRoleSelected || (maxTeamCheck && minTeamsCheck);
     }
 
     const disabledTeam = (teamId: any) => {
@@ -252,7 +253,8 @@ export function fantasyDraftState() {
             return acc;
         }, {})
         const maxTeamCheck = (teamCounts[teamId] ?? 0) >= 2;
-        return maxTeamCheck;
+        const minTeamsCheck = new Set(fantasyPlayersAvailable.value.flatMap(player => player.teamId)).size > 2;
+        return maxTeamCheck && minTeamsCheck;
     }
 
     return {
