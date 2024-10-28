@@ -104,6 +104,7 @@ const authenticated = computed(() => {
     position: absolute;
     height: 90%;
     pointer-events: none;
+    z-index: 20;
 }
 
 .sticky-child {

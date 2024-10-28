@@ -22,6 +22,14 @@
                         :style="{ fontWeight: item.description == props.authenticatedUser?.name ? 'bold' : 'normal' }">
                         {{ item.value.toFixed(2).toLocaleString() }}</span>
                 </div>
+                <div class="leaderboard-details bg-surface"
+                    v-if="!fantasyLeagueStore.isDraftOpen(fantasyLeagueStore.selectedFantasyLeague.fantasyDraftLocked)">
+                    <p v-for="pick in item.fantasyDraft.draftPickPlayers.sort((a, b) => a.draftOrder - b.draftOrder)"
+                        style="text-align:right">
+                        {{ pick.fantasyPlayer.dotaAccount.name }}: {{ item.playerPoints[pick.draftOrder - 1].toFixed(2)
+                            ?? 0 }}
+                    </p>
+                </div>
             </li>
         </ol>
     </div>
@@ -33,6 +41,7 @@ import type { User } from '@/stores/auth';
 import type { LeaderboardItem } from '@/types/LeaderboardItem';
 import TrophySvg from '@/components/icons/TrophySvg.vue'
 import { VRow } from 'vuetify/components';
+import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 
 const props = defineProps({
     leaderboardTitle: {
@@ -54,6 +63,8 @@ const props = defineProps({
     }
 })
 
+const fantasyLeagueStore = useFantasyLeagueStore();
+
 const getImageUrl = (teamId: number) => {
     if (teamId == 0) return undefined
     return `logos/teams_logo_${teamId}.png`
@@ -64,7 +75,6 @@ const getImageUrl = (teamId: number) => {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 div ::v-deep(.player-header-name) {
-    font-family: Arial, Helvetica, sans-serif;
     font-style: normal;
     font-weight: 400;
     font-size: 18px;
@@ -78,7 +88,6 @@ div ::v-deep(.player-header-name) {
 }
 
 div ::v-deep(.player-header-value) {
-    font-family: Arial, Helvetica, sans-serif;
     font-style: normal;
     font-weight: 400;
     font-size: 18px;
@@ -92,7 +101,6 @@ div ::v-deep(.player-header-value) {
 }
 
 div ::v-deep(.player-descriptors) {
-    font-family: Arial, Helvetica, sans-serif;
     font-style: normal;
     font-weight: 400;
     font-size: 16px;
@@ -112,16 +120,11 @@ div ::v-deep(.player-data) {
     flex: 0.5 1;
 }
 
-div ::v-deep(.ico-cup-reverse) {
-    transform: rotate(180deg);
-}
-
 /*-------------------- Leaderboard --------------------*/
 .leaderboard {
-    /* background: linear-gradient(to bottom, #3a404d, #181c26); */
     background-color: var(--aghanims-fantasy-main-4);
     border: 5px solid var(--aghanims-fantasy-main-2);
-    border-radius: 10px;
+    border-radius: 15px;
     box-shadow: 0 7px 30px rgba(62, 9, 11, 0.3);
     margin-bottom: 10px;
     margin-left: 5px;
@@ -157,7 +160,6 @@ div ::v-deep(.ico-cup-reverse) {
 }
 
 .leaderboard ol {
-    border-top: 5px solid var(--aghanims-fantasy-main-3);
     margin-top: 0px;
     counter-reset: leaderboard;
     list-style-type: none;
@@ -165,13 +167,12 @@ div ::v-deep(.ico-cup-reverse) {
 }
 
 .leaderboard ol li {
-    z-index: 1;
+    position: relative;
     font-size: 16px;
     font-family: Arial, Helvetica, sans-serif;
     counter-increment: leaderboard;
     padding: 12px 12px 12px 50px;
     backface-visibility: hidden;
-    transform: translateZ(0) scale(1, 1);
 }
 
 .leaderboard ol li::before {
@@ -330,5 +331,21 @@ div ::v-deep(.ico-cup-reverse) {
     bottom: auto;
     border-top: none;
     border-bottom: 8px solid var(--gradient-blue-8);
+}
+
+.leaderboard-details {
+    display: none;
+    position: absolute;
+    top: 20px;
+    right: 140px;
+    background-color: white;
+    z-index: 10;
+    padding: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+}
+
+li:hover .leaderboard-details {
+    display: block;
 }
 </style>

@@ -66,6 +66,9 @@
                 <template v-slot:item.totalPoints="{ value }">
                     <b>{{ value }}</b>
                 </template>
+                <template v-slot:item.pointsPerMatch="{ value }">
+                    <b>{{ value }}</b>
+                </template>
                 <template v-slot:item.totalKills="{ value }">
                     <b>{{ value.killPoints }}</b>
                     <br>
@@ -258,6 +261,16 @@ const commonFantasyColumns = [
         width: '50px',
         sortable: true,
         sort: (a: number, b: number) => b - a
+    },
+    {
+        key: 'pointsPerMatch',
+        title: isDesktop.value ? 'Avg Points' : 'FP/M',
+        align: 'left',
+        value: (row: any) => row.totalMatches > 1 ? (row.totalMatchFantasyPoints.toFixed(1) / row.totalMatches).toFixed(1) : 0,
+        format: (val: number) => `${val.toLocaleString()}`,
+        width: '50px',
+        sortable: true,
+        sort: (a: number, b: number) => a - b
     },
 ];
 const kdaFantasyColumns = [

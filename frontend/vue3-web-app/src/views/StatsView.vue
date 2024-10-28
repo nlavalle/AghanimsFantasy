@@ -14,7 +14,7 @@
       <v-col>
         <v-row>
           <v-select label="League" v-model="leagueStore.selectedFantasyLeague" :items="availableFantasyLeagues"
-            item-value="id" variant="underlined" return-object>
+            item-value="id" variant="underlined" return-object width="300">
             <template v-slot:selection="{ item }" slot-scope="data">
               <p>{{ fullFantasyName(item.raw.leagueId, item.raw.name) }}</p>
             </template>

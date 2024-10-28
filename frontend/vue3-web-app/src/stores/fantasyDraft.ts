@@ -58,7 +58,15 @@ export const useFantasyDraftStore = defineStore({
         isTeam: leaderboard.isTeam,
         teamId: leaderboard.teamId,
         description: leaderboard.discordName,
-        value: leaderboard.draftTotalFantasyPoints
+        value: leaderboard.draftTotalFantasyPoints,
+        fantasyDraft: leaderboard.fantasyDraft,
+        playerPoints: [
+          leaderboard.draftPickOnePoints,
+          leaderboard.draftPickTwoPoints,
+          leaderboard.draftPickThreePoints,
+          leaderboard.draftPickFourPoints,
+          leaderboard.draftPickFivePoints
+        ]
       } as LeaderboardItem))
     }
   }
