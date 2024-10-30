@@ -24,7 +24,7 @@ const router = createRouter({
       component: () => import('../views/StatsView.vue')
     },
     {
-      path: '/fantasy',
+      path: '/fantasy/:id?',
       name: 'fantasy',
       component: () => import('../views/FantasyView.vue')
     },

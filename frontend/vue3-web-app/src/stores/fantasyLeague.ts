@@ -35,12 +35,21 @@ export const useFantasyLeagueStore = defineStore({
       })
     },
 
-    fetchFantasyLeagues() {
+    fetchFantasyLeagues(selectFantasyLeagueId: number | undefined) {
       if (this.leagues.length == 0) this.fetchLeagues();
       return localApiService.getFantasyLeagues()
         .then((fantasyLeagueResult: any) => {
           this.setFantasyLeagues(fantasyLeagueResult);
-          if (this.selectedFantasyLeague.id == 0) {
+          if (selectFantasyLeagueId) {
+            let fantasyLeagueLookup = this.fantasyLeagues.find(fl => fl.id == selectFantasyLeagueId)
+            if (fantasyLeagueLookup) {
+              let leagueLookup = this.leagues.find(l => l.id == fantasyLeagueLookup.leagueId)
+              if (leagueLookup) {
+                this.setSelectedLeague(leagueLookup);
+                this.setSelectedFantasyLeague(fantasyLeagueLookup);
+              }
+            }
+          } else if (this.selectedFantasyLeague.id == 0) {
             this.setSelectedFantasyLeague(this.defaultFantasyLeague);
           }
         })

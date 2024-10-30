@@ -46,9 +46,12 @@ import { computed, onMounted, watch } from 'vue';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import { useAuthStore } from '@/stores/auth';
 import { VContainer, VRow, VCol, VSelect, VListItem, VIcon, VTab, VTabs } from 'vuetify/components'
+import { useRoute } from 'vue-router';
 
 const authStore = useAuthStore()
 const leagueStore = useFantasyLeagueStore()
+
+const route = useRoute();
 
 const leagueOptions = computed(() => {
   return leagueStore.activeLeagues.sort((a, b) => b.id - a.id)
@@ -63,17 +66,18 @@ const fantasyLeagueOptions = computed(() => {
 onMounted(() => {
   authStore.checkAuthenticatedAsync()
     .then(() => leagueStore.fetchLeagues())
-    .then(() => leagueStore.fetchFantasyLeagues())
+    .then(() => leagueStore.fetchFantasyLeagues(Number(route.params.id)))
     .then(() => {
       if (authStore.authenticated) {
         leagueStore.fetchFantasyDraftPoints()
       }
+
     });
 })
 
 watch(() => authStore.authenticated, () => {
   leagueStore.fetchLeagues()
-    .then(() => leagueStore.fetchFantasyLeagues())
+    .then(() => leagueStore.fetchFantasyLeagues(Number(route.params.id)))
     .then(() => leagueStore.fetchFantasyDraftPoints());
 })
 
