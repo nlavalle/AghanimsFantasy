@@ -24,11 +24,10 @@ const router = createRouter({
       component: () => import('../views/StatsView.vue')
     },
     {
-      path: '/fantasy/:id?',
+      path: '/fantasy',
       name: 'fantasy',
       component: () => import('../views/FantasyView.vue')
     },
-
     {
       path: '/admin',
       name: 'admin',

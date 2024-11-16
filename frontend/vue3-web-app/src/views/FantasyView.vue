@@ -8,7 +8,6 @@
             <v-tab value="draft">Draft Players</v-tab>
             <v-tab value="leaderboard">Leaderboard</v-tab>
             <v-tab value="match">Fantasy Matches</v-tab>
-            <p>{{ $route.params.id }}</p>
           </v-tabs>
         </v-row>
         <v-row>
