@@ -164,6 +164,7 @@ public class FantasyDraftRepository : IFantasyDraftRepository
             .ToListAsync();
 
         var fantasyDraftPoints = fantasyDraftPointsByLeagueQuery
+            .Where(fd => fd.DraftPickPlayers.Count > 0)
             .Select(fd => new FantasyDraftPointTotals
             {
                 FantasyDraft = fd,

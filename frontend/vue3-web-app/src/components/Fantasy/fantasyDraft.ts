@@ -181,12 +181,9 @@ export interface DraftPickPlayer {
 }
 
 const selectedPlayer = ref<FantasyPlayer>();
-
 const currentDraftSlotSelected = ref<number>(1);
-
 const fantasyDraftPicks = ref<FantasyPlayer[]>([]);
-
-const fantasyPlayersAvailable = ref<FantasyPlayer[]>([]);
+const fantasyPlayerPointsAvailable = ref<FantasyPlayerPoints[]>([]);
 
 export function serializeFantasyDraftToDraftPick(fantasyDraftPlayer: any) {
     return {
@@ -203,8 +200,8 @@ export function fantasyDraftState() {
         })
     }
 
-    const setFantasyPlayers = (fantasyPlayers: FantasyPlayer[]) => {
-        fantasyPlayersAvailable.value = fantasyPlayers;
+    const setFantasyPlayerPoints = (fantasyPlayerPoints: FantasyPlayerPoints[]) => {
+        fantasyPlayerPointsAvailable.value = fantasyPlayerPoints;
     }
 
     const setFantasyPlayer = (fantasyPlayer: FantasyPlayer) => {
@@ -242,8 +239,8 @@ export function fantasyDraftState() {
             acc[fp.teamId] = (acc[fp.teamId] || 0) + 1;
             return acc;
         }, {})
-        const maxTeamCheck = fantasyPlayersAvailable.value.filter(player => player.id == fantasyPlayer.id && (teamCounts[player.teamId] ?? 0) < 2).length == 0;
-        const minTeamsCheck = new Set(fantasyPlayersAvailable.value.flatMap(player => player.teamId)).size > 2;
+        const maxTeamCheck = fantasyPlayerPointsAvailable.value.filter(player => player.fantasyPlayer.id == fantasyPlayer.id && (teamCounts[player.fantasyPlayer.teamId] ?? 0) < 2).length == 0;
+        const minTeamsCheck = new Set(fantasyPlayerPointsAvailable.value.flatMap(player => player.fantasyPlayer.teamId)).size > 2;
         return pickedPlayer || !correctDraftSlotRoleSelected || (maxTeamCheck && minTeamsCheck);
     }
 
@@ -253,7 +250,7 @@ export function fantasyDraftState() {
             return acc;
         }, {})
         const maxTeamCheck = (teamCounts[teamId] ?? 0) >= 2;
-        const minTeamsCheck = new Set(fantasyPlayersAvailable.value.flatMap(player => player.teamId)).size > 2;
+        const minTeamsCheck = new Set(fantasyPlayerPointsAvailable.value.flatMap(player => player.fantasyPlayer.teamId)).size > 2;
         return maxTeamCheck && minTeamsCheck;
     }
 
@@ -261,9 +258,9 @@ export function fantasyDraftState() {
         selectedPlayer,
         currentDraftSlotSelected,
         fantasyDraftPicks,
-        fantasyPlayersAvailable,
+        fantasyPlayerPointsAvailable,
         setFantasyDraftPicks,
-        setFantasyPlayers,
+        setFantasyPlayerPoints,
         setFantasyPlayer,
         clearFantasyDraftPicks,
         disabledPlayer,

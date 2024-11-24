@@ -308,13 +308,13 @@ const fantasyLeagueWeightDefaultItemSpecified = {
   tripleKillsWeight: 0,
   aegisSnatchedWeight: 0,
   rapiersPurchasedWeight: 0,
-  couriersKilledWeight: 0,
+  couriersKilledWeight: 0.2,
   networthRankWeight: 0,
   supportGoldSpentWeight: 0,
   observerWardsPlacedWeight: 0.15,
   sentryWardsPlacedWeight: 0,
-  wardsDewardedWeight: 0,
-  stunDurationWeight: 0.05
+  wardsDewardedWeight: 0.15,
+  stunDurationWeight: 0.025
 }
 
 const accountDefaultItemSpecified = {

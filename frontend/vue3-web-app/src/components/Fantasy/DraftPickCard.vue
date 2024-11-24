@@ -1,6 +1,30 @@
 <template>
   <div class="draft-card">
-    <v-card class="card-container">
+    <v-card v-if="props.size == 'small'" class="card-container">
+      <div class="card-title-small">
+        <v-card-title class="ma-0 pa-0" :style="{ 'font-size': isDesktop ? '0.9rem' : '0.7rem' }">
+          {{ props.fantasyPlayer?.dotaAccount?.name || '' }}
+        </v-card-title>
+      </div>
+      <div class="card-images">
+        <img class="player-image" :style="{ 'max-width': isDesktop ? '70px' : '60px' }" :src="getPlayerLogo()" />
+        <img class="team-image" :src="getTeamLogo()" />
+      </div>
+      <div class="draft-body-small">
+        <v-card-text class="pt-1 pl-2" style="min-height: 3rem;">
+          <div v-if="props.fantasyLeagueActive">
+            <span :style="{ 'font-size': '0.8rem', 'font-weight': 'bold' }">
+              {{ props.fantasyPoints?.toFixed(2) ?? 0 }}
+            </span>
+            <br />
+            <span :style="{ 'font-size': '0.8rem' }">
+              Fantasy Pts
+            </span>
+          </div>
+        </v-card-text>
+      </div>
+    </v-card>
+    <v-card v-else class="card-container">
       <div class="card-title">
         <v-card-title class="ma-0 pl-1 pa-0" :style="{ 'font-size': isDesktop ? '1.2rem' : '1rem' }">
           {{ props.fantasyPlayer?.dotaAccount?.name || '' }}
@@ -30,7 +54,6 @@
           </div>
         </v-card-text>
       </div>
-
     </v-card>
   </div>
 </template>
@@ -41,6 +64,10 @@ import { VCard, VCardTitle, VCardSubtitle, VCardText } from 'vuetify/components'
 import type { FantasyPlayer } from './fantasyDraft';
 
 const props = defineProps({
+  size: {
+    type: String,
+    required: false
+  },
   fantasyPlayer: {
     type: Object as PropType<FantasyPlayer>,
     required: false
@@ -49,6 +76,10 @@ const props = defineProps({
     type: Number,
     required: false
   },
+  fantasyLeagueActive: {
+    type: Boolean,
+    required: false
+  }
 })
 
 const isDesktop = ref(window.outerWidth >= 600);
@@ -95,6 +126,11 @@ const getTeamLogo = () => {
   background-color: var(--aghanims-fantasy-main-2);
 }
 
+.card-title-small {
+  background-color: var(--aghanims-fantasy-main-2);
+  font-family: 'Roboto', sans-serif;
+}
+
 .card-images {
   display: flex;
   justify-content: center;
@@ -106,6 +142,14 @@ const getTeamLogo = () => {
   border-top: 3px solid var(--aghanims-fantasy-main-2);
   height: 50%;
   text-align: start;
+}
+
+.draft-body-small {
+  background: linear-gradient(to bottom, var(--aghanims-fantasy-main-2), var(--aghanims-fantasy-blue-1));
+  border-top: 3px solid var(--aghanims-fantasy-main-2);
+  height: 50%;
+  text-align: start;
+  font-family: 'Roboto', sans-serif;
 }
 
 .draft-body-main {

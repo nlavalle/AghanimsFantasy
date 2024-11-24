@@ -38,11 +38,12 @@
         </div>
 
 
-        <div v-if="isDesktop" style="margin-top:120px;margin-right:450px;">
-            <PlayerPicksAvailable class="picks-available" />
+        <div v-if="isDesktop" style="margin-top:120px;margin-right:450px;min-height:620px;">
+            <PlayerPicksAvailable class="picks-available" :FantasyLeague="selectedFantasyLeague" />
         </div>
         <div v-else style="margin-top:120px;">
-            <PlayerPicksAvailable class="picks-available" @click="toggleDrawer" />
+            <PlayerPicksAvailable class="picks-available" :FantasyLeague="selectedFantasyLeague"
+                @click="toggleDrawer" />
         </div>
     </div>
 </template>
