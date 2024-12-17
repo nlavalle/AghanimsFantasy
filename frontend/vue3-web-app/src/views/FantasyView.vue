@@ -120,7 +120,7 @@ import { useFantasyDraftStore } from '@/stores/fantasyDraft';
 const authStore = useAuthStore();
 const leagueStore = useFantasyLeagueStore();
 const fantasyDraftStore = useFantasyDraftStore();
-const { fantasyDraftPicks, setFantasyDraftPicks, setFantasyPlayers, clearFantasyDraftPicks } = fantasyDraftState();
+const { fantasyDraftPicks, setFantasyDraftPicks, setFantasyPlayerPoints, clearFantasyDraftPicks } = fantasyDraftState();
 const draftFiltered = true;
 
 const showSuccessModal = ref(false);
@@ -177,7 +177,7 @@ const scrollAfterAlertDialog = () => {
 }
 
 onMounted(() => {
-  leagueStore.fetchFantasyPlayers()?.then(() => setFantasyPlayers(leagueStore.fantasyPlayers))
+  leagueStore.fetchFantasyPlayerPoints()?.then(() => setFantasyPlayerPoints(leagueStore.fantasyPlayerPoints))
   if (authStore.authenticated && leagueStore.selectedFantasyLeague) {
     fantasyDraftStore.fetchLeaderboard();
   } else if (!authStore.authenticated && leagueStore.selectedFantasyLeague) {
@@ -186,7 +186,7 @@ onMounted(() => {
 });
 
 watch(() => leagueStore.selectedFantasyLeague, () => {
-  leagueStore.fetchFantasyPlayers()?.then(() => setFantasyPlayers(leagueStore.fantasyPlayers))
+  leagueStore.fetchFantasyPlayerPoints()?.then(() => setFantasyPlayerPoints(leagueStore.fantasyPlayerPoints))
     .then(() => {
       if (authStore.authenticated) fantasyDraftStore.fetchLeaderboard()
     })

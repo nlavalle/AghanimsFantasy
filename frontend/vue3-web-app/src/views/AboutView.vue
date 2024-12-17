@@ -13,8 +13,8 @@
         </p>
       </div>
       <div>
-        <v-data-table class="about-table" :items="statistics" :headers="statsHeaders" hide-default-footer
-          density="compact">
+        <v-data-table class="about-table" :items="statistics" :items-per-page="11" :headers="statsHeaders"
+          hide-default-footer density="compact">
           <template v-slot:item.value="{ item }">
             <span :style="getPointsPer(item)">{{ item.value }}</span>
           </template>
@@ -34,7 +34,7 @@ const statsHeaders = [
   {
     title: 'Name',
     value: 'name',
-    width: '40%'
+    width: '50%'
   },
   {
     title: 'Points Per',
@@ -44,7 +44,7 @@ const statsHeaders = [
   {
     title: 'Available?',
     value: 'available',
-    width: '30%'
+    width: '20%'
   },
 ];
 
@@ -57,6 +57,11 @@ const statistics = [
   {
     name: 'Death',
     value: '-0.3',
+    available: 'Yes'
+  },
+  {
+    name: 'Assist',
+    value: '0.15',
     available: 'Yes'
   },
   {
@@ -75,18 +80,28 @@ const statistics = [
     available: 'Yes'
   },
   {
-    name: 'Wards Planted',
+    name: 'Ward Planted',
     value: '0.15',
     available: 'Yes'
   },
   {
-    name: 'Camps Stacked',
+    name: 'Deward',
+    value: '0.15',
+    available: 'Yes'
+  },
+  {
+    name: 'Camp Stacked',
     value: '0.5',
     available: 'Yes'
   },
   {
-    name: 'Stuns',
-    value: '0.05',
+    name: 'Courier Kill',
+    value: '0.2',
+    available: 'Yes'
+  },
+  {
+    name: 'Stun Duration (sec)',
+    value: '0.025',
     available: 'Yes'
   },
   {

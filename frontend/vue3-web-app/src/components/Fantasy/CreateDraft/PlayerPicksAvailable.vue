@@ -8,19 +8,14 @@
                     <span>{{ team.name }}</span>
                 </v-row>
                 <v-row>
-                    <v-col class="available-player ma-1"
-                        :class="{ 'disabled-player': disabledPlayer(player), 'selected-player': selectedPlayerCheck(player.id) }"
+                    <v-col class="available-player ma-1 pa-0"
+                        :class="{ 'disabled-player': disabledPlayer(player.fantasyPlayer), 'selected-player': selectedPlayerCheck(player.fantasyPlayer.id) }"
                         v-for="(player, playerIndex) in fantasyPlayersByTeam(team.teamId)" :key="playerIndex"
                         :style="{ 'min-width': isDesktop ? '110px' : '60px', 'max-width': isDesktop ? '110px' : '60px' }"
-                        @click="selectPlayer(player)">
-                        <v-row justify="center">
-                            <img :src="player.dotaAccount.steamProfilePicture" :alt="player.dotaAccount.name"
-                                :style="{ width: isDesktop ? '80px' : '40px', height: isDesktop ? '80px' : '40px' }" />
-                        </v-row>
-                        <v-row class="available-player-caption">
-                            <span style="width: 100%" :style="{ 'font-size': isDesktop ? '0.8em' : '0.5em' }">{{
-                                player.dotaAccount.name }}</span>
-                        </v-row>
+                        @click="selectPlayer(player.fantasyPlayer)">
+                        <draft-pick-card size="small" :fantasyPlayer="player.fantasyPlayer"
+                            :fantasyPoints="player.totalMatchFantasyPoints"
+                            :fantasyLeagueActive="fantasyLeagueActive" />
                     </v-col>
                 </v-row>
                 <v-overlay :model-value="disabledTeam(team.teamId)"
@@ -34,24 +29,41 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import { fantasyDraftState, type FantasyPlayer } from '../fantasyDraft';
+import { computed, ref, type PropType } from 'vue';
+import { fantasyDraftState, type FantasyPlayer, type FantasyPlayerPoints } from '../fantasyDraft';
 import { VContainer, VRow, VCol, VOverlay } from 'vuetify/components';
+import DraftPickCard from '@/components/Fantasy/DraftPickCard.vue';
+import type { FantasyLeague } from '@/types/FantasyLeague';
 
-const { selectedPlayer, fantasyPlayersAvailable, disabledPlayer, disabledTeam } = fantasyDraftState();
+const { selectedPlayer, fantasyPlayerPointsAvailable, disabledPlayer, disabledTeam } = fantasyDraftState();
 
 const isDesktop = ref(window.outerWidth >= 600);
 
+const props = defineProps({
+    FantasyLeague: {
+        type: Object as PropType<FantasyLeague>,
+        required: false,
+    }
+})
+
 const fantasyTeams = computed(() => {
     // We want the distinct teams
-    let teams = fantasyPlayersAvailable.value.map(item => ({ teamId: item.teamId, ...item.team }))
+    let teams = fantasyPlayerPointsAvailable.value.map(item => ({ teamId: item.fantasyPlayer.teamId, ...item.fantasyPlayer.team }))
     return [...new Map(teams.map(item => [item.teamId, item])).values()]
 })
 
+const fantasyLeagueActive = computed(() => {
+    if (props.FantasyLeague) {
+        return new Date() > new Date(props.FantasyLeague.leagueStartTime * 1000);
+    } else {
+        return false
+    }
+})
+
 const fantasyPlayersByTeam = (teamId: number) => {
-    return fantasyPlayersAvailable.value.filter(player => player.teamId == teamId).sort((playerA: FantasyPlayer, playerB: FantasyPlayer) => {
-        if (playerA.teamPosition < playerB.teamPosition) return -1;
-        if (playerA.teamPosition > playerB.teamPosition) return 1;
+    return fantasyPlayerPointsAvailable.value.filter(player => player.fantasyPlayer.teamId == teamId).sort((playerA: FantasyPlayerPoints, playerB: FantasyPlayerPoints) => {
+        if (playerA.fantasyPlayer.teamPosition < playerB.fantasyPlayer.teamPosition) return -1;
+        if (playerA.fantasyPlayer.teamPosition > playerB.fantasyPlayer.teamPosition) return 1;
         return 0;
     })
 }
@@ -96,7 +108,7 @@ const selectedPlayerCheck = (fantasyPlayerId: number) => {
 .available-player {
     overflow: hidden;
     margin-bottom: 5px;
-    border: 1px solid white;
+    /* border: 1px solid white; */
 }
 
 .available-player img {
@@ -112,17 +124,15 @@ const selectedPlayerCheck = (fantasyPlayerId: number) => {
     background: rgba(122, 122, 122);
     /* pointer-events: none; */
     opacity: 0.5;
+    border-radius: 5px;
 }
 
 .selected-player {
-    border: 1px solid var(--aghanims-fantasy-main-1);
-    background: var(--aghanims-fantasy-main-1);
-    /* opacity: 0.5; */
     box-shadow:
         0 0 2px var(--aghanims-fantasy-main-1),
         0 0 4px var(--aghanims-fantasy-main-1),
         0 0 6px var(--aghanims-fantasy-main-1),
         0 0 8px var(--aghanims-fantasy-main-1);
-    border-radius: 2px;
+    border-radius: 8px;
 }
 </style>

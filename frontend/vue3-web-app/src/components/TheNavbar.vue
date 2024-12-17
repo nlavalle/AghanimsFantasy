@@ -13,7 +13,7 @@
         <LoginDiscord class="login-discord" />
     </div>
     <div>
-        <FantasyNavbar v-if="selectedTab === 1" />
+        <FantasyNavbar />
     </div>
 </template>
 

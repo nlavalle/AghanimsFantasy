@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/valid-v-slot -->
 <template>
   <v-container>
     <v-row>
@@ -9,20 +8,6 @@
             <v-tab value="league">League</v-tab>
             <v-tab value="match">Matches</v-tab>
           </v-tabs>
-        </v-row>
-      </v-col>
-      <v-col>
-        <v-row>
-          <v-select label="League" v-model="leagueStore.selectedFantasyLeague" :items="availableFantasyLeagues"
-            item-value="id" variant="underlined" return-object width="300">
-            <template v-slot:selection="{ item }" slot-scope="data">
-              <p>{{ fullFantasyName(item.raw.leagueId, item.raw.name) }}</p>
-            </template>
-            <template v-slot:item="{ props, item }">
-              <v-list-item v-bind="props" class="league-selector"
-                :title="fullFantasyName(item.raw.leagueId, item.raw.name)"></v-list-item>
-            </template>
-          </v-select>
         </v-row>
       </v-col>
     </v-row>
@@ -59,8 +44,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
-import { VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem, VListItem, VSelect } from 'vuetify/components';
+import { ref, onMounted } from 'vue';
+import { VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem } from 'vuetify/components';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import FantasyDataTable from '@/components/Stats/FantasyDataTable.vue';
 import LeagueDataTable from '@/components/Stats/LeagueDataTable.vue';
@@ -70,20 +55,11 @@ const statsTab = ref('fantasy')
 const leagueStore = useFantasyLeagueStore();
 const draftFiltered = false;
 
-const availableFantasyLeagues = computed(() => {
-  return leagueStore.activeFantasyLeagues
-})
-
 onMounted(() => {
   if (leagueStore.selectedFantasyLeague.id == 0) {
-    leagueStore.fetchFantasyLeagues()
+    leagueStore.fetchFantasyLeagues(undefined)
   }
 })
-
-function fullFantasyName(fantasyLeagueId: number, fantasyLeagueName: string) {
-  const league = leagueStore.activeLeagues.find(l => l.id === fantasyLeagueId);
-  return `${league?.name ?? ''} - ${fantasyLeagueName}`
-}
 
 </script>
 

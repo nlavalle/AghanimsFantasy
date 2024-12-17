@@ -41,7 +41,7 @@ import PlayerRadarChart from '@/components/Fantasy/PlayerStats/PlayerRadarChart.
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faDice } from '@fortawesome/free-solid-svg-icons';
 
-const { selectedPlayer, fantasyPlayersAvailable, setFantasyPlayer, disabledPlayer } = fantasyDraftState();
+const { selectedPlayer, fantasyPlayerPointsAvailable, setFantasyPlayer, disabledPlayer } = fantasyDraftState();
 
 const emit = defineEmits(['savePlayer']);
 
@@ -137,9 +137,9 @@ const draftPlayer = () => {
 }
 
 const randomPlayer = () => {
-    var availablePicks = fantasyPlayersAvailable.value.filter(pa => !disabledPlayer(pa))
+    var availablePicks = fantasyPlayerPointsAvailable.value.filter(pa => !disabledPlayer(pa.fantasyPlayer))
     var randomPick = availablePicks[(Math.floor(Math.random() * availablePicks.length))];
-    selectedPlayer.value = randomPick;
+    selectedPlayer.value = randomPick.fantasyPlayer;
 }
 
 </script>

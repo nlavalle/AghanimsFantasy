@@ -28,7 +28,6 @@ const router = createRouter({
       name: 'fantasy',
       component: () => import('../views/FantasyView.vue')
     },
-
     {
       path: '/admin',
       name: 'admin',

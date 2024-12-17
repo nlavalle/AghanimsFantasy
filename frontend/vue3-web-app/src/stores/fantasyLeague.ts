@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import type { FantasyLeague } from '@/types/FantasyLeague'
 import type { League } from '@/types/League'
 import { localApiService } from '@/services/localApiService'
-import type { FantasyDraftPoints, FantasyPlayer } from '@/components/Fantasy/fantasyDraft'
+import type { FantasyDraftPoints, FantasyPlayerPoints } from '@/components/Fantasy/fantasyDraft'
 
 export const useFantasyLeagueStore = defineStore({
   id: 'league',
@@ -24,7 +24,7 @@ export const useFantasyLeagueStore = defineStore({
       leagueEndTime: 0
     } as FantasyLeague,
     fantasyDraftPoints: [] as FantasyDraftPoints[],
-    fantasyPlayers: [] as FantasyPlayer[]
+    fantasyPlayerPoints: [] as FantasyPlayerPoints[]
   }),
 
   actions: {
@@ -35,17 +35,26 @@ export const useFantasyLeagueStore = defineStore({
       })
     },
 
-    fetchFantasyLeagues() {
+    fetchFantasyLeagues(selectFantasyLeagueId: number | undefined) {
       if (this.leagues.length == 0) this.fetchLeagues();
       return localApiService.getFantasyLeagues()
         .then((fantasyLeagueResult: any) => {
           this.setFantasyLeagues(fantasyLeagueResult);
-          if (this.selectedFantasyLeague.id == 0) {
+          if (selectFantasyLeagueId) {
+            let fantasyLeagueLookup = this.fantasyLeagues.find(fl => fl.id == selectFantasyLeagueId)
+            if (fantasyLeagueLookup) {
+              let leagueLookup = this.leagues.find(l => l.id == fantasyLeagueLookup.leagueId)
+              if (leagueLookup) {
+                this.setSelectedLeague(leagueLookup);
+                this.setSelectedFantasyLeague(fantasyLeagueLookup);
+              }
+            }
+          } else if (this.selectedFantasyLeague.id == 0) {
             this.setSelectedFantasyLeague(this.defaultFantasyLeague);
           }
         })
         .then(() => {
-          this.fetchFantasyPlayers();
+          this.fetchFantasyPlayerPoints();
         })
     },
 
@@ -57,11 +66,11 @@ export const useFantasyLeagueStore = defineStore({
       }
     },
 
-    fetchFantasyPlayers() {
+    fetchFantasyPlayerPoints() {
       if (this.selectedFantasyLeague.id) {
-        return localApiService.getFantasyPlayers(this.selectedFantasyLeague.id)
+        return localApiService.getPlayerFantasyStats(this.selectedFantasyLeague.id)
           .then((result: any) => {
-            this.fantasyPlayers = result;
+            this.fantasyPlayerPoints = result;
           });
       }
     },
