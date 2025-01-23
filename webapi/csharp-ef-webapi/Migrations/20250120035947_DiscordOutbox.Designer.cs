@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using DataAccessLibrary.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace csharp_ef_webapi.Migrations
 {
     [DbContext(typeof(AghanimsFantasyContext))]
-    partial class AghanimsFantasyContextModelSnapshot : ModelSnapshot
+    [Migration("20250120035947_DiscordOutbox")]
+    partial class DiscordOutbox
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -807,10 +810,6 @@ namespace csharp_ef_webapi.Migrations
                     b.Property<long>("FantasyLeagueJoinDate")
                         .HasColumnType("bigint")
                         .HasColumnName("fantasy_league_join_date");
-
-                    b.Property<bool>("IsAdmin")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_admin");
 
                     b.HasKey("Id");
 

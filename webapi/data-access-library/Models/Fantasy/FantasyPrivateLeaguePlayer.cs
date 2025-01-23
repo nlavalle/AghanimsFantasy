@@ -1,5 +1,6 @@
 namespace DataAccessLibrary.Models.Fantasy;
 
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using DataAccessLibrary.Models.Discord;
@@ -7,6 +8,7 @@ using DataAccessLibrary.Models.Discord;
 [Table("dota_fantasy_private_league_players")]
 public class FantasyPrivateLeaguePlayer
 {
+    [Key]
     [Column("id")]
     public int Id { get; set; }
 
@@ -21,8 +23,10 @@ public class FantasyPrivateLeaguePlayer
     [Column("discord_user_id")]
     public required long DiscordUserId { get; set; }
 
-    [JsonIgnore]
-    public required DiscordUser DiscordUser { get; set; }
+    public DiscordUser? DiscordUser { get; set; }
+
+    [Column("is_admin")]
+    public required bool IsAdmin { get; set; } = false;
 
     [Column("fantasy_league_join_date")]
     public long FantasyLeagueJoinDate { get; set; } = DateTimeOffset.Now.ToUnixTimeSeconds();

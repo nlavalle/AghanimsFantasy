@@ -1,7 +1,7 @@
 namespace DataAccessLibrary.Data;
 
 using DataAccessLibrary.Models.Discord;
-using Microsoft.CodeAnalysis;
+using DataAccessLibrary.Models.Fantasy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -19,7 +19,31 @@ public class DiscordRepository : IDiscordRepository
         _dbContext = dbContext;
     }
 
-    #region Discord
+    public async Task<List<FantasyMatch>> GetFantasyMatchesNotInDiscordOutboxAsync()
+    {
+        var outboxMessages = await _dbContext.DiscordOutbox.Where(ob => ob.EventObject == "FantasyMatch").ToListAsync();
+        var fantasyMatches = await _dbContext.FantasyPlayerPointsView.Where(fppv => fppv.FantasyMatchPlayerId != null && fppv.FantasyMatchPlayer!.Match != null).Select(fppv => fppv.FantasyMatchPlayer!.Match!).ToListAsync();
+
+        return fantasyMatches.Where(fm => !outboxMessages.Any(obm => obm.ObjectKey == fm.MatchId.ToString() && obm.EventType == "FantasyMatch")).Distinct().ToList();
+    }
+
+    #region DiscordOutbox
+    public async Task<List<DiscordOutbox>> GetOutboxMessagesAsync(string getObjectKey, string getEventObject)
+    {
+        return await _dbContext.DiscordOutbox.Where(ob => ob.ObjectKey == getObjectKey && ob.EventObject == getEventObject).ToListAsync();
+    }
+
+    public async Task AddDiscordOutboxAsync(DiscordOutbox newDiscordOutbox)
+    {
+        _logger.LogInformation($"Adding Discord Outbox Message {newDiscordOutbox.EventObject} {newDiscordOutbox.EventType}");
+
+        await _dbContext.DiscordOutbox.AddAsync(newDiscordOutbox);
+        await _dbContext.SaveChangesAsync();
+    }
+
+    #endregion DiscordOutbox
+
+    #region DiscordUser
     public async Task<DiscordUser?> GetDiscordUserAsync(long GetDiscordId)
     {
         _logger.LogInformation($"Getting Discord User {GetDiscordId}");
@@ -48,5 +72,29 @@ public class DiscordRepository : IDiscordRepository
 
         return false;
     }
-    #endregion Discord
+
+    public async Task<bool> IsUserPrivateFantasyAdminAsync(long UserDiscordId)
+    {
+        _logger.LogDebug($"Checking if Discord ID {UserDiscordId} is admin for any private fantasy league.");
+
+        var discordUser = await _dbContext.fantasyPrivateLeaguePlayers.Where(fplp => fplp.DiscordUserId == UserDiscordId).FirstOrDefaultAsync();
+        if (discordUser == null) return false;
+
+        if (discordUser.IsAdmin) return true;
+
+        return false;
+    }
+
+    public async Task<bool> IsUserPrivateFantasyAdminAsync(long UserDiscordId, long FantasyLeagueId)
+    {
+        _logger.LogDebug($"Checking if Discord ID {UserDiscordId} is admin for a private fantasy league {FantasyLeagueId}.");
+
+        var discordUser = await _dbContext.fantasyPrivateLeaguePlayers.Where(fplp => fplp.FantasyLeagueId == FantasyLeagueId && fplp.DiscordUserId == UserDiscordId).FirstOrDefaultAsync();
+        if (discordUser == null) return false;
+
+        if (discordUser.IsAdmin) return true;
+
+        return false;
+    }
+    #endregion DiscordUser
 }

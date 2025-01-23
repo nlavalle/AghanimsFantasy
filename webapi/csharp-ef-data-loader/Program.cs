@@ -1,5 +1,6 @@
 using csharp_ef_data_loader.Services;
 using DataAccessLibrary.Data;
+using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -51,6 +52,14 @@ builder.Services.AddScoped<DotaClient>();
 // Add WebApi and Steam Client Services
 builder.Services.AddHostedService<DotaWebApiService>();
 builder.Services.AddHostedService<DotaSteamClientService>();
+
+// Add Discord Bot services
+builder.Services.AddSingleton(new DiscordSocketConfig
+{
+    GatewayIntents = Discord.GatewayIntents.AllUnprivileged | Discord.GatewayIntents.MessageContent
+});
+builder.Services.AddSingleton<DiscordSocketClient>();
+builder.Services.AddHostedService<DiscordBotService>();
 
 
 var app = builder.Build();

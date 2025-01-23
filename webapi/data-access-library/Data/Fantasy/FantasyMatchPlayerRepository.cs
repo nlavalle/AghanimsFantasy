@@ -1,6 +1,7 @@
 namespace DataAccessLibrary.Data;
 
 using System.Threading.Tasks;
+using DataAccessLibrary.Models;
 using DataAccessLibrary.Models.Fantasy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -85,5 +86,21 @@ public class FantasyMatchPlayerRepository : IFantasyMatchPlayerRepository
         await _dbContext.SaveChangesAsync();
 
         return;
+    }
+
+    public async Task<List<FantasyPlayerPoints>> GetFantasyPlayerPointsByMatchAsync(long MatchId)
+    {
+        return await _dbContext.FantasyPlayerPointsView
+            .Where(fppv => fppv.FantasyMatchPlayer!.Match!.MatchId == MatchId)
+            .Include(fppv => fppv.FantasyMatchPlayer)
+            .ToListAsync();
+    }
+
+    public async Task<List<FantasyPlayerPoints>> GetFantasyPlayerPointsByMatchesAsync(IEnumerable<long> MatchIds)
+    {
+        return await _dbContext.FantasyPlayerPointsView
+            .Where(fppv => MatchIds.Any(mi => mi == fppv.FantasyMatchPlayer!.Match!.MatchId))
+            .Include(fppv => fppv.FantasyMatchPlayer)
+            .ToListAsync();
     }
 }

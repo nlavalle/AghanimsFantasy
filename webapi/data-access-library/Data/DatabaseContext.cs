@@ -20,49 +20,51 @@ public class AghanimsFantasyContext : DbContext
     }
 
     #region ProMetadata
-    public DbSet<League> Leagues { get; set; }
-    public DbSet<Account> Accounts { get; set; }
-    public DbSet<Hero> Heroes { get; set; }
-    public DbSet<Team> Teams { get; set; }
+    public DbSet<League> Leagues { get; set; } = null!;
+    public DbSet<Account> Accounts { get; set; } = null!;
+    public DbSet<Hero> Heroes { get; set; } = null!;
+    public DbSet<Team> Teams { get; set; } = null!;
     #endregion ProMetadata
 
     #region Discord
-    public DbSet<DiscordUser> DiscordUsers { get; set; }
+    public DbSet<DiscordOutbox> DiscordOutbox { get; set; } = null!;
+    public DbSet<DiscordUser> DiscordUsers { get; set; } = null!;
     #endregion Discord
 
     #region Fantasy
-    public DbSet<FantasyLeague> FantasyLeagues { get; set; }
-    public DbSet<FantasyLeagueWeight> FantasyLeagueWeights { get; set; }
-    public DbSet<FantasyMatch> FantasyMatches { get; set; }
-    public DbSet<FantasyMatchPlayer> FantasyMatchPlayers { get; set; }
-    public DbSet<FantasyDraft> FantasyDrafts { get; set; }
-    public DbSet<FantasyPlayer> FantasyPlayers { get; set; }
-    public DbSet<FantasyDraftPlayer> FantasyDraftPlayers { get; set; }
-    public DbSet<FantasyPlayerPoints> FantasyPlayerPointsView { get; set; }
-    public DbSet<FantasyPlayerPointTotals> FantasyPlayerPointTotalsView { get; set; }
-    public DbSet<MetadataSummary> MetadataSummaries { get; set; }
-    public DbSet<FantasyNormalizedAverages> FantasyNormalizedAveragesView { get; set; }
-    public DbSet<FantasyNormalizedAveragesTable> FantasyNormalizedAverages { get; set; }
+    public DbSet<FantasyLeague> FantasyLeagues { get; set; } = null!;
+    public DbSet<FantasyLeagueWeight> FantasyLeagueWeights { get; set; } = null!;
+    public DbSet<FantasyMatch> FantasyMatches { get; set; } = null!;
+    public DbSet<FantasyMatchPlayer> FantasyMatchPlayers { get; set; } = null!;
+    public DbSet<FantasyDraft> FantasyDrafts { get; set; } = null!;
+    public DbSet<FantasyPlayer> FantasyPlayers { get; set; } = null!;
+    public DbSet<FantasyDraftPlayer> FantasyDraftPlayers { get; set; } = null!;
+    public DbSet<FantasyPlayerPoints> FantasyPlayerPointsView { get; set; } = null!;
+    public DbSet<FantasyPlayerPointTotals> FantasyPlayerPointTotalsView { get; set; } = null!;
+    public DbSet<MetadataSummary> MetadataSummaries { get; set; } = null!;
+    public DbSet<FantasyNormalizedAverages> FantasyNormalizedAveragesView { get; set; } = null!;
+    public DbSet<FantasyNormalizedAveragesTable> FantasyNormalizedAverages { get; set; } = null!;
+    public DbSet<FantasyPrivateLeaguePlayer> fantasyPrivateLeaguePlayers { get; set; } = null!;
     #endregion
 
     #region Match
-    public DbSet<MatchHistory> MatchHistory { get; set; }
-    public DbSet<MatchHistoryPlayer> MatchHistoryPlayers { get; set; }
-    public DbSet<MatchDetail> MatchDetails { get; set; }
-    public DbSet<MatchDetailsPicksBans> MatchDetailsPicksBans { get; set; }
-    public DbSet<MatchDetailsPlayer> MatchDetailsPlayers { get; set; }
-    public DbSet<MatchDetailsPlayersAbilityUpgrade> MatchDetailsPlayersAbilityUpgrades { get; set; }
-    public DbSet<MatchHighlights> MatchHighlightsView { get; set; }
+    public DbSet<MatchHistory> MatchHistory { get; set; } = null!;
+    public DbSet<MatchHistoryPlayer> MatchHistoryPlayers { get; set; } = null!;
+    public DbSet<MatchDetail> MatchDetails { get; set; } = null!;
+    public DbSet<MatchDetailsPicksBans> MatchDetailsPicksBans { get; set; } = null!;
+    public DbSet<MatchDetailsPlayer> MatchDetailsPlayers { get; set; } = null!;
+    public DbSet<MatchDetailsPlayersAbilityUpgrade> MatchDetailsPlayersAbilityUpgrades { get; set; } = null!;
+    public DbSet<MatchHighlights> MatchHighlightsView { get; set; } = null!;
     #endregion
 
     #region DotaClient
-    public DbSet<CMsgDOTAMatch> GcDotaMatches { get; set; }
-    public DbSet<GcMatchMetadata> GcMatchMetadata { get; set; }
-    public DbSet<GcMatchMetadataItemPurchase> GcMatchMetadataItemPurchases { get; set; }
-    public DbSet<GcMatchMetadataPlayer> GcMatchMetadataPlayers { get; set; }
-    public DbSet<GcMatchMetadataPlayerKill> GcMatchMetadataPlayerKills { get; set; }
-    public DbSet<GcMatchMetadataTeam> GcMatchMetadataTeams { get; set; }
-    public DbSet<GcMatchMetadataTip> GcMatchMetadataTips { get; set; }
+    public DbSet<CMsgDOTAMatch> GcDotaMatches { get; set; } = null!;
+    public DbSet<GcMatchMetadata> GcMatchMetadata { get; set; } = null!;
+    public DbSet<GcMatchMetadataItemPurchase> GcMatchMetadataItemPurchases { get; set; } = null!;
+    public DbSet<GcMatchMetadataPlayer> GcMatchMetadataPlayers { get; set; } = null!;
+    public DbSet<GcMatchMetadataPlayerKill> GcMatchMetadataPlayerKills { get; set; } = null!;
+    public DbSet<GcMatchMetadataTeam> GcMatchMetadataTeams { get; set; } = null!;
+    public DbSet<GcMatchMetadataTip> GcMatchMetadataTips { get; set; } = null!;
 
     #endregion
 

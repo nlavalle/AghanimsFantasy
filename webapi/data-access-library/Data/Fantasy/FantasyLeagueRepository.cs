@@ -69,6 +69,11 @@ public class FantasyLeagueRepository : IFantasyLeagueRepository
             ).DateTime;
     }
 
+    public bool IsFantasyLeagueOpenAsync(FantasyLeague FantasyLeague)
+    {
+        return DateTime.UtcNow <= DateTime.UnixEpoch.AddSeconds(FantasyLeague.FantasyDraftLocked);
+    }
+
     public async Task<FantasyLeague?> GetByIdAsync(int FantasyLeagueId)
     {
         _logger.LogInformation($"Fetching Single Fantasy League {FantasyLeagueId}");
