@@ -96,10 +96,10 @@ public class FantasyMatchPlayerRepository : IFantasyMatchPlayerRepository
             .ToListAsync();
     }
 
-    public async Task<List<FantasyPlayerPoints>> GetFantasyPlayerPointsByMatchesAsync(IEnumerable<long> MatchIds)
+    public async Task<List<FantasyPlayerPoints>> GetFantasyPlayerPointsByMatchesAsync(IEnumerable<FantasyMatch> FantasyMatches)
     {
         return await _dbContext.FantasyPlayerPointsView
-            .Where(fppv => MatchIds.Any(mi => mi == fppv.FantasyMatchPlayer!.Match!.MatchId))
+            .Where(fppv => fppv.FantasyMatchPlayerId != null && FantasyMatches.Any(mi => mi == fppv.FantasyMatchPlayer!.Match))
             .Include(fppv => fppv.FantasyMatchPlayer)
             .ToListAsync();
     }

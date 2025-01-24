@@ -53,6 +53,13 @@ public class FantasyMatchRepository : IFantasyMatchRepository
         return await _dbContext.FantasyMatches.FindAsync(FantasyMatchId);
     }
 
+    public async Task<List<FantasyMatch>> GetByIdsAsync(IEnumerable<long> FantasyMatchIds)
+    {
+        _logger.LogInformation($"Fetching {FantasyMatchIds.Count()} Fantasy Matches ");
+
+        return await _dbContext.FantasyMatches.Where(fm => FantasyMatchIds.Any(fmi => fmi == fm.MatchId)).ToListAsync();
+    }
+
     public async Task<IEnumerable<FantasyMatch>> GetAllAsync()
     {
         _logger.LogInformation($"Get Fantasy Matches");

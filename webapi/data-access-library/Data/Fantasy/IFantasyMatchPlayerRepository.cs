@@ -8,5 +8,5 @@ public interface IFantasyMatchPlayerRepository : IRepository<FantasyMatchPlayer,
     Task<List<FantasyMatchPlayer>> GetNotGcDetailParsed(int takeAmount);
     Task UpdateRangeAsync(IEnumerable<FantasyMatchPlayer> updateFantasyMatchPlayers);
     Task<List<FantasyPlayerPoints>> GetFantasyPlayerPointsByMatchAsync(long MatchId);
-    Task<List<FantasyPlayerPoints>> GetFantasyPlayerPointsByMatchesAsync(IEnumerable<long> MatchIds);
+    Task<List<FantasyPlayerPoints>> GetFantasyPlayerPointsByMatchesAsync(IEnumerable<FantasyMatch> FantasyMatches);
 }

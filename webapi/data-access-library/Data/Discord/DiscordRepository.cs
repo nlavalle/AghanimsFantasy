@@ -21,10 +21,10 @@ public class DiscordRepository : IDiscordRepository
 
     public async Task<List<FantasyMatch>> GetFantasyMatchesNotInDiscordOutboxAsync()
     {
-        var outboxMessages = await _dbContext.DiscordOutbox.Where(ob => ob.EventObject == "FantasyMatch").ToListAsync();
+        var outboxMessages = await _dbContext.DiscordOutbox.Where(ob => ob.EventObject == "FantasyMatch" && ob.EventType == "Scored").ToListAsync();
         var fantasyMatches = await _dbContext.FantasyPlayerPointsView.Where(fppv => fppv.FantasyMatchPlayerId != null && fppv.FantasyMatchPlayer!.Match != null).Select(fppv => fppv.FantasyMatchPlayer!.Match!).ToListAsync();
 
-        return fantasyMatches.Where(fm => !outboxMessages.Any(obm => obm.ObjectKey == fm.MatchId.ToString() && obm.EventType == "FantasyMatch")).Distinct().ToList();
+        return fantasyMatches.Where(fm => !outboxMessages.Any(obm => obm.ObjectKey == fm.MatchId.ToString())).Distinct().ToList();
     }
 
     #region DiscordOutbox
