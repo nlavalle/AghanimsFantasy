@@ -2,12 +2,8 @@ namespace DataAccessLibrary.Data;
 
 using DataAccessLibrary.Models.Fantasy;
 
-public interface IPrivateFantasyPlayerRepository
+public interface IPrivateFantasyPlayerRepository : IRepository<FantasyPrivateLeaguePlayer, int>
 {
-    Task<List<FantasyLeague>> GetPrivateFantasyLeaguesAsync(long DiscordAccountId);
-    Task<FantasyPrivateLeaguePlayer?> GetFantasyPrivateLeaguePlayerAsync(int FantasyPrivateLeaguePlayerId);
-    Task<List<FantasyPrivateLeaguePlayer>> GetFantasyPrivateLeaguePlayersAsync(int FantasyLeagueId);
-    Task AddPrivateFantasyPlayerAsync(FantasyPrivateLeaguePlayer newPrivateFantasyLeaguePlayer);
-    Task UpdatePrivateFantasyPlayerAsync(FantasyPrivateLeaguePlayer updatePrivateFantasyLeaguePlayer);
-    Task DeletePrivateFantasyPlayerAsync(FantasyPrivateLeaguePlayer deletePrivateFantasyLeaguePlayer);
+    Task<List<FantasyPrivateLeaguePlayer>> GetByFantasyLeagueAsync(int FantasyLeagueId);
+    Task<FantasyPrivateLeaguePlayer?> GetByDiscordIdAsync(long id);
 }

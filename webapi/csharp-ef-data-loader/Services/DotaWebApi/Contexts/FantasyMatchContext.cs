@@ -7,24 +7,31 @@ using DataAccessLibrary.Models.ProMetadata;
 using SteamKit2.GC.Dota.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using DataAccessLibrary.Facades;
 
 internal class FantasyMatchContext : DotaOperationContext
 {
+    private readonly ILogger<FantasyMatchContext> _logger;
     private readonly IProMetadataRepository _proMetadataRepository;
+    private readonly IFantasyViewsRepository _fantasyViewsRepository;
     private readonly IFantasyMatchRepository _fantasyMatchRepository;
     private readonly IFantasyMatchPlayerRepository _fantasyMatchPlayerRepository;
     private readonly IGcDotaMatchRepository _gcDotaMatchRepository;
+    private readonly IGcMatchMetadataRepository _gcMatchMetadataRepository;
     private readonly IMatchHistoryRepository _matchHistoryRepository;
     private readonly IMatchDetailRepository _matchDetailRepository;
     private readonly GameCoordinatorRepository _gameCoordinatorRepository;
-    private readonly ILogger<FantasyMatchContext> _logger;
+    private readonly FantasyMatchFacade _fantasyMatchFacade;
 
     public FantasyMatchContext(
             ILogger<FantasyMatchContext> logger,
+            ILogger<FantasyMatchFacade> facadeLogger,
             IProMetadataRepository proMetadataRepository,
+            IFantasyViewsRepository fantasyViewsRepository,
             IFantasyMatchRepository fantasyMatchRepository,
             IFantasyMatchPlayerRepository fantasyMatchPlayerRepository,
             IGcDotaMatchRepository gcDotaMatchRepository,
+            IGcMatchMetadataRepository gcMatchMetadataRepository,
             IMatchHistoryRepository matchHistoryRepository,
             IMatchDetailRepository matchDetailRepository,
             GameCoordinatorRepository gameCoordinatorRepository,
@@ -35,12 +42,26 @@ internal class FantasyMatchContext : DotaOperationContext
     {
         _logger = logger;
         _proMetadataRepository = proMetadataRepository;
+        _fantasyViewsRepository = fantasyViewsRepository;
         _fantasyMatchRepository = fantasyMatchRepository;
         _fantasyMatchPlayerRepository = fantasyMatchPlayerRepository;
         _gcDotaMatchRepository = gcDotaMatchRepository;
+        _gcMatchMetadataRepository = gcMatchMetadataRepository;
         _matchHistoryRepository = matchHistoryRepository;
         _matchDetailRepository = matchDetailRepository;
         _gameCoordinatorRepository = gameCoordinatorRepository;
+
+        _fantasyMatchFacade = new FantasyMatchFacade(
+            facadeLogger,
+            _proMetadataRepository,
+            _fantasyViewsRepository,
+            _fantasyMatchPlayerRepository,
+            _fantasyMatchRepository,
+            _gcDotaMatchRepository,
+            _gcMatchMetadataRepository,
+            _matchDetailRepository,
+            _matchHistoryRepository
+        );
     }
 
     protected override async Task OperateAsync(CancellationToken cancellationToken)
@@ -48,7 +69,7 @@ internal class FantasyMatchContext : DotaOperationContext
         try
         {
             // Load new match histories not in the FantasyMatch table (limit 50)
-            List<MatchHistory> newMatchHistories = await _matchHistoryRepository.GetNotInFantasyMatches(50);
+            List<MatchHistory> newMatchHistories = await _fantasyMatchFacade.GetNotInFantasyMatches(50);
 
             if (newMatchHistories.Count > 0)
             {
@@ -85,7 +106,7 @@ internal class FantasyMatchContext : DotaOperationContext
             }
 
             // Check for gc match details and update if exists
-            List<FantasyMatch> gcMatchDetailsToParse = await _fantasyMatchRepository.GetNotGcDetailParsed(50);
+            List<FantasyMatch> gcMatchDetailsToParse = await _fantasyMatchFacade.GetMatchNotGcDetailParsed(50);
 
             if (gcMatchDetailsToParse.Count > 0)
             {
@@ -109,7 +130,7 @@ internal class FantasyMatchContext : DotaOperationContext
 
             // Check for match details and update if exists
             // Call this second, we prefer the GC match detail data if we have it there, this is a backup in case one of them goes down
-            List<FantasyMatch> matchDetailsToParse = await _fantasyMatchRepository.GetNotDetailParsed(50);
+            List<FantasyMatch> matchDetailsToParse = await _fantasyMatchFacade.GetNotDetailParsed(50);
 
             if (matchDetailsToParse.Count > 0)
             {
@@ -132,7 +153,7 @@ internal class FantasyMatchContext : DotaOperationContext
             }
 
             // Check for gc match detail player and add match player if exists
-            List<(CMsgDOTAMatch, CMsgDOTAMatch.Player)> gcMatchPlayers = await _gcDotaMatchRepository.GetNotInFantasyMatchPlayers(500);
+            List<(CMsgDOTAMatch, CMsgDOTAMatch.Player)> gcMatchPlayers = await _fantasyMatchFacade.GetNotInFantasyMatchPlayers(500);
 
             if (gcMatchPlayers.Count() > 0)
             {
@@ -208,7 +229,7 @@ internal class FantasyMatchContext : DotaOperationContext
                 _logger.LogInformation($"{gcMatchPlayers.Count} new fantasy match players added to table");
             }
             // Check for match metadata player and update match player if exists
-            List<FantasyMatchPlayer> metadataPlayersToParse = await _fantasyMatchPlayerRepository.GetNotGcDetailParsed(500);
+            List<FantasyMatchPlayer> metadataPlayersToParse = await _fantasyMatchFacade.GetMatchPlayerNotGcDetailParsed(500);
 
             if (metadataPlayersToParse.Count > 0)
             {

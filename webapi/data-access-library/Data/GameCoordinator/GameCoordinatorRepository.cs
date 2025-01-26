@@ -21,10 +21,6 @@ public class GameCoordinatorRepository
         _dbContext = dbContext;
     }
 
-    #region CMsgDotaMatch
-
-    #endregion CMsgDotaMatch
-
     #region GcMatchMetadata
     public async Task AddGcMatchMetadata(GcMatchMetadata newGcMetadata)
     {
@@ -36,7 +32,7 @@ public class GameCoordinatorRepository
 
     public async Task<GcMatchMetadataPlayer> GetMatchMetadataPlayerAsync(FantasyMatchPlayer fantasyMatchPlayer)
     {
-        _logger.LogInformation($"Getting Match Metadata Player for FantasyMatchPlayer: {fantasyMatchPlayer.Id}");
+        _logger.LogDebug($"Getting Match Metadata Player for FantasyMatchPlayer: {fantasyMatchPlayer.Id}");
 
         var matchMetadataPlayerQuery = _dbContext.GcMatchMetadata
             .Where(md => md.MatchId == fantasyMatchPlayer.FantasyMatchId)
@@ -54,7 +50,7 @@ public class GameCoordinatorRepository
 
     public async Task<GcMatchMetadata?> GetMatchMetadataAsync(long MatchId)
     {
-        _logger.LogInformation($"Getting Match Metadata for Match: {MatchId}");
+        _logger.LogDebug($"Getting Match Metadata for Match: {MatchId}");
 
         var matchMetadataQuery = _dbContext.GcMatchMetadata
                 .Where(md => md.MatchId == MatchId);

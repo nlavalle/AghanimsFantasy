@@ -23,6 +23,11 @@ public class MatchHistoryRepository : IMatchHistoryRepository
         _dbContext = dbContext;
     }
 
+    public IQueryable<MatchHistory> GetQueryable()
+    {
+        return _dbContext.MatchHistory;
+    }
+
     public async Task<List<MatchHistory>> GetByLeagueAsync(League League)
     {
         _logger.LogInformation($"Getting Match History for League Id: {League.Id}");
@@ -65,68 +70,6 @@ public class MatchHistoryRepository : IMatchHistoryRepository
         return await matchHistoryQuery.ToListAsync();
     }
 
-    public async Task<List<MatchHistory>> GetNotInFantasyMatches(int takeAmount)
-    {
-        _logger.LogInformation($"Getting new Match Histories not loaded into Fantasy Match");
-
-        var newMatchHistoryQuery = _dbContext.MatchHistory
-                .Include(mh => mh.League)
-                .Where(
-                    mh => !_dbContext.FantasyMatches.Any(fm => fm.MatchId == mh.MatchId))
-                .OrderBy(mh => mh.MatchId)
-                .Take(takeAmount);
-
-        _logger.LogDebug($"Match History SQL Query: {newMatchHistoryQuery.ToQueryString()}");
-
-        return await newMatchHistoryQuery.ToListAsync();
-    }
-
-    public async Task<List<MatchHistory>> GetNotInGcMatches(int takeAmount)
-    {
-        _logger.LogInformation($"Getting new Match Histories not loaded into Gc Dota Matches");
-
-        var matchesNotInGcQuery = _dbContext.MatchHistory
-            .Where(
-                mh => !_dbContext.GcDotaMatches
-                    .Where(dm => dm.replay_state == CMsgDOTAMatch.ReplayState.REPLAY_AVAILABLE)
-                    .Select(gdm => gdm.match_id)
-                    .Contains((ulong)mh.MatchId))
-                .OrderBy(mh => mh.MatchId)
-                .Take(takeAmount);
-
-        _logger.LogDebug($"GetMatchHistoriesNotInGcMatches SQL Query: {matchesNotInGcQuery.ToQueryString()}");
-
-        return await matchesNotInGcQuery.ToListAsync();
-    }
-
-    public async Task<List<MatchHistory>> GetNotInMatchDetails(int takeAmount)
-    {
-        _logger.LogInformation($"Getting new Match Histories not loaded into Fantasy Match");
-
-        var newMatchHistoryQuery = _dbContext.MatchHistory
-            .Where(mh => _dbContext.Leagues
-                    .Where(l => l.IsActive == true)
-                    .Select(l => l.Id)
-                    .Contains(mh.LeagueId)
-            )
-            .Where(
-                mh => !_dbContext.MatchDetails
-                    .Where(md => _dbContext.Leagues
-                        .Where(l => l.IsActive == true)
-                        .Select(l => l.Id)
-                        .Contains(md.LeagueId)
-                    )
-                    .Select(md => md.MatchId)
-                    .Contains(mh.MatchId)
-            )
-            .OrderBy(mh => mh.MatchId)
-            .Take(takeAmount);
-
-        _logger.LogDebug($"GetMatchHistoriesNotInMatchDetails SQL Query: {newMatchHistoryQuery.ToQueryString()}");
-
-        return await newMatchHistoryQuery.ToListAsync();
-    }
-
     public async Task<MatchHistory?> GetByIdAsync(long MatchId)
     {
         _logger.LogDebug($"Fetching Single Match History {MatchId}");
@@ -134,9 +77,9 @@ public class MatchHistoryRepository : IMatchHistoryRepository
         return await _dbContext.MatchHistory.FindAsync(MatchId);
     }
 
-    public async Task<IEnumerable<MatchHistory>> GetAllAsync()
+    public async Task<List<MatchHistory>> GetAllAsync()
     {
-        _logger.LogInformation($"Get Match Histories");
+        _logger.LogDebug($"Get Match Histories");
 
         return await _dbContext.MatchHistory.ToListAsync();
     }

@@ -6,22 +6,41 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Discord.WebSocket;
 using DataAccessLibrary.Models;
+using DataAccessLibrary.Facades;
 
 internal class DiscordUpdatesContext : DotaOperationContext
 {
+    private readonly ILogger<FantasyMatchContext> _logger;
+    private readonly IProMetadataRepository _proMetadataRepository;
     private readonly IFantasyDraftRepository _fantasyDraftRepository;
     private readonly IFantasyLeagueRepository _fantasyLeagueRepository;
+    private readonly IFantasyMatchRepository _fantasyMatchRepository;
     private readonly IFantasyMatchPlayerRepository _fantasyMatchPlayerRepository;
-    private readonly ILogger<FantasyMatchContext> _logger;
-    private readonly IDiscordRepository _discordRepository;
+    private readonly IFantasyPlayerRepository _fantasyPlayerRepository;
+    private readonly IFantasyViewsRepository _fantasyViewsRepository;
+    private readonly IPrivateFantasyPlayerRepository _privateFantasyPlayerRepository;
+    private readonly IDiscordUserRepository _discordUserRepository;
+    private readonly IDiscordOutboxRepository _discordOutboxRepository;
     private readonly DiscordSocketClient _discordSocketClient;
+    private readonly DiscordFacade _discordFacade;
+    private readonly FantasyPointsFacade _fantasyPointsFacade;
+    private readonly FantasyDraftFacade _fantasyDraftFacade;
 
     public DiscordUpdatesContext(
             ILogger<FantasyMatchContext> logger,
+            ILogger<DiscordFacade> facadeDiscordLogger,
+            ILogger<FantasyPointsFacade> facadePointsLogger,
+            ILogger<FantasyDraftFacade> facadeDraftLogger,
+            IProMetadataRepository proMetadataRepository,
             IFantasyDraftRepository fantasyDraftRepository,
             IFantasyLeagueRepository fantasyLeagueRepository,
+            IFantasyMatchRepository fantasyMatchRepository,
             IFantasyMatchPlayerRepository fantasyMatchPlayerRepository,
-            IDiscordRepository discordRepository,
+            IFantasyPlayerRepository fantasyPlayerRepository,
+            IFantasyViewsRepository fantasyViewsRepository,
+            IPrivateFantasyPlayerRepository privateFantasyPlayerRepository,
+            IDiscordUserRepository discordUserRepository,
+            IDiscordOutboxRepository discordOutboxRepository,
             DiscordSocketClient discordSocketClient,
             IServiceScope scope,
             Config config
@@ -29,11 +48,44 @@ internal class DiscordUpdatesContext : DotaOperationContext
         : base(scope, config)
     {
         _logger = logger;
+        _proMetadataRepository = proMetadataRepository;
         _fantasyDraftRepository = fantasyDraftRepository;
         _fantasyLeagueRepository = fantasyLeagueRepository;
+        _fantasyMatchRepository = fantasyMatchRepository;
         _fantasyMatchPlayerRepository = fantasyMatchPlayerRepository;
-        _discordRepository = discordRepository;
+        _fantasyPlayerRepository = fantasyPlayerRepository;
+        _fantasyViewsRepository = fantasyViewsRepository;
+        _privateFantasyPlayerRepository = privateFantasyPlayerRepository;
+        _discordUserRepository = discordUserRepository;
+        _discordOutboxRepository = discordOutboxRepository;
         _discordSocketClient = discordSocketClient;
+
+        _discordFacade = new DiscordFacade(
+            facadeDiscordLogger,
+            _discordUserRepository,
+            _discordOutboxRepository,
+            _fantasyLeagueRepository,
+            _fantasyDraftRepository,
+            _fantasyViewsRepository,
+            _privateFantasyPlayerRepository
+        );
+
+        _fantasyPointsFacade = new FantasyPointsFacade(
+            facadePointsLogger,
+            _proMetadataRepository,
+            _fantasyViewsRepository,
+            _fantasyMatchRepository,
+            _fantasyPlayerRepository
+        );
+
+        _fantasyDraftFacade = new FantasyDraftFacade(
+            facadeDraftLogger,
+            _proMetadataRepository,
+            _discordUserRepository,
+            _fantasyLeagueRepository,
+            _fantasyDraftRepository,
+            _fantasyViewsRepository
+        );
     }
 
     protected override async Task OperateAsync(CancellationToken cancellationToken)
@@ -41,7 +93,9 @@ internal class DiscordUpdatesContext : DotaOperationContext
         try
         {
             // Get FantasyMatches from FantasyPlayerPoints (calculated matches) that aren't uploaded into DiscordOutbox
-            var unsentFantasyMessages = await _discordRepository.GetFantasyMatchesNotInDiscordOutboxAsync();
+            var unsentFantasyMessages = await _discordFacade.GetFantasyMatchesNotInDiscordOutboxAsync();
+
+            _logger.LogInformation($"Notifying Discord for {unsentFantasyMessages.Count()} matches.");
 
             await Task.Delay(10000);
 
@@ -49,10 +103,10 @@ internal class DiscordUpdatesContext : DotaOperationContext
             {
                 foreach (SocketGuild guild in _discordSocketClient.Guilds)
                 {
-                    foreach (FantasyMatch fantasyMatch in unsentFantasyMessages.Take(2))
+                    foreach (FantasyMatch fantasyMatch in unsentFantasyMessages)
                     {
                         await guild.TextChannels.First(tc => tc.Name == "bot-fantasy-events").SendMessageAsync(await FantasyMatchToDiscordMessage(fantasyMatch));
-                        await _discordRepository.AddDiscordOutboxAsync(new DataAccessLibrary.Models.Discord.DiscordOutbox
+                        await _discordOutboxRepository.AddAsync(new DataAccessLibrary.Models.Discord.DiscordOutbox
                         {
                             EventObject = "FantasyMatch",
                             EventType = "Scored",
@@ -61,18 +115,19 @@ internal class DiscordUpdatesContext : DotaOperationContext
                         });
                     }
 
-                    if (unsentFantasyMessages.Count() > 1)
+                    if (unsentFantasyMessages.Count() > 0)
                     {
-                        var affectedMatches = await _fantasyMatchPlayerRepository.GetFantasyPlayerPointsByMatchesAsync(unsentFantasyMessages.Select(fm => fm.MatchId).ToList());
+                        var affectedMatches = await _fantasyPointsFacade.GetFantasyPlayerPointsByMatchesAsync(unsentFantasyMessages);
                         var affectedFantasyLeagues = affectedMatches.Select(am => am.FantasyLeagueId).Distinct().ToList();
+                        _logger.LogInformation($"Pulling {affectedFantasyLeagues.Count()} fantasy leagues to update leaderboard");
                         foreach (int affectedLeague in affectedFantasyLeagues)
                         {
                             var fantasyLeague = await _fantasyLeagueRepository.GetByIdAsync(affectedLeague);
                             if (fantasyLeague == null || fantasyLeague.IsPrivate) continue;
-                            List<FantasyDraftPointTotals> fantasyPoints = await _fantasyDraftRepository.AllDraftPointTotalsByFantasyLeagueAsync(fantasyLeague);
+                            List<FantasyDraftPointTotals> fantasyPoints = await _fantasyDraftFacade.AllDraftPointTotalsByFantasyLeagueAsync(fantasyLeague);
                             if (fantasyPoints.Count() == 0) continue;
 
-                            List<FantasyDraftPointTotals> top10Players = fantasyPoints.Where(fp => !fp.IsTeam).OrderByDescending(fp => fp.DraftTotalFantasyPoints).Take(10).ToList();
+                            List<FantasyDraftPointTotals> top10Players = fantasyPoints.OrderByDescending(fp => fp.DraftTotalFantasyPoints).Take(10).ToList();
                             await guild.TextChannels.First(tc => tc.Name == "bot-fantasy-leaderboard").SendMessageAsync(LeaderboardToDiscordMessage(top10Players));
                         }
                     }
@@ -89,7 +144,7 @@ internal class DiscordUpdatesContext : DotaOperationContext
 
     private async Task<string> FantasyMatchToDiscordMessage(FantasyMatch fantasyMatch)
     {
-        var fantasyMatchPlayerPoints = await _fantasyMatchPlayerRepository.GetFantasyPlayerPointsByMatchAsync(fantasyMatch.MatchId);
+        var fantasyMatchPlayerPoints = await _fantasyPointsFacade.GetFantasyPlayerPointsByMatchAsync(fantasyMatch.MatchId);
         return $"""
 ```
 New Match Id: {fantasyMatch.MatchId}

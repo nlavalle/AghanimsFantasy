@@ -33,7 +33,6 @@ builder.Services.AddScoped<IFantasyLeagueRepository, FantasyLeagueRepository>();
 builder.Services.AddScoped<IFantasyPlayerRepository, FantasyPlayerRepository>();
 builder.Services.AddScoped<IFantasyMatchRepository, FantasyMatchRepository>();
 builder.Services.AddScoped<IFantasyMatchPlayerRepository, FantasyMatchPlayerRepository>();
-builder.Services.AddScoped<IFantasyRepository, FantasyRepository>();
 // Add Game Coordinator Repositories
 builder.Services.AddScoped<IGcMatchMetadataRepository, GcMatchMetadataRepository>();
 builder.Services.AddScoped<IGcDotaMatchRepository, GcDotaMatchRepository>();
@@ -44,7 +43,10 @@ builder.Services.AddScoped<IProMetadataRepository, ProMetadataRepository>();
 builder.Services.AddScoped<IMatchHistoryRepository, MatchHistoryRepository>();
 builder.Services.AddScoped<IMatchDetailRepository, MatchDetailRepository>();
 // Add Discord Repositories
-builder.Services.AddScoped<IDiscordRepository, DiscordRepository>();
+builder.Services.AddScoped<IDiscordUserRepository, DiscordUserRepository>();
+builder.Services.AddScoped<IDiscordOutboxRepository, DiscordOutboxRepository>();
+// Add View Repository
+builder.Services.AddScoped<IFantasyViewsRepository, FantasyViewsRepository>();
 
 // Add Scoped Dota Client to be called for Dota Client Background Service
 builder.Services.AddScoped<DotaClient>();

@@ -2,6 +2,7 @@ namespace csharp_ef_data_loader.Services;
 
 using DataAccessLibrary.Data;
 using DataAccessLibrary.Models.WebApi;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
@@ -12,6 +13,7 @@ internal class MatchDetailsContext : DotaOperationContext
     // private readonly DotaWebApiService _apiService;
     private readonly ILogger<MatchDetailsContext> _logger;
     private readonly HttpClient _httpClient;
+    private readonly IProMetadataRepository _proMetadataRepository;
     private readonly IMatchHistoryRepository _matchHistoryRepository;
     private readonly IMatchDetailRepository _matchDetailRepository;
 
@@ -26,6 +28,7 @@ internal class MatchDetailsContext : DotaOperationContext
     public MatchDetailsContext(
             ILogger<MatchDetailsContext> logger,
             HttpClient httpClient,
+            IProMetadataRepository proMetadataRepository,
             IMatchHistoryRepository matchHistoryRepository,
             IMatchDetailRepository matchDetailRepository,
             IServiceScope scope,
@@ -35,6 +38,7 @@ internal class MatchDetailsContext : DotaOperationContext
     {
         _logger = logger;
         _httpClient = httpClient;
+        _proMetadataRepository = proMetadataRepository;
         _matchHistoryRepository = matchHistoryRepository;
         _matchDetailRepository = matchDetailRepository;
     }
@@ -44,7 +48,7 @@ internal class MatchDetailsContext : DotaOperationContext
         try
         {
             // Find all the match histories without match detail rows and add tasks to fetch them all
-            List<MatchHistory> matchesWithoutDetails = await _matchHistoryRepository.GetNotInMatchDetails(50);
+            List<MatchHistory> matchesWithoutDetails = await GetNotInMatchDetails(50);
 
             if (matchesWithoutDetails.Count() > 0)
             {
@@ -155,8 +159,34 @@ internal class MatchDetailsContext : DotaOperationContext
             Interlocked.Add(ref _startedMatches, 1);
             Interlocked.Decrement(ref _remainingMatches);
         }
+    }
 
+    private async Task<List<MatchHistory>> GetNotInMatchDetails(int takeAmount)
+    {
+        _logger.LogInformation($"Getting new Match Histories not loaded into Fantasy Match");
 
+        var activeLeagues = await _proMetadataRepository.GetLeaguesAsync(true);
+
+        var newMatchHistoryQuery = _matchHistoryRepository.GetQueryable()
+            .Where(mh => activeLeagues
+                    .Select(l => l.Id)
+                    .Contains(mh.LeagueId)
+            )
+            .Where(
+                mh => !_matchDetailRepository.GetQueryable()
+                    .Where(md => activeLeagues
+                        .Select(l => l.Id)
+                        .Contains(md.LeagueId)
+                    )
+                    .Select(md => md.MatchId)
+                    .Contains(mh.MatchId)
+            )
+            .OrderBy(mh => mh.MatchId)
+            .Take(takeAmount);
+
+        _logger.LogDebug($"GetMatchHistoriesNotInMatchDetails SQL Query: {newMatchHistoryQuery.ToQueryString()}");
+
+        return await newMatchHistoryQuery.ToListAsync();
     }
 
     public string GetMatchDetailFetchStatus()

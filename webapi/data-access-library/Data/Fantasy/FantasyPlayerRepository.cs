@@ -20,9 +20,14 @@ public class FantasyPlayerRepository : IFantasyPlayerRepository
         _dbContext = dbContext;
     }
 
-    public async Task<IEnumerable<FantasyPlayer>> GetFantasyLeaguePlayersAsync(FantasyLeague FantasyLeague)
+    public IQueryable<FantasyPlayer> GetQueryable()
     {
-        _logger.LogInformation($"Get Fantasy Players by Fantasy League Id: {FantasyLeague.Id}");
+        return _dbContext.FantasyPlayers;
+    }
+
+    public async Task<List<FantasyPlayer>> GetByFantasyLeagueAsync(FantasyLeague FantasyLeague)
+    {
+        _logger.LogDebug($"Get Fantasy Players by Fantasy League Id: {FantasyLeague.Id}");
 
         var fantasyPlayerLeagueQuery = _dbContext.FantasyPlayers
             .Include(fp => fp.FantasyLeague)
@@ -39,14 +44,14 @@ public class FantasyPlayerRepository : IFantasyPlayerRepository
 
     public async Task<FantasyPlayer?> GetByIdAsync(long FantasyPlayerId)
     {
-        _logger.LogInformation($"Fetching Single Fantasy Player {FantasyPlayerId}");
+        _logger.LogDebug($"Fetching Single Fantasy Player {FantasyPlayerId}");
 
         return await _dbContext.FantasyPlayers.FindAsync(FantasyPlayerId);
     }
 
-    public async Task<IEnumerable<FantasyPlayer>> GetAllAsync()
+    public async Task<List<FantasyPlayer>> GetAllAsync()
     {
-        _logger.LogInformation($"Get Fantasy Players");
+        _logger.LogDebug($"Get Fantasy Players");
 
         var fantasyPlayerLeagueQuery = _dbContext.FantasyPlayers
             .Include(fp => fp.Team)

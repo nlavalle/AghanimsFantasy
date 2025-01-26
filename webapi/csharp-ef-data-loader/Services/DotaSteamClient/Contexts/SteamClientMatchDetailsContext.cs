@@ -2,8 +2,10 @@ namespace csharp_ef_data_loader.Services;
 
 using DataAccessLibrary.Data;
 using DataAccessLibrary.Models.WebApi;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using SteamKit2.GC.Dota.Internal;
 
 internal class SteamClientMatchDetailsContext : DotaOperationContext
 {
@@ -49,7 +51,7 @@ internal class SteamClientMatchDetailsContext : DotaOperationContext
 
             // Find all the match histories without match detail rows and add tasks to fetch them all
 
-            List<MatchHistory> matchesWithoutDetails = await _matchHistoryRepository.GetNotInGcMatches(50);
+            List<MatchHistory> matchesWithoutDetails = await GetNotInGcMatches(50);
 
             if (matchesWithoutDetails.Count() > 0)
             {
@@ -88,5 +90,23 @@ internal class SteamClientMatchDetailsContext : DotaOperationContext
             // Close connection between jobs so we don't get into weird game coordinator downtime issues
             _dotaClient.Disconnect();
         }
+    }
+
+    private async Task<List<MatchHistory>> GetNotInGcMatches(int takeAmount)
+    {
+        _logger.LogInformation($"Getting new Match Histories not loaded into Gc Dota Matches");
+
+        var matchesNotInGcQuery = _matchHistoryRepository.GetQueryable()
+            .Where(
+                mh => !_gcDotaMatchRepository.GetQueryable()
+                    .Where(dm => dm.replay_state == CMsgDOTAMatch.ReplayState.REPLAY_AVAILABLE)
+                    .Select(gdm => gdm.match_id)
+                    .Contains((ulong)mh.MatchId))
+                .OrderBy(mh => mh.MatchId)
+                .Take(takeAmount);
+
+        _logger.LogDebug($"GetMatchHistoriesNotInGcMatches SQL Query: {matchesNotInGcQuery.ToQueryString()}");
+
+        return await matchesNotInGcQuery.ToListAsync();
     }
 }

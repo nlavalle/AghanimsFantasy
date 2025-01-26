@@ -1,38 +1,56 @@
-namespace DataAccessLibrary.Data;
-
+using DataAccessLibrary.Data;
 using DataAccessLibrary.Models;
 using DataAccessLibrary.Models.Fantasy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-/// <summary>
-/// Service to fetch and transform the Postgres data to read/write fantasy draft data for the webapi
-/// example is to fetch all of the current scores, vs adding a new draft. Controllers should handle none of the business
-/// logic 
-/// </summary>
-public class FantasyRepository : IFantasyRepository
+namespace DataAccessLibrary.Facades;
+
+public class FantasyPointsFacade
 {
-    private readonly ILogger<FantasyRepository> _logger;
-    private AghanimsFantasyContext _dbContext;
-    public FantasyRepository(ILogger<FantasyRepository> logger, AghanimsFantasyContext dbContext)
+    private readonly ILogger<FantasyPointsFacade> _logger;
+    private readonly IProMetadataRepository _proMetadataRepository;
+    private readonly IFantasyPlayerRepository _fantasyPlayerRepository;
+    private readonly IFantasyMatchRepository _fantasyMatchRepository;
+    private readonly IFantasyViewsRepository _fantasyViewsRepository;
+
+    public FantasyPointsFacade(
+        ILogger<FantasyPointsFacade> logger,
+        IProMetadataRepository proMetadataRepository,
+        IFantasyViewsRepository fantasyViewsRepository,
+        IFantasyMatchRepository fantasyMatchRepository,
+        IFantasyPlayerRepository fantasyPlayerRepository
+    )
     {
         _logger = logger;
-        _dbContext = dbContext;
+        _proMetadataRepository = proMetadataRepository;
+        _fantasyPlayerRepository = fantasyPlayerRepository;
+        _fantasyMatchRepository = fantasyMatchRepository;
+        _fantasyViewsRepository = fantasyViewsRepository;
     }
 
-    #region Fantasy
+
+    public async Task<List<FantasyPlayerPoints>> GetFantasyPlayerPointsByMatchAsync(long MatchId)
+    {
+        return await _fantasyViewsRepository.GetPlayerPointsQueryable()
+            .Where(fppv => fppv.FantasyMatchPlayer!.Match!.MatchId == MatchId)
+            .Include(fppv => fppv.FantasyMatchPlayer)
+            .ToListAsync();
+    }
+
+    public async Task<List<FantasyPlayerPoints>> GetFantasyPlayerPointsByMatchesAsync(IEnumerable<FantasyMatch> FantasyMatches)
+    {
+        return await _fantasyViewsRepository.GetPlayerPointsQueryable()
+            .Where(fppv => fppv.FantasyMatchPlayerId != null && FantasyMatches.Any(mi => mi == fppv.FantasyMatchPlayer!.Match))
+            .Include(fppv => fppv.FantasyMatchPlayer)
+            .ToListAsync();
+    }
 
     public async Task<List<FantasyPlayerPoints>> FantasyPlayerPointsByFantasyLeagueAsync(int FantasyLeagueId, int limit)
     {
         _logger.LogInformation($"Fetching Fantasy Points for Fantasy League Id: {FantasyLeagueId}");
 
-        var fantasyPlayerPointsByLeagueQuery = _dbContext.FantasyPlayerPointsView
-            .Include(fppv => fppv.FantasyPlayer)
-                .ThenInclude(fp => fp.DotaAccount)
-            .Include(fppv => fppv.FantasyPlayer)
-                .ThenInclude(fp => fp.Team)
-            .Include(fppv => fppv.FantasyMatchPlayer)
-                .ThenInclude(fmp => fmp!.Hero)
+        var fantasyPlayerPointsByLeagueQuery = _fantasyViewsRepository.GetPlayerPointsQueryable()
             .Where(fpp => fpp.FantasyLeagueId == FantasyLeagueId)
             .Where(fpp => fpp.FantasyMatchPlayer != null)
             .Where(fpp => fpp.FantasyMatchPlayer!.GcMetadataPlayerParsed && fpp.FantasyMatchPlayer!.MatchDetailPlayerParsed)
@@ -50,7 +68,7 @@ public class FantasyRepository : IFantasyRepository
     {
         _logger.LogInformation($"Getting Player Averages");
 
-        FantasyPlayer? fantasyPlayer = await _dbContext.FantasyPlayers.FindAsync(FantasyPlayerId);
+        FantasyPlayer? fantasyPlayer = await _fantasyPlayerRepository.GetByIdAsync(FantasyPlayerId);
 
         if (fantasyPlayer == null)
         {
@@ -58,9 +76,9 @@ public class FantasyRepository : IFantasyRepository
             return new FantasyPlayerTopHeroes();
         }
 
-        var heroes = await _dbContext.Heroes.ToListAsync();
+        var heroes = await _proMetadataRepository.GetHeroesAsync();
 
-        var topHeroIds = await _dbContext.FantasyMatches
+        var topHeroIds = await _fantasyMatchRepository.GetQueryable()
                 .SelectMany(
                     md => md.Players,
                     (left, right) => new { Match = left, MatchPlayer = right }
@@ -103,7 +121,7 @@ public class FantasyRepository : IFantasyRepository
     {
         _logger.LogInformation($"Getting Player Averages");
 
-        return await _dbContext.FantasyNormalizedAverages
+        return await _fantasyViewsRepository.GetFantasyNormalizedAveragesQueryable()
                 .Where(fnp => fnp.FantasyPlayer.Id == FantasyPlayerId)
                 .ToListAsync();
     }
@@ -112,7 +130,7 @@ public class FantasyRepository : IFantasyRepository
     {
         _logger.LogInformation($"Fetching Metadata for Fantasy League Id: {FantasyLeague.Id}");
 
-        List<MetadataSummary> metadataSummaries = await _dbContext.MetadataSummaries
+        List<MetadataSummary> metadataSummaries = await _fantasyViewsRepository.GetMetadataSummariesQueryable()
             .Where(ms => ms.FantasyLeagueId == FantasyLeague.Id)
             .Include(ms => ms.FantasyPlayer)
             .ToListAsync();
@@ -120,15 +138,11 @@ public class FantasyRepository : IFantasyRepository
         return metadataSummaries;
     }
 
-    #endregion Fantasy
-
-    #region Match
-
     public async Task<List<MatchHighlights>> GetLastNMatchHighlights(int FantasyLeagueId, int MatchCount)
     {
         _logger.LogInformation($"Getting {MatchCount} Match Highlights for Fantasy League ID: {FantasyLeagueId}");
 
-        var matchHighlightsQuery = _dbContext.MatchHighlightsView
+        var matchHighlightsQuery = _fantasyViewsRepository.GetMatchHighlightsQueryable()
                 .Include(mhv => mhv.FantasyPlayer)
                 .Where(mhv => mhv.FantasyLeagueId == FantasyLeagueId)
                 .OrderByDescending(mhv => mhv.StartTime)
@@ -138,5 +152,4 @@ public class FantasyRepository : IFantasyRepository
 
         return await matchHighlightsQuery.ToListAsync();
     }
-    #endregion Match
 }

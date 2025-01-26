@@ -20,55 +20,21 @@ public class GcDotaMatchRepository : IGcDotaMatchRepository
         _dbContext = dbContext;
     }
 
-    public async Task<List<(CMsgDOTAMatch, CMsgDOTAMatch.Player)>> GetNotInFantasyMatchPlayers(int takeAmount)
+    public IQueryable<CMsgDOTAMatch> GetQueryable()
     {
-        _logger.LogInformation($"Getting new GcDotaMatches not loaded into Fantasy Match Players");
-
-        var newGcDotaMatchQuery = _dbContext.GcDotaMatches
-                .SelectMany(match => match.players,
-                (left, right) => new { Match = left, MatchPlayer = right })
-                .Where(gcmp =>
-                    !_dbContext.FantasyMatchPlayers.Any(fmp => fmp.FantasyMatchId == (long)gcmp.Match.match_id && fmp.Account != null && fmp.Account.Id == gcmp.MatchPlayer.account_id)
-                    && (gcmp.Match.match_outcome == EMatchOutcome.k_EMatchOutcome_RadVictory || gcmp.Match.match_outcome == EMatchOutcome.k_EMatchOutcome_DireVictory) // Filter out cancelled games
-                )
-                .Take(takeAmount);
-
-        _logger.LogDebug($"GetGcDotaMatchesNotInFantasyMatchPlayers SQL Query: {newGcDotaMatchQuery.ToQueryString()}");
-
-        var result = await newGcDotaMatchQuery.ToListAsync();
-
-        return result.Select(rs => (rs.Match, rs.MatchPlayer)).ToList();
-    }
-
-    public async Task<List<CMsgDOTAMatch>> GetNotInGcMetadata(int takeAmount)
-    {
-        _logger.LogInformation($"Getting new GcDotaMatches not loaded into Fantasy Match Players");
-
-        var newGcDotaMatchQuery = _dbContext.GcDotaMatches
-                .Where(match => _dbContext.Leagues
-                        .Where(league => league.IsActive)
-                        .Select(league => league.Id)
-                        .Contains((int)match.leagueid)
-                )
-                .Where(gcdm => gcdm.replay_state == CMsgDOTAMatch.ReplayState.REPLAY_AVAILABLE &&
-                    !_dbContext.GcMatchMetadata.Any(gcmm => (ulong)gcmm.MatchId == gcdm.match_id))
-                .Take(takeAmount);
-
-        _logger.LogDebug($"GetGcDotaMatchesNotInGcMetadata SQL Query: {newGcDotaMatchQuery.ToQueryString()}");
-
-        return await newGcDotaMatchQuery.ToListAsync();
+        return _dbContext.GcDotaMatches;
     }
 
     public async Task<CMsgDOTAMatch?> GetByIdAsync(ulong MatchId)
     {
-        _logger.LogInformation($"Fetching Single GcDotaMatch {MatchId}");
+        _logger.LogDebug($"Fetching Single GcDotaMatch {MatchId}");
 
         return await _dbContext.GcDotaMatches.FindAsync(MatchId);
     }
 
-    public async Task<IEnumerable<CMsgDOTAMatch>> GetAllAsync()
+    public async Task<List<CMsgDOTAMatch>> GetAllAsync()
     {
-        _logger.LogInformation($"Get GcDotaMatches");
+        _logger.LogDebug($"Get GcDotaMatches");
 
         return await _dbContext.GcDotaMatches.ToListAsync();
     }

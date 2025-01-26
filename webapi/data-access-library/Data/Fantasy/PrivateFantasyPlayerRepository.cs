@@ -19,46 +19,63 @@ public class PrivateFantasyPlayerRepository : IPrivateFantasyPlayerRepository
         _dbContext = dbContext;
     }
 
-    public async Task<List<FantasyLeague>> GetPrivateFantasyLeaguesAsync(long DiscordAccountId)
+    public IQueryable<FantasyPrivateLeaguePlayer> GetQueryable()
     {
-        return await _dbContext.fantasyPrivateLeaguePlayers.Where(fplp => fplp.DiscordUserId == DiscordAccountId).Select(fplp => fplp.FantasyLeague!).Distinct().ToListAsync();
+        return _dbContext.FantasyPrivateLeaguePlayers;
     }
 
-    public async Task<FantasyPrivateLeaguePlayer?> GetFantasyPrivateLeaguePlayerAsync(int FantasyPrivateLeaguePlayerId)
+    public async Task<List<FantasyPrivateLeaguePlayer>> GetAllAsync()
     {
-        return await _dbContext.fantasyPrivateLeaguePlayers.FindAsync(FantasyPrivateLeaguePlayerId);
+        _logger.LogDebug($"Get Private Fantasy League Players");
+
+        return await _dbContext.FantasyPrivateLeaguePlayers.ToListAsync();
     }
 
-    public async Task<List<FantasyPrivateLeaguePlayer>> GetFantasyPrivateLeaguePlayersAsync(int FantasyLeagueId)
+    public async Task<FantasyPrivateLeaguePlayer?> GetByIdAsync(int id)
     {
-        return await _dbContext.fantasyPrivateLeaguePlayers.Where(fplp => fplp.FantasyLeagueId == FantasyLeagueId).ToListAsync();
+        _logger.LogDebug($"Fetching Single Private Fantasy League Player {id}");
+
+        return await _dbContext.FantasyPrivateLeaguePlayers.FindAsync(id);
     }
 
-    public async Task AddPrivateFantasyPlayerAsync(FantasyPrivateLeaguePlayer newPrivateFantasyLeaguePlayer)
+    public async Task<FantasyPrivateLeaguePlayer?> GetByDiscordIdAsync(long id)
     {
-        _logger.LogInformation($"Adding new Private Fantasy Player {newPrivateFantasyLeaguePlayer.DiscordUserId} to Fantasy League {newPrivateFantasyLeaguePlayer.FantasyLeagueId}");
+        _logger.LogDebug($"Fetching Single Private Fantasy League Player {id}");
 
-        await _dbContext.fantasyPrivateLeaguePlayers.AddAsync(newPrivateFantasyLeaguePlayer);
+        return await _dbContext.FantasyPrivateLeaguePlayers.FirstOrDefaultAsync(fplp => fplp.DiscordUserId == id);
+    }
+
+    public async Task<List<FantasyPrivateLeaguePlayer>> GetByFantasyLeagueAsync(int FantasyLeagueId)
+    {
+        _logger.LogDebug($"Fetching Players for Fantasy League Id {FantasyLeagueId}");
+
+        return await _dbContext.FantasyPrivateLeaguePlayers.Where(fplp => fplp.FantasyLeagueId == FantasyLeagueId).ToListAsync();
+    }
+
+    public async Task AddAsync(FantasyPrivateLeaguePlayer entity)
+    {
+        _logger.LogInformation($"Adding new Private Fantasy League Player {entity.Id}");
+
+        await _dbContext.FantasyPrivateLeaguePlayers.AddAsync(entity);
+
+        return;
+    }
+
+    public async Task DeleteAsync(FantasyPrivateLeaguePlayer entity)
+    {
+        _logger.LogInformation($"Removing Discord User {entity.Id}");
+
+        _dbContext.FantasyPrivateLeaguePlayers.Remove(entity);
         await _dbContext.SaveChangesAsync();
 
         return;
     }
 
-    public async Task UpdatePrivateFantasyPlayerAsync(FantasyPrivateLeaguePlayer updatePrivateFantasyLeaguePlayer)
+    public async Task UpdateAsync(FantasyPrivateLeaguePlayer entity)
     {
-        _logger.LogInformation($"Updating Private Fantasy Player {updatePrivateFantasyLeaguePlayer.Id}");
+        _logger.LogInformation($"Updating Fantasy Draft {entity.Id}");
 
-        _dbContext.Entry(updatePrivateFantasyLeaguePlayer).State = EntityState.Modified;
-        await _dbContext.SaveChangesAsync();
-
-        return;
-    }
-
-    public async Task DeletePrivateFantasyPlayerAsync(FantasyPrivateLeaguePlayer deletePrivateFantasyLeaguePlayer)
-    {
-        _logger.LogInformation($"Removing Private Fantasy Player {deletePrivateFantasyLeaguePlayer.Id}");
-
-        _dbContext.fantasyPrivateLeaguePlayers.Remove(deletePrivateFantasyLeaguePlayer);
+        _dbContext.Entry(entity).State = EntityState.Modified;
         await _dbContext.SaveChangesAsync();
 
         return;

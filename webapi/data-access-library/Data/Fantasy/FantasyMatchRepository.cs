@@ -20,49 +20,28 @@ public class FantasyMatchRepository : IFantasyMatchRepository
         _dbContext = dbContext;
     }
 
-    public async Task<List<FantasyMatch>> GetNotGcDetailParsed(int takeAmount)
+    public IQueryable<FantasyMatch> GetQueryable()
     {
-        _logger.LogInformation($"Getting Fantasy Matches not GC Match Detail Parsed");
-
-        var matchDetailsToParse = _dbContext.FantasyMatches.Where(
-                fm => !fm.MatchDetailParsed && _dbContext.GcDotaMatches.Any(md => (long)md.match_id == fm.MatchId))
-                .Take(takeAmount);
-
-        _logger.LogDebug($"GetFantasyMatchesNotGcDetailParsed SQL Query: {matchDetailsToParse.ToQueryString()}");
-
-        return await matchDetailsToParse.ToListAsync();
-    }
-
-    public async Task<List<FantasyMatch>> GetNotDetailParsed(int takeAmount)
-    {
-        _logger.LogInformation($"Getting Fantasy Matches not Match Detail Parsed");
-
-        var matchDetailsToParse = _dbContext.FantasyMatches.Where(
-                fm => !fm.MatchDetailParsed && _dbContext.MatchDetails.Any(md => md.MatchId == fm.MatchId))
-                .Take(takeAmount);
-
-        _logger.LogDebug($"GetFantasyMatchesNotDetailParsed SQL Query: {matchDetailsToParse.ToQueryString()}");
-
-        return await matchDetailsToParse.ToListAsync();
+        return _dbContext.FantasyMatches;
     }
 
     public async Task<FantasyMatch?> GetByIdAsync(long FantasyMatchId)
     {
-        _logger.LogInformation($"Fetching Single Fantasy Match {FantasyMatchId}");
+        _logger.LogDebug($"Fetching Single Fantasy Match {FantasyMatchId}");
 
         return await _dbContext.FantasyMatches.FindAsync(FantasyMatchId);
     }
 
     public async Task<List<FantasyMatch>> GetByIdsAsync(IEnumerable<long> FantasyMatchIds)
     {
-        _logger.LogInformation($"Fetching {FantasyMatchIds.Count()} Fantasy Matches ");
+        _logger.LogDebug($"Fetching {FantasyMatchIds.Count()} Fantasy Matches ");
 
         return await _dbContext.FantasyMatches.Where(fm => FantasyMatchIds.Any(fmi => fmi == fm.MatchId)).ToListAsync();
     }
 
-    public async Task<IEnumerable<FantasyMatch>> GetAllAsync()
+    public async Task<List<FantasyMatch>> GetAllAsync()
     {
-        _logger.LogInformation($"Get Fantasy Matches");
+        _logger.LogDebug($"Get Fantasy Matches");
 
         return await _dbContext.FantasyMatches.ToListAsync();
     }

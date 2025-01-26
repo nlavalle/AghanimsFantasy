@@ -20,16 +20,21 @@ public class FantasyLeagueWeightRepository : IFantasyLeagueWeightRepository
         _dbContext = dbContext;
     }
 
+    public IQueryable<FantasyLeagueWeight> GetQueryable()
+    {
+        return _dbContext.FantasyLeagueWeights;
+    }
+
     public async Task<FantasyLeagueWeight?> GetByIdAsync(int FantasyLeagueWeightId)
     {
-        _logger.LogInformation($"Fetching Single Fantasy League Weight {FantasyLeagueWeightId}");
+        _logger.LogDebug($"Fetching Single Fantasy League Weight {FantasyLeagueWeightId}");
 
         return await _dbContext.FantasyLeagueWeights.FindAsync(FantasyLeagueWeightId);
     }
 
-    public async Task<IEnumerable<FantasyLeagueWeight>> GetAllAsync()
+    public async Task<List<FantasyLeagueWeight>> GetAllAsync()
     {
-        _logger.LogInformation($"Fetching All Fantasy League Weights");
+        _logger.LogDebug($"Fetching All Fantasy League Weights");
 
         return await _dbContext.FantasyLeagueWeights
                 .ToListAsync();

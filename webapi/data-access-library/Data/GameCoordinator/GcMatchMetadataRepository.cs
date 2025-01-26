@@ -22,9 +22,14 @@ public class GcMatchMetadataRepository : IGcMatchMetadataRepository
         _dbContext = dbContext;
     }
 
+    public IQueryable<GcMatchMetadata> GetQueryable()
+    {
+        return _dbContext.GcMatchMetadata;
+    }
+
     public async Task<List<GcMatchMetadata>> GetByLeagueAsync(League League, int Skip = 0, int Take = 50)
     {
-        _logger.LogInformation($"Getting Match Metadata for League {League.Id}");
+        _logger.LogDebug($"Getting Match Metadata for League {League.Id}");
 
         var leagueMetadataQuery = QueryLeagueMatchMetadata(League.Id)
             .OrderByDescending(md => md.MatchId)
@@ -38,7 +43,7 @@ public class GcMatchMetadataRepository : IGcMatchMetadataRepository
 
     public async Task<List<GcMatchMetadata>> GetByFantasyLeagueAsync(FantasyLeague FantasyLeague, int Skip = 0, int Take = 50)
     {
-        _logger.LogInformation($"Getting Match Metadata for Fantasy League {FantasyLeague.Id}");
+        _logger.LogDebug($"Getting Match Metadata for Fantasy League {FantasyLeague.Id}");
 
         var fantasyLeagueMetadataQuery = QueryFantasyLeagueMatchMetadata(FantasyLeague.Id)
             .OrderByDescending(md => md.MatchId)
@@ -52,14 +57,14 @@ public class GcMatchMetadataRepository : IGcMatchMetadataRepository
 
     public async Task<GcMatchMetadata?> GetByIdAsync(long MatchId)
     {
-        _logger.LogInformation($"Fetching Single GcMatchmetadata {MatchId}");
+        _logger.LogDebug($"Fetching Single GcMatchmetadata {MatchId}");
 
         return await _dbContext.GcMatchMetadata.FirstOrDefaultAsync(gmm => gmm.MatchId == MatchId);
     }
 
-    public async Task<IEnumerable<GcMatchMetadata>> GetAllAsync()
+    public async Task<List<GcMatchMetadata>> GetAllAsync()
     {
-        _logger.LogInformation($"Get GcMatchmetadata");
+        _logger.LogDebug($"Get GcMatchmetadata");
 
         return await _dbContext.GcMatchMetadata.ToListAsync();
     }

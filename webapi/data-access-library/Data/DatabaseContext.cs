@@ -44,7 +44,7 @@ public class AghanimsFantasyContext : DbContext
     public DbSet<MetadataSummary> MetadataSummaries { get; set; } = null!;
     public DbSet<FantasyNormalizedAverages> FantasyNormalizedAveragesView { get; set; } = null!;
     public DbSet<FantasyNormalizedAveragesTable> FantasyNormalizedAverages { get; set; } = null!;
-    public DbSet<FantasyPrivateLeaguePlayer> fantasyPrivateLeaguePlayers { get; set; } = null!;
+    public DbSet<FantasyPrivateLeaguePlayer> FantasyPrivateLeaguePlayers { get; set; } = null!;
     #endregion
 
     #region Match

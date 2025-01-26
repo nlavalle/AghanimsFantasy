@@ -21,29 +21,21 @@ public class FantasyMatchPlayerRepository : IFantasyMatchPlayerRepository
         _dbContext = dbContext;
     }
 
-    public async Task<List<FantasyMatchPlayer>> GetNotGcDetailParsed(int takeAmount)
+    public IQueryable<FantasyMatchPlayer> GetQueryable()
     {
-        _logger.LogInformation($"Getting Fantasy Match Players not GC Match Detail Parsed");
-
-        var matchDetailsToParse = _dbContext.FantasyMatchPlayers.Where(
-                fm => !fm.GcMetadataPlayerParsed && _dbContext.GcMatchMetadata.Any(md => md.MatchId == fm.FantasyMatchId))
-                .Take(takeAmount);
-
-        _logger.LogDebug($"GetFantasyMatchPlayersNotGcDetailParsed SQL Query: {matchDetailsToParse.ToQueryString()}");
-
-        return await matchDetailsToParse.ToListAsync();
+        return _dbContext.FantasyMatchPlayers;
     }
 
     public async Task<FantasyMatchPlayer?> GetByIdAsync(int FantasyMatchPlayerId)
     {
-        _logger.LogInformation($"Fetching Single Fantasy Match Player {FantasyMatchPlayerId}");
+        _logger.LogDebug($"Fetching Single Fantasy Match Player {FantasyMatchPlayerId}");
 
         return await _dbContext.FantasyMatchPlayers.FindAsync(FantasyMatchPlayerId);
     }
 
-    public async Task<IEnumerable<FantasyMatchPlayer>> GetAllAsync()
+    public async Task<List<FantasyMatchPlayer>> GetAllAsync()
     {
-        _logger.LogInformation($"Get Fantasy Match Players");
+        _logger.LogDebug($"Get Fantasy Match Players");
 
         return await _dbContext.FantasyMatchPlayers.ToListAsync();
     }
@@ -86,21 +78,5 @@ public class FantasyMatchPlayerRepository : IFantasyMatchPlayerRepository
         await _dbContext.SaveChangesAsync();
 
         return;
-    }
-
-    public async Task<List<FantasyPlayerPoints>> GetFantasyPlayerPointsByMatchAsync(long MatchId)
-    {
-        return await _dbContext.FantasyPlayerPointsView
-            .Where(fppv => fppv.FantasyMatchPlayer!.Match!.MatchId == MatchId)
-            .Include(fppv => fppv.FantasyMatchPlayer)
-            .ToListAsync();
-    }
-
-    public async Task<List<FantasyPlayerPoints>> GetFantasyPlayerPointsByMatchesAsync(IEnumerable<FantasyMatch> FantasyMatches)
-    {
-        return await _dbContext.FantasyPlayerPointsView
-            .Where(fppv => fppv.FantasyMatchPlayerId != null && FantasyMatches.Any(mi => mi == fppv.FantasyMatchPlayer!.Match))
-            .Include(fppv => fppv.FantasyMatchPlayer)
-            .ToListAsync();
     }
 }

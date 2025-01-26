@@ -3,7 +3,7 @@ using DataAccessLibrary.Models.GameCoordinator;
 using DataAccessLibrary.Models.ProMetadata;
 using DataAccessLibrary.Models.WebApi;
 
-namespace DataAccessLibrary.UnitTests.Data;
+namespace DataAccessLibrary.IntegrationTests.Data;
 
 public static class DbSeeder
 {

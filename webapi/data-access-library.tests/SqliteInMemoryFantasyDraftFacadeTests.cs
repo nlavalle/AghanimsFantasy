@@ -6,18 +6,24 @@ using Microsoft.Extensions.Logging;
 using DataAccessLibrary.Models.ProMetadata;
 using DataAccessLibrary.Models.Fantasy;
 using DataAccessLibrary.Models.Discord;
+using DataAccessLibrary.Facades;
+
 
 namespace DataAccessLibrary.IntegrationTests.Data;
 
-public class SqliteInMemoryFantasyTests : IDisposable
+public class SqliteInMemoryFantasyDraftFacadeTests : IDisposable
 {
     // private readonly ILogger<FantasyRepository> loggerMock = new Mock<ILogger<FantasyRepository>>();
     private readonly DbConnection _connection;
     private readonly DbContextOptions<AghanimsFantasyContext> _contextOptions;
-
+    private readonly ProMetadataRepository _proMetadataRepository;
+    private readonly DiscordUserRepository _discordUserRepository;
+    private readonly FantasyLeagueRepository _fantasyLeagueRepository;
+    private readonly FantasyDraftRepository _fantasyDraftRepository;
+    private readonly FantasyViewsRepository _fantasyViewsRepository;
 
     #region ConstructorAndDispose
-    public SqliteInMemoryFantasyTests()
+    public SqliteInMemoryFantasyDraftFacadeTests()
     {
         // Create and open a connection. This creates the SQLite in-memory database, which will persist until the connection is closed
         // at the end of the test (see Dispose below).
@@ -312,6 +318,14 @@ public class SqliteInMemoryFantasyTests : IDisposable
         );
 
         context.SaveChanges();
+
+
+        // Setup readonly to be used in all the tests
+        _proMetadataRepository = new ProMetadataRepository(new Mock<ILogger<ProMetadataRepository>>().Object, context);
+        _discordUserRepository = new DiscordUserRepository(new Mock<ILogger<DiscordUserRepository>>().Object, context);
+        _fantasyLeagueRepository = new FantasyLeagueRepository(new Mock<ILogger<FantasyLeagueRepository>>().Object, context);
+        _fantasyDraftRepository = new FantasyDraftRepository(new Mock<ILogger<FantasyDraftRepository>>().Object, context);
+        _fantasyViewsRepository = new FantasyViewsRepository(context);
     }
 
     AghanimsFantasyContext CreateContext() => new AghanimsFantasyContext(_contextOptions);
@@ -319,71 +333,49 @@ public class SqliteInMemoryFantasyTests : IDisposable
     public void Dispose() => _connection.Dispose();
     #endregion
 
-    #region Fantasy
     [Fact]
-    public async void GetLeagueFantasyPlayers()
+    public async void GetFantasyPlayerPointsLeague()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<FantasyPlayerRepository>>();
-        var repository = new FantasyPlayerRepository(loggerMock.Object, context);
+        var loggerMock = new Mock<ILogger<FantasyDraftFacade>>();
+        var fantasyDraftFacade = new FantasyDraftFacade(
+            loggerMock.Object,
+            _proMetadataRepository,
+            _discordUserRepository,
+            _fantasyLeagueRepository,
+            _fantasyDraftRepository,
+            _fantasyViewsRepository
+        );
 
         var fantasyLeague = await context.FantasyLeagues.FindAsync(1);
-        var fantasyPlayers = await repository.GetByFantasyLeagueAsync(fantasyLeague!);
-        Assert.Equal(10, fantasyPlayers.Count());
-        Assert.IsAssignableFrom<IEnumerable<FantasyPlayer>>(fantasyPlayers);
+        var fantasyPlayerPoints = await fantasyDraftFacade.FantasyPlayerPointTotalsByFantasyLeagueAsync(fantasyLeague!);
+        // // We want to return fantasy player points even if rows are null, so this should have 2 players with a match
+        // //  and all 3 players should return a null row for scenarios when a new league has no games yet
+        Assert.Equal(2, fantasyPlayerPoints.Where(fpp => fpp.TotalMatches > 0).Count());
+        Assert.Equal(8, fantasyPlayerPoints.Where(fpp => fpp.TotalMatches == 0).Count());
+        Assert.Equal(10, fantasyPlayerPoints.Count());
+        Assert.IsAssignableFrom<IEnumerable<FantasyPlayerPointTotals>>(fantasyPlayerPoints);
     }
 
     [Fact]
-    public async void GetAllLeagueFantasyPlayers()
+    public async void GetFantasyPlayerPointTotalsLeague()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<FantasyPlayerRepository>>();
-        var repository = new FantasyPlayerRepository(loggerMock.Object, context);
-
-        var fantasyPlayers = await repository.GetAllAsync();
-        Assert.Equal(20, fantasyPlayers.Count());
-        Assert.IsAssignableFrom<IEnumerable<FantasyPlayer>>(fantasyPlayers);
-    }
-
-    [Fact]
-    public async void GetEmptyLeagueFantasyPlayers()
-    {
-        using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<FantasyPlayerRepository>>();
-        var repository = new FantasyPlayerRepository(loggerMock.Object, context);
-
-        var fantasyLeague = await context.FantasyLeagues.FindAsync(3);
-        var fantasyPlayers = await repository.GetByFantasyLeagueAsync(fantasyLeague!);
-        Assert.Empty(fantasyPlayers);
-    }
-
-    [Fact]
-    public async void GetFantasyDraftsByUserLeague()
-    {
-        using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<FantasyDraftRepository>>();
-        var repository = new FantasyDraftRepository(loggerMock.Object, context);
+        var loggerMock = new Mock<ILogger<FantasyDraftFacade>>();
+        var fantasyDraftFacade = new FantasyDraftFacade(
+            loggerMock.Object,
+            _proMetadataRepository,
+            _discordUserRepository,
+            _fantasyLeagueRepository,
+            _fantasyDraftRepository,
+            _fantasyViewsRepository
+        );
 
         var fantasyLeague = await context.FantasyLeagues.FindAsync(1);
-        var discordUser = await context.DiscordUsers.FindAsync(1L);
-        var fantasyDraft = await repository.GetByUserFantasyLeague(fantasyLeague!, discordUser!);
-
-        Assert.NotNull(fantasyDraft);
-        Assert.IsAssignableFrom<FantasyDraft>(fantasyDraft);
+        var fantasyPlayerPoints = await fantasyDraftFacade.FantasyPlayerPointTotalsByFantasyLeagueAsync(fantasyLeague!);
+        // We want to return fantasy player points even if rows are null, so this should have all 3 players
+        // even though 1 has no match
+        Assert.Equal(10, fantasyPlayerPoints.Count());
+        Assert.IsAssignableFrom<IEnumerable<FantasyPlayerPointTotals>>(fantasyPlayerPoints);
     }
-
-    [Fact]
-    public async void GetFantasyDraftsEmptyLeague()
-    {
-        using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<FantasyDraftRepository>>();
-        var repository = new FantasyDraftRepository(loggerMock.Object, context);
-
-        var fantasyLeague = await context.FantasyLeagues.FindAsync(2);
-        var discordUser = await context.DiscordUsers.FindAsync(1L);
-        var fantasyDraft = await repository.GetByUserFantasyLeague(fantasyLeague!, discordUser!);
-
-        Assert.Null(fantasyDraft);
-    }
-    #endregion
 }

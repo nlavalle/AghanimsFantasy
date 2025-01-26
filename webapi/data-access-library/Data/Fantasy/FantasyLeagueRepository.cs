@@ -21,69 +21,21 @@ public class FantasyLeagueRepository : IFantasyLeagueRepository
         _dbContext = dbContext;
     }
 
-    public async Task<IEnumerable<FantasyLeague>> GetAccessibleFantasyLeaguesAsync(DiscordUser? user)
+    public IQueryable<FantasyLeague> GetQueryable()
     {
-        return await _dbContext.FantasyLeagues
-                .Include(fl => fl.FantasyPrivateLeaguePlayers)
-                .Include(fl => fl.League)
-                .Where(fl =>
-                    !fl.IsPrivate ||
-                    (user != null && fl.FantasyPrivateLeaguePlayers.Any(p => p.DiscordUser == user)) ||
-                    (user != null && user.IsAdmin))
-                .ToListAsync();
-    }
-
-    public async Task<IEnumerable<FantasyLeague>> GetAccessibleFantasyLeaguesByLeagueIdAsync(DiscordUser? user, int leagueId)
-    {
-        return await _dbContext.FantasyLeagues
-                .Include(fl => fl.FantasyPrivateLeaguePlayers)
-                .Include(fl => fl.League)
-                .Where(fl =>
-                    !fl.IsPrivate ||
-                    (user != null && fl.FantasyPrivateLeaguePlayers.Any(p => p.DiscordUser == user)) ||
-                    (user != null && user.IsAdmin))
-                .Where(fl => fl.LeagueId == leagueId)
-                .ToListAsync();
-    }
-
-    public async Task<FantasyLeague?> GetAccessibleFantasyLeagueAsync(int FantasyLeagueId, DiscordUser? user)
-    {
-        return await _dbContext.FantasyLeagues
-                .Include(fl => fl.FantasyPrivateLeaguePlayers)
-                .Include(fl => fl.League)
-                .Where(fl =>
-                    !fl.IsPrivate ||
-                    (user != null && fl.FantasyPrivateLeaguePlayers.Any(p => p.DiscordUser == user)) ||
-                    (user != null && user.IsAdmin)
-                )
-                .Where(fl => fl.Id == FantasyLeagueId)
-                .FirstOrDefaultAsync();
-    }
-
-    public async Task<DateTime> GetLeagueLockedDateAsync(int FantasyLeagueId)
-    {
-        _logger.LogInformation($"Fetching Draft Locked Date for Fantasy League Id: {FantasyLeagueId}");
-
-        return DateTimeOffset.FromUnixTimeSeconds(
-                await _dbContext.FantasyLeagues.Where(l => l.Id == FantasyLeagueId).Select(l => l.FantasyDraftLocked).FirstOrDefaultAsync()
-            ).DateTime;
-    }
-
-    public bool IsFantasyLeagueOpenAsync(FantasyLeague FantasyLeague)
-    {
-        return DateTime.UtcNow <= DateTime.UnixEpoch.AddSeconds(FantasyLeague.FantasyDraftLocked);
+        return _dbContext.FantasyLeagues;
     }
 
     public async Task<FantasyLeague?> GetByIdAsync(int FantasyLeagueId)
     {
-        _logger.LogInformation($"Fetching Single Fantasy League {FantasyLeagueId}");
+        _logger.LogDebug($"Fetching Single Fantasy League {FantasyLeagueId}");
 
         return await _dbContext.FantasyLeagues.FindAsync(FantasyLeagueId);
     }
 
-    public async Task<IEnumerable<FantasyLeague>> GetAllAsync()
+    public async Task<List<FantasyLeague>> GetAllAsync()
     {
-        _logger.LogInformation($"Fetching All Fantasy Leagues");
+        _logger.LogDebug($"Fetching All Fantasy Leagues");
 
         return await _dbContext.FantasyLeagues
                 .ToListAsync();

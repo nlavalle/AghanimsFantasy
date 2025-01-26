@@ -22,9 +22,14 @@ public class MatchDetailRepository : IMatchDetailRepository
         _dbContext = dbContext;
     }
 
+    public IQueryable<MatchDetail> GetQueryable()
+    {
+        return _dbContext.MatchDetails;
+    }
+
     public async Task<List<MatchDetailsPlayer>> GetByLeagueAsync(League? League)
     {
-        _logger.LogInformation($"Getting Match Details Players for League ID: {League?.Id ?? 0}");
+        _logger.LogDebug($"Getting Match Details Players for League ID: {League?.Id ?? 0}");
 
         var matchDetailPlayerLeagueQuery = QueryLeagueMatchDetails(League?.Id)
             .SelectMany(md => md.Players)
@@ -35,7 +40,7 @@ public class MatchDetailRepository : IMatchDetailRepository
 
     public async Task<List<MatchDetail>> GetByFantasyLeagueAsync(FantasyLeague FantasyLeague)
     {
-        _logger.LogInformation($"Getting Match Details for Fantasy League {FantasyLeague.Id}");
+        _logger.LogDebug($"Getting Match Details for Fantasy League {FantasyLeague.Id}");
 
         var leagueMatchDetailsQuery = QueryFantasyLeagueMatchDetails(FantasyLeague.Id)
             .Include(md => md.PicksBans);
@@ -45,7 +50,7 @@ public class MatchDetailRepository : IMatchDetailRepository
 
     public async Task<MatchDetail?> GetByIdAsync(long MatchId)
     {
-        _logger.LogInformation($"Getting Match Detail for Match: {MatchId}");
+        _logger.LogDebug($"Getting Match Detail for Match: {MatchId}");
 
         var matchDetailsQuery = _dbContext.MatchDetails
                 .Where(md => md.MatchId == MatchId)
@@ -57,7 +62,7 @@ public class MatchDetailRepository : IMatchDetailRepository
         return await matchDetailsQuery.FirstOrDefaultAsync();
     }
 
-    public async Task<IEnumerable<MatchDetail>> GetAllAsync()
+    public async Task<List<MatchDetail>> GetAllAsync()
     {
         _logger.LogInformation($"Get Match Details");
 

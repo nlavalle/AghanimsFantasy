@@ -4,8 +4,8 @@ using System.Diagnostics;
 using DataAccessLibrary.Data;
 using DataAccessLibrary.Models.GameCoordinator;
 using DataAccessLibrary.Models.ProMetadata;
-using DataAccessLibrary.Models.WebApi;
 using ICSharpCode.SharpZipLib.BZip2;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ProtoBuf;
@@ -17,6 +17,7 @@ internal class MatchMetadataContext : DotaOperationContext
     private readonly HttpClient _httpClient;
     private readonly GameCoordinatorRepository _gameCoordinatorRepository;
     private readonly IGcDotaMatchRepository _gcDotaMatchRepository;
+    private readonly IGcMatchMetadataRepository _gcMatchMetadataRepository;
     private readonly IMatchHistoryRepository _matchHistoryRepository;
     private readonly IProMetadataRepository _proMetadataRepository;
 
@@ -33,6 +34,7 @@ internal class MatchMetadataContext : DotaOperationContext
             HttpClient httpClient,
             GameCoordinatorRepository gameCoordinatorRepository,
             IGcDotaMatchRepository gcDotaMatchRepository,
+            IGcMatchMetadataRepository gcMatchMetadataRepository,
             IMatchHistoryRepository matchHistoryRepository,
             IProMetadataRepository proMetadataRepository,
             IServiceScope scope,
@@ -43,6 +45,7 @@ internal class MatchMetadataContext : DotaOperationContext
         _httpClient = httpClient;
         _gameCoordinatorRepository = gameCoordinatorRepository;
         _gcDotaMatchRepository = gcDotaMatchRepository;
+        _gcMatchMetadataRepository = gcMatchMetadataRepository;
         _matchHistoryRepository = matchHistoryRepository;
         _proMetadataRepository = proMetadataRepository;
     }
@@ -54,7 +57,7 @@ internal class MatchMetadataContext : DotaOperationContext
             // Find all the match histories without match detail rows and add tasks to fetch them all
             // Take 50 at a time since this runs every 5 minutes, no reason to blast it all at once
             // Only look at active leagues otherwise this will look for old missing matches forever
-            List<CMsgDOTAMatch> matchesWithoutDetails = await _gcDotaMatchRepository.GetNotInGcMetadata(50);
+            List<CMsgDOTAMatch> matchesWithoutDetails = await GetMatchesWithoutMatchDetails(50);
 
             if (matchesWithoutDetails.Count() > 0)
             {
@@ -155,6 +158,21 @@ internal class MatchMetadataContext : DotaOperationContext
         int totalMatches = _totalMatches;
         int completeLeagues = totalMatches - _remainingMatches;
         return $"{completeLeagues} of {totalMatches} missing match details fetched";
+    }
+
+    private async Task<List<CMsgDOTAMatch>> GetMatchesWithoutMatchDetails(int takeAmount)
+    {
+        var activeLeagues = await _proMetadataRepository.GetLeaguesAsync(true);
+
+        return await _gcDotaMatchRepository.GetQueryable()
+            .Where(match => activeLeagues
+                    .Select(league => league.Id)
+                    .Contains((int)match.leagueid)
+            )
+            .Where(gcdm => gcdm.replay_state == CMsgDOTAMatch.ReplayState.REPLAY_AVAILABLE &&
+                !_gcMatchMetadataRepository.GetQueryable().Any(gcmm => (ulong)gcmm.MatchId == gcdm.match_id))
+            .Take(50)
+            .ToListAsync();
     }
 
     private GcMatchMetadata CastGcToModel(CDOTAMatchMetadata matchMetadata, int leagueId)
