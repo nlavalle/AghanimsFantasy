@@ -1,3 +1,5 @@
+namespace DataAccessLibrary.Data.Facades;
+
 using DataAccessLibrary.Data;
 using DataAccessLibrary.Models;
 using DataAccessLibrary.Models.Discord;
@@ -6,33 +8,31 @@ using DataAccessLibrary.Models.ProMetadata;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace DataAccessLibrary.Facades;
-
 public class FantasyDraftFacade
 {
     private readonly ILogger<FantasyDraftFacade> _logger;
-    private readonly IProMetadataRepository _proMetadataRepository;
-    private readonly IDiscordUserRepository _discordUserRepository;
-    private readonly IFantasyLeagueRepository _fantasyLeagueRepository;
-    private readonly IFantasyDraftRepository _fantasyDraftRepository;
-    private readonly IFantasyViewsRepository _fantasyViewsRepository;
+    private readonly AghanimsFantasyContext _dbContext;
 
     public FantasyDraftFacade(
         ILogger<FantasyDraftFacade> logger,
-        IProMetadataRepository proMetadataRepository,
-        IDiscordUserRepository discordUserRepository,
-        IFantasyLeagueRepository fantasyLeagueRepository,
-        IFantasyDraftRepository fantasyDraftRepository,
-        IFantasyViewsRepository fantasyViewsRepository
+        AghanimsFantasyContext dbContext
     )
     {
         _logger = logger;
-        _proMetadataRepository = proMetadataRepository;
-        _discordUserRepository = discordUserRepository;
-        _fantasyLeagueRepository = fantasyLeagueRepository;
-        _fantasyDraftRepository = fantasyDraftRepository;
-        _fantasyViewsRepository = fantasyViewsRepository;
+        _dbContext = dbContext;
     }
+
+    public async Task<FantasyDraft?> GetByUserFantasyLeague(FantasyLeague fantasyLeague, DiscordUser user)
+    {
+        _logger.LogDebug($"Fetching Fantasy League {fantasyLeague.Name} Draft for User {user.Username}");
+
+        var userFantasyDraftQuery = _dbContext.FantasyDrafts
+                    .Include(fd => fd.DraftPickPlayers)
+                    .Where(fd => fd.FantasyLeagueId == fantasyLeague.Id && fd.DiscordAccountId == user.Id);
+
+        return await userFantasyDraftQuery.FirstOrDefaultAsync();
+    }
+
     public async Task<FantasyDraft> AddPlayerPickAsync(FantasyDraft fantasyDraft, FantasyPlayer fantasyPlayerPick)
     {
         FantasyDraftPlayer? updateFantasyDraftPlayer = fantasyDraft.DraftPickPlayers
@@ -59,7 +59,8 @@ public class FantasyDraftFacade
         fantasyDraft.DraftPickPlayers.Add(updateFantasyDraftPlayer);
 
         fantasyDraft.DraftLastUpdated = DateTime.UtcNow;
-        await _fantasyDraftRepository.UpdateAsync(fantasyDraft);
+        _dbContext.Entry(fantasyDraft).State = EntityState.Modified;
+        await _dbContext.SaveChangesAsync();
 
         return fantasyDraft;
     }
@@ -78,7 +79,8 @@ public class FantasyDraftFacade
         }
 
         fantasyDraft.DraftLastUpdated = DateTime.UtcNow;
-        await _fantasyDraftRepository.UpdateAsync(fantasyDraft);
+        _dbContext.Entry(fantasyDraft).State = EntityState.Modified;
+        await _dbContext.SaveChangesAsync();
 
         return fantasyDraft;
     }
@@ -86,7 +88,8 @@ public class FantasyDraftFacade
     public async Task ClearPicksAsync(FantasyDraft fantasyDraft)
     {
         fantasyDraft.DraftPickPlayers.Clear();
-        await _fantasyDraftRepository.UpdateAsync(fantasyDraft);
+        _dbContext.Entry(fantasyDraft).State = EntityState.Modified;
+        await _dbContext.SaveChangesAsync();
 
         return;
     }
@@ -95,7 +98,7 @@ public class FantasyDraftFacade
     {
         _logger.LogInformation($"Fetching Fantasy Points for LeagueID: {fantasyDraft.FantasyLeagueId}");
 
-        var fantasyLeague = fantasyDraft.FantasyLeague ?? await _fantasyLeagueRepository.GetByIdAsync(fantasyDraft.FantasyLeagueId) ?? throw new ArgumentException("Fantasy Draft has invalid fantasy league ID");
+        var fantasyLeague = fantasyDraft.FantasyLeague ?? await _dbContext.FantasyLeagues.FindAsync(fantasyDraft.FantasyLeagueId) ?? throw new ArgumentException("Fantasy Draft has invalid fantasy league ID");
 
         var playerTotals = await FantasyPlayerPointTotalsByFantasyLeagueAsync(fantasyLeague);
         Team? teamDiscordIdLookup = null;
@@ -103,8 +106,8 @@ public class FantasyDraftFacade
 
         if (fantasyDraft.DiscordAccountId.HasValue)
         {
-            teamDiscordIdLookup = await _proMetadataRepository.GetTeamAsync(fantasyDraft.DiscordAccountId.Value);
-            discordUserLookup = await _discordUserRepository.GetByIdAsync(fantasyDraft.DiscordAccountId.Value);
+            teamDiscordIdLookup = await _dbContext.Teams.FindAsync(fantasyDraft.DiscordAccountId.Value);
+            discordUserLookup = await _dbContext.DiscordUsers.FindAsync(fantasyDraft.DiscordAccountId.Value);
         }
 
         var fantasyDraftPoints = new FantasyDraftPointTotals
@@ -123,10 +126,10 @@ public class FantasyDraftFacade
 
         var playerTotals = await FantasyPlayerPointTotalsByFantasyLeagueAsync(FantasyLeague);
 
-        var allTeams = await _proMetadataRepository.GetTeamsAsync();
-        var discordUsers = await _discordUserRepository.GetAllAsync();
+        var allTeams = await _dbContext.Teams.ToListAsync();
+        var discordUsers = await _dbContext.DiscordUsers.ToListAsync();
 
-        var fantasyDraftPointsByLeague = await _fantasyDraftRepository.GetQueryable()
+        var fantasyDraftPointsByLeague = await _dbContext.FantasyDrafts
             .Where(fl => fl.FantasyLeagueId == FantasyLeague.Id)
             .ToListAsync();
 
@@ -147,7 +150,7 @@ public class FantasyDraftFacade
     {
         _logger.LogInformation($"Fetching Fantasy Point Totals for Fantasy League Id: {FantasyLeague.Id}");
 
-        var fantasyPlayerTotalsQuery = _fantasyViewsRepository.GetPlayerPointTotalsQueryable()
+        var fantasyPlayerTotalsQuery = _dbContext.FantasyPlayerPointTotalsView
             .Where(fppt => fppt.FantasyLeagueId == FantasyLeague.Id)
             .OrderByDescending(fppt => (double)fppt.TotalMatchFantasyPoints); // double casted needed for Sqlite: https://learn.microsoft.com/en-us/ef/core/providers/sqlite/limitations#query-limitations
 
@@ -160,7 +163,7 @@ public class FantasyDraftFacade
     {
         _logger.LogInformation($"Fetching Fantasy Points for Fantasy League Id: {FantasyDraft.FantasyLeagueId}");
 
-        var fantasyPlayerPointsByLeagueQuery = _fantasyViewsRepository.GetPlayerPointsQueryable()
+        var fantasyPlayerPointsByLeagueQuery = _dbContext.FantasyPlayerPointsView
             .Where(fpp => fpp.FantasyLeagueId == FantasyDraft.FantasyLeagueId)
             .Where(fpp => FantasyDraft.DraftPickPlayers.Any(dpp => dpp.FantasyPlayer == fpp.FantasyPlayer))
             .Where(fpp => fpp.FantasyMatchPlayer != null)

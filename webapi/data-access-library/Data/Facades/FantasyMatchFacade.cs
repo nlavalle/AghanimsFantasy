@@ -1,57 +1,35 @@
+namespace DataAccessLibrary.Data.Facades;
+
 using DataAccessLibrary.Data;
-using DataAccessLibrary.Models;
 using DataAccessLibrary.Models.Fantasy;
 using DataAccessLibrary.Models.WebApi;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SteamKit2.GC.Dota.Internal;
 
-namespace DataAccessLibrary.Facades;
-
 public class FantasyMatchFacade
 {
     private readonly ILogger<FantasyMatchFacade> _logger;
-    private readonly IProMetadataRepository _proMetadataRepository;
-    private readonly IFantasyViewsRepository _fantasyViewsRepository;
-    private readonly IFantasyMatchPlayerRepository _fantasyMatchPlayerRepository;
-    private readonly IFantasyMatchRepository _fantasyMatchRepository;
-    private readonly IGcDotaMatchRepository _gcDotaMatchRepository;
-    private readonly IGcMatchMetadataRepository _gcMatchMetadataRepository;
-    private readonly IMatchDetailRepository _matchDetailRepository;
-    private readonly IMatchHistoryRepository _matchHistoryRepository;
+    private readonly AghanimsFantasyContext _dbContext;
 
     public FantasyMatchFacade(
         ILogger<FantasyMatchFacade> logger,
-        IProMetadataRepository proMetadataRepository,
-        IFantasyViewsRepository fantasyViewsRepository,
-        IFantasyMatchPlayerRepository fantasyMatchPlayerRepository,
-        IFantasyMatchRepository fantasyMatchRepository,
-        IGcDotaMatchRepository gcDotaMatchRepository,
-        IGcMatchMetadataRepository gcMatchMetadataRepository,
-        IMatchDetailRepository matchDetailRepository,
-        IMatchHistoryRepository matchHistoryRepository
+        AghanimsFantasyContext dbContext
     )
     {
         _logger = logger;
-        _proMetadataRepository = proMetadataRepository;
-        _fantasyViewsRepository = fantasyViewsRepository;
-        _fantasyMatchPlayerRepository = fantasyMatchPlayerRepository;
-        _fantasyMatchRepository = fantasyMatchRepository;
-        _gcDotaMatchRepository = gcDotaMatchRepository;
-        _gcMatchMetadataRepository = gcMatchMetadataRepository;
-        _matchDetailRepository = matchDetailRepository;
-        _matchHistoryRepository = matchHistoryRepository;
+        _dbContext = dbContext;
     }
 
     public async Task<List<(CMsgDOTAMatch, CMsgDOTAMatch.Player)>> GetNotInFantasyMatchPlayers(int takeAmount)
     {
         _logger.LogInformation($"Getting new GcDotaMatches not loaded into Fantasy Match Players");
 
-        var newGcDotaMatchQuery = _gcDotaMatchRepository.GetQueryable()
+        var newGcDotaMatchQuery = _dbContext.GcDotaMatches
                 .SelectMany(match => match.players,
                 (left, right) => new { Match = left, MatchPlayer = right })
                 .Where(gcmp =>
-                    !_fantasyMatchPlayerRepository.GetQueryable().Any(fmp => fmp.FantasyMatchId == (long)gcmp.Match.match_id && fmp.Account != null && fmp.Account.Id == gcmp.MatchPlayer.account_id)
+                    !_dbContext.FantasyMatchPlayers.Any(fmp => fmp.FantasyMatchId == (long)gcmp.Match.match_id && fmp.Account != null && fmp.Account.Id == gcmp.MatchPlayer.account_id)
                     && (gcmp.Match.match_outcome == EMatchOutcome.k_EMatchOutcome_RadVictory || gcmp.Match.match_outcome == EMatchOutcome.k_EMatchOutcome_DireVictory) // Filter out cancelled games
                 )
                 .Take(takeAmount);
@@ -67,10 +45,10 @@ public class FantasyMatchFacade
     {
         _logger.LogInformation($"Getting Fantasy Match Players not GC Match Detail Parsed");
 
-        var matchDetailsToParse = _fantasyMatchPlayerRepository.GetQueryable()
+        var matchDetailsToParse = _dbContext.FantasyMatchPlayers
                 .Where(
                     fm => !fm.GcMetadataPlayerParsed &&
-                    _gcMatchMetadataRepository.GetQueryable().Any(md => md.MatchId == fm.FantasyMatchId))
+                    _dbContext.GcMatchMetadata.Any(md => md.MatchId == fm.FantasyMatchId))
                 .Take(takeAmount);
 
         _logger.LogDebug($"GetFantasyMatchPlayersNotGcDetailParsed SQL Query: {matchDetailsToParse.ToQueryString()}");
@@ -82,9 +60,9 @@ public class FantasyMatchFacade
     {
         _logger.LogInformation($"Getting Fantasy Matches not GC Match Detail Parsed");
 
-        var matchDetailsToParse = _fantasyMatchRepository.GetQueryable()
+        var matchDetailsToParse = _dbContext.FantasyMatches
                 .Where(
-                    fm => !fm.MatchDetailParsed && _gcDotaMatchRepository.GetQueryable().Any(md => (long)md.match_id == fm.MatchId))
+                    fm => !fm.MatchDetailParsed && _dbContext.GcDotaMatches.Any(md => (long)md.match_id == fm.MatchId))
                 .Take(takeAmount);
 
         _logger.LogDebug($"GetFantasyMatchesNotGcDetailParsed SQL Query: {matchDetailsToParse.ToQueryString()}");
@@ -96,9 +74,9 @@ public class FantasyMatchFacade
     {
         _logger.LogInformation($"Getting Fantasy Matches not Match Detail Parsed");
 
-        var matchDetailsToParse = _fantasyMatchRepository.GetQueryable()
+        var matchDetailsToParse = _dbContext.FantasyMatches
                 .Where(
-                    fm => !fm.MatchDetailParsed && _matchDetailRepository.GetQueryable().Any(md => md.MatchId == fm.MatchId))
+                    fm => !fm.MatchDetailParsed && _dbContext.MatchDetails.Any(md => md.MatchId == fm.MatchId))
                 .Take(takeAmount);
 
         _logger.LogDebug($"GetFantasyMatchesNotDetailParsed SQL Query: {matchDetailsToParse.ToQueryString()}");
@@ -111,10 +89,10 @@ public class FantasyMatchFacade
     {
         _logger.LogInformation($"Getting new Match Histories not loaded into Fantasy Match");
 
-        var newMatchHistoryQuery = _matchHistoryRepository.GetQueryable()
+        var newMatchHistoryQuery = _dbContext.MatchHistory
                 .Include(mh => mh.League)
                 .Where(
-                    mh => !_fantasyMatchRepository.GetQueryable().Any(fm => fm.MatchId == mh.MatchId))
+                    mh => !_dbContext.FantasyMatches.Any(fm => fm.MatchId == mh.MatchId))
                 .OrderBy(mh => mh.MatchId)
                 .Take(takeAmount);
 

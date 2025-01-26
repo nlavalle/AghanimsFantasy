@@ -1,39 +1,35 @@
 using DataAccessLibrary.Data;
+using DataAccessLibrary.Data.Facades;
 using DataAccessLibrary.Models;
 using DataAccessLibrary.Models.Discord;
 using DataAccessLibrary.Models.Fantasy;
+using Microsoft.EntityFrameworkCore;
 
 namespace csharp_ef_webapi.Services;
 public class FantasyService
 {
     private readonly ILogger<FantasyService> _logger;
-    private readonly IFantasyLeagueRepository _fantasyLeagueRepository;
-    private readonly IFantasyLeagueWeightRepository _fantasyLeagueWeightRepository;
-    private readonly IFantasyDraftRepository _fantasyDraftRepository;
-    private readonly IFantasyPlayerRepository _fantasyPlayerRepository;
-    private readonly IFantasyRepository _fantasyRepository;
+    private readonly AghanimsFantasyContext _dbContext;
+    private readonly FantasyDraftFacade _fantasyDraftFacade;
+    private readonly FantasyPointsFacade _fantasyPointsFacade;
 
     public FantasyService(
         ILogger<FantasyService> logger,
-        IFantasyLeagueRepository fantasyLeagueRepository,
-        IFantasyLeagueWeightRepository fantasyLeagueWeightRepository,
-        IFantasyDraftRepository fantasyDraftRepository,
-        IFantasyPlayerRepository fantasyPlayerRepository,
-        IFantasyRepository fantasyRepository
+        AghanimsFantasyContext dbContext,
+        FantasyDraftFacade fantasyDraftFacade,
+        FantasyPointsFacade fantasyPointsFacade
     )
     {
         _logger = logger;
-        _fantasyLeagueRepository = fantasyLeagueRepository;
-        _fantasyLeagueWeightRepository = fantasyLeagueWeightRepository;
-        _fantasyDraftRepository = fantasyDraftRepository;
-        _fantasyPlayerRepository = fantasyPlayerRepository;
-        _fantasyRepository = fantasyRepository;
+        _dbContext = dbContext;
+        _fantasyDraftFacade = fantasyDraftFacade;
+        _fantasyPointsFacade = fantasyPointsFacade;
     }
 
     public async Task<FantasyPlayer?> GetFantasyPlayerAsync(DiscordUser? siteUser, int fantasyPlayerId)
     {
-        IEnumerable<FantasyLeague> fantasyLeagues = await _fantasyLeagueRepository.GetAccessibleFantasyLeaguesAsync(siteUser);
-        FantasyPlayer? fantasyPlayer = await _fantasyPlayerRepository.GetByIdAsync(fantasyPlayerId);
+        IEnumerable<FantasyLeague> fantasyLeagues = await GetAccessibleFantasyLeaguesAsync(siteUser);
+        FantasyPlayer? fantasyPlayer = await _dbContext.FantasyPlayers.FindAsync(fantasyPlayerId);
 
         if (fantasyPlayer != null && !fantasyLeagues.Contains(fantasyPlayer.FantasyLeague))
         {
@@ -46,8 +42,8 @@ public class FantasyService
 
     public async Task<FantasyLeagueWeight?> GetFantasyLeagueWeightAsync(DiscordUser? siteUser, int fantasyLeagueWeightId)
     {
-        IEnumerable<FantasyLeague> fantasyLeagues = await _fantasyLeagueRepository.GetAccessibleFantasyLeaguesAsync(siteUser);
-        FantasyLeagueWeight? fantasyLeagueWeight = await _fantasyLeagueWeightRepository.GetByIdAsync(fantasyLeagueWeightId);
+        IEnumerable<FantasyLeague> fantasyLeagues = await GetAccessibleFantasyLeaguesAsync(siteUser);
+        FantasyLeagueWeight? fantasyLeagueWeight = await _dbContext.FantasyLeagueWeights.FindAsync(fantasyLeagueWeightId);
 
         if (fantasyLeagueWeight != null && !fantasyLeagues.Contains(fantasyLeagueWeight.FantasyLeague))
         {
@@ -60,15 +56,16 @@ public class FantasyService
 
     public async Task<List<FantasyLeagueWeight>> GetFantasyLeagueWeightsAsync(DiscordUser? siteUser)
     {
-        IEnumerable<FantasyLeague> fantasyLeagues = await _fantasyLeagueRepository.GetAccessibleFantasyLeaguesAsync(siteUser);
-        IEnumerable<FantasyLeagueWeight> fantasyLeagueWeights = await _fantasyLeagueWeightRepository.GetAllAsync();
+        IEnumerable<FantasyLeague> fantasyLeagues = await GetAccessibleFantasyLeaguesAsync(siteUser);
+        IEnumerable<FantasyLeagueWeight> fantasyLeagueWeights = await _dbContext.FantasyLeagueWeights.ToListAsync();
 
         return fantasyLeagueWeights.Where(flw => fantasyLeagues.Contains(flw.FantasyLeague)).ToList();
     }
 
     public async Task<FantasyLeague> GetAccessibleFantasyLeagueAsync(DiscordUser? siteUser, int fantasyLeagueId)
     {
-        FantasyLeague? fantasyLeague = await _fantasyLeagueRepository.GetAccessibleFantasyLeagueAsync(fantasyLeagueId, siteUser);
+        List<FantasyLeague> fantasyLeagues = await GetAccessibleFantasyLeaguesAsync(siteUser);
+        FantasyLeague? fantasyLeague = fantasyLeagues.FirstOrDefault(fl => fl.Id == fantasyLeagueId);
         if (fantasyLeague == null)
         {
             throw new ArgumentException("Fantasy League Id not found");
@@ -77,45 +74,59 @@ public class FantasyService
         return fantasyLeague;
     }
 
-    public async Task<IEnumerable<FantasyLeague>> GetAccessibleFantasyLeaguesAsync(DiscordUser? siteUser)
+    public async Task<List<FantasyLeague>> GetAccessibleFantasyLeaguesAsync(DiscordUser? siteUser)
     {
-        return await _fantasyLeagueRepository.GetAccessibleFantasyLeaguesAsync(siteUser);
+        // Everyone has access to all public leagues
+        var fantasyLeagues = await _dbContext.FantasyLeagues.Where(fl => !fl.IsPrivate).ToListAsync();
+
+        if (siteUser != null)
+        {
+            // Get Private Fantasy Leagues user is a part of and append it to the list
+            var privateLeagues = await _dbContext.FantasyPrivateLeaguePlayers
+                .Where(pfp => pfp.DiscordUserId == siteUser.Id && pfp.FantasyLeague != null)
+                .Select(pfp => pfp.FantasyLeague)
+                .Distinct()
+                .ToListAsync();
+
+            fantasyLeagues.AddRange(privateLeagues!);
+        }
+
+        return fantasyLeagues;
     }
 
     public async Task<IEnumerable<FantasyPlayer>> GetFantasyLeaguePlayersAsync(DiscordUser? siteUser, int fantasyLeagueId)
     {
-        FantasyLeague? fantasyLeague = await _fantasyLeagueRepository.GetAccessibleFantasyLeagueAsync(fantasyLeagueId, siteUser);
+        FantasyLeague? fantasyLeague = await GetAccessibleFantasyLeagueAsync(siteUser, fantasyLeagueId);
         if (fantasyLeague == null)
         {
             throw new ArgumentException("Fantasy League Id not found");
         }
 
-        return await _fantasyPlayerRepository.GetFantasyLeaguePlayersAsync(fantasyLeague);
+        return await GetFantasyPlayerByFantasyLeagueAsync(fantasyLeague);
     }
 
     public async Task<FantasyDraft?> GetFantasyDraft(DiscordUser siteUser, int fantasyLeagueId)
     {
-        FantasyLeague? fantasyLeague = await _fantasyLeagueRepository.GetAccessibleFantasyLeagueAsync(fantasyLeagueId, siteUser);
+        FantasyLeague? fantasyLeague = await GetAccessibleFantasyLeagueAsync(siteUser, fantasyLeagueId);
 
         if (fantasyLeague == null)
         {
             throw new ArgumentException("Fantasy League Id not found.");
         }
 
-        return await _fantasyDraftRepository.GetByUserFantasyLeague(fantasyLeague, siteUser);
+        return await _fantasyDraftFacade.GetByUserFantasyLeague(fantasyLeague, siteUser);
     }
 
     public async Task<FantasyDraft> UpdateFantasyDraft(DiscordUser siteUser, FantasyDraft fantasyDraft)
     {
-        FantasyLeague? fantasyLeague = await _fantasyLeagueRepository.GetByIdAsync(fantasyDraft.FantasyLeagueId);
+        FantasyLeague? fantasyLeague = await _dbContext.FantasyLeagues.FindAsync(fantasyDraft.FantasyLeagueId);
         if (fantasyLeague == null)
         {
             throw new ArgumentException("Draft created for invalid Fantasy League Id");
         }
 
-        FantasyDraft? existingUserDraft = await _fantasyDraftRepository.GetByUserFantasyLeague(fantasyLeague, siteUser);
-        var draftLockedDate = await _fantasyLeagueRepository.GetLeagueLockedDateAsync(fantasyLeague.Id);
-        if (DateTime.UtcNow > draftLockedDate)
+        FantasyDraft? existingUserDraft = await _fantasyDraftFacade.GetByUserFantasyLeague(fantasyLeague, siteUser);
+        if (DateTime.UtcNow > DateTime.UnixEpoch.AddSeconds(fantasyLeague.FantasyDraftLocked))
         {
             // TODO: Set this up so that a user can draft late, but then the points only count starting from that time
             // If a user hasn't drafted yet let them add it in late, if they already have a draft though return a bad request cannot update
@@ -123,7 +134,7 @@ public class FantasyService
         }
 
         // Ensure player has posted a draft that is one of each team position, if there's 2 of the same position then reject it as a bad request
-        var fantasyPlayers = await _fantasyPlayerRepository.GetFantasyLeaguePlayersAsync(fantasyLeague);
+        var fantasyPlayers = await GetFantasyPlayerByFantasyLeagueAsync(fantasyLeague);
 
         // Populate fantasy players by ID for draft picks
         foreach (FantasyDraftPlayer pick in fantasyDraft.DraftPickPlayers)
@@ -134,12 +145,13 @@ public class FantasyService
         if (fantasyPlayers.Where(fp => fantasyDraft.DraftPickPlayers.Where(dpp => dpp.FantasyPlayer != null).Any(dpp => dpp.FantasyPlayer!.Id == fp.Id)).GroupBy(fp => fp.TeamPosition).Where(grp => grp.Count() > 1).Count() > 0)
         {
             throw new ArgumentException("Can only draft one of each team position");
-        };
+        }
+        ;
 
         if (existingUserDraft != null)
         {
             // To handle partial drafts we're going to always clear the current draft then add the picks
-            await _fantasyDraftRepository.ClearPicksAsync(existingUserDraft);
+            await _fantasyDraftFacade.ClearPicksAsync(existingUserDraft);
         }
         else
         {
@@ -150,7 +162,8 @@ public class FantasyService
                 DraftCreated = DateTime.UtcNow,
                 DraftPickPlayers = []
             };
-            await _fantasyDraftRepository.AddAsync(existingUserDraft);
+            await _dbContext.FantasyDrafts.AddAsync(existingUserDraft);
+            await _dbContext.SaveChangesAsync();
         }
 
         // Fantasy Draft may be incomplete, so go through and add the IDs passed
@@ -158,7 +171,7 @@ public class FantasyService
         {
             if (fantasyDraft.DraftPickPlayers[i].FantasyPlayer != null)
             {
-                existingUserDraft = await _fantasyDraftRepository.AddPlayerPickAsync(existingUserDraft, fantasyDraft.DraftPickPlayers[i].FantasyPlayer!);
+                existingUserDraft = await _fantasyDraftFacade.AddPlayerPickAsync(existingUserDraft, fantasyDraft.DraftPickPlayers[i].FantasyPlayer!);
             }
         }
 
@@ -168,15 +181,16 @@ public class FantasyService
 
     public async Task<IEnumerable<FantasyDraftPointTotals>> GetFantasyDraftPointTotals(DiscordUser siteUser, int leagueId)
     {
-        IEnumerable<FantasyLeague> fantasyLeagues = await _fantasyLeagueRepository.GetAccessibleFantasyLeaguesByLeagueIdAsync(siteUser, leagueId);
+        IEnumerable<FantasyLeague> fantasyLeagues = await GetAccessibleFantasyLeaguesAsync(siteUser);
+        fantasyLeagues = fantasyLeagues.Where(fl => fl.LeagueId == leagueId);
 
         List<FantasyDraftPointTotals> fantasyDraftPointsTotals = new List<FantasyDraftPointTotals>();
         foreach (FantasyLeague fantasyLeague in fantasyLeagues)
         {
-            FantasyDraft? fantasyDraft = await _fantasyDraftRepository.GetByUserFantasyLeague(fantasyLeague, siteUser);
+            FantasyDraft? fantasyDraft = await _fantasyDraftFacade.GetByUserFantasyLeague(fantasyLeague, siteUser);
             if (fantasyDraft != null)
             {
-                FantasyDraftPointTotals? fantasyPointTotal = await _fantasyDraftRepository.DraftPointTotalAsync(fantasyDraft);
+                FantasyDraftPointTotals? fantasyPointTotal = await _fantasyDraftFacade.DraftPointTotalAsync(fantasyDraft);
                 if (fantasyPointTotal != null)
                 {
                     fantasyDraftPointsTotals.Add(fantasyPointTotal);
@@ -189,59 +203,59 @@ public class FantasyService
 
     public async Task<IEnumerable<FantasyPlayerPoints>> GetFantasyPlayerPoints(DiscordUser siteUser, int fantasyLeagueId, int limit)
     {
-        FantasyLeague? fantasyLeague = await _fantasyLeagueRepository.GetAccessibleFantasyLeagueAsync(fantasyLeagueId, siteUser);
+        FantasyLeague? fantasyLeague = await GetAccessibleFantasyLeagueAsync(siteUser, fantasyLeagueId);
 
         if (fantasyLeague == null)
         {
             throw new ArgumentException("Fantasy League Id not found.");
         }
 
-        FantasyDraft? fantasyDraft = await _fantasyDraftRepository.GetByUserFantasyLeague(fantasyLeague, siteUser);
+        FantasyDraft? fantasyDraft = await _fantasyDraftFacade.GetByUserFantasyLeague(fantasyLeague, siteUser);
 
         if (fantasyDraft == null)
         {
             throw new ArgumentException("Fantasy Draft not found.");
         }
 
-        var fantasyPlayerPointTotals = await _fantasyDraftRepository.FantasyPlayerPointsAsync(fantasyDraft, limit);
+        var fantasyPlayerPointTotals = await _fantasyDraftFacade.FantasyPlayerPointsAsync(fantasyDraft, limit);
 
         return fantasyPlayerPointTotals;
     }
 
     public async Task<IEnumerable<FantasyPlayerPointTotals>> GetFantasyLeaguePlayerPointTotalsAsync(DiscordUser? siteUser, int fantasyLeagueId)
     {
-        FantasyLeague? fantasyLeague = await _fantasyLeagueRepository.GetAccessibleFantasyLeagueAsync(fantasyLeagueId, siteUser);
+        FantasyLeague? fantasyLeague = await GetAccessibleFantasyLeagueAsync(siteUser, fantasyLeagueId);
 
         if (fantasyLeague == null)
         {
             throw new ArgumentException("Fantasy League Id not found");
         }
 
-        return await _fantasyDraftRepository.FantasyPlayerPointTotalsByFantasyLeagueAsync(fantasyLeague);
+        return await _fantasyDraftFacade.FantasyPlayerPointTotalsByFantasyLeagueAsync(fantasyLeague);
     }
 
     public async Task<IEnumerable<FantasyPlayerPoints>> GetFantasyLeaguePlayerPointsByMatchAsync(DiscordUser? siteUser, int fantasyLeagueId, int limit)
     {
-        FantasyLeague? fantasyLeague = await _fantasyLeagueRepository.GetAccessibleFantasyLeagueAsync(fantasyLeagueId, siteUser);
+        FantasyLeague? fantasyLeague = await GetAccessibleFantasyLeagueAsync(siteUser, fantasyLeagueId);
 
         if (fantasyLeague == null)
         {
             throw new ArgumentException("Fantasy League Id not found");
         }
 
-        return await _fantasyRepository.FantasyPlayerPointsByFantasyLeagueAsync(fantasyLeague.Id, limit);
+        return await _fantasyPointsFacade.FantasyPlayerPointsByFantasyLeagueAsync(fantasyLeague.Id, limit);
     }
 
     public async Task<IEnumerable<MetadataSummary>> GetMetadataSummariesByFantasyLeagueAsync(DiscordUser? siteUser, int fantasyLeagueId)
     {
-        FantasyLeague? fantasyLeague = await _fantasyLeagueRepository.GetAccessibleFantasyLeagueAsync(fantasyLeagueId, siteUser);
+        FantasyLeague? fantasyLeague = await GetAccessibleFantasyLeagueAsync(siteUser, fantasyLeagueId);
 
         if (fantasyLeague == null)
         {
             throw new ArgumentException("Fantasy League Id not found");
         }
 
-        List<MetadataSummary>? matchSummary = await _fantasyRepository.MetadataSummariesByFantasyLeagueAsync(fantasyLeague);
+        List<MetadataSummary>? matchSummary = await _fantasyPointsFacade.MetadataSummariesByFantasyLeagueAsync(fantasyLeague);
 
         if (matchSummary == null)
         {
@@ -253,21 +267,21 @@ public class FantasyService
 
     public async Task<IEnumerable<FantasyDraftPointTotals>?> GetTop10FantasyDraftsAsync(DiscordUser siteUser, int fantasyLeagueId)
     {
-        FantasyLeague? fantasyLeague = await _fantasyLeagueRepository.GetAccessibleFantasyLeagueAsync(fantasyLeagueId, siteUser);
+        FantasyLeague? fantasyLeague = await GetAccessibleFantasyLeagueAsync(siteUser, fantasyLeagueId);
 
         if (fantasyLeague == null)
         {
             throw new ArgumentException("Fantasy League Id not found");
         }
 
-        List<FantasyDraftPointTotals> fantasyPoints = await _fantasyDraftRepository.AllDraftPointTotalsByFantasyLeagueAsync(fantasyLeague);
+        List<FantasyDraftPointTotals> fantasyPoints = await _fantasyDraftFacade.AllDraftPointTotalsByFantasyLeagueAsync(fantasyLeague);
         if (fantasyPoints.Count() == 0)
         {
             // League doesn't have fantasy players/points yet
             return null;
         }
 
-        List<FantasyDraftPointTotals> top10Players = fantasyPoints.Where(fp => !fp.IsTeam).OrderByDescending(fp => fp.DraftTotalFantasyPoints).Take(10).ToList();
+        List<FantasyDraftPointTotals> top10Players = fantasyPoints.OrderByDescending(fp => fp.DraftTotalFantasyPoints).Take(10).ToList();
 
         // We want the user included even if they're not top 10
         if (!top10Players.Any(tp => tp.FantasyDraft.DiscordAccountId == siteUser.Id))
@@ -279,7 +293,7 @@ public class FantasyService
             }
         }
 
-        List<FantasyDraftPointTotals> teamsScores = fantasyPoints.Where(fp => fp.IsTeam).OrderByDescending(fp => fp.DraftTotalFantasyPoints).ToList();
+        List<FantasyDraftPointTotals> teamsScores = fantasyPoints.OrderByDescending(fp => fp.DraftTotalFantasyPoints).ToList();
 
         IEnumerable<FantasyDraftPointTotals> unionedLeaderboard = top10Players.Union(teamsScores);
 
@@ -297,8 +311,6 @@ public class FantasyService
                     DraftPickPlayers = lb.FantasyDraft.DraftPickPlayers
                 },
                 DiscordName = lb.DiscordName,
-                IsTeam = lb.IsTeam,
-                TeamId = lb.TeamId,
                 FantasyPlayerPoints = lb.FantasyPlayerPoints
             }
         )
@@ -310,14 +322,14 @@ public class FantasyService
 
     public async Task<LeaderboardStats> GetLeaderboardStatsAsync(DiscordUser siteUser, int fantasyLeagueId)
     {
-        FantasyLeague? fantasyLeague = await _fantasyLeagueRepository.GetAccessibleFantasyLeagueAsync(fantasyLeagueId, siteUser);
+        FantasyLeague? fantasyLeague = await GetAccessibleFantasyLeagueAsync(siteUser, fantasyLeagueId);
 
         if (fantasyLeague == null)
         {
             throw new ArgumentException("Fantasy League Id not found");
         }
 
-        List<FantasyDraftPointTotals> fantasyPoints = await _fantasyDraftRepository.AllDraftPointTotalsByFantasyLeagueAsync(fantasyLeague);
+        List<FantasyDraftPointTotals> fantasyPoints = await _fantasyDraftFacade.AllDraftPointTotalsByFantasyLeagueAsync(fantasyLeague);
         if (fantasyPoints.Count() == 0)
         {
             // League doesn't have fantasy players/points yet
@@ -340,7 +352,7 @@ public class FantasyService
 
     public async Task<IEnumerable<MatchHighlights>> GetMatchHighlightsAsync(DiscordUser? siteUser, int fantasyLeagueId, int limit)
     {
-        FantasyLeague? fantasyLeague = await _fantasyLeagueRepository.GetAccessibleFantasyLeagueAsync(fantasyLeagueId, siteUser);
+        FantasyLeague? fantasyLeague = await GetAccessibleFantasyLeagueAsync(siteUser, fantasyLeagueId);
 
         if (fantasyLeague == null)
         {
@@ -349,6 +361,23 @@ public class FantasyService
 
         limit = Math.Min(limit, 100);
 
-        return await _fantasyRepository.GetLastNMatchHighlights(fantasyLeagueId, limit);
+        return await _fantasyPointsFacade.GetLastNMatchHighlights(fantasyLeagueId, limit);
+    }
+
+    private async Task<List<FantasyPlayer>> GetFantasyPlayerByFantasyLeagueAsync(FantasyLeague fantasyLeague)
+    {
+        _logger.LogDebug($"Get Fantasy Players by Fantasy League Id: {fantasyLeague.Id}");
+
+        var fantasyPlayerLeagueQuery = _dbContext.FantasyPlayers
+            .Include(fp => fp.FantasyLeague)
+            .Include(fp => fp.Team)
+            .Include(fp => fp.DotaAccount)
+            .Where(fp => fp.FantasyLeagueId == fantasyLeague.Id)
+            .OrderBy(fp => fp.Team!.Name)
+                .ThenBy(fp => fp.DotaAccount!.Name);
+
+        _logger.LogDebug($"Get Fantasy Players by Fantasy League Query: {fantasyPlayerLeagueQuery.ToQueryString()}");
+
+        return await fantasyPlayerLeagueQuery.ToListAsync();
     }
 }

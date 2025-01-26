@@ -1,48 +1,42 @@
 using DataAccessLibrary.Data;
+using DataAccessLibrary.Data.Facades;
 using DataAccessLibrary.Models.Discord;
 using DataAccessLibrary.Models.Fantasy;
 using DataAccessLibrary.Models.ProMetadata;
+using Microsoft.EntityFrameworkCore;
 
 namespace csharp_ef_webapi.Services;
 public class FantasyServiceAdmin
 {
     private readonly ILogger<FantasyService> _logger;
-    private readonly IProMetadataRepository _proMetadataRepository;
-    private readonly IFantasyLeagueRepository _fantasyLeagueRepository;
-    private readonly IFantasyLeagueWeightRepository _fantasyLeagueWeightRepository;
-    private readonly IFantasyPlayerRepository _fantasyPlayerRepository;
-    private readonly IDiscordRepository _discordRepository;
+    private readonly AuthFacade _authFacade;
+    private readonly AghanimsFantasyContext _dbContext;
 
     public FantasyServiceAdmin(
         ILogger<FantasyService> logger,
-        IProMetadataRepository proMetadataRepository,
-        IFantasyLeagueRepository fantasyLeagueRepository,
-        IFantasyLeagueWeightRepository fantasyLeagueWeightsRepository,
-        IFantasyPlayerRepository fantasyPlayerRepository,
-        IDiscordRepository discordRepository
+        AuthFacade authFacade,
+        AghanimsFantasyContext dbContext
     )
     {
         _logger = logger;
-        _proMetadataRepository = proMetadataRepository;
-        _fantasyLeagueRepository = fantasyLeagueRepository;
-        _fantasyLeagueWeightRepository = fantasyLeagueWeightsRepository;
-        _fantasyPlayerRepository = fantasyPlayerRepository;
-        _discordRepository = discordRepository;
+        _authFacade = authFacade;
+        _dbContext = dbContext;
     }
 
     public async Task AddLeagueAsync(DiscordUser adminUser, League addLeague)
     {
-        if (!await _discordRepository.IsUserAdminAsync(adminUser.Id))
+        if (!await _authFacade.IsUserAdminAsync(adminUser.Id))
         {
             throw new UnauthorizedAccessException();
         }
 
-        await _proMetadataRepository.AddLeagueAsync(addLeague);
+        await _dbContext.Leagues.AddAsync(addLeague);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task UpdateLeagueAsync(DiscordUser adminUser, int leagueId, League updateLeague)
     {
-        if (!await _discordRepository.IsUserAdminAsync(adminUser.Id))
+        if (!await _authFacade.IsUserAdminAsync(adminUser.Id))
         {
             throw new UnauthorizedAccessException();
         }
@@ -52,44 +46,48 @@ public class FantasyServiceAdmin
             throw new ArgumentException("League ID to Update League mismatch");
         }
 
-        await _proMetadataRepository.UpdateLeagueAsync(updateLeague);
+        _dbContext.Entry(updateLeague).State = EntityState.Modified;
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task DeleteLeagueAsync(DiscordUser adminUser, int deleteLeagueId)
     {
-        if (!await _discordRepository.IsUserAdminAsync(adminUser.Id))
+        if (!await _authFacade.IsUserAdminAsync(adminUser.Id))
         {
             throw new UnauthorizedAccessException();
         }
 
-        League? deleteLeague = await _proMetadataRepository.GetLeagueAsync(deleteLeagueId);
+        League? deleteLeague = await _dbContext.Leagues.FindAsync(deleteLeagueId);
 
         if (deleteLeague == null)
         {
             throw new ArgumentException("League ID Not Found");
         }
 
-        await _proMetadataRepository.DeleteLeagueAsync(deleteLeague);
+        _dbContext.Leagues.Remove(deleteLeague);
+
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task AddFantasyLeagueAsync(DiscordUser adminUser, FantasyLeague addFantasyLeague)
     {
-        if (!await _discordRepository.IsUserAdminAsync(adminUser.Id))
+        if (!await _authFacade.IsUserAdminAsync(adminUser.Id))
         {
             throw new UnauthorizedAccessException();
         }
 
         if (addFantasyLeague.League == null)
         {
-            addFantasyLeague.League = await _proMetadataRepository.GetLeagueAsync(addFantasyLeague.LeagueId) ?? throw new ArgumentException("Invalid parent League ID");
+            addFantasyLeague.League = await _dbContext.Leagues.FindAsync(addFantasyLeague.LeagueId) ?? throw new ArgumentException("Invalid parent League ID");
         }
 
-        await _fantasyLeagueRepository.AddAsync(addFantasyLeague);
+        await _dbContext.FantasyLeagues.AddAsync(addFantasyLeague);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task UpdateFantasyLeagueAsync(DiscordUser adminUser, int fantasyLeagueId, FantasyLeague updateFantasyLeague)
     {
-        if (!await _discordRepository.IsUserAdminAsync(adminUser.Id))
+        if (!await _authFacade.IsUserAdminAsync(adminUser.Id))
         {
             throw new UnauthorizedAccessException();
         }
@@ -101,43 +99,46 @@ public class FantasyServiceAdmin
 
         if (updateFantasyLeague.League == null)
         {
-            updateFantasyLeague.League = await _proMetadataRepository.GetLeagueAsync(updateFantasyLeague.LeagueId) ?? throw new ArgumentException("Invalid parent League ID");
+            updateFantasyLeague.League = await _dbContext.Leagues.FindAsync(updateFantasyLeague.LeagueId) ?? throw new ArgumentException("Invalid parent League ID");
         }
 
-        await _fantasyLeagueRepository.UpdateAsync(updateFantasyLeague);
+        _dbContext.Entry(updateFantasyLeague).State = EntityState.Modified;
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task DeleteFantasyLeagueAsync(DiscordUser adminUser, int deleteFantasyLeagueId)
     {
-        if (!await _discordRepository.IsUserAdminAsync(adminUser.Id))
+        if (!await _authFacade.IsUserAdminAsync(adminUser.Id))
         {
             throw new UnauthorizedAccessException();
         }
 
-        FantasyLeague? deleteFantasyLeague = await _fantasyLeagueRepository.GetByIdAsync(deleteFantasyLeagueId);
+        FantasyLeague? deleteFantasyLeague = await _dbContext.FantasyLeagues.FindAsync(deleteFantasyLeagueId);
 
         if (deleteFantasyLeague == null)
         {
             throw new ArgumentException("Fantasy League Id Not Found");
         }
 
-        await _fantasyLeagueRepository.DeleteAsync(deleteFantasyLeague);
+        _dbContext.FantasyLeagues.Remove(deleteFantasyLeague);
+        await _dbContext.SaveChangesAsync();
     }
 
 
     public async Task AddFantasyLeagueWeightAsync(DiscordUser adminUser, FantasyLeagueWeight addFantasyLeagueWeight)
     {
-        if (!await _discordRepository.IsUserAdminAsync(adminUser.Id))
+        if (!await _authFacade.IsUserAdminAsync(adminUser.Id))
         {
             throw new UnauthorizedAccessException();
         }
 
-        await _fantasyLeagueWeightRepository.AddAsync(addFantasyLeagueWeight);
+        await _dbContext.FantasyLeagueWeights.AddAsync(addFantasyLeagueWeight);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task UpdateFantasyLeagueWeightAsync(DiscordUser adminUser, int fantasyLeagueWeightId, FantasyLeagueWeight updateFantasyLeagueWeight)
     {
-        if (!await _discordRepository.IsUserAdminAsync(adminUser.Id))
+        if (!await _authFacade.IsUserAdminAsync(adminUser.Id))
         {
             throw new UnauthorizedAccessException();
         }
@@ -147,39 +148,42 @@ public class FantasyServiceAdmin
             throw new ArgumentException("League ID to Update League mismatch");
         }
 
-        await _fantasyLeagueWeightRepository.UpdateAsync(updateFantasyLeagueWeight);
+        _dbContext.Entry(updateFantasyLeagueWeight).State = EntityState.Modified;
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task DeleteFantasyLeagueWeightAsync(DiscordUser adminUser, int deleteFantasyLeagueWeightId)
     {
-        if (!await _discordRepository.IsUserAdminAsync(adminUser.Id))
+        if (!await _authFacade.IsUserAdminAsync(adminUser.Id))
         {
             throw new UnauthorizedAccessException();
         }
 
-        FantasyLeagueWeight? deleteFantasyLeagueWeight = await _fantasyLeagueWeightRepository.GetByIdAsync(deleteFantasyLeagueWeightId);
+        FantasyLeagueWeight? deleteFantasyLeagueWeight = await _dbContext.FantasyLeagueWeights.FindAsync(deleteFantasyLeagueWeightId);
 
         if (deleteFantasyLeagueWeight == null)
         {
             throw new ArgumentException("League ID Not Found");
         }
 
-        await _fantasyLeagueWeightRepository.DeleteAsync(deleteFantasyLeagueWeight);
+        _dbContext.FantasyLeagueWeights.Remove(deleteFantasyLeagueWeight);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task AddFantasyPlayerAsync(DiscordUser adminUser, FantasyPlayer addFantasyPlayer)
     {
-        if (!await _discordRepository.IsUserAdminAsync(adminUser.Id))
+        if (!await _authFacade.IsUserAdminAsync(adminUser.Id))
         {
             throw new UnauthorizedAccessException();
         }
 
-        await _fantasyPlayerRepository.AddAsync(addFantasyPlayer);
+        await _dbContext.FantasyPlayers.AddAsync(addFantasyPlayer);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task UpdateFantasyPlayerAsync(DiscordUser adminUser, long fantasyPlayerId, FantasyPlayer updateFantasyPlayer)
     {
-        if (!await _discordRepository.IsUserAdminAsync(adminUser.Id))
+        if (!await _authFacade.IsUserAdminAsync(adminUser.Id))
         {
             throw new UnauthorizedAccessException();
         }
@@ -189,52 +193,57 @@ public class FantasyServiceAdmin
             throw new ArgumentException("Fantasy Player ID to Update FantasyPlayer mismatch");
         }
 
-        await _fantasyPlayerRepository.UpdateAsync(updateFantasyPlayer);
+        _dbContext.Entry(updateFantasyPlayer).State = EntityState.Modified;
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task UpdateFantasyPlayersAsync(DiscordUser adminUser, IEnumerable<FantasyPlayer> updateFantasyPlayers)
     {
-        if (!await _discordRepository.IsUserAdminAsync(adminUser.Id))
+        if (!await _authFacade.IsUserAdminAsync(adminUser.Id))
         {
             throw new UnauthorizedAccessException();
         }
 
         foreach (FantasyPlayer updateFantasyPlayer in updateFantasyPlayers)
         {
-            await _fantasyPlayerRepository.UpdateAsync(updateFantasyPlayer);
+            _dbContext.Entry(updateFantasyPlayer).State = EntityState.Modified;
         }
+
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task DeleteFantasyPlayerAsync(DiscordUser adminUser, long deleteFantasyPlayerId)
     {
-        if (!await _discordRepository.IsUserAdminAsync(adminUser.Id))
+        if (!await _authFacade.IsUserAdminAsync(adminUser.Id))
         {
             throw new UnauthorizedAccessException();
         }
 
-        FantasyPlayer? deleteFantasyPlayer = await _fantasyPlayerRepository.GetByIdAsync(deleteFantasyPlayerId);
+        FantasyPlayer? deleteFantasyPlayer = await _dbContext.FantasyPlayers.FindAsync(deleteFantasyPlayerId);
 
         if (deleteFantasyPlayer == null)
         {
             throw new ArgumentException("Fantasy Player Id Not Found");
         }
 
-        await _fantasyPlayerRepository.DeleteAsync(deleteFantasyPlayer);
+        _dbContext.FantasyPlayers.Remove(deleteFantasyPlayer);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task AddAccountAsync(DiscordUser adminUser, Account addAccount)
     {
-        if (!await _discordRepository.IsUserAdminAsync(adminUser.Id))
+        if (!await _authFacade.IsUserAdminAsync(adminUser.Id))
         {
             throw new UnauthorizedAccessException();
         }
 
-        await _proMetadataRepository.AddAccountAsync(addAccount);
+        await _dbContext.Accounts.AddAsync(addAccount);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task UpdateAccountAsync(DiscordUser adminUser, long accountId, Account updateAccount)
     {
-        if (!await _discordRepository.IsUserAdminAsync(adminUser.Id))
+        if (!await _authFacade.IsUserAdminAsync(adminUser.Id))
         {
             throw new UnauthorizedAccessException();
         }
@@ -244,39 +253,42 @@ public class FantasyServiceAdmin
             throw new ArgumentException("Account ID to Update Account mismatch");
         }
 
-        await _proMetadataRepository.UpdateAccountAsync(updateAccount);
+        _dbContext.Entry(updateAccount).State = EntityState.Modified;
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task DeleteAccountAsync(DiscordUser adminUser, long deleteAccountId)
     {
-        if (!await _discordRepository.IsUserAdminAsync(adminUser.Id))
+        if (!await _authFacade.IsUserAdminAsync(adminUser.Id))
         {
             throw new UnauthorizedAccessException();
         }
 
-        Account? deleteAccount = await _proMetadataRepository.GetPlayerAccount(deleteAccountId);
+        Account? deleteAccount = await _dbContext.Accounts.FindAsync(deleteAccountId);
 
         if (deleteAccount == null)
         {
             throw new ArgumentException("Account Id Not Found");
         }
 
-        await _proMetadataRepository.DeleteAccountAsync(deleteAccount);
+        _dbContext.Accounts.Remove(deleteAccount);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task AddTeamAsync(DiscordUser adminUser, Team addTeam)
     {
-        if (!await _discordRepository.IsUserAdminAsync(adminUser.Id))
+        if (!await _authFacade.IsUserAdminAsync(adminUser.Id))
         {
             throw new UnauthorizedAccessException();
         }
 
-        await _proMetadataRepository.AddTeamAsync(addTeam);
+        await _dbContext.Teams.AddAsync(addTeam);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task UpdateTeamAsync(DiscordUser adminUser, long teamId, Team updateTeam)
     {
-        if (!await _discordRepository.IsUserAdminAsync(adminUser.Id))
+        if (!await _authFacade.IsUserAdminAsync(adminUser.Id))
         {
             throw new UnauthorizedAccessException();
         }
@@ -286,23 +298,25 @@ public class FantasyServiceAdmin
             throw new ArgumentException("Team ID to Update Team mismatch");
         }
 
-        await _proMetadataRepository.UpdateTeamAsync(updateTeam);
+        _dbContext.Entry(updateTeam).State = EntityState.Modified;
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task DeleteTeamAsync(DiscordUser adminUser, long deleteTeamId)
     {
-        if (!await _discordRepository.IsUserAdminAsync(adminUser.Id))
+        if (!await _authFacade.IsUserAdminAsync(adminUser.Id))
         {
             throw new UnauthorizedAccessException();
         }
 
-        Team? deleteTeam = await _proMetadataRepository.GetTeamAsync(deleteTeamId);
+        Team? deleteTeam = await _dbContext.Teams.FindAsync(deleteTeamId);
 
         if (deleteTeam == null)
         {
             throw new ArgumentException("Team Id Not Found");
         }
 
-        await _proMetadataRepository.DeleteTeamAsync(deleteTeam);
+        _dbContext.Teams.Remove(deleteTeam);
+        await _dbContext.SaveChangesAsync();
     }
 }

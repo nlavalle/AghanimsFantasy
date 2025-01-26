@@ -1,4 +1,4 @@
-namespace csharp_ef_webapi.UnitTests.Data;
+namespace csharp_ef_webapi.IntegrationTests.Data;
 
 using Moq;
 using System.Data.Common;

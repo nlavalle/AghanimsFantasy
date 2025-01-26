@@ -1,38 +1,29 @@
+namespace DataAccessLibrary.Data.Facades;
+
 using DataAccessLibrary.Data;
 using DataAccessLibrary.Models;
 using DataAccessLibrary.Models.Fantasy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace DataAccessLibrary.Facades;
-
 public class FantasyPointsFacade
 {
     private readonly ILogger<FantasyPointsFacade> _logger;
-    private readonly IProMetadataRepository _proMetadataRepository;
-    private readonly IFantasyPlayerRepository _fantasyPlayerRepository;
-    private readonly IFantasyMatchRepository _fantasyMatchRepository;
-    private readonly IFantasyViewsRepository _fantasyViewsRepository;
+    private readonly AghanimsFantasyContext _dbContext;
 
     public FantasyPointsFacade(
         ILogger<FantasyPointsFacade> logger,
-        IProMetadataRepository proMetadataRepository,
-        IFantasyViewsRepository fantasyViewsRepository,
-        IFantasyMatchRepository fantasyMatchRepository,
-        IFantasyPlayerRepository fantasyPlayerRepository
+        AghanimsFantasyContext dbContext
     )
     {
         _logger = logger;
-        _proMetadataRepository = proMetadataRepository;
-        _fantasyPlayerRepository = fantasyPlayerRepository;
-        _fantasyMatchRepository = fantasyMatchRepository;
-        _fantasyViewsRepository = fantasyViewsRepository;
+        _dbContext = dbContext;
     }
 
 
     public async Task<List<FantasyPlayerPoints>> GetFantasyPlayerPointsByMatchAsync(long MatchId)
     {
-        return await _fantasyViewsRepository.GetPlayerPointsQueryable()
+        return await _dbContext.FantasyPlayerPointsView
             .Where(fppv => fppv.FantasyMatchPlayer!.Match!.MatchId == MatchId)
             .Include(fppv => fppv.FantasyMatchPlayer)
             .ToListAsync();
@@ -40,7 +31,7 @@ public class FantasyPointsFacade
 
     public async Task<List<FantasyPlayerPoints>> GetFantasyPlayerPointsByMatchesAsync(IEnumerable<FantasyMatch> FantasyMatches)
     {
-        return await _fantasyViewsRepository.GetPlayerPointsQueryable()
+        return await _dbContext.FantasyPlayerPointsView
             .Where(fppv => fppv.FantasyMatchPlayerId != null && FantasyMatches.Any(mi => mi == fppv.FantasyMatchPlayer!.Match))
             .Include(fppv => fppv.FantasyMatchPlayer)
             .ToListAsync();
@@ -50,7 +41,7 @@ public class FantasyPointsFacade
     {
         _logger.LogInformation($"Fetching Fantasy Points for Fantasy League Id: {FantasyLeagueId}");
 
-        var fantasyPlayerPointsByLeagueQuery = _fantasyViewsRepository.GetPlayerPointsQueryable()
+        var fantasyPlayerPointsByLeagueQuery = _dbContext.FantasyPlayerPointsView
             .Where(fpp => fpp.FantasyLeagueId == FantasyLeagueId)
             .Where(fpp => fpp.FantasyMatchPlayer != null)
             .Where(fpp => fpp.FantasyMatchPlayer!.GcMetadataPlayerParsed && fpp.FantasyMatchPlayer!.MatchDetailPlayerParsed)
@@ -68,7 +59,7 @@ public class FantasyPointsFacade
     {
         _logger.LogInformation($"Getting Player Averages");
 
-        FantasyPlayer? fantasyPlayer = await _fantasyPlayerRepository.GetByIdAsync(FantasyPlayerId);
+        FantasyPlayer? fantasyPlayer = await _dbContext.FantasyPlayers.FindAsync(FantasyPlayerId);
 
         if (fantasyPlayer == null)
         {
@@ -76,9 +67,9 @@ public class FantasyPointsFacade
             return new FantasyPlayerTopHeroes();
         }
 
-        var heroes = await _proMetadataRepository.GetHeroesAsync();
+        var heroes = await _dbContext.Heroes.ToListAsync();
 
-        var topHeroIds = await _fantasyMatchRepository.GetQueryable()
+        var topHeroIds = await _dbContext.FantasyMatches
                 .SelectMany(
                     md => md.Players,
                     (left, right) => new { Match = left, MatchPlayer = right }
@@ -121,7 +112,7 @@ public class FantasyPointsFacade
     {
         _logger.LogInformation($"Getting Player Averages");
 
-        return await _fantasyViewsRepository.GetFantasyNormalizedAveragesQueryable()
+        return await _dbContext.FantasyNormalizedAverages
                 .Where(fnp => fnp.FantasyPlayer.Id == FantasyPlayerId)
                 .ToListAsync();
     }
@@ -130,7 +121,7 @@ public class FantasyPointsFacade
     {
         _logger.LogInformation($"Fetching Metadata for Fantasy League Id: {FantasyLeague.Id}");
 
-        List<MetadataSummary> metadataSummaries = await _fantasyViewsRepository.GetMetadataSummariesQueryable()
+        List<MetadataSummary> metadataSummaries = await _dbContext.MetadataSummaries
             .Where(ms => ms.FantasyLeagueId == FantasyLeague.Id)
             .Include(ms => ms.FantasyPlayer)
             .ToListAsync();
@@ -142,7 +133,7 @@ public class FantasyPointsFacade
     {
         _logger.LogInformation($"Getting {MatchCount} Match Highlights for Fantasy League ID: {FantasyLeagueId}");
 
-        var matchHighlightsQuery = _fantasyViewsRepository.GetMatchHighlightsQueryable()
+        var matchHighlightsQuery = _dbContext.MatchHighlightsView
                 .Include(mhv => mhv.FantasyPlayer)
                 .Where(mhv => mhv.FantasyLeagueId == FantasyLeagueId)
                 .OrderByDescending(mhv => mhv.StartTime)

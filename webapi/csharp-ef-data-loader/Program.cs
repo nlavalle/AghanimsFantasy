@@ -27,27 +27,6 @@ builder.Services.AddDbContext<AghanimsFantasyContext>(
 // Add persistent HttpClient
 builder.Services.AddHttpClient();
 
-// Add Fantasy Repositories
-builder.Services.AddScoped<IFantasyDraftRepository, FantasyDraftRepository>();
-builder.Services.AddScoped<IFantasyLeagueRepository, FantasyLeagueRepository>();
-builder.Services.AddScoped<IFantasyPlayerRepository, FantasyPlayerRepository>();
-builder.Services.AddScoped<IFantasyMatchRepository, FantasyMatchRepository>();
-builder.Services.AddScoped<IFantasyMatchPlayerRepository, FantasyMatchPlayerRepository>();
-// Add Game Coordinator Repositories
-builder.Services.AddScoped<IGcMatchMetadataRepository, GcMatchMetadataRepository>();
-builder.Services.AddScoped<IGcDotaMatchRepository, GcDotaMatchRepository>();
-builder.Services.AddScoped<GameCoordinatorRepository>();
-// Add ProMetadata Repositories
-builder.Services.AddScoped<IProMetadataRepository, ProMetadataRepository>();
-// Add WebApi Repositories
-builder.Services.AddScoped<IMatchHistoryRepository, MatchHistoryRepository>();
-builder.Services.AddScoped<IMatchDetailRepository, MatchDetailRepository>();
-// Add Discord Repositories
-builder.Services.AddScoped<IDiscordUserRepository, DiscordUserRepository>();
-builder.Services.AddScoped<IDiscordOutboxRepository, DiscordOutboxRepository>();
-// Add View Repository
-builder.Services.AddScoped<IFantasyViewsRepository, FantasyViewsRepository>();
-
 // Add Scoped Dota Client to be called for Dota Client Background Service
 builder.Services.AddScoped<DotaClient>();
 

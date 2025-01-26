@@ -11,19 +11,16 @@ internal class SteamClientMatchDetailsContext : DotaOperationContext
 {
     private readonly ILogger<SteamClientMatchDetailsContext> _logger;
     private readonly DotaClient _dotaClient;
-    private readonly IMatchHistoryRepository _matchHistoryRepository;
-    private readonly IGcDotaMatchRepository _gcDotaMatchRepository;
+    private readonly AghanimsFantasyContext _dbContext;
 
     public SteamClientMatchDetailsContext(
             ILogger<SteamClientMatchDetailsContext> logger,
-            IMatchHistoryRepository matchHistoryRepository,
-            IGcDotaMatchRepository gcDotaMatchRepository,
+            AghanimsFantasyContext dbContext,
             IServiceScope scope,
             Config config)
         : base(scope, config)
     {
-        _matchHistoryRepository = matchHistoryRepository;
-        _gcDotaMatchRepository = gcDotaMatchRepository;
+        _dbContext = dbContext;
         _logger = logger;
         _dotaClient = scope.ServiceProvider.GetRequiredService<DotaClient>();
     }
@@ -67,16 +64,18 @@ internal class SteamClientMatchDetailsContext : DotaOperationContext
 
                     if (matchDetails != null)
                     {
-                        if (await _gcDotaMatchRepository.GetByIdAsync(matchDetails.match_id) != null)
+                        if (await _dbContext.GcDotaMatches.FindAsync(matchDetails.match_id) != null)
                         {
-                            await _gcDotaMatchRepository.UpdateAsync(matchDetails);
+                            _dbContext.Entry(matchDetails).State = EntityState.Modified;
                         }
                         else
                         {
-                            await _gcDotaMatchRepository.AddAsync(matchDetails);
+                            await _dbContext.GcDotaMatches.AddAsync(matchDetails);
                         }
                     }
                 }
+
+                await _dbContext.SaveChangesAsync();
 
                 _logger.LogInformation($"Steam Client Match Details fetch done");
             }
@@ -96,9 +95,9 @@ internal class SteamClientMatchDetailsContext : DotaOperationContext
     {
         _logger.LogInformation($"Getting new Match Histories not loaded into Gc Dota Matches");
 
-        var matchesNotInGcQuery = _matchHistoryRepository.GetQueryable()
+        var matchesNotInGcQuery = _dbContext.MatchHistory
             .Where(
-                mh => !_gcDotaMatchRepository.GetQueryable()
+                mh => !_dbContext.GcDotaMatches
                     .Where(dm => dm.replay_state == CMsgDOTAMatch.ReplayState.REPLAY_AVAILABLE)
                     .Select(gdm => gdm.match_id)
                     .Contains((ulong)mh.MatchId))

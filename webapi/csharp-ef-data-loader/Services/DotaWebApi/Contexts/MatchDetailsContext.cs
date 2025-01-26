@@ -13,9 +13,7 @@ internal class MatchDetailsContext : DotaOperationContext
     // private readonly DotaWebApiService _apiService;
     private readonly ILogger<MatchDetailsContext> _logger;
     private readonly HttpClient _httpClient;
-    private readonly IProMetadataRepository _proMetadataRepository;
-    private readonly IMatchHistoryRepository _matchHistoryRepository;
-    private readonly IMatchDetailRepository _matchDetailRepository;
+    private readonly AghanimsFantasyContext _dbContext;
 
     // Our match history list: just going to use a locked list, contention should be very low
     private readonly List<MatchDetail> _matches = new List<MatchDetail>();
@@ -28,9 +26,7 @@ internal class MatchDetailsContext : DotaOperationContext
     public MatchDetailsContext(
             ILogger<MatchDetailsContext> logger,
             HttpClient httpClient,
-            IProMetadataRepository proMetadataRepository,
-            IMatchHistoryRepository matchHistoryRepository,
-            IMatchDetailRepository matchDetailRepository,
+            AghanimsFantasyContext dbContext,
             IServiceScope scope,
             Config config
         )
@@ -38,9 +34,7 @@ internal class MatchDetailsContext : DotaOperationContext
     {
         _logger = logger;
         _httpClient = httpClient;
-        _proMetadataRepository = proMetadataRepository;
-        _matchHistoryRepository = matchHistoryRepository;
-        _matchDetailRepository = matchDetailRepository;
+        _dbContext = dbContext;
     }
 
     protected override async Task OperateAsync(CancellationToken cancellationToken)
@@ -74,7 +68,7 @@ internal class MatchDetailsContext : DotaOperationContext
 
                 foreach (MatchDetail matchDetail in _matches)
                 {
-                    if (await _matchDetailRepository.GetByIdAsync(matchDetail.MatchId) == null)
+                    if (await _dbContext.MatchDetails.FindAsync(matchDetail.MatchId) == null)
                     {
 
                         // Set PicksBans Match IDs since it's not in json
@@ -94,9 +88,11 @@ internal class MatchDetailsContext : DotaOperationContext
                             }
                         }
 
-                        await _matchDetailRepository.AddAsync(matchDetail);
+                        await _dbContext.MatchDetails.AddAsync(matchDetail);
                     }
                 }
+
+                await _dbContext.SaveChangesAsync();
 
                 _logger.LogInformation($"Missing match details fetch done");
 
@@ -165,15 +161,15 @@ internal class MatchDetailsContext : DotaOperationContext
     {
         _logger.LogInformation($"Getting new Match Histories not loaded into Fantasy Match");
 
-        var activeLeagues = await _proMetadataRepository.GetLeaguesAsync(true);
+        var activeLeagues = await _dbContext.Leagues.Where(l => l.IsActive).ToListAsync();
 
-        var newMatchHistoryQuery = _matchHistoryRepository.GetQueryable()
+        var newMatchHistoryQuery = _dbContext.MatchHistory
             .Where(mh => activeLeagues
                     .Select(l => l.Id)
                     .Contains(mh.LeagueId)
             )
             .Where(
-                mh => !_matchDetailRepository.GetQueryable()
+                mh => !_dbContext.MatchDetails
                     .Where(md => activeLeagues
                         .Select(l => l.Id)
                         .Contains(md.LeagueId)

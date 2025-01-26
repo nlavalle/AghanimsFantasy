@@ -8,20 +8,20 @@ namespace csharp_ef_webapi.Controllers
     [ApiController]
     public class MatchController : ControllerBase
     {
-        private readonly IGcMatchMetadataRepository _gcMatchMetadataRepository;
+        private readonly AghanimsFantasyContext _dbContext;
 
         public MatchController(
-            IGcMatchMetadataRepository gcMatchMetadataRepository
+            AghanimsFantasyContext dbContext
         )
         {
-            _gcMatchMetadataRepository = gcMatchMetadataRepository;
+            _dbContext = dbContext;
         }
 
         // GET: api/Match/5/Metadata
         [HttpGet("{matchId}/metadata")]
         public async Task<ActionResult<GcMatchMetadata>> GetLeagueMatchIdMetadata(long matchId)
         {
-            var match = await _gcMatchMetadataRepository.GetByIdAsync(matchId);
+            var match = await _dbContext.GcMatchMetadata.FindAsync(matchId);
 
             if (match == null)
             {

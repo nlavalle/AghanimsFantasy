@@ -1,6 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
 using DataAccessLibrary.Data;
 using DataAccessLibrary.Models.ProMetadata;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace csharp_ef_webapi.Controllers
 {
@@ -8,18 +9,18 @@ namespace csharp_ef_webapi.Controllers
     [ApiController]
     public class HeroController : ControllerBase
     {
-        private readonly IProMetadataRepository _proMetadataRepository;
+        private readonly AghanimsFantasyContext _dbContext;
 
-        public HeroController(IProMetadataRepository proMetadataRepository)
+        public HeroController(AghanimsFantasyContext dbContext)
         {
-            _proMetadataRepository = proMetadataRepository;
+            _dbContext = dbContext;
         }
 
         // GET: api/Hero
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Hero>>> GetHeroes()
         {
-            return Ok(await _proMetadataRepository.GetHeroesAsync());
+            return Ok(await _dbContext.Heroes.ToListAsync());
         }
     }
 }

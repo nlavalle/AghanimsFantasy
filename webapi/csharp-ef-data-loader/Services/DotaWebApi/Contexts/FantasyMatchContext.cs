@@ -1,67 +1,33 @@
 namespace csharp_ef_data_loader.Services;
 
 using DataAccessLibrary.Data;
+using DataAccessLibrary.Data.Facades;
 using DataAccessLibrary.Models.Fantasy;
 using DataAccessLibrary.Models.WebApi;
 using DataAccessLibrary.Models.ProMetadata;
 using SteamKit2.GC.Dota.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
-using DataAccessLibrary.Facades;
+using Microsoft.EntityFrameworkCore;
 
 internal class FantasyMatchContext : DotaOperationContext
 {
     private readonly ILogger<FantasyMatchContext> _logger;
-    private readonly IProMetadataRepository _proMetadataRepository;
-    private readonly IFantasyViewsRepository _fantasyViewsRepository;
-    private readonly IFantasyMatchRepository _fantasyMatchRepository;
-    private readonly IFantasyMatchPlayerRepository _fantasyMatchPlayerRepository;
-    private readonly IGcDotaMatchRepository _gcDotaMatchRepository;
-    private readonly IGcMatchMetadataRepository _gcMatchMetadataRepository;
-    private readonly IMatchHistoryRepository _matchHistoryRepository;
-    private readonly IMatchDetailRepository _matchDetailRepository;
-    private readonly GameCoordinatorRepository _gameCoordinatorRepository;
+    private readonly AghanimsFantasyContext _dbContext;
     private readonly FantasyMatchFacade _fantasyMatchFacade;
 
     public FantasyMatchContext(
             ILogger<FantasyMatchContext> logger,
-            ILogger<FantasyMatchFacade> facadeLogger,
-            IProMetadataRepository proMetadataRepository,
-            IFantasyViewsRepository fantasyViewsRepository,
-            IFantasyMatchRepository fantasyMatchRepository,
-            IFantasyMatchPlayerRepository fantasyMatchPlayerRepository,
-            IGcDotaMatchRepository gcDotaMatchRepository,
-            IGcMatchMetadataRepository gcMatchMetadataRepository,
-            IMatchHistoryRepository matchHistoryRepository,
-            IMatchDetailRepository matchDetailRepository,
-            GameCoordinatorRepository gameCoordinatorRepository,
+            AghanimsFantasyContext dbContext,
+            FantasyMatchFacade fantasyMatchFacade,
             IServiceScope scope,
             Config config
         )
         : base(scope, config)
     {
         _logger = logger;
-        _proMetadataRepository = proMetadataRepository;
-        _fantasyViewsRepository = fantasyViewsRepository;
-        _fantasyMatchRepository = fantasyMatchRepository;
-        _fantasyMatchPlayerRepository = fantasyMatchPlayerRepository;
-        _gcDotaMatchRepository = gcDotaMatchRepository;
-        _gcMatchMetadataRepository = gcMatchMetadataRepository;
-        _matchHistoryRepository = matchHistoryRepository;
-        _matchDetailRepository = matchDetailRepository;
-        _gameCoordinatorRepository = gameCoordinatorRepository;
-
-        _fantasyMatchFacade = new FantasyMatchFacade(
-            facadeLogger,
-            _proMetadataRepository,
-            _fantasyViewsRepository,
-            _fantasyMatchPlayerRepository,
-            _fantasyMatchRepository,
-            _gcDotaMatchRepository,
-            _gcMatchMetadataRepository,
-            _matchDetailRepository,
-            _matchHistoryRepository
-        );
+        _dbContext = dbContext;
+        _fantasyMatchFacade = fantasyMatchFacade;
     }
 
     protected override async Task OperateAsync(CancellationToken cancellationToken)
@@ -80,7 +46,7 @@ internal class FantasyMatchContext : DotaOperationContext
                     {
                         MatchId = newMatchHistory.MatchId,
                         DireScore = null,
-                        DireTeam = await _proMetadataRepository.GetTeamAsync(newMatchHistory.DireTeamId),
+                        DireTeam = await _dbContext.Teams.FindAsync(newMatchHistory.DireTeamId),
                         Duration = null,
                         FirstBloodTime = null,
                         GameMode = null,
@@ -92,7 +58,7 @@ internal class FantasyMatchContext : DotaOperationContext
                         MatchHistoryParsed = true,
                         PreGameDuration = null,
                         RadiantScore = null,
-                        RadiantTeam = await _proMetadataRepository.GetTeamAsync(newMatchHistory.RadiantTeamId),
+                        RadiantTeam = await _dbContext.Teams.FindAsync(newMatchHistory.RadiantTeamId),
                         RadiantWin = null,
                         StartTime = newMatchHistory.StartTime
                     };
@@ -100,7 +66,7 @@ internal class FantasyMatchContext : DotaOperationContext
                     newHistoryFantasyMatches.Add(newFantasyMatch);
                 }
 
-                await _fantasyMatchRepository.AddRangeAsync(newHistoryFantasyMatches);
+                await _dbContext.FantasyMatches.AddRangeAsync(newHistoryFantasyMatches);
 
                 _logger.LogInformation($"{newMatchHistories.Count} new fantasy matches added to table");
             }
@@ -112,7 +78,7 @@ internal class FantasyMatchContext : DotaOperationContext
             {
                 foreach (FantasyMatch gcMatchDetailToParse in gcMatchDetailsToParse)
                 {
-                    CMsgDOTAMatch gcMatchDetailLookup = await _gcDotaMatchRepository.GetByIdAsync((ulong)gcMatchDetailToParse.MatchId) ?? throw new Exception($"Expected to find Game Coordinator data for {gcMatchDetailToParse.MatchId}");
+                    CMsgDOTAMatch gcMatchDetailLookup = await _dbContext.GcDotaMatches.FindAsync((ulong)gcMatchDetailToParse.MatchId) ?? throw new Exception($"Expected to find Game Coordinator data for {gcMatchDetailToParse.MatchId}");
                     gcMatchDetailToParse.DireScore = (int)gcMatchDetailLookup.dire_team_score;
                     gcMatchDetailToParse.Duration = (int)gcMatchDetailLookup.duration;
                     gcMatchDetailToParse.FirstBloodTime = (int)gcMatchDetailLookup.first_blood_time;
@@ -123,7 +89,8 @@ internal class FantasyMatchContext : DotaOperationContext
                     gcMatchDetailToParse.RadiantWin = gcMatchDetailLookup.match_outcome == EMatchOutcome.k_EMatchOutcome_RadVictory;
                 }
 
-                await _fantasyMatchRepository.UpdateRangeAsync(gcMatchDetailsToParse);
+                _dbContext.FantasyMatches.UpdateRange(gcMatchDetailsToParse);
+                await _dbContext.SaveChangesAsync();
 
                 _logger.LogInformation($"{gcMatchDetailsToParse.Count} matches updated with GC Match Detail data");
             }
@@ -136,7 +103,7 @@ internal class FantasyMatchContext : DotaOperationContext
             {
                 foreach (FantasyMatch matchDetailToParse in matchDetailsToParse)
                 {
-                    MatchDetail matchDetailLookup = await _matchDetailRepository.GetByIdAsync(matchDetailToParse.MatchId) ?? throw new Exception($"Expected Match Detail for {matchDetailToParse.MatchId}");
+                    MatchDetail matchDetailLookup = await _dbContext.MatchDetails.FindAsync(matchDetailToParse.MatchId) ?? throw new Exception($"Expected Match Detail for {matchDetailToParse.MatchId}");
                     matchDetailToParse.DireScore = matchDetailLookup.DireScore;
                     matchDetailToParse.Duration = matchDetailLookup.Duration;
                     matchDetailToParse.FirstBloodTime = matchDetailLookup.FirstBloodTime;
@@ -147,7 +114,8 @@ internal class FantasyMatchContext : DotaOperationContext
                     matchDetailToParse.RadiantWin = matchDetailLookup.RadiantWin;
                 }
 
-                await _fantasyMatchRepository.UpdateRangeAsync(matchDetailsToParse);
+                _dbContext.FantasyMatches.UpdateRange(matchDetailsToParse);
+                await _dbContext.SaveChangesAsync();
 
                 _logger.LogInformation($"{matchDetailsToParse.Count} matches updated with WebApi Match Detail data");
             }
@@ -160,14 +128,14 @@ internal class FantasyMatchContext : DotaOperationContext
                 foreach ((CMsgDOTAMatch, CMsgDOTAMatch.Player) gcMatchDetailPlayer in gcMatchPlayers)
                 {
                     // We don't want to insert anything with nulls, so flag errors so I can catch them in the logging and add them in
-                    Account? accountLookup = await _proMetadataRepository.GetPlayerAccount(gcMatchDetailPlayer.Item2.account_id);
+                    Account? accountLookup = await _dbContext.Accounts.FindAsync(gcMatchDetailPlayer.Item2.account_id);
                     if (accountLookup == null)
                     {
                         _logger.LogError($"Missing Account {gcMatchDetailPlayer.Item2.account_id}, need to add it to nadcl.dota_accounts");
                         continue;
                     }
 
-                    Hero? heroLookup = await _proMetadataRepository.GetHeroAsync(gcMatchDetailPlayer.Item2.hero_id);
+                    Hero? heroLookup = await _dbContext.Heroes.FindAsync(gcMatchDetailPlayer.Item2.hero_id);
                     if (heroLookup == null)
                     {
                         _logger.LogError($"Missing Hero {gcMatchDetailPlayer.Item2.hero_id}, need to add it to nadcl.dota_heroes");
@@ -175,14 +143,14 @@ internal class FantasyMatchContext : DotaOperationContext
                     }
 
                     long teamId = gcMatchDetailPlayer.Item2.team_number == DOTA_GC_TEAM.DOTA_GC_TEAM_BAD_GUYS ? gcMatchDetailPlayer.Item1.dire_team_id : gcMatchDetailPlayer.Item1.radiant_team_id;
-                    Team? teamLookup = await _proMetadataRepository.GetTeamAsync(teamId);
+                    Team? teamLookup = await _dbContext.Teams.FindAsync(teamId);
                     if (teamLookup == null)
                     {
                         _logger.LogError($"Missing Team {teamId}, need to add it to nadcl.dota_teams");
                         continue;
                     }
 
-                    FantasyMatch? fantasyMatch = await _fantasyMatchRepository.GetByIdAsync((long)gcMatchDetailPlayer.Item1.match_id);
+                    FantasyMatch? fantasyMatch = await _dbContext.FantasyMatches.FindAsync((long)gcMatchDetailPlayer.Item1.match_id);
                     if (fantasyMatch == null)
                     {
                         _logger.LogInformation($"Missing Match parent {gcMatchDetailPlayer.Item1.match_id}, skipping and will retry.");
@@ -223,7 +191,8 @@ internal class FantasyMatchContext : DotaOperationContext
                         XpPerMin = (int)gcMatchDetailPlayer.Item2.xp_per_min,
                     };
 
-                    await _fantasyMatchPlayerRepository.AddAsync(newPlayer);
+                    await _dbContext.FantasyMatchPlayers.AddAsync(newPlayer);
+                    await _dbContext.SaveChangesAsync();
                 }
 
                 _logger.LogInformation($"{gcMatchPlayers.Count} new fantasy match players added to table");
@@ -235,7 +204,15 @@ internal class FantasyMatchContext : DotaOperationContext
             {
                 foreach (FantasyMatchPlayer metadataPlayerToParse in metadataPlayersToParse)
                 {
-                    var matchMetadataLookup = await _gameCoordinatorRepository.GetMatchMetadataPlayerAsync(metadataPlayerToParse);
+                    var matchMetadataLookup = await _dbContext.GcMatchMetadata
+                        .Where(md => md.MatchId == metadataPlayerToParse.FantasyMatchId)
+                        .SelectMany(md => md.Teams,
+                        (left, right) => new { Match = left, Team = right })
+                        .SelectMany(mdt => mdt.Team.Players,
+                        (left, right) => new { Match = left.Match, Team = left.Team, Player = right })
+                        .Where(mdp => mdp.Match.MatchId == metadataPlayerToParse.FantasyMatchId && mdp.Player.PlayerSlot == metadataPlayerToParse.PlayerSlot)
+                        .Select(result => result.Player)
+                        .FirstAsync();
 
                     metadataPlayerToParse.CampsStacked = (int)matchMetadataLookup.CampsStacked;
                     metadataPlayerToParse.Dewards = (int)matchMetadataLookup.WardsDewarded;
@@ -255,7 +232,8 @@ internal class FantasyMatchContext : DotaOperationContext
                     metadataPlayerToParse.CouriersKilled = matchMetadataLookup.CouriersKilled;
                 }
 
-                await _fantasyMatchPlayerRepository.UpdateRangeAsync(metadataPlayersToParse);
+                _dbContext.FantasyMatchPlayers.UpdateRange(metadataPlayersToParse);
+                await _dbContext.SaveChangesAsync();
 
                 _logger.LogInformation($"{metadataPlayersToParse.Count} players updated with Metadata Detail data");
             }

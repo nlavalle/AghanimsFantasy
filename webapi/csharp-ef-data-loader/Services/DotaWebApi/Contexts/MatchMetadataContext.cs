@@ -15,11 +15,7 @@ internal class MatchMetadataContext : DotaOperationContext
 {
     private readonly ILogger<MatchMetadataContext> _logger;
     private readonly HttpClient _httpClient;
-    private readonly GameCoordinatorRepository _gameCoordinatorRepository;
-    private readonly IGcDotaMatchRepository _gcDotaMatchRepository;
-    private readonly IGcMatchMetadataRepository _gcMatchMetadataRepository;
-    private readonly IMatchHistoryRepository _matchHistoryRepository;
-    private readonly IProMetadataRepository _proMetadataRepository;
+    private readonly AghanimsFantasyContext _dbContext;
 
     // Our match history list: just going to use a locked list, contention should be very low
     private readonly List<GcMatchMetadata> _matches = new List<GcMatchMetadata>();
@@ -32,22 +28,14 @@ internal class MatchMetadataContext : DotaOperationContext
     public MatchMetadataContext(
             ILogger<MatchMetadataContext> logger,
             HttpClient httpClient,
-            GameCoordinatorRepository gameCoordinatorRepository,
-            IGcDotaMatchRepository gcDotaMatchRepository,
-            IGcMatchMetadataRepository gcMatchMetadataRepository,
-            IMatchHistoryRepository matchHistoryRepository,
-            IProMetadataRepository proMetadataRepository,
+            AghanimsFantasyContext dbContext,
             IServiceScope scope,
             Config config)
         : base(scope, config)
     {
         _logger = logger;
         _httpClient = httpClient;
-        _gameCoordinatorRepository = gameCoordinatorRepository;
-        _gcDotaMatchRepository = gcDotaMatchRepository;
-        _gcMatchMetadataRepository = gcMatchMetadataRepository;
-        _matchHistoryRepository = matchHistoryRepository;
-        _proMetadataRepository = proMetadataRepository;
+        _dbContext = dbContext;
     }
 
     protected override async Task OperateAsync(CancellationToken cancellationToken)
@@ -82,14 +70,15 @@ internal class MatchMetadataContext : DotaOperationContext
                 await Task.WhenAll(tasks);
 
                 // Get Leagues to assign to match details
-                List<League> leagues = await _proMetadataRepository.GetLeaguesAsync(null);
+                List<League> leagues = await _dbContext.Leagues.ToListAsync();
 
                 foreach (GcMatchMetadata matchDetail in _matches)
                 {
-                    Debug.Assert(await _gcDotaMatchRepository.GetByIdAsync((ulong)matchDetail.MatchId) != null);
+                    Debug.Assert(await _dbContext.GcDotaMatches.FindAsync((ulong)matchDetail.MatchId) != null);
                     matchDetail.League = leagues.First(l => l.Id == matchesWithoutDetails.First(mh => (long)mh.match_id == matchDetail.MatchId).leagueid);
-                    await _gameCoordinatorRepository.AddGcMatchMetadata(matchDetail);
+                    await _dbContext.GcMatchMetadata.AddAsync(matchDetail);
                 }
+                await _dbContext.SaveChangesAsync();
 
                 _logger.LogInformation($"Dota Web API - Missing match metadata fetch done");
 
@@ -162,16 +151,16 @@ internal class MatchMetadataContext : DotaOperationContext
 
     private async Task<List<CMsgDOTAMatch>> GetMatchesWithoutMatchDetails(int takeAmount)
     {
-        var activeLeagues = await _proMetadataRepository.GetLeaguesAsync(true);
+        var activeLeagues = await _dbContext.Leagues.Where(l => l.IsActive).ToListAsync();
 
-        return await _gcDotaMatchRepository.GetQueryable()
+        return await _dbContext.GcDotaMatches
             .Where(match => activeLeagues
                     .Select(league => league.Id)
                     .Contains((int)match.leagueid)
             )
             .Where(gcdm => gcdm.replay_state == CMsgDOTAMatch.ReplayState.REPLAY_AVAILABLE &&
-                !_gcMatchMetadataRepository.GetQueryable().Any(gcmm => (ulong)gcmm.MatchId == gcdm.match_id))
-            .Take(50)
+                !_dbContext.GcMatchMetadata.Any(gcmm => (ulong)gcmm.MatchId == gcdm.match_id))
+            .Take(takeAmount)
             .ToListAsync();
     }
 

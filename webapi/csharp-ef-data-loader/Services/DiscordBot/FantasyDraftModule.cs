@@ -1,52 +1,31 @@
 namespace csharp_ef_data_loader.Services.Modules;
 
 using DataAccessLibrary.Data;
-using DataAccessLibrary.Facades;
+using DataAccessLibrary.Data.Facades;
 using DataAccessLibrary.Models.Discord;
 using DataAccessLibrary.Models.Fantasy;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 public class FantasyDraftModule : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly ILogger<FantasyDraftModule> _logger;
-    private readonly IFantasyLeagueRepository _fantasyLeagueRepository;
-    private readonly IFantasyDraftRepository _fantasyDraftRepository;
-    private readonly IFantasyPlayerRepository _fantasyPlayerRepository;
-    private readonly IProMetadataRepository _proMetadataRepository;
-    private readonly IFantasyViewsRepository _fantasyViewsRepository;
-    private readonly IDiscordUserRepository _discordUserRepository;
+    private readonly AghanimsFantasyContext _dbContext;
     private readonly FantasyDraftFacade _fantasyDraftFacade;
     private DiscordUser? _discordUser;
 
     public FantasyDraftModule(
         ILogger<FantasyDraftModule> logger,
-        ILogger<FantasyDraftFacade> facadeLogger,
-        IFantasyLeagueRepository fantasyLeagueRepository,
-        IFantasyDraftRepository fantasyDraftRepository,
-        IFantasyPlayerRepository fantasyPlayerRepository,
-        IProMetadataRepository proMetadataRepository,
-        IDiscordUserRepository discordUserRepository,
-        IFantasyViewsRepository fantasyViewsRepository
+        AghanimsFantasyContext dbContext,
+        FantasyDraftFacade fantasyDraftFacade
         )
     {
         _logger = logger;
-        _fantasyLeagueRepository = fantasyLeagueRepository;
-        _fantasyDraftRepository = fantasyDraftRepository;
-        _fantasyPlayerRepository = fantasyPlayerRepository;
-        _proMetadataRepository = proMetadataRepository;
-        _discordUserRepository = discordUserRepository;
-        _fantasyViewsRepository = fantasyViewsRepository;
-        _fantasyDraftFacade = new FantasyDraftFacade(
-            facadeLogger,
-            _proMetadataRepository,
-            _discordUserRepository,
-            _fantasyLeagueRepository,
-            _fantasyDraftRepository,
-            _fantasyViewsRepository
-        );
+        _dbContext = dbContext;
+        _fantasyDraftFacade = fantasyDraftFacade;
     }
 
     [SlashCommand("set-fantasy-draft", "Draft your 5 Fantasy Players for a given Fantasy League")]
@@ -58,7 +37,7 @@ public class FantasyDraftModule : InteractionModuleBase<SocketInteractionContext
 
         var fantasyDraftMessage = await GetOriginalResponseAsync();
 
-        var fantasyLeagues = await _fantasyLeagueRepository.GetAllAsync();
+        var fantasyLeagues = await _dbContext.FantasyLeagues.ToListAsync();
         var openFantasyLeagues = fantasyLeagues.Where(fl => DateTime.UtcNow < DateTime.UnixEpoch.AddSeconds(fl.FantasyDraftLocked));
 
         // Bomb out if nothing is active
@@ -92,7 +71,14 @@ public class FantasyDraftModule : InteractionModuleBase<SocketInteractionContext
         }
 
         var selectedFantasyLeague = openFantasyLeagues.First(fl => fl.Id.ToString() == userResponse);
-        var availableFantasyPlayers = await _fantasyPlayerRepository.GetByFantasyLeagueAsync(selectedFantasyLeague);
+        var availableFantasyPlayers = await _dbContext.FantasyPlayers
+            .Include(fp => fp.FantasyLeague)
+            .Include(fp => fp.Team)
+            .Include(fp => fp.DotaAccount)
+            .Where(fp => fp.FantasyLeagueId == selectedFantasyLeague.Id)
+            .OrderBy(fp => fp.Team!.Name)
+                .ThenBy(fp => fp.DotaAccount!.Name)
+            .ToListAsync();
 
         List<FantasyPlayer> selectedFantasyPlayers = new List<FantasyPlayer>();
 
@@ -179,7 +165,7 @@ Choose a Fantasy Player for position {position}
 
     private async Task CheckUserAsync()
     {
-        var discordUser = await _discordUserRepository.GetByIdAsync((long)Context.User.Id);
+        var discordUser = await _dbContext.DiscordUsers.FindAsync((long)Context.User.Id);
         if (discordUser != null)
         {
             _discordUser = discordUser;
@@ -193,7 +179,8 @@ Choose a Fantasy Player for position {position}
                 IsAdmin = false,
                 Username = Context.User.Username
             };
-            await _discordUserRepository.AddAsync(newUser);
+            await _dbContext.DiscordUsers.AddAsync(newUser);
+            await _dbContext.SaveChangesAsync();
             _discordUser = newUser;
         }
         return;
@@ -305,7 +292,7 @@ Choose a Fantasy Player for position {position}
 
     private async Task UpdateFantasyDraft(FantasyLeague fantasyLeague, IEnumerable<FantasyPlayer> updateFantasyPlayers)
     {
-        var discordUser = await _discordUserRepository.GetByIdAsync((long)Context.User.Id);
+        var discordUser = await _dbContext.DiscordUsers.FindAsync((long)Context.User.Id);
         if (discordUser == null)
         {
             return;
@@ -315,7 +302,9 @@ Choose a Fantasy Player for position {position}
             throw new ArgumentException("Draft created for invalid Fantasy League Id");
         }
 
-        FantasyDraft? existingUserDraft = await _fantasyDraftRepository.GetByUserFantasyLeague(fantasyLeague, discordUser);
+        FantasyDraft? existingUserDraft = await _dbContext.FantasyDrafts
+                    .Include(fd => fd.DraftPickPlayers)
+                    .FirstOrDefaultAsync(fd => fd.FantasyLeagueId == fantasyLeague.Id && fd.DiscordAccountId == discordUser.Id);
         if (DateTime.UtcNow > DateTime.UnixEpoch.AddSeconds(fantasyLeague.FantasyDraftLocked))
         {
             // TODO: Set this up so that a user can draft late, but then the points only count starting from that time
@@ -324,7 +313,14 @@ Choose a Fantasy Player for position {position}
         }
 
         // Ensure player has posted a draft that is one of each team position, if there's 2 of the same position then reject it as a bad request
-        var fantasyPlayers = await _fantasyPlayerRepository.GetByFantasyLeagueAsync(fantasyLeague);
+        var fantasyPlayers = await _dbContext.FantasyPlayers
+            .Include(fp => fp.FantasyLeague)
+            .Include(fp => fp.Team)
+            .Include(fp => fp.DotaAccount)
+            .Where(fp => fp.FantasyLeagueId == fantasyLeague.Id)
+            .OrderBy(fp => fp.Team!.Name)
+                .ThenBy(fp => fp.DotaAccount!.Name)
+            .ToListAsync();
 
         List<FantasyDraftPlayer> draftPickPlayers = new List<FantasyDraftPlayer>();
 
@@ -343,7 +339,8 @@ Choose a Fantasy Player for position {position}
         if (fantasyPlayers.Where(fp => draftPickPlayers.Where(dpp => dpp.FantasyPlayer != null).Any(dpp => dpp.FantasyPlayer!.Id == fp.Id)).GroupBy(fp => fp.TeamPosition).Where(grp => grp.Count() > 1).Count() > 0)
         {
             throw new ArgumentException("Can only draft one of each team position");
-        };
+        }
+        ;
 
         if (existingUserDraft != null)
         {
@@ -359,7 +356,8 @@ Choose a Fantasy Player for position {position}
                 DraftCreated = DateTime.UtcNow,
                 DraftPickPlayers = []
             };
-            await _fantasyDraftRepository.AddAsync(existingUserDraft);
+            await _dbContext.FantasyDrafts.AddAsync(existingUserDraft);
+            await _dbContext.SaveChangesAsync();
         }
 
         // Fantasy Draft may be incomplete, so go through and add the IDs passed

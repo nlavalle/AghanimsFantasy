@@ -1,13 +1,12 @@
 namespace csharp_ef_data_loader.Services;
 
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-
 using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
-using System.Reflection;
 using Discord.Interactions;
+using Discord.WebSocket;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using System.Reflection;
 
 public class DiscordBotService : IHostedService
 {
