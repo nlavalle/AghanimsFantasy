@@ -24,6 +24,39 @@ namespace csharp_ef_webapi.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("DataAccessLibrary.Models.Discord.DiscordOutbox", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("EventObject")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("event_object");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("event_type");
+
+                    b.Property<long>("MessageSentTimestamp")
+                        .HasColumnType("bigint")
+                        .HasColumnName("message_sent_timestamp");
+
+                    b.Property<string>("ObjectKey")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("object_key");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("discord_outbox", "nadcl");
+                });
+
             modelBuilder.Entity("DataAccessLibrary.Models.Discord.DiscordUser", b =>
                 {
                     b.Property<long>("Id")
@@ -774,6 +807,10 @@ namespace csharp_ef_webapi.Migrations
                     b.Property<long>("FantasyLeagueJoinDate")
                         .HasColumnType("bigint")
                         .HasColumnName("fantasy_league_join_date");
+
+                    b.Property<bool>("IsAdmin")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_admin");
 
                     b.HasKey("Id");
 
@@ -2027,7 +2064,8 @@ namespace csharp_ef_webapi.Migrations
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnName("id")
+                        .HasAnnotation("Relational:JsonPropertyName", "id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
@@ -2095,7 +2133,8 @@ namespace csharp_ef_webapi.Migrations
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnName("id")
+                        .HasAnnotation("Relational:JsonPropertyName", "id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
@@ -2119,13 +2158,13 @@ namespace csharp_ef_webapi.Migrations
                         .HasColumnName("games_played")
                         .HasAnnotation("Relational:JsonPropertyName", "games_played");
 
-                    b.Property<string>("Logo")
-                        .HasColumnType("text")
+                    b.Property<decimal?>("Logo")
+                        .HasColumnType("numeric")
                         .HasColumnName("logo")
                         .HasAnnotation("Relational:JsonPropertyName", "logo");
 
-                    b.Property<string>("LogoSponsor")
-                        .HasColumnType("text")
+                    b.Property<decimal?>("LogoSponsor")
+                        .HasColumnType("numeric")
                         .HasColumnName("logo_sponsor")
                         .HasAnnotation("Relational:JsonPropertyName", "logo_sponsor");
 
@@ -3155,7 +3194,7 @@ namespace csharp_ef_webapi.Migrations
 
             modelBuilder.Entity("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch", b =>
                 {
-                    b.OwnsMany("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch.players#SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player", "players", b1 =>
+                    b.OwnsMany("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player", "players", b1 =>
                         {
                             b1.Property<int>("Id")
                                 .ValueGeneratedOnAdd()
@@ -3379,7 +3418,7 @@ namespace csharp_ef_webapi.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("MatchId");
 
-                            b1.OwnsMany("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch.players#SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player.hero_damage_dealt#SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player+HeroDamageReceived", "hero_damage_dealt", b2 =>
+                            b1.OwnsMany("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player+HeroDamageReceived", "hero_damage_dealt", b2 =>
                                 {
                                     b2.Property<int>("Id")
                                         .ValueGeneratedOnAdd()
@@ -3409,7 +3448,7 @@ namespace csharp_ef_webapi.Migrations
                                         .HasForeignKey("MatchPlayerId");
                                 });
 
-                            b1.OwnsMany("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch.players#SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player.hero_damage_received#SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player+HeroDamageReceived", "hero_damage_received", b2 =>
+                            b1.OwnsMany("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch+Player+HeroDamageReceived", "hero_damage_received", b2 =>
                                 {
                                     b2.Property<int>("Id")
                                         .ValueGeneratedOnAdd()

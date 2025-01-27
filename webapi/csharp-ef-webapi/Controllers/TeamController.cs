@@ -1,9 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
+using csharp_ef_webapi.Services;
 using DataAccessLibrary.Data;
+using DataAccessLibrary.Models.Discord;
 using DataAccessLibrary.Models.ProMetadata;
 using Microsoft.AspNetCore.Authorization;
-using csharp_ef_webapi.Services;
-using DataAccessLibrary.Models.Discord;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace csharp_ef_webapi.Controllers
 {
@@ -11,17 +12,17 @@ namespace csharp_ef_webapi.Controllers
     [ApiController]
     public class TeamController : ControllerBase
     {
-        private readonly IProMetadataRepository _proMetadataRepository;
+        private readonly AghanimsFantasyContext _dbContext;
         private readonly DiscordWebApiService _discordWebApiService;
         private readonly FantasyServiceAdmin _fantasyServiceAdmin;
 
         public TeamController(
-            IProMetadataRepository proMetadataRepository,
+            AghanimsFantasyContext dbContext,
             DiscordWebApiService discordWebApiService,
             FantasyServiceAdmin fantasyServiceAdmin
         )
         {
-            _proMetadataRepository = proMetadataRepository;
+            _dbContext = dbContext;
             _discordWebApiService = discordWebApiService;
             _fantasyServiceAdmin = fantasyServiceAdmin;
         }
@@ -35,14 +36,14 @@ namespace csharp_ef_webapi.Controllers
                 return BadRequest("Please specify a Team Id");
             }
 
-            return Ok(await _proMetadataRepository.GetTeamAsync(teamId.Value));
+            return Ok(await _dbContext.Teams.FindAsync(teamId.Value));
         }
 
         // GET: api/Team
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Team>>> GetTeams()
         {
-            return Ok(await _proMetadataRepository.GetTeamsAsync());
+            return Ok(await _dbContext.Teams.ToListAsync());
         }
 
         // POST: api/Team

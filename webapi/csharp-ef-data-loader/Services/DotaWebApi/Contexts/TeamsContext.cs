@@ -2,6 +2,7 @@ namespace csharp_ef_data_loader.Services;
 
 using DataAccessLibrary.Data;
 using DataAccessLibrary.Models.ProMetadata;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
@@ -11,19 +12,19 @@ internal class TeamsContext : DotaOperationContext
     private static readonly string AppendedApiPath = "GetTeamInfoByTeamID/v1";
     private readonly ILogger<TeamsContext> _logger;
     private readonly HttpClient _httpClient;
-    private readonly IProMetadataRepository _proMetadataRepository;
+    private readonly AghanimsFantasyContext _dbContext;
 
     public TeamsContext(
             ILogger<TeamsContext> logger,
             HttpClient httpClient,
-            IProMetadataRepository proMetadataRepository,
+            AghanimsFantasyContext dbContext,
             IServiceScope scope,
             Config config)
         : base(scope, config)
     {
         _logger = logger;
         _httpClient = httpClient;
-        _proMetadataRepository = proMetadataRepository;
+        _dbContext = dbContext;
     }
 
     protected override async Task OperateAsync(CancellationToken cancellationToken)
@@ -31,8 +32,16 @@ internal class TeamsContext : DotaOperationContext
         try
         {
             _logger.LogInformation($"Fetching heroes");
-
-            List<long> newTeams = await _proMetadataRepository.GetUnknownTeamIds();
+            List<long> newTeams = await _dbContext.MatchHistory
+            .Select(mh => mh.RadiantTeamId)
+            .Union(_dbContext.MatchHistory.Select(mh => mh.DireTeamId))
+            .Distinct()
+            .Where(t => t != 0)
+            .Where(
+                mh => !_dbContext.Teams
+                    .Select(t => t.Id)
+                    .Contains(mh))
+            .ToListAsync();
 
             if (newTeams.Count() > 0)
             {
@@ -48,7 +57,7 @@ internal class TeamsContext : DotaOperationContext
 
                 foreach (Team team in fetchTeamsTasks.SelectMany(t => t.Result).ToList())
                 {
-                    await _proMetadataRepository.AddTeamAsync(team);
+                    await _dbContext.Teams.AddAsync(team);
                 }
             }
 

@@ -4,8 +4,8 @@ using System.Diagnostics;
 using DataAccessLibrary.Data;
 using DataAccessLibrary.Models.GameCoordinator;
 using DataAccessLibrary.Models.ProMetadata;
-using DataAccessLibrary.Models.WebApi;
 using ICSharpCode.SharpZipLib.BZip2;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ProtoBuf;
@@ -15,10 +15,7 @@ internal class MatchMetadataContext : DotaOperationContext
 {
     private readonly ILogger<MatchMetadataContext> _logger;
     private readonly HttpClient _httpClient;
-    private readonly GameCoordinatorRepository _gameCoordinatorRepository;
-    private readonly IGcDotaMatchRepository _gcDotaMatchRepository;
-    private readonly IMatchHistoryRepository _matchHistoryRepository;
-    private readonly IProMetadataRepository _proMetadataRepository;
+    private readonly AghanimsFantasyContext _dbContext;
 
     // Our match history list: just going to use a locked list, contention should be very low
     private readonly List<GcMatchMetadata> _matches = new List<GcMatchMetadata>();
@@ -31,20 +28,14 @@ internal class MatchMetadataContext : DotaOperationContext
     public MatchMetadataContext(
             ILogger<MatchMetadataContext> logger,
             HttpClient httpClient,
-            GameCoordinatorRepository gameCoordinatorRepository,
-            IGcDotaMatchRepository gcDotaMatchRepository,
-            IMatchHistoryRepository matchHistoryRepository,
-            IProMetadataRepository proMetadataRepository,
+            AghanimsFantasyContext dbContext,
             IServiceScope scope,
             Config config)
         : base(scope, config)
     {
         _logger = logger;
         _httpClient = httpClient;
-        _gameCoordinatorRepository = gameCoordinatorRepository;
-        _gcDotaMatchRepository = gcDotaMatchRepository;
-        _matchHistoryRepository = matchHistoryRepository;
-        _proMetadataRepository = proMetadataRepository;
+        _dbContext = dbContext;
     }
 
     protected override async Task OperateAsync(CancellationToken cancellationToken)
@@ -54,7 +45,7 @@ internal class MatchMetadataContext : DotaOperationContext
             // Find all the match histories without match detail rows and add tasks to fetch them all
             // Take 50 at a time since this runs every 5 minutes, no reason to blast it all at once
             // Only look at active leagues otherwise this will look for old missing matches forever
-            List<CMsgDOTAMatch> matchesWithoutDetails = await _gcDotaMatchRepository.GetNotInGcMetadata(50);
+            List<CMsgDOTAMatch> matchesWithoutDetails = await GetMatchesWithoutMatchDetails(50);
 
             if (matchesWithoutDetails.Count() > 0)
             {
@@ -79,14 +70,15 @@ internal class MatchMetadataContext : DotaOperationContext
                 await Task.WhenAll(tasks);
 
                 // Get Leagues to assign to match details
-                List<League> leagues = await _proMetadataRepository.GetLeaguesAsync(null);
+                List<League> leagues = await _dbContext.Leagues.ToListAsync();
 
                 foreach (GcMatchMetadata matchDetail in _matches)
                 {
-                    Debug.Assert(await _gcDotaMatchRepository.GetByIdAsync((ulong)matchDetail.MatchId) != null);
+                    Debug.Assert(await _dbContext.GcDotaMatches.FindAsync((ulong)matchDetail.MatchId) != null);
                     matchDetail.League = leagues.First(l => l.Id == matchesWithoutDetails.First(mh => (long)mh.match_id == matchDetail.MatchId).leagueid);
-                    await _gameCoordinatorRepository.AddGcMatchMetadata(matchDetail);
+                    await _dbContext.GcMatchMetadata.AddAsync(matchDetail);
                 }
+                await _dbContext.SaveChangesAsync();
 
                 _logger.LogInformation($"Dota Web API - Missing match metadata fetch done");
 
@@ -155,6 +147,21 @@ internal class MatchMetadataContext : DotaOperationContext
         int totalMatches = _totalMatches;
         int completeLeagues = totalMatches - _remainingMatches;
         return $"{completeLeagues} of {totalMatches} missing match details fetched";
+    }
+
+    private async Task<List<CMsgDOTAMatch>> GetMatchesWithoutMatchDetails(int takeAmount)
+    {
+        var activeLeagues = await _dbContext.Leagues.Where(l => l.IsActive).ToListAsync();
+
+        return await _dbContext.GcDotaMatches
+            .Where(match => activeLeagues
+                    .Select(league => league.Id)
+                    .Contains((int)match.leagueid)
+            )
+            .Where(gcdm => gcdm.replay_state == CMsgDOTAMatch.ReplayState.REPLAY_AVAILABLE &&
+                !_dbContext.GcMatchMetadata.Any(gcmm => (ulong)gcmm.MatchId == gcdm.match_id))
+            .Take(takeAmount)
+            .ToListAsync();
     }
 
     private GcMatchMetadata CastGcToModel(CDOTAMatchMetadata matchMetadata, int leagueId)

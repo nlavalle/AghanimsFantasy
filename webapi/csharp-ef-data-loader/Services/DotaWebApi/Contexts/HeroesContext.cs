@@ -11,12 +11,12 @@ internal class HeroesContext : DotaOperationContext
     private static readonly string AppendedApiPath = "GetHeroes/v1";
     private readonly ILogger<HeroesContext> _logger;
     private readonly HttpClient _httpClient;
-    private readonly IProMetadataRepository _proMetadataRepository;
+    private readonly AghanimsFantasyContext _dbContext;
 
     public HeroesContext(
             ILogger<HeroesContext> logger,
             HttpClient httpClient,
-            IProMetadataRepository proMetadataRepository,
+            AghanimsFantasyContext dbContext,
             IServiceScope scope,
             Config config
         )
@@ -24,7 +24,7 @@ internal class HeroesContext : DotaOperationContext
     {
         _logger = logger;
         _httpClient = httpClient;
-        _proMetadataRepository = proMetadataRepository;
+        _dbContext = dbContext;
     }
 
     protected override async Task OperateAsync(CancellationToken cancellationToken)
@@ -36,7 +36,7 @@ internal class HeroesContext : DotaOperationContext
 
         foreach (Hero hero in heroes)
         {
-            await _proMetadataRepository.UpsertHeroAsync(hero);
+            await UpsertHeroAsync(hero);
         }
 
         _logger.LogInformation($"Hero fetch done");
@@ -70,5 +70,25 @@ internal class HeroesContext : DotaOperationContext
         List<Hero> heroesResponse = JsonSerializer.Deserialize<List<Hero>>(heroesElement.GetRawText()) ?? throw new Exception("Unable to deserialize response json to Hero");
 
         return heroesResponse;
+    }
+
+    private async Task UpsertHeroAsync(Hero upsertHero)
+    {
+        _logger.LogInformation($"Upserting Dota Hero {upsertHero.Name}");
+
+        if (_dbContext.Heroes.Find(upsertHero.Id) != null)
+        {
+            Hero updateHero = _dbContext.Heroes.First(h => h.Id == upsertHero.Id);
+            updateHero.Name = upsertHero.Name;
+            _dbContext.Heroes.Update(updateHero);
+        }
+        else
+        {
+            _dbContext.Heroes.Add(upsertHero);
+        }
+
+        await _dbContext.SaveChangesAsync();
+
+        return;
     }
 }

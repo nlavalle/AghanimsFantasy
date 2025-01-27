@@ -1,4 +1,4 @@
-namespace DataAccessLibrary.UnitTests.Data;
+namespace DataAccessLibrary.IntegrationTests.Data;
 
 using Moq;
 using System.Data.Common;

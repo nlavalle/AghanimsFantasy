@@ -1,6 +1,7 @@
 using csharp_ef_webapi.Migrations;
 using csharp_ef_webapi.Services;
 using DataAccessLibrary.Data;
+using DataAccessLibrary.Data.Facades;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
@@ -124,28 +125,18 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add Fantasy Repositories
-builder.Services.AddScoped<IFantasyDraftRepository, FantasyDraftRepository>();
-builder.Services.AddScoped<IFantasyLeagueRepository, FantasyLeagueRepository>();
-builder.Services.AddScoped<IFantasyLeagueWeightRepository, FantasyLeagueWeightRepository>();
-builder.Services.AddScoped<IFantasyPlayerRepository, FantasyPlayerRepository>();
-builder.Services.AddScoped<IFantasyMatchRepository, FantasyMatchRepository>();
-builder.Services.AddScoped<IFantasyMatchPlayerRepository, FantasyMatchPlayerRepository>();
-builder.Services.AddScoped<IFantasyRepository, FantasyRepository>();
-// Add Game Coordinator Repositories
-builder.Services.AddScoped<IGcMatchMetadataRepository, GcMatchMetadataRepository>();
-// Add ProMetadata Repositories
-builder.Services.AddScoped<IProMetadataRepository, ProMetadataRepository>();
-// Add WebApi Repositories
-builder.Services.AddScoped<IMatchHistoryRepository, MatchHistoryRepository>();
-builder.Services.AddScoped<IMatchDetailRepository, MatchDetailRepository>();
-// Add Discord Repositories
-builder.Services.AddScoped<IDiscordRepository, DiscordRepository>();
-
-// Add Scoped services to be used by controllers to limit direct repository access
+// Add Scoped services to be used by controllers
 builder.Services.AddScoped<DiscordWebApiService>();
 builder.Services.AddScoped<FantasyService>();
 builder.Services.AddScoped<FantasyServiceAdmin>();
+builder.Services.AddScoped<FantasyServicePrivateFantasyAdmin>();
+
+// Add Scoped data services to be used by controllers
+builder.Services.AddScoped<AuthFacade>();
+builder.Services.AddScoped<DiscordFacade>();
+builder.Services.AddScoped<FantasyDraftFacade>();
+builder.Services.AddScoped<FantasyMatchFacade>();
+builder.Services.AddScoped<FantasyPointsFacade>();
 
 var app = builder.Build();
 

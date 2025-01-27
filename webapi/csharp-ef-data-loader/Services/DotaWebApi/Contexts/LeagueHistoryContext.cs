@@ -6,14 +6,14 @@ using DataAccessLibrary.Models.WebApi;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 
 internal class LeagueHistoryContext : DotaOperationContext
 {
     private static readonly string AppendedApiPath = "GetMatchHistory/v1";
     private readonly ILogger<LeagueHistoryContext> _logger;
     private readonly HttpClient _httpClient;
-    private readonly IProMetadataRepository _proMetadataRepository;
-    private readonly IMatchHistoryRepository _matchHistoryRepository;
+    private readonly AghanimsFantasyContext _dbContext;
 
     // Our match history list: just going to use a locked list, contention should be very low
     private readonly List<MatchHistory> _matches = new List<MatchHistory>();
@@ -27,8 +27,7 @@ internal class LeagueHistoryContext : DotaOperationContext
     public LeagueHistoryContext(
             ILogger<LeagueHistoryContext> logger,
             HttpClient httpClient,
-            IProMetadataRepository proMetadataRepository,
-            IMatchHistoryRepository matchHistoryRepository,
+            AghanimsFantasyContext dbContext,
             IServiceScope scope,
             Config config
         )
@@ -36,8 +35,7 @@ internal class LeagueHistoryContext : DotaOperationContext
     {
         _logger = logger;
         _httpClient = httpClient;
-        _proMetadataRepository = proMetadataRepository;
-        _matchHistoryRepository = matchHistoryRepository;
+        _dbContext = dbContext;
     }
 
     protected override async Task OperateAsync(CancellationToken cancellationToken)
@@ -46,7 +44,7 @@ internal class LeagueHistoryContext : DotaOperationContext
         {
             Dictionary<string, string> query = new Dictionary<string, string>();
 
-            var leagues = (await _proMetadataRepository.GetLeaguesAsync(false)).Distinct().ToArray();
+            var leagues = await _dbContext.Leagues.Where(l => l.IsActive).Distinct().ToArrayAsync();
             var length = leagues.Length;
 
             // Knowing the length triggers a lot of stuff
@@ -65,13 +63,13 @@ internal class LeagueHistoryContext : DotaOperationContext
             await Task.WhenAll(tasks);
 
             // Going to assume that an ImmutableSortedSet is the fastest to do Contains()
-            var knownHeroes = (await _proMetadataRepository.GetHeroesAsync()).Select(x => x.Id).ToImmutableSortedSet();
+            var knownHeroes = _dbContext.Heroes.Select(x => x.Id).ToImmutableSortedSet();
             bool triedHeroFetch = false;
 
             // _matches is safe to use here, because this location is guaranteed to be the only user
             foreach (MatchHistory match in _matches)
             {
-                if (await _matchHistoryRepository.GetByIdAsync(match.MatchId) == null)
+                if (await _dbContext.MatchHistory.FindAsync(match.MatchId) == null)
                 {
                     // Set Players Match IDs since it's not in json
                     foreach (MatchHistoryPlayer player in match.Players)
@@ -80,7 +78,7 @@ internal class LeagueHistoryContext : DotaOperationContext
                         {
                             if (!triedHeroFetch)
                             {
-                                knownHeroes = (await _proMetadataRepository.GetHeroesAsync()).Select(x => x.Id).ToImmutableSortedSet();
+                                knownHeroes = _dbContext.Heroes.Select(x => x.Id).ToImmutableSortedSet();
                                 triedHeroFetch = true;
                                 continue;
                             }
@@ -91,9 +89,11 @@ internal class LeagueHistoryContext : DotaOperationContext
 
                         player.MatchId = match.MatchId;
                     }
-                    await _matchHistoryRepository.AddAsync(match);
+                    await _dbContext.MatchHistory.AddAsync(match);
                 }
             }
+
+            await _dbContext.SaveChangesAsync();
             _logger.LogInformation($"League Match History fetch done");
         }
         catch (Exception ex)

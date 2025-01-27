@@ -40,6 +40,7 @@ namespace csharp_ef_webapi.Controllers
 
             bool getAccountId = long.TryParse(nameId.Value, out long userDiscordAccountId);
             var discordUser = await _discordService.GetDiscordUserAsync(userDiscordAccountId);
+            var fantasyAdmin = await _discordService.CheckPrivateFantasyAdminUser(userDiscordAccountId);
 
             if (discordUser != null && discordUser.IsAdmin)
             {
@@ -50,6 +51,11 @@ namespace csharp_ef_webapi.Controllers
                 userClaims.Add(new { Type = ClaimTypes.Role, Value = "user" });
             }
 
+            // Check for Admins of Private Fantasy Leagues
+            if (discordUser != null && fantasyAdmin == true)
+            {
+                userClaims.Add(new { Type = ClaimTypes.Role, Value = "privateFantasyAdmin" });
+            }
 
             return Ok(userClaims);
         }

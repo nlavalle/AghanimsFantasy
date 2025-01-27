@@ -5,12 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using DataAccessLibrary.Models.ProMetadata;
 using DataAccessLibrary.Models.Fantasy;
-using DataAccessLibrary.Models.WebApi;
-using DataAccessLibrary.Models.GameCoordinator;
 using DataAccessLibrary.Models.Discord;
 
-
-namespace DataAccessLibrary.UnitTests.Data;
+namespace DataAccessLibrary.IntegrationTests.Data;
 
 public class SqliteInMemoryFantasyTests : IDisposable
 {
@@ -331,7 +328,7 @@ public class SqliteInMemoryFantasyTests : IDisposable
         var repository = new FantasyPlayerRepository(loggerMock.Object, context);
 
         var fantasyLeague = await context.FantasyLeagues.FindAsync(1);
-        var fantasyPlayers = await repository.GetFantasyLeaguePlayersAsync(fantasyLeague!);
+        var fantasyPlayers = await repository.GetByFantasyLeagueAsync(fantasyLeague!);
         Assert.Equal(10, fantasyPlayers.Count());
         Assert.IsAssignableFrom<IEnumerable<FantasyPlayer>>(fantasyPlayers);
     }
@@ -356,40 +353,8 @@ public class SqliteInMemoryFantasyTests : IDisposable
         var repository = new FantasyPlayerRepository(loggerMock.Object, context);
 
         var fantasyLeague = await context.FantasyLeagues.FindAsync(3);
-        var fantasyPlayers = await repository.GetFantasyLeaguePlayersAsync(fantasyLeague!);
+        var fantasyPlayers = await repository.GetByFantasyLeagueAsync(fantasyLeague!);
         Assert.Empty(fantasyPlayers);
-    }
-
-    [Fact]
-    public async void GetFantasyPlayerPointsLeague()
-    {
-        using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<FantasyDraftRepository>>();
-        var repository = new FantasyDraftRepository(loggerMock.Object, context);
-
-        var fantasyLeague = await context.FantasyLeagues.FindAsync(1);
-        var fantasyPlayerPoints = await repository.FantasyPlayerPointTotalsByFantasyLeagueAsync(fantasyLeague!);
-        // // We want to return fantasy player points even if rows are null, so this should have 2 players with a match
-        // //  and all 3 players should return a null row for scenarios when a new league has no games yet
-        Assert.Equal(2, fantasyPlayerPoints.Where(fpp => fpp.TotalMatches > 0).Count());
-        Assert.Equal(8, fantasyPlayerPoints.Where(fpp => fpp.TotalMatches == 0).Count());
-        Assert.Equal(10, fantasyPlayerPoints.Count());
-        Assert.IsAssignableFrom<IEnumerable<FantasyPlayerPointTotals>>(fantasyPlayerPoints);
-    }
-
-    [Fact]
-    public async void GetFantasyPlayerPointTotalsLeague()
-    {
-        using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<FantasyDraftRepository>>();
-        var repository = new FantasyDraftRepository(loggerMock.Object, context);
-
-        var fantasyLeague = await context.FantasyLeagues.FindAsync(1);
-        var fantasyPlayerPoints = await repository.FantasyPlayerPointTotalsByFantasyLeagueAsync(fantasyLeague!);
-        // We want to return fantasy player points even if rows are null, so this should have all 3 players
-        // even though 1 has no match
-        Assert.Equal(10, fantasyPlayerPoints.Count());
-        Assert.IsAssignableFrom<IEnumerable<FantasyPlayerPointTotals>>(fantasyPlayerPoints);
     }
 
     [Fact]
@@ -420,13 +385,5 @@ public class SqliteInMemoryFantasyTests : IDisposable
 
         Assert.Null(fantasyDraft);
     }
-
-    // Task<IEnumerable<FantasyPlayerPoints>> FantasyDraftPointsByLeagueAsync(int LeagueId);
-    // Task<IEnumerable<FantasyPlayerPoints>> FantasyDraftPointsByUserLeagueAsync(long UserDiscordAccountId, int LeagueId);
-    // IEnumerable<FantasyPlayerPointTotals> AggregateFantasyPlayerPoints(IEnumerable<FantasyPlayerPoints> fantasyPlayerPoints);
-    // IEnumerable<FantasyDraftPointTotals> AggregateFantasyDraftPoints(IEnumerable<FantasyPlayerPoints> fantasyPlayerPoints);
-    // Task ClearUserFantasyPlayersAsync(long UserDiscordAccountId, int LeagueId);
-    // Task<FantasyDraft> AddNewUserFantasyPlayerAsync(long UserDiscordAccountId, int LeagueId, long? FantasyPlayerId, int DraftOrder);
-
     #endregion
 }

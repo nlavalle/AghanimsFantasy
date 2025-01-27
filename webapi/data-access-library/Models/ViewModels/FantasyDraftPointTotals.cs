@@ -6,9 +6,7 @@ using DataAccessLibrary.Models.Fantasy;
 public class FantasyDraftPointTotals
 {
     public required FantasyDraft FantasyDraft { get; set; }
-    public bool IsTeam { get; set; }
-    public long? TeamId { get; set; }
-    public string DiscordName { get; set; } = "";
+    public string DiscordName { get; set; } = "unknown";
     public List<FantasyPlayerPointTotals> FantasyPlayerPoints { get; set; } = new List<FantasyPlayerPointTotals>();
     public decimal DraftPickOnePoints
     {

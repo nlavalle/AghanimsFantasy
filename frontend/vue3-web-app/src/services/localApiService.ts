@@ -258,6 +258,70 @@ export const localApiService = {
         throw error
       })
   },
+  getPrivateFantasyLeagueWeights() {
+    return fetch(`${baseUrl}/PrivateFantasyLeague/FantasyLeagueWeight`)
+      .then(
+        function (response: Response) {
+          if (!response.ok) {
+            throw response.status
+          } else {
+            return response.json()
+          }
+        }.bind(this)
+      )
+      .then(
+        function (data: any) {
+          return data.sort((a: any, b: any) => b.id - a.id)
+        }.bind(this)
+      )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
+  putPrivateFantasyLeagueWeight(updateFantasyLeagueWeight: FantasyLeagueWeight) {
+    if (!updateFantasyLeagueWeight.id) return;
+    return fetch(`${baseUrl}/PrivateFantasyLeague/FantasyLeagueWeight/${updateFantasyLeagueWeight.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(updateFantasyLeagueWeight)
+    }).then(
+      function (response: Response) {
+        if (!response.ok) {
+          throw response.status
+        } else {
+          return response.status
+        }
+      }.bind(this)
+    )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
+  getPrivateFantasyPlayers(fantasyLeagueId: number = 0) {
+    return fetch(`${baseUrl}/PrivateFantasyLeague/FantasyLeague/${fantasyLeagueId}`)
+      .then(
+        function (response: Response) {
+          if (!response.ok) {
+            throw response.status
+          } else {
+            return response.json()
+          }
+        }.bind(this)
+      )
+      .then(
+        function (data: any) {
+          return data.sort((a: any, b: any) => b.id - a.id)
+        }.bind(this)
+      )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
   getFantasyPlayers(fantasyLeagueId: number = 0) {
     return fetch(`${baseUrl}/FantasyLeague/${fantasyLeagueId}/players`)
       .then(

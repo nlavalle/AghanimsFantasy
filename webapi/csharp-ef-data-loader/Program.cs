@@ -1,5 +1,7 @@
 using csharp_ef_data_loader.Services;
 using DataAccessLibrary.Data;
+using DataAccessLibrary.Data.Facades;
+using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,31 +28,27 @@ builder.Services.AddDbContext<AghanimsFantasyContext>(
 // Add persistent HttpClient
 builder.Services.AddHttpClient();
 
-// Add Fantasy Repositories
-builder.Services.AddScoped<IFantasyDraftRepository, FantasyDraftRepository>();
-builder.Services.AddScoped<IFantasyLeagueRepository, FantasyLeagueRepository>();
-builder.Services.AddScoped<IFantasyPlayerRepository, FantasyPlayerRepository>();
-builder.Services.AddScoped<IFantasyMatchRepository, FantasyMatchRepository>();
-builder.Services.AddScoped<IFantasyMatchPlayerRepository, FantasyMatchPlayerRepository>();
-builder.Services.AddScoped<IFantasyRepository, FantasyRepository>();
-// Add Game Coordinator Repositories
-builder.Services.AddScoped<IGcMatchMetadataRepository, GcMatchMetadataRepository>();
-builder.Services.AddScoped<IGcDotaMatchRepository, GcDotaMatchRepository>();
-builder.Services.AddScoped<GameCoordinatorRepository>();
-// Add ProMetadata Repositories
-builder.Services.AddScoped<IProMetadataRepository, ProMetadataRepository>();
-// Add WebApi Repositories
-builder.Services.AddScoped<IMatchHistoryRepository, MatchHistoryRepository>();
-builder.Services.AddScoped<IMatchDetailRepository, MatchDetailRepository>();
-// Add Discord Repositories
-builder.Services.AddScoped<IDiscordRepository, DiscordRepository>();
-
 // Add Scoped Dota Client to be called for Dota Client Background Service
 builder.Services.AddScoped<DotaClient>();
 
 // Add WebApi and Steam Client Services
 builder.Services.AddHostedService<DotaWebApiService>();
 builder.Services.AddHostedService<DotaSteamClientService>();
+
+// Add Discord Bot services
+builder.Services.AddSingleton(new DiscordSocketConfig
+{
+    GatewayIntents = Discord.GatewayIntents.AllUnprivileged | Discord.GatewayIntents.MessageContent
+});
+builder.Services.AddSingleton<DiscordSocketClient>();
+builder.Services.AddHostedService<DiscordBotService>();
+
+// Add Scoped Data Facades
+builder.Services.AddScoped<AuthFacade>();
+builder.Services.AddScoped<DiscordFacade>();
+builder.Services.AddScoped<FantasyDraftFacade>();
+builder.Services.AddScoped<FantasyMatchFacade>();
+builder.Services.AddScoped<FantasyPointsFacade>();
 
 
 var app = builder.Build();

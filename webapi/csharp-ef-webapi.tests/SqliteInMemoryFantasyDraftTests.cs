@@ -7,9 +7,9 @@ using DataAccessLibrary.Models.ProMetadata;
 using DataAccessLibrary.Models.Fantasy;
 using DataAccessLibrary.Models.Discord;
 using csharp_ef_webapi.Services;
-using csharp_ef_webapi.UnitTests.Data;
+using csharp_ef_webapi.IntegrationTests.Data;
 
-namespace DataAccessLibrary.UnitTests.Data;
+namespace csharp_ef_webapi.IntegrationTests.Data;
 
 public class SqliteInMemoryFantasyDraftTests : IDisposable
 {

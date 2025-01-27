@@ -3,7 +3,7 @@ using DataAccessLibrary.Models.GameCoordinator;
 using DataAccessLibrary.Models.ProMetadata;
 using DataAccessLibrary.Models.WebApi;
 
-namespace csharp_ef_webapi.UnitTests.Data;
+namespace csharp_ef_webapi.IntegrationTests.Data;
 
 public static class DbSeeder
 {

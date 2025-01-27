@@ -1,6 +1,6 @@
 <template>
   <div class="league-select bg-primary">
-    <v-tabs v-model="leagueStore.selectedLeague">
+    <v-tabs v-model="leagueStore.selectedLeague" selected-class="selected-tab">
       <v-tab v-for="league in leagueOptions" :value="league"
         :variant="leagueStore.isLeagueActive(league) ? 'text' : 'plain'">
         {{ league.name }}
@@ -10,7 +10,7 @@
     </v-tabs>
   </div>
   <div class="bg-secondary">
-    <v-tabs v-model="leagueStore.selectedFantasyLeague">
+    <v-tabs v-model="leagueStore.selectedFantasyLeague" selected-class="selected-tab">
       <v-tab v-for="fantasyLeague in fantasyLeagueOptions" :value="fantasyLeague"
         :variant="leagueStore.isDraftActive(fantasyLeague.leagueEndTime) ? 'text' : 'plain'">
         {{ fantasyLeague.name }} ({{ leagueStore.fantasyDraftPoints.find(draft => draft?.fantasyDraft?.fantasyLeagueId
@@ -89,9 +89,9 @@ watch(() => leagueStore.selectedFantasyLeague, () => {
 </script>
 
 <style scoped>
-.league-select {
+/* .league-select {
   height: 2.5rem;
-}
+} */
 
 .league-selector-label {
   text-transform: uppercase;
@@ -101,5 +101,9 @@ watch(() => leagueStore.selectedFantasyLeague, () => {
 
 .league-selector :deep(.v-list-item-title) {
   font-size: 0.8rem;
+}
+
+.selected-tab {
+  backdrop-filter: brightness(150%);
 }
 </style>

@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using DataAccessLibrary.Models;
 using DataAccessLibrary.Data;
+using DataAccessLibrary.Data.Facades;
 using DataAccessLibrary.Models.ProMetadata;
 using DataAccessLibrary.Models.Fantasy;
 using Microsoft.AspNetCore.Authorization;
 using csharp_ef_webapi.Services;
 using DataAccessLibrary.Models.Discord;
+using Microsoft.EntityFrameworkCore;
 
 namespace csharp_ef_webapi.Controllers
 {
@@ -13,22 +15,22 @@ namespace csharp_ef_webapi.Controllers
     [ApiController]
     public class PlayerController : ControllerBase
     {
-        private readonly IFantasyRepository _fantasyRepository;
-        private readonly IProMetadataRepository _proMetadataRepository;
+        private readonly AghanimsFantasyContext _dbContext;
         private readonly DiscordWebApiService _discordWebApiService;
         private readonly FantasyServiceAdmin _fantasyServiceAdmin;
+        private readonly FantasyPointsFacade _fantasyPointsFacade;
 
         public PlayerController(
-            IFantasyRepository fantasyRepository,
-            IProMetadataRepository proMetadataRepository,
+            AghanimsFantasyContext dbContext,
             DiscordWebApiService discordWebApiService,
-            FantasyServiceAdmin fantasyServiceAdmin
+            FantasyServiceAdmin fantasyServiceAdmin,
+            FantasyPointsFacade fantasyPointsFacade
         )
         {
-            _fantasyRepository = fantasyRepository;
-            _proMetadataRepository = proMetadataRepository;
+            _dbContext = dbContext;
             _discordWebApiService = discordWebApiService;
             _fantasyServiceAdmin = fantasyServiceAdmin;
+            _fantasyPointsFacade = fantasyPointsFacade;
         }
 
         // GET: api/Player/account/{accountId}
@@ -40,14 +42,14 @@ namespace csharp_ef_webapi.Controllers
                 return BadRequest("Please specify an Account Id");
             }
 
-            return Ok(await _proMetadataRepository.GetPlayerAccount(accountId.Value));
+            return Ok(await _dbContext.Accounts.FindAsync(accountId.Value));
         }
 
         // GET: api/Player/accounts
         [HttpGet("accounts")]
         public async Task<ActionResult<IEnumerable<Account>>> GetAccounts()
         {
-            return Ok(await _proMetadataRepository.GetPlayerAccounts());
+            return Ok(await _dbContext.Accounts.ToListAsync());
         }
 
         // GET: api/Player/1/topheroes
@@ -59,7 +61,7 @@ namespace csharp_ef_webapi.Controllers
                 return BadRequest("Please specify a Fantasy Player Id");
             }
 
-            return Ok(await _fantasyRepository.GetFantasyPlayerTopHeroesAsync(fantasyPlayerId.Value));
+            return Ok(await _fantasyPointsFacade.GetFantasyPlayerTopHeroesAsync(fantasyPlayerId.Value));
         }
 
         // GET: api/player/1/fantasyaverages
@@ -71,7 +73,7 @@ namespace csharp_ef_webapi.Controllers
                 return BadRequest("Please specify a Fantasy Player Id");
             }
 
-            return Ok(await _fantasyRepository.GetFantasyNormalizedAveragesAsync(fantasyPlayerId.Value));
+            return Ok(await _fantasyPointsFacade.GetFantasyNormalizedAveragesAsync(fantasyPlayerId.Value));
         }
 
         // POST: api/Player

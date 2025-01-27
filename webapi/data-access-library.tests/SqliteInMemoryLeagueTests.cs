@@ -1,5 +1,3 @@
-namespace DataAccessLibrary.UnitTests.Data;
-
 using Moq;
 using System.Data.Common;
 using Microsoft.Data.Sqlite;
@@ -7,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using DataAccessLibrary.Models.ProMetadata;
 using DataAccessLibrary.Models.Fantasy;
+
+namespace DataAccessLibrary.IntegrationTests.Data;
 
 public class SqliteInMemoryLeagueTests : IDisposable
 {
@@ -118,18 +118,6 @@ public class SqliteInMemoryLeagueTests : IDisposable
             leagues,
             l => Assert.Equal("test league 1", l.Name)
         );
-    }
-
-    [Fact]
-    public async void GetLeagueLockedDateTest()
-    {
-        using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<FantasyLeagueRepository>>();
-        var repository = new FantasyLeagueRepository(loggerMock.Object, context);
-
-        var league = await repository.GetLeagueLockedDateAsync(1);
-
-        Assert.Equal(league, new DateTimeOffset(new DateTime(2024, 1, 1)).UtcDateTime);
     }
     #endregion
 }

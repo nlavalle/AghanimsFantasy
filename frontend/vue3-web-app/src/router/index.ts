@@ -34,6 +34,13 @@ const router = createRouter({
       component: () => import('../views/AdminView.vue'),
       meta: { requiresAdmin: true }
     },
+
+    {
+      path: '/privatefantasy',
+      name: 'privatefantasyadmin',
+      component: () => import('../views/PrivateFantasyAdminView.vue'),
+      meta: { requiresPrivateFantasyAdmin: true }
+    },
   ]
 })
 
@@ -43,6 +50,8 @@ router.beforeEach((to, from, next) => {
   userStore.getUser();
 
   if (to.meta.requiresAdmin && !userStore.user?.isAdmin) {
+    next('/');
+  } else if (to.meta.requiresPrivateFantasyAdmin && !userStore.user?.isPrivateFantasyAdmin) {
     next('/');
   } else {
     next();

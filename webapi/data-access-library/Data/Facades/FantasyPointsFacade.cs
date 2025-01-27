@@ -1,26 +1,41 @@
-namespace DataAccessLibrary.Data;
+namespace DataAccessLibrary.Data.Facades;
 
+using DataAccessLibrary.Data;
 using DataAccessLibrary.Models;
 using DataAccessLibrary.Models.Fantasy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-/// <summary>
-/// Service to fetch and transform the Postgres data to read/write fantasy draft data for the webapi
-/// example is to fetch all of the current scores, vs adding a new draft. Controllers should handle none of the business
-/// logic 
-/// </summary>
-public class FantasyRepository : IFantasyRepository
+public class FantasyPointsFacade
 {
-    private readonly ILogger<FantasyRepository> _logger;
-    private AghanimsFantasyContext _dbContext;
-    public FantasyRepository(ILogger<FantasyRepository> logger, AghanimsFantasyContext dbContext)
+    private readonly ILogger<FantasyPointsFacade> _logger;
+    private readonly AghanimsFantasyContext _dbContext;
+
+    public FantasyPointsFacade(
+        ILogger<FantasyPointsFacade> logger,
+        AghanimsFantasyContext dbContext
+    )
     {
         _logger = logger;
         _dbContext = dbContext;
     }
 
-    #region Fantasy
+
+    public async Task<List<FantasyPlayerPoints>> GetFantasyPlayerPointsByMatchAsync(long MatchId)
+    {
+        return await _dbContext.FantasyPlayerPointsView
+            .Where(fppv => fppv.FantasyMatchPlayer!.Match!.MatchId == MatchId)
+            .Include(fppv => fppv.FantasyMatchPlayer)
+            .ToListAsync();
+    }
+
+    public async Task<List<FantasyPlayerPoints>> GetFantasyPlayerPointsByMatchesAsync(IEnumerable<FantasyMatch> FantasyMatches)
+    {
+        return await _dbContext.FantasyPlayerPointsView
+            .Where(fppv => fppv.FantasyMatchPlayerId != null && FantasyMatches.Any(mi => mi == fppv.FantasyMatchPlayer!.Match))
+            .Include(fppv => fppv.FantasyMatchPlayer)
+            .ToListAsync();
+    }
 
     public async Task<List<FantasyPlayerPoints>> FantasyPlayerPointsByFantasyLeagueAsync(int FantasyLeagueId, int limit)
     {
@@ -120,10 +135,6 @@ public class FantasyRepository : IFantasyRepository
         return metadataSummaries;
     }
 
-    #endregion Fantasy
-
-    #region Match
-
     public async Task<List<MatchHighlights>> GetLastNMatchHighlights(int FantasyLeagueId, int MatchCount)
     {
         _logger.LogInformation($"Getting {MatchCount} Match Highlights for Fantasy League ID: {FantasyLeagueId}");
@@ -138,5 +149,4 @@ public class FantasyRepository : IFantasyRepository
 
         return await matchHighlightsQuery.ToListAsync();
     }
-    #endregion Match
 }

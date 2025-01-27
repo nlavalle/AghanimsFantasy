@@ -1,11 +1,11 @@
-namespace DataAccessLibrary.UnitTests.Data;
-
 using Moq;
 using System.Data.Common;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using DataAccessLibrary.Models.ProMetadata;
+
+namespace DataAccessLibrary.IntegrationTests.Data;
 
 public class SqliteInMemoryHeroTests : IDisposable
 {
