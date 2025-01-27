@@ -126,6 +126,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Add Scoped services to be used by controllers
+builder.Services.AddScoped<DiscordWebApiService>();
+builder.Services.AddScoped<FantasyService>();
+builder.Services.AddScoped<FantasyServiceAdmin>();
+builder.Services.AddScoped<FantasyServicePrivateFantasyAdmin>();
+
+// Add Scoped data services to be used by controllers
 builder.Services.AddScoped<AuthFacade>();
 builder.Services.AddScoped<DiscordFacade>();
 builder.Services.AddScoped<FantasyDraftFacade>();

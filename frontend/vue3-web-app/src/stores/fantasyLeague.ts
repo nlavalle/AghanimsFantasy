@@ -161,7 +161,29 @@ export const useFantasyLeagueStore = defineStore({
         .filter(fantasyLeague => fantasyLeague.leagueId == this.selectedLeague?.id);
       return filteredLeagues
         .reduce((max, current) => {
-          return current.fantasyDraftLocked > max.fantasyDraftLocked ? current : max
+          // Scenarios
+          if (
+            // if any are active take active fantasy league
+            new Date() >= new Date(current.leagueStartTime * 1000) &&
+            new Date() < new Date(current.leagueEndTime * 1000)
+          ) {
+            return current
+          } else if (
+            // if none are active but the fantasy hasn't started take the earliest
+            new Date() < new Date(current.leagueStartTime * 1000) &&
+            new Date() < new Date(max.leagueStartTime * 1000)
+          ) {
+            return current.fantasyDraftLocked < max.fantasyDraftLocked ? current : max
+          } else if (
+            // if none are active but the fantasy has finished take the latest
+            new Date() > new Date(current.leagueEndTime * 1000) &&
+            new Date() > new Date(max.leagueEndTime * 1000)
+          ) {
+            return current.fantasyDraftLocked > max.fantasyDraftLocked ? current : max
+          } else {
+            // idk why this should trigger
+            return max
+          }
         }, filteredLeagues[0])
     },
     selectedFantasyDraftPoints(): FantasyDraftPoints | undefined {

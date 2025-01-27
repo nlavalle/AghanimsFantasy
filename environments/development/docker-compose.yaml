@@ -1,14 +1,14 @@
 services:
   postgres:
-    image: postgres:bullseye
+    image: postgres:16.1-bullseye
     ports:
       - "5432:5432"
     env_file:
       - postgres.env
     volumes:
      - ../../postgres-db/data:/var/lib/postgresql/data
-      # The init script will be executed when the database is first run
-     - ../../postgres-db/dotabet_schema.sql:/docker-entrypoint-initdb.d/init.sql
+    # The init script will be executed when the database is first run
+    #  - ../../postgres-db/dotabet_schema.sql:/docker-entrypoint-initdb.d/init.sql
   dataloader:
     build:
       context: ../../webapi

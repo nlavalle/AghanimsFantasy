@@ -42,6 +42,12 @@ public class FantasyPointsFacade
         _logger.LogInformation($"Fetching Fantasy Points for Fantasy League Id: {FantasyLeagueId}");
 
         var fantasyPlayerPointsByLeagueQuery = _dbContext.FantasyPlayerPointsView
+            .Include(fppv => fppv.FantasyPlayer)
+                .ThenInclude(fp => fp.DotaAccount)
+            .Include(fppv => fppv.FantasyPlayer)
+                .ThenInclude(fp => fp.Team)
+            .Include(fppv => fppv.FantasyMatchPlayer)
+                .ThenInclude(fmp => fmp!.Hero)
             .Where(fpp => fpp.FantasyLeagueId == FantasyLeagueId)
             .Where(fpp => fpp.FantasyMatchPlayer != null)
             .Where(fpp => fpp.FantasyMatchPlayer!.GcMetadataPlayerParsed && fpp.FantasyMatchPlayer!.MatchDetailPlayerParsed)

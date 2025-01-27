@@ -4,6 +4,7 @@ export interface User {
   id: number
   name: string
   isAdmin: boolean
+  isPrivateFantasyAdmin: boolean
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -56,11 +57,18 @@ export const useAuthStore = defineStore('auth', {
                   claim.type ===
                   'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'
               ).value,
-              isAdmin: data.find(
-                (claim: { type: string }) =>
+              isAdmin: (data.find(
+                (claim: { type: string, value: string }) =>
                   claim.type ===
                   'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
-              ).value == "admin",
+                  && claim.value == "admin"
+              ) ?? "user").value == "admin",
+              isPrivateFantasyAdmin: (data.find(
+                (claim: { type: string, value: string }) =>
+                  claim.type ===
+                  'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
+                  && claim.value == "privateFantasyAdmin"
+              ) ?? "user").value == "privateFantasyAdmin"
             }
           })
       }

@@ -151,6 +151,7 @@ public class FantasyDraftFacade
         _logger.LogInformation($"Fetching Fantasy Point Totals for Fantasy League Id: {FantasyLeague.Id}");
 
         var fantasyPlayerTotalsQuery = _dbContext.FantasyPlayerPointTotalsView
+            .Include(fppv => fppv.FantasyPlayer)
             .Where(fppt => fppt.FantasyLeagueId == FantasyLeague.Id)
             .OrderByDescending(fppt => (double)fppt.TotalMatchFantasyPoints); // double casted needed for Sqlite: https://learn.microsoft.com/en-us/ef/core/providers/sqlite/limitations#query-limitations
 
@@ -163,9 +164,21 @@ public class FantasyDraftFacade
     {
         _logger.LogInformation($"Fetching Fantasy Points for Fantasy League Id: {FantasyDraft.FantasyLeagueId}");
 
+        List<FantasyPlayer> fantasyDraftPlayers = await _dbContext.FantasyDraftPlayers
+            .Where(dpp => dpp.FantasyDraftId == FantasyDraft.Id)
+            .Where(dpp => dpp.FantasyPlayer != null)
+            .Select(dpp => dpp.FantasyPlayer!)
+            .ToListAsync();
+
         var fantasyPlayerPointsByLeagueQuery = _dbContext.FantasyPlayerPointsView
+            .Include(fppv => fppv.FantasyPlayer)
+                .ThenInclude(fp => fp.DotaAccount)
+            .Include(fppv => fppv.FantasyPlayer)
+                .ThenInclude(fp => fp.Team)
+            .Include(fppv => fppv.FantasyMatchPlayer)
+                .ThenInclude(fmp => fmp!.Hero)
             .Where(fpp => fpp.FantasyLeagueId == FantasyDraft.FantasyLeagueId)
-            .Where(fpp => FantasyDraft.DraftPickPlayers.Any(dpp => dpp.FantasyPlayer == fpp.FantasyPlayer))
+            .Where(fpp => fantasyDraftPlayers.Contains(fpp.FantasyPlayer))
             .Where(fpp => fpp.FantasyMatchPlayer != null)
             .OrderByDescending(fpp => fpp.FantasyMatchPlayer!.FantasyMatchId)
             .ThenBy(fpp => fpp.FantasyMatchPlayer!.Team!.Name)

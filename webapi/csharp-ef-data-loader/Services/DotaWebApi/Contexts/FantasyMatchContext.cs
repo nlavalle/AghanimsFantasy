@@ -128,14 +128,14 @@ internal class FantasyMatchContext : DotaOperationContext
                 foreach ((CMsgDOTAMatch, CMsgDOTAMatch.Player) gcMatchDetailPlayer in gcMatchPlayers)
                 {
                     // We don't want to insert anything with nulls, so flag errors so I can catch them in the logging and add them in
-                    Account? accountLookup = await _dbContext.Accounts.FindAsync(gcMatchDetailPlayer.Item2.account_id);
+                    Account? accountLookup = await _dbContext.Accounts.FindAsync((long)gcMatchDetailPlayer.Item2.account_id);
                     if (accountLookup == null)
                     {
                         _logger.LogError($"Missing Account {gcMatchDetailPlayer.Item2.account_id}, need to add it to nadcl.dota_accounts");
                         continue;
                     }
 
-                    Hero? heroLookup = await _dbContext.Heroes.FindAsync(gcMatchDetailPlayer.Item2.hero_id);
+                    Hero? heroLookup = await _dbContext.Heroes.FindAsync((long)gcMatchDetailPlayer.Item2.hero_id);
                     if (heroLookup == null)
                     {
                         _logger.LogError($"Missing Hero {gcMatchDetailPlayer.Item2.hero_id}, need to add it to nadcl.dota_heroes");

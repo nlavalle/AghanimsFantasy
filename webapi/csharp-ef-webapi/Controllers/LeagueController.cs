@@ -38,7 +38,7 @@ namespace csharp_ef_webapi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<League>>> GetLeagues(bool include_inactive = false)
         {
-            return Ok(await _dbContext.Leagues.Where(l => l.IsActive == include_inactive).ToListAsync());
+            return Ok(await _dbContext.Leagues.Where(l => include_inactive || l.IsActive).ToListAsync());
         }
 
         // GET: api/League/5

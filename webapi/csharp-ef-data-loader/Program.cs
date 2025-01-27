@@ -1,5 +1,6 @@
 using csharp_ef_data_loader.Services;
 using DataAccessLibrary.Data;
+using DataAccessLibrary.Data.Facades;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -41,6 +42,13 @@ builder.Services.AddSingleton(new DiscordSocketConfig
 });
 builder.Services.AddSingleton<DiscordSocketClient>();
 builder.Services.AddHostedService<DiscordBotService>();
+
+// Add Scoped Data Facades
+builder.Services.AddScoped<AuthFacade>();
+builder.Services.AddScoped<DiscordFacade>();
+builder.Services.AddScoped<FantasyDraftFacade>();
+builder.Services.AddScoped<FantasyMatchFacade>();
+builder.Services.AddScoped<FantasyPointsFacade>();
 
 
 var app = builder.Build();
