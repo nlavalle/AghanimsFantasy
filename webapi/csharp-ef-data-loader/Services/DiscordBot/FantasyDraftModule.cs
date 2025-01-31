@@ -37,8 +37,8 @@ public class FantasyDraftModule : InteractionModuleBase<SocketInteractionContext
 
         var fantasyDraftMessage = await GetOriginalResponseAsync();
 
-        var fantasyLeagues = await _dbContext.FantasyLeagues.ToListAsync();
-        var openFantasyLeagues = fantasyLeagues.Where(fl => DateTime.UtcNow < DateTime.UnixEpoch.AddSeconds(fl.FantasyDraftLocked));
+        var fantasyLeagues = await _dbContext.FantasyLeagues.Include(fl => fl.League).ToListAsync();
+        var openFantasyLeagues = fantasyLeagues.Where(fl => DateTime.UtcNow < DateTime.UnixEpoch.AddSeconds(fl.FantasyDraftLocked)).ToList();
 
         // Bomb out if nothing is active
         if (openFantasyLeagues.Count() == 0)
