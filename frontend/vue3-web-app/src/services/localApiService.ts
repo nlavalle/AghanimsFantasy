@@ -54,14 +54,14 @@ export const localApiService = {
         throw error
       })
   },
-  putLeague(newLeague: League) {
-    if (!newLeague.id) return;
-    return fetch(`${baseUrl}/League/${newLeague.id}`, {
+  putLeague(updateLeague: League) {
+    if (!updateLeague.league_id) return;
+    return fetch(`${baseUrl}/League/${updateLeague.league_id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(newLeague)
+      body: JSON.stringify(updateLeague)
     }).then(
       function (response: Response) {
         if (!response.ok) {
@@ -76,9 +76,9 @@ export const localApiService = {
         throw error
       })
   },
-  deleteLeague(newLeague: League) {
-    if (!newLeague.id) return;
-    return fetch(`${baseUrl}/League/${newLeague.id}`, {
+  deleteLeague(deleteLeague: League) {
+    if (!deleteLeague.league_id) return;
+    return fetch(`${baseUrl}/League/${deleteLeague.league_id}`, {
       method: 'DELETE'
     }).then(
       function (response: Response) {
@@ -158,7 +158,7 @@ export const localApiService = {
         throw error
       })
   },
-  deleteFantasyLeague(deleteFantasyLeague: League) {
+  deleteFantasyLeague(deleteFantasyLeague: FantasyLeague) {
     if (!deleteFantasyLeague.id) return;
     return fetch(`${baseUrl}/FantasyLeague/${deleteFantasyLeague.id}`, {
       method: 'DELETE'
@@ -240,7 +240,7 @@ export const localApiService = {
         throw error
       })
   },
-  deleteFantasyLeagueWeight(deleteFantasyLeagueWeight: League) {
+  deleteFantasyLeagueWeight(deleteFantasyLeagueWeight: FantasyLeagueWeight) {
     if (!deleteFantasyLeagueWeight.id) return;
     return fetch(`${baseUrl}/FantasyLeagueWeight/${deleteFantasyLeagueWeight.id}`, {
       method: 'DELETE'
@@ -855,6 +855,27 @@ export const localApiService = {
       .then(
         function (data: any) {
           return data
+        }.bind(this)
+      )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
+  getLeagueSchedules() {
+    return fetch(`${baseUrl}/league/schedule`)
+      .then(
+        function (response: Response) {
+          if (!response.ok) {
+            throw response.status
+          } else {
+            return response.json()
+          }
+        }.bind(this)
+      )
+      .then(
+        function (data: any) {
+          return data.sort((a: any, b: any) => b.id - a.id)
         }.bind(this)
       )
       .catch((error) => {

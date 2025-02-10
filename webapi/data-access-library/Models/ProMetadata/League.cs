@@ -12,13 +12,48 @@ public class League
 {
     [Key]
     [Column("id")]
+    [JsonPropertyName("league_id")]
     public int Id { get; set; }
 
     [Column("league_name")]
+    [JsonPropertyName("name")]
     public string? Name { get; set; }
 
     [Column("is_active")]
-    public bool IsActive { get; set; }
+    [JsonPropertyName("is_active")]
+    public bool IsActive { get; set; } = false;
+
+    [Column("is_scheduled")]
+    [JsonPropertyName("is_scheduled")]
+    public bool IsScheduled { get; set; } = false;
+
+    [Column("tier")]
+    [JsonPropertyName("tier")]
+    public int Tier { get; set; }
+
+    [Column("region")]
+    [JsonPropertyName("region")]
+    public int Region { get; set; }
+
+    [Column("most_recent_activity")]
+    [JsonPropertyName("most_recent_activity")]
+    public long MostRecentActivity { get; set; }
+
+    [Column("total_prize_pool")]
+    [JsonPropertyName("total_prize_pool")]
+    public long PrizePool { get; set; }
+
+    [Column("start_timestamp")]
+    [JsonPropertyName("start_timestamp")]
+    public long StartTimestamp { get; set; }
+
+    [Column("end_timestamp")]
+    [JsonPropertyName("end_timestamp")]
+    public long EndTimeStamp { get; set; }
+
+    [Column("status")]
+    [JsonPropertyName("status")]
+    public int Status { get; set; }
 
     [JsonIgnore]
     public List<GcMatchMetadata> MatchMetadatas { get; set; } = new List<GcMatchMetadata>();

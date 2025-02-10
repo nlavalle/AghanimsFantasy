@@ -1,5 +1,9 @@
 export interface League {
-    id: number
+    league_id: number
     name: string
-    isActive: boolean
+    is_active: boolean,
+    tier: number,
+    region: number,
+    start_timestamp: number,
+    end_timestamp: number
 }

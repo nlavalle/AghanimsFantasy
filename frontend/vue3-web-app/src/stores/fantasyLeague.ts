@@ -10,8 +10,8 @@ export const useFantasyLeagueStore = defineStore({
     leagues: [] as League[],
     fantasyLeagues: [] as FantasyLeague[],
     selectedLeague: {
-      id: 0,
-      isActive: false,
+      league_id: 0,
+      is_active: false,
       name: ''
     } as League,
     selectedFantasyLeague: {
@@ -31,7 +31,7 @@ export const useFantasyLeagueStore = defineStore({
     fetchLeagues() {
       return localApiService.getLeagues().then((leagueResult: any) => {
         this.setLeagues(leagueResult);
-        if (this.selectedLeague.id == 0) this.setSelectedLeague(this.defaultLeague);
+        if (this.selectedLeague.league_id == 0) this.setSelectedLeague(this.defaultLeague);
       })
     },
 
@@ -43,7 +43,7 @@ export const useFantasyLeagueStore = defineStore({
           if (selectFantasyLeagueId) {
             let fantasyLeagueLookup = this.fantasyLeagues.find(fl => fl.id == selectFantasyLeagueId)
             if (fantasyLeagueLookup) {
-              let leagueLookup = this.leagues.find(l => l.id == fantasyLeagueLookup.leagueId)
+              let leagueLookup = this.leagues.find(l => l.league_id == fantasyLeagueLookup.leagueId)
               if (leagueLookup) {
                 this.setSelectedLeague(leagueLookup);
                 this.setSelectedFantasyLeague(fantasyLeagueLookup);
@@ -60,7 +60,7 @@ export const useFantasyLeagueStore = defineStore({
 
     fetchFantasyDraftPoints() {
       if (this.selectedLeague) {
-        return localApiService.getUserDraftPoints(this.selectedLeague.id).then((draftResult: FantasyDraftPoints[]) => {
+        return localApiService.getUserDraftPoints(this.selectedLeague.league_id).then((draftResult: FantasyDraftPoints[]) => {
           this.fantasyDraftPoints = draftResult;
         })
       }
@@ -101,9 +101,13 @@ export const useFantasyLeagueStore = defineStore({
 
     clearSelectedLeague() {
       this.selectedLeague = {
-        id: 0,
-        isActive: false,
-        name: ''
+        league_id: 0,
+        is_active: false,
+        name: '',
+        region: 0,
+        tier: 0,
+        start_timestamp: 0,
+        end_timestamp: 0
       }
     },
 
@@ -128,19 +132,19 @@ export const useFantasyLeagueStore = defineStore({
     },
     isLeagueActive(league: League) {
       return this.activeFantasyLeagues
-        .filter(fantasyLeague => fantasyLeague.leagueId == league.id)
+        .filter(fantasyLeague => fantasyLeague.leagueId == league.league_id)
         .some(fantasyLeague => this.isDraftActive(fantasyLeague.leagueEndTime));
     },
     isLeagueOpen(league: League) {
       return this.activeFantasyLeagues
-        .filter(fantasyLeague => fantasyLeague.leagueId == league.id)
+        .filter(fantasyLeague => fantasyLeague.leagueId == league.league_id)
         .some(fantasyLeague => this.isDraftOpen(fantasyLeague.fantasyDraftLocked));
     }
   },
 
   getters: {
     activeLeagues(): League[] {
-      return this.leagues?.filter((league) => league.isActive) ?? []
+      return this.leagues?.filter((league) => league.is_active) ?? []
     },
     activeFantasyLeagues(): FantasyLeague[] {
       return this.fantasyLeagues?.filter((fantasyLeague) => fantasyLeague.isActive) ?? []
@@ -153,12 +157,12 @@ export const useFantasyLeagueStore = defineStore({
     },
     defaultLeague(): League {
       return this.activeLeagues.reduce((max, current) => {
-        return current.id > max.id ? current : max
+        return current.league_id > max.league_id ? current : max
       }, this.activeLeagues[0])
     },
     defaultFantasyLeague(): FantasyLeague {
       let filteredLeagues = this.activeFantasyLeagues
-        .filter(fantasyLeague => fantasyLeague.leagueId == this.selectedLeague?.id);
+        .filter(fantasyLeague => fantasyLeague.leagueId == this.selectedLeague?.league_id);
       return filteredLeagues
         .reduce((max, current) => {
           // Scenarios
