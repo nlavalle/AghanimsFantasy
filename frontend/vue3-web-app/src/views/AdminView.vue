@@ -268,7 +268,15 @@ const defaultItem = computed(() => {
 const leagueDefaultItemSpecified = {
   id: 0,
   name: "string",
-  isActive: true
+  is_active: true,
+  is_scheduled: true,
+  tier: 0,
+  region: 0,
+  most_recent_activity: 0,
+  total_prize_pool: 0,
+  start_timestamp: 0,
+  end_timestamp: 0,
+  status: 0
 }
 
 const fantasyLeagueDefaultItemSpecified = {
@@ -346,7 +354,7 @@ const teamDefaultItemSpecified = {
 const leagueColumns = [
   {
     title: 'ID',
-    value: 'id'
+    value: 'league_id'
   },
   {
     title: 'League Name',
@@ -354,7 +362,11 @@ const leagueColumns = [
   },
   {
     title: 'Active?',
-    value: 'isActive',
+    value: 'is_active',
+  },
+  {
+    title: 'Scheduled?',
+    value: 'is_scheduled',
   },
 ];
 

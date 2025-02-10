@@ -177,7 +177,7 @@ watch(selectedFantasyLeague, () => {
 });
 
 function fullFantasyName(fantasyLeagueId: number, fantasyLeagueName: string) {
-    const league = leagueStore.activeLeagues.find(l => l.id === fantasyLeagueId);
+    const league = leagueStore.activeLeagues.find(l => l.league_id === fantasyLeagueId);
     return `${league?.name ?? ''} - ${fantasyLeagueName}`
 }
 
