@@ -56,6 +56,7 @@ import CrudTable from '@/components/Admin/CrudTable.vue'
 import type { FantasyLeague } from '@/types/FantasyLeague';
 import FantasyPlayerCrud from '@/components/Admin/FantasyPlayerCrud.vue';
 import type { DotaAccount, DotaTeam } from '@/types/Dota';
+import type { League } from '@/types/League';
 
 const leagueStore = useFantasyLeagueStore();
 
@@ -71,7 +72,7 @@ const isMounted = ref(false);
 onMounted(() => {
   localApiService.getLeagues('true').then((result: any) => {
     leagueStore.setLeagues(result);
-    leagueData.value = leagueStore.allLeagues;
+    leagueData.value = leagueStore.allLeagues.sort((a: League, b: League) => b.league_id - a.league_id);
   })
   localApiService.getFantasyLeagues().then((result: any) => {
     fantasyLeagueData.value = result;
@@ -367,6 +368,22 @@ const leagueColumns = [
   {
     title: 'Scheduled?',
     value: 'is_scheduled',
+  },
+  {
+    title: 'Tier',
+    value: 'tier',
+  },
+  {
+    title: 'Start',
+    value: 'start_timestamp',
+  },
+  {
+    title: 'End',
+    value: 'end_timestamp',
+  },
+  {
+    title: 'Prize Pool',
+    value: 'total_prize_pool',
   },
 ];
 
