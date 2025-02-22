@@ -10,6 +10,7 @@ public class DiscordUser
     [Key]
     [Column("id")]
     [JsonPropertyName("id")]
+    [JsonNumberHandling(JsonNumberHandling.WriteAsString | JsonNumberHandling.AllowReadingFromString)]
     public long Id { get; set; }
 
     [Column("username")]

@@ -4,6 +4,7 @@ using System.Text.Json;
 using DataAccessLibrary.Data;
 using DataAccessLibrary.Data.Facades;
 using DataAccessLibrary.Models.Discord;
+using Microsoft.EntityFrameworkCore;
 
 namespace csharp_ef_webapi.Services;
 public class DiscordWebApiService
@@ -77,6 +78,11 @@ public class DiscordWebApiService
     public async Task<DiscordUser?> GetDiscordUserAsync(long userId)
     {
         return await _dbContext.DiscordUsers.FindAsync(userId);
+    }
+
+    public async Task<DiscordUser?> GetDiscordUserAsync(string discordUsername)
+    {
+        return await _dbContext.DiscordUsers.FirstOrDefaultAsync(du => du.Username == discordUsername);
     }
 
     public async Task<DiscordUser?> AddNewDiscordUserByIdAsync(long DiscordId)

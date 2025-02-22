@@ -23,6 +23,7 @@ namespace csharp_ef_webapi.Controllers
         }
 
         // GET: api/PrivateFantasyLeague/5
+        [Authorize]
         [HttpGet("{privateFantasyPlayerId}")]
         public async Task<ActionResult<FantasyPrivateLeaguePlayer>> GetPrivateFantasyPlayer(int privateFantasyPlayerId)
         {
@@ -51,6 +52,7 @@ namespace csharp_ef_webapi.Controllers
         }
 
         // GET: api/PrivateFantasyLeague/FantasyLeague/5
+        [Authorize]
         [HttpGet("fantasyleague/{fantasyLeagueId}")]
         public async Task<ActionResult<IEnumerable<FantasyPrivateLeaguePlayer>>> GetPrivateFantasyPlayers(int fantasyLeagueId)
         {
@@ -71,7 +73,42 @@ namespace csharp_ef_webapi.Controllers
             }
         }
 
+        // GET: api/PrivateFantasyLeague/Validate/DiscordUsername
+        [Authorize]
+        [HttpGet("validate/{discordUsername}")]
+        public async Task<ActionResult<string>> ValidateDiscordUsername(string discordUsername)
+        {
+            try
+            {
+                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
+
+                if (discordUser == null)
+                {
+                    return NotFound();
+                }
+
+                if (await _discordWebApiService.CheckPrivateFantasyAdminUser(discordUser.Id) == false)
+                {
+                    return NotFound();
+                }
+
+                var discordUserLookup = await _discordWebApiService.GetDiscordUserAsync(discordUsername);
+
+                if (discordUserLookup == null)
+                {
+                    return Ok(0.ToString());
+                }
+
+                return Ok(discordUserLookup.Id.ToString());
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         // GET: api/PrivateFantasyLeague/FantasyLeague
+        [Authorize]
         [HttpGet("fantasyleague")]
         public async Task<ActionResult<IEnumerable<FantasyPrivateLeaguePlayer>>> GetPrivateFantasyLeagues()
         {
@@ -93,6 +130,7 @@ namespace csharp_ef_webapi.Controllers
         }
 
         // GET: api/PrivateFantasyLeague/FantasyLeagueWeight
+        [Authorize]
         [HttpGet("fantasyleagueweight")]
         public async Task<ActionResult<IEnumerable<FantasyLeagueWeight>>> GetFantasyLeagueWeights()
         {
@@ -119,20 +157,21 @@ namespace csharp_ef_webapi.Controllers
         [HttpPost]
         public async Task<ActionResult<FantasyLeague>> PostPrivateFantasyPlayers(FantasyPrivateLeaguePlayer fantasyPrivateLeaguePlayer)
         {
-            // Admin only operation
-            if (!await _discordWebApiService.CheckAdminUser(HttpContext))
+            DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
+
+            if (discordUser == null)
+            {
+                return Unauthorized();
+            }
+
+            // Private Fantasy Admin only operation
+            if (!await _discordWebApiService.CheckPrivateFantasyAdminUser(discordUser.Id))
             {
                 return Unauthorized();
             }
 
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-                if (discordUser == null)
-                {
-                    return Unauthorized();
-                }
-
                 await _fantasyServicePrivateFantasyAdmin.AddPrivateFantasyPlayerAsync(discordUser, fantasyPrivateLeaguePlayer);
                 return CreatedAtAction("GetPrivateFantasyPlayer", new { privateFantasyPlayerId = fantasyPrivateLeaguePlayer.Id }, fantasyPrivateLeaguePlayer);
             }
@@ -148,19 +187,21 @@ namespace csharp_ef_webapi.Controllers
         [HttpPut("{privateFantasyPlayerId}")]
         public async Task<IActionResult> PutPrivateFantasyPlayer(int privateFantasyPlayerId, FantasyPrivateLeaguePlayer fantasyPrivateLeaguePlayer)
         {
-            // Admin only operation
-            if (!await _discordWebApiService.CheckAdminUser(HttpContext))
+            DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
+
+            if (discordUser == null)
+            {
+                return Unauthorized();
+            }
+
+            // Private Fantasy Admin only operation
+            if (!await _discordWebApiService.CheckPrivateFantasyAdminUser(discordUser.Id))
             {
                 return Unauthorized();
             }
 
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-                if (discordUser == null)
-                {
-                    return Unauthorized();
-                }
 
                 await _fantasyServicePrivateFantasyAdmin.UpdatePrivateFantasyPlayerAsync(discordUser, privateFantasyPlayerId, fantasyPrivateLeaguePlayer);
                 return NoContent();
@@ -214,20 +255,21 @@ namespace csharp_ef_webapi.Controllers
         [HttpDelete("{privateFantasyPlayerId}")]
         public async Task<IActionResult> DeletePrivateFantasyPlayer(int privateFantasyPlayerId)
         {
-            // Admin only operation
-            if (!await _discordWebApiService.CheckAdminUser(HttpContext))
+            DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
+
+            if (discordUser == null)
+            {
+                return Unauthorized();
+            }
+
+            // Private Fantasy Admin only operation
+            if (!await _discordWebApiService.CheckPrivateFantasyAdminUser(discordUser.Id))
             {
                 return Unauthorized();
             }
 
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-                if (discordUser == null)
-                {
-                    return Unauthorized();
-                }
-
                 await _fantasyServicePrivateFantasyAdmin.DeletePrivateFantasyPlayerAsync(discordUser, privateFantasyPlayerId);
                 return NoContent();
             }

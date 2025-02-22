@@ -5,6 +5,7 @@ import type { DotaAccount, DotaTeam } from "@/types/Dota"
 import type { FantasyLeague } from "@/types/FantasyLeague"
 import type { FantasyLeagueWeight } from "@/types/FantasyLeagueWeight"
 import type { League } from "@/types/League"
+import type { PrivateFantasyPlayer } from "@/types/PrivateFantasyPlayer"
 
 const baseUrl = '/api'
 
@@ -317,6 +318,67 @@ export const localApiService = {
           return data.sort((a: any, b: any) => b.id - a.id)
         }.bind(this)
       )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
+  postPrivateFantasyPlayer(newPrivateFantasyPlayer: Partial<PrivateFantasyPlayer>) {
+    return fetch(`${baseUrl}/PrivateFantasyLeague`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newPrivateFantasyPlayer)
+    }).then(
+      function (response: Response) {
+        if (!response.ok) {
+          throw response.status
+        } else {
+          return response.json()
+        }
+      }.bind(this)
+    )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
+  putPrivateFantasyPlayer(updatePrivateFantasyPlayer: PrivateFantasyPlayer) {
+    if (!updatePrivateFantasyPlayer.id) return;
+    return fetch(`${baseUrl}/PrivateFantasyLeague/${updatePrivateFantasyPlayer.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(updatePrivateFantasyPlayer)
+    }).then(
+      function (response: Response) {
+        if (!response.ok) {
+          throw response.status
+        } else {
+          return response.status
+        }
+      }.bind(this)
+    )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
+  deletePrivateFantasyPlayer(deletePrivateFantasyPlayer: PrivateFantasyPlayer) {
+    if (!deletePrivateFantasyPlayer.id) return;
+    return fetch(`${baseUrl}/PrivateFantasyLeague/${deletePrivateFantasyPlayer.id}`, {
+      method: 'DELETE'
+    }).then(
+      function (response: Response) {
+        if (!response.ok) {
+          throw response.status
+        } else {
+          return response.status
+        }
+      }.bind(this)
+    )
       .catch((error) => {
         console.error('Error fetching data:', error)
         throw error
@@ -883,7 +945,23 @@ export const localApiService = {
         throw error
       })
   },
-  saveFantasyDraft(user: any, league: any, draftPickArray: FantasyPlayer[]) {
+  validateDiscordUsername(username: string) {
+    return fetch(`${baseUrl}/PrivateFantasyLeague/validate/${username}`)
+      .then(
+        function (response: Response) {
+          if (!response.ok) {
+            throw response.status
+          } else {
+            return response.text()
+          }
+        }.bind(this)
+      )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
+  saveFantasyDraft(league: any, draftPickArray: FantasyPlayer[]) {
     let draftPicks = [];
     for (let i = 1; i < 6; i++) {
       if (draftPickArray[i]) {
@@ -895,7 +973,6 @@ export const localApiService = {
     }
     const updateRequest = {
       FantasyLeagueId: league.id,
-      DisordAccountId: user.id,
       DraftPickPlayers: draftPicks
     }
     return fetch(`${baseUrl}/fantasydraft`, {

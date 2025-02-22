@@ -35,10 +35,9 @@ export const useFantasyDraftStore = defineStore({
       }
     },
 
-    saveFantasyDraft(user: User, draftPicks: FantasyPlayer[]) {
+    saveFantasyDraft(draftPicks: FantasyPlayer[]) {
       return new Promise((resolve) => {
         localApiService.saveFantasyDraft(
-          user,
           this.leagueStore.selectedFantasyLeague,
           draftPicks
         ).then((result: any) => {

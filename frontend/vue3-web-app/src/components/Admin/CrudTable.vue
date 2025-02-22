@@ -7,7 +7,7 @@
                     single-line></v-text-field>
                 <v-divider class="mx-4" inset vertical></v-divider>
                 <v-spacer></v-spacer>
-                <v-dialog v-model="dialog" max-width="800px">
+                <v-dialog v-if="props.canSave" v-model="dialog" max-width="800px">
                     <template v-slot:activator="{ props }">
                         <v-btn class="mb-2" dark v-bind="props">
                             New Item
@@ -109,6 +109,11 @@ const props = defineProps(
         defaultItemSpecified: {
             type: Object,
             required: false,
+        },
+        canSave: {
+            type: Boolean,
+            required: false,
+            default: true
         }
     })
 
