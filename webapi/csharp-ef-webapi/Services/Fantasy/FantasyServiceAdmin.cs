@@ -69,6 +69,16 @@ public class FantasyServiceAdmin
         await _dbContext.SaveChangesAsync();
     }
 
+    public async Task<List<FantasyLeague>> GetFantasyLeaguesAsync(DiscordUser adminUser)
+    {
+        if (!await _authFacade.IsUserAdminAsync(adminUser.Id))
+        {
+            throw new UnauthorizedAccessException();
+        }
+
+        return await _dbContext.FantasyLeagues.ToListAsync();
+    }
+
     public async Task AddFantasyLeagueAsync(DiscordUser adminUser, FantasyLeague addFantasyLeague)
     {
         if (!await _authFacade.IsUserAdminAsync(adminUser.Id))

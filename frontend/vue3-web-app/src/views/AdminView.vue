@@ -51,6 +51,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem } from 'vuetify/components';
 import { localApiService } from '@/services/localApiService';
+import { localApiAdminService } from '@/services/localApiAdminService';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import CrudTable from '@/components/Admin/CrudTable.vue'
 import type { FantasyLeague } from '@/types/FantasyLeague';
@@ -72,9 +73,9 @@ const isMounted = ref(false);
 onMounted(() => {
   localApiService.getLeagues('true').then((result: any) => {
     leagueStore.setLeagues(result);
-    leagueData.value = leagueStore.allLeagues.sort((a: League, b: League) => b.league_id - a.league_id);
+    leagueData.value = leagueStore.allLeagues.sort((a: League, b: League) => b.start_timestamp - a.start_timestamp);
   })
-  localApiService.getFantasyLeagues().then((result: any) => {
+  localApiAdminService.getAdminFantasyLeagues().then((result: any) => {
     fantasyLeagueData.value = result;
   })
   localApiService.getFantasyLeagueWeights().then((result: any) => {
@@ -101,7 +102,7 @@ const saveItem = (item: any) => {
       break;
     case "fantasyLeague":
       localApiService.postFantasyLeague(item)?.then(() => {
-        localApiService.getFantasyLeagues().then((result: any) => {
+        localApiAdminService.getAdminFantasyLeagues().then((result: any) => {
           fantasyLeagueData.value = result;
         })
       })
@@ -142,7 +143,7 @@ const editItem = (item: any) => {
       break;
     case "fantasyLeague":
       localApiService.putFantasyLeague(item)?.then(() => {
-        localApiService.getFantasyLeagues().then((result: any) => {
+        localApiAdminService.getAdminFantasyLeagues().then((result: any) => {
           fantasyLeagueData.value = result;
         })
       })
@@ -183,7 +184,7 @@ const deleteItem = (item: any) => {
       break;
     case "fantasyLeague":
       localApiService.deleteFantasyLeague(item)?.then(() => {
-        localApiService.getFantasyLeagues().then((result: any) => {
+        localApiAdminService.getAdminFantasyLeagues().then((result: any) => {
           fantasyLeagueData.value = result;
         })
       });
