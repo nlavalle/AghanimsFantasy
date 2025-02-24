@@ -18,9 +18,10 @@
                             :fantasyLeagueActive="fantasyLeagueActive" />
                     </v-col>
                 </v-row>
+                <!-- overlay without scroll-strategy bricks the page scrolling: https://github.com/vuetifyjs/vuetify/issues/15653 -->
                 <v-overlay :model-value="disabledTeam(team.teamId)"
                     class="ma-6 align-center justify-center disabled-team" contained persistent no-click-animation
-                    z-index="2">
+                    scroll-strategy="none" z-index="2">
                     <span>Max 2 players per team</span>
                 </v-overlay>
             </v-col>
