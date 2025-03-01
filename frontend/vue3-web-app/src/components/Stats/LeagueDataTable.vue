@@ -99,9 +99,9 @@
 import { ref, defineModel, onMounted, watch, computed } from 'vue';
 import { VRow, VCol, VDataTable, VPagination, VTabs, VTab, VTextField, VSelect } from 'vuetify/components';
 import { localApiService } from '@/services/localApiService';
-import type { League } from '@/types/League';
 import type { LeagueMetadata } from '@/types/LeagueMetadata';
 import { useDebouncedRef } from '@/services/debounce'
+import type { FantasyLeague } from '@/types/FantasyLeague';
 
 const isDesktop = ref(window.outerWidth >= 600);
 
@@ -138,7 +138,7 @@ const teamsList = computed(() => {
     return [...new Map(teams.map(item => [item['id'], item])).values()]
 })
 
-const selectedFantasyLeague = defineModel<League>('selectedFantasyLeague');
+const selectedFantasyLeague = defineModel<FantasyLeague>('selectedFantasyLeague');
 
 const page = ref(1)
 const itemsPerPage = 15;

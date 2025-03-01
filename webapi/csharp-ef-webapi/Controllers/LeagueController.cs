@@ -41,6 +41,14 @@ namespace csharp_ef_webapi.Controllers
             return Ok(await _dbContext.Leagues.Where(l => include_inactive || l.IsActive).ToListAsync());
         }
 
+        // GET: api/League/Schedule
+        [HttpGet("schedule")]
+        public async Task<ActionResult<IEnumerable<League>>> GetLeaguesSchedule()
+        {
+            // Get all the scheduled leagues including the last 2 weeks of scheduled leagues
+            return Ok(await _dbContext.Leagues.Where(l => l.IsScheduled && DateTime.UnixEpoch.AddSeconds(l.StartTimestamp) >= DateTime.UtcNow.AddDays(-14)).ToListAsync());
+        }
+
         // GET: api/League/5
         [HttpGet("{id}")]
         public async Task<ActionResult<League>> GetLeague(int id)

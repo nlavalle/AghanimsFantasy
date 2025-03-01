@@ -20,14 +20,6 @@ import { VApp, VMain } from 'vuetify/components'
 </template>
 
 <style scoped>
-.navbar {
-  height: 3rem;
-  width: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-}
-
 main {
   margin-top: 3rem;
 }

@@ -3,6 +3,15 @@
     <h3>This is your private fantasy league admin page</h3>
   </div>
   <v-container>
+    <v-row v-if="isMounted">
+      <v-col class="v-col-2">
+        <v-text-field v-model="addDiscordUsername" label="Search"
+          :rules="[validateDiscordUserPresent, validateDiscordUser]" variant="outlined"></v-text-field>
+      </v-col>
+      <v-col class="v-col-auto">
+        <v-btn @click="saveDiscordUser" :disabled="addDiscordId == '0'">Add Discord User</v-btn>
+      </v-col>
+    </v-row>
     <v-row>
       <v-col>
         <v-row>
@@ -17,11 +26,11 @@
       <v-tabs-window v-model="statsTab" style="width:100%">
         <v-tabs-window-item value="privateFantasyDiscordUsers">
           <CrudTable :table-columns="columns" :table-items="items" :default-item-specified="defaultItem"
-            @save="saveItem" @edit="editItem" @delete="deleteItem" />
+            @edit="editItem" @delete="deleteItem" :can-save="false" />
         </v-tabs-window-item>
         <v-tabs-window-item value="fantasyLeagueWeight">
           <CrudTable :table-columns="columns" :table-items="items" :default-item-specified="defaultItem"
-            @edit="editItem" />
+            @edit="editItem" :can-save="false" />
         </v-tabs-window-item>
       </v-tabs-window>
     </v-row>
@@ -30,16 +39,20 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem } from 'vuetify/components';
+import { VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem, VTextField, VBtn } from 'vuetify/components';
 import { localApiService } from '@/services/localApiService';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import CrudTable from '@/components/Admin/CrudTable.vue'
+import { useDebouncedRef } from '@/services/debounce';
+import type { PrivateFantasyPlayer } from '@/types/PrivateFantasyPlayer';
 
 const leagueStore = useFantasyLeagueStore();
 
 const statsTab = ref('fantasy')
 const privateFantasyDiscordUserData = ref([]);
 const fantasyLeagueWeightData = ref([]);
+const addDiscordUsername = useDebouncedRef('');
+const addDiscordId = ref('');
 
 const isMounted = ref(false);
 
@@ -53,27 +66,29 @@ onMounted(() => {
   isMounted.value = true;
 })
 
-const saveItem = (item: any) => {
-  switch (statsTab.value) {
-    case "privateFantasyDiscordUsers":
-      // localApiService.postFantasyLeague(item)?.then(() => {
-      //   localApiService.getFantasyLeagues().then((result: any) => {
-      //     fantasyLeagueData.value = result;
-      //   })
-      // })
-      break;
+const saveDiscordUser = (item: any) => {
+  let fantasyPlayer: Partial<PrivateFantasyPlayer> = {
+    discord_user_id: addDiscordId.value,
+    fantasy_league_id: leagueStore.selectedFantasyLeague.id,
+    fantasy_league_join_date: Math.round(Date.now() / 1000),
+    is_admin: false
   }
+  localApiService.postPrivateFantasyPlayer(fantasyPlayer)?.then(() => {
+    localApiService.getPrivateFantasyPlayers(leagueStore.selectedFantasyLeague.id).then((result: any) => {
+      privateFantasyDiscordUserData.value = result;
+    })
+  })
+  console.log(fantasyPlayer)
 }
 
 const editItem = (item: any) => {
   switch (statsTab.value) {
     case "privateFantasyDiscordUsers":
-      // localApiService.putLeague(item)?.then(() => {
-      //   localApiService.getLeagues('true').then((result: any) => {
-      //     leagueStore.setLeagues(result);
-      //     leagueData.value = leagueStore.allLeagues;
-      //   })
-      // })
+      localApiService.putPrivateFantasyPlayer(item)?.then(() => {
+        localApiService.getPrivateFantasyPlayers(leagueStore.selectedFantasyLeague.id).then((result: any) => {
+          privateFantasyDiscordUserData.value = result;
+        })
+      })
       break;
     case "fantasyLeagueWeight":
       localApiService.putPrivateFantasyLeagueWeight(item)?.then(() => {
@@ -88,13 +103,12 @@ const editItem = (item: any) => {
 const deleteItem = (item: any) => {
   switch (statsTab.value) {
     case "privateFantasyDiscordUsers":
-    // localApiService.deleteLeague(item)?.then(() => {
-    //   localApiService.getLeagues('true').then((result: any) => {
-    //     leagueStore.setLeagues(result);
-    //     leagueData.value = leagueStore.allLeagues;
-    //   })
-    // });
-    // break;
+      localApiService.deletePrivateFantasyPlayer(item)?.then(() => {
+        localApiService.getPrivateFantasyPlayers(leagueStore.selectedFantasyLeague.id).then((result: any) => {
+          privateFantasyDiscordUserData.value = result;
+        })
+      });
+      break;
     case "fantasyLeagueWeight":
       localApiService.deleteFantasyLeagueWeight(item)?.then(() => {
         localApiService.getFantasyLeagueWeights().then((result: any) => {
@@ -104,6 +118,18 @@ const deleteItem = (item: any) => {
       break;
   }
 }
+
+const validateDiscordUserPresent = () => {
+  return !!addDiscordUsername.value || 'Required'
+}
+
+const validateDiscordUser = async () => {
+  let result = '0';
+  result = await localApiService.validateDiscordUsername(addDiscordUsername.value);
+  addDiscordId.value = result
+  console.log(result)
+  return result != '0' || 'Discord Username not in Database'
+};
 
 const columns = computed(() => {
   switch (statsTab.value) {
@@ -180,19 +206,19 @@ const fantasyLeagueWeightDefaultItemSpecified = {
 const privateFantasyDiscordUserColumns = [
   {
     title: 'Discord ID',
-    value: 'discordUserId'
+    value: 'discord_user_id'
   },
   {
     title: 'Discord Name',
-    value: 'discordUser.username'
+    value: 'discord_user.username'
   },
   {
     title: 'Fantasy League',
-    value: 'fantasyLeagueId',
+    value: 'fantasy_league_id',
   },
   {
     title: 'Is Admin',
-    value: 'isAdmin',
+    value: 'is_admin',
   },
 ];
 

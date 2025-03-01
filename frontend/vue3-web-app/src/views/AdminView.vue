@@ -51,11 +51,13 @@
 import { ref, computed, onMounted } from 'vue';
 import { VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem } from 'vuetify/components';
 import { localApiService } from '@/services/localApiService';
+import { localApiAdminService } from '@/services/localApiAdminService';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import CrudTable from '@/components/Admin/CrudTable.vue'
 import type { FantasyLeague } from '@/types/FantasyLeague';
 import FantasyPlayerCrud from '@/components/Admin/FantasyPlayerCrud.vue';
 import type { DotaAccount, DotaTeam } from '@/types/Dota';
+import type { League } from '@/types/League';
 
 const leagueStore = useFantasyLeagueStore();
 
@@ -71,9 +73,9 @@ const isMounted = ref(false);
 onMounted(() => {
   localApiService.getLeagues('true').then((result: any) => {
     leagueStore.setLeagues(result);
-    leagueData.value = leagueStore.allLeagues;
+    leagueData.value = leagueStore.allLeagues.sort((a: League, b: League) => b.start_timestamp - a.start_timestamp);
   })
-  localApiService.getFantasyLeagues().then((result: any) => {
+  localApiAdminService.getAdminFantasyLeagues().then((result: any) => {
     fantasyLeagueData.value = result;
   })
   localApiService.getFantasyLeagueWeights().then((result: any) => {
@@ -100,7 +102,7 @@ const saveItem = (item: any) => {
       break;
     case "fantasyLeague":
       localApiService.postFantasyLeague(item)?.then(() => {
-        localApiService.getFantasyLeagues().then((result: any) => {
+        localApiAdminService.getAdminFantasyLeagues().then((result: any) => {
           fantasyLeagueData.value = result;
         })
       })
@@ -141,7 +143,7 @@ const editItem = (item: any) => {
       break;
     case "fantasyLeague":
       localApiService.putFantasyLeague(item)?.then(() => {
-        localApiService.getFantasyLeagues().then((result: any) => {
+        localApiAdminService.getAdminFantasyLeagues().then((result: any) => {
           fantasyLeagueData.value = result;
         })
       })
@@ -182,7 +184,7 @@ const deleteItem = (item: any) => {
       break;
     case "fantasyLeague":
       localApiService.deleteFantasyLeague(item)?.then(() => {
-        localApiService.getFantasyLeagues().then((result: any) => {
+        localApiAdminService.getAdminFantasyLeagues().then((result: any) => {
           fantasyLeagueData.value = result;
         })
       });
@@ -268,7 +270,15 @@ const defaultItem = computed(() => {
 const leagueDefaultItemSpecified = {
   id: 0,
   name: "string",
-  isActive: true
+  is_active: true,
+  is_scheduled: true,
+  tier: 0,
+  region: 0,
+  most_recent_activity: 0,
+  total_prize_pool: 0,
+  start_timestamp: 0,
+  end_timestamp: 0,
+  status: 0
 }
 
 const fantasyLeagueDefaultItemSpecified = {
@@ -346,7 +356,7 @@ const teamDefaultItemSpecified = {
 const leagueColumns = [
   {
     title: 'ID',
-    value: 'id'
+    value: 'league_id'
   },
   {
     title: 'League Name',
@@ -354,7 +364,27 @@ const leagueColumns = [
   },
   {
     title: 'Active?',
-    value: 'isActive',
+    value: 'is_active',
+  },
+  {
+    title: 'Scheduled?',
+    value: 'is_scheduled',
+  },
+  {
+    title: 'Tier',
+    value: 'tier',
+  },
+  {
+    title: 'Start',
+    value: 'start_timestamp',
+  },
+  {
+    title: 'End',
+    value: 'end_timestamp',
+  },
+  {
+    title: 'Prize Pool',
+    value: 'total_prize_pool',
   },
 ];
 

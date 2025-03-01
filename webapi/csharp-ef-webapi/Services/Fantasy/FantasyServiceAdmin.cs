@@ -69,6 +69,16 @@ public class FantasyServiceAdmin
         await _dbContext.SaveChangesAsync();
     }
 
+    public async Task<List<FantasyLeague>> GetFantasyLeaguesAsync(DiscordUser adminUser)
+    {
+        if (!await _authFacade.IsUserAdminAsync(adminUser.Id))
+        {
+            throw new UnauthorizedAccessException();
+        }
+
+        return await _dbContext.FantasyLeagues.ToListAsync();
+    }
+
     public async Task AddFantasyLeagueAsync(DiscordUser adminUser, FantasyLeague addFantasyLeague)
     {
         if (!await _authFacade.IsUserAdminAsync(adminUser.Id))
@@ -318,5 +328,39 @@ public class FantasyServiceAdmin
 
         _dbContext.Teams.Remove(deleteTeam);
         await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task AddFantasyPlayersByTeam(DiscordUser adminUser, long getTeamId, int newFantasyLeagueId)
+    {
+        if (!await _authFacade.IsUserAdminAsync(adminUser.Id))
+        {
+            throw new UnauthorizedAccessException();
+        }
+
+        var mostRecentFantasyLeague = await _dbContext.FantasyPlayers
+            .Where(fp => fp.TeamId == getTeamId)
+            .OrderByDescending(fp => fp.FantasyLeagueId)
+            .Select(fp => fp.FantasyLeagueId)
+            .FirstOrDefaultAsync();
+        if (mostRecentFantasyLeague != 0)
+        {
+            var lastLeagueFantasyPlayers = await _dbContext.FantasyPlayers
+               .Where(fp => fp.TeamId == getTeamId && fp.FantasyLeagueId == mostRecentFantasyLeague)
+               .OrderBy(fp => fp.TeamPosition)
+               .ToListAsync();
+
+            foreach (FantasyPlayer recentFantasyPlayer in lastLeagueFantasyPlayers)
+            {
+                FantasyPlayer newFantasyPlayer = new FantasyPlayer()
+                {
+                    FantasyLeagueId = newFantasyLeagueId,
+                    TeamId = recentFantasyPlayer.TeamId,
+                    DotaAccountId = recentFantasyPlayer.DotaAccountId,
+                    TeamPosition = recentFantasyPlayer.TeamPosition
+                };
+                await _dbContext.FantasyPlayers.AddAsync(newFantasyPlayer);
+            }
+            await _dbContext.SaveChangesAsync();
+        }
     }
 }

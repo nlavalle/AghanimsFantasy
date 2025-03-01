@@ -144,7 +144,7 @@ const updateDisabled = computed(() => {
 
 const saveDraft = async () => {
   if (!authStore.authenticated) return;
-  fantasyDraftStore.saveFantasyDraft(authStore.user!, fantasyDraftPicks.value)
+  fantasyDraftStore.saveFantasyDraft(fantasyDraftPicks.value)
     .then(() => {
       showSuccessModal.value = true;
       window.scrollTo({
