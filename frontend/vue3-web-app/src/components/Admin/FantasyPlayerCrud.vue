@@ -103,7 +103,7 @@
         <v-dialog v-model="dialogDeleteFantasyPlayer" max-width="500px">
             <v-card>
                 <v-card-title class="text-h7">Confirm delete Player {{ deleteFantasyPlayerItem?.dotaAccount.name ?? ''
-                }}?</v-card-title>
+                    }}?</v-card-title>
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="blue-darken-1" variant="text" @click="closeDeleteFantasyPlayer">Cancel</v-btn>
@@ -116,7 +116,7 @@
             <v-card>
                 <v-card-title class="text-h7">Confirm delete Team {{
                     deleteFantasyTeamItem?.name ?? ''
-                    }}?</v-card-title>
+                }}?</v-card-title>
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="blue-darken-1" variant="text" @click="closeDeleteFantasyTeam">Cancel</v-btn>
@@ -129,7 +129,7 @@
             <v-card>
                 <v-card-title class="text-h7">Confirm edit player {{
                     editFantasyPlayerItem?.dotaAccount.name ?? ''
-                    }}?</v-card-title>
+                }}?</v-card-title>
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-autocomplete v-model="editSelectedPlayer" :items="players" item-title="name" max-width="300"
@@ -376,3 +376,15 @@ const closeDeleteFantasyTeam = () => {
 }
 
 </script>
+
+<style scoped>
+.available-team-title {
+    margin-right: 5px;
+    margin-top: 5px;
+}
+
+.available-team-title img {
+    height: 40px;
+    margin-right: 10px;
+}
+</style>
