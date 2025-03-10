@@ -35,7 +35,7 @@ internal class LeaguesContext : DotaOperationContext
             List<League> leaguesResponse = await GetLeaguesAsync(cancellationToken);
             List<League> currentLeagues = await _dbContext.Leagues.ToListAsync();
             List<League> newLeagues = leaguesResponse.Where(l => l.Tier >= 2
-                && !currentLeagues.Contains(l)
+                && !currentLeagues.Select(cl => cl.Id).Contains(l.Id)
                 && DateTime.UnixEpoch.AddSeconds(l.StartTimestamp) >= DateTime.UtcNow)
             .ToList();
 
