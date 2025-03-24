@@ -13,6 +13,8 @@
                 <span>Role: <img :src=getPositionIcon(selectedPlayer!.teamPosition) height="20px" width="20px" />
                     ({{ selectedPlayer!.teamPosition }})
                 </span>
+                <span>Cost: {{leagueStore.fantasyPlayersStats.find(fps => fps.fantasy_player.id ==
+                    selectedPlayer!.id)?.cost.toFixed(0) ?? 0}} Gold</span>
             </v-row>
         </v-col>
     </v-row>
@@ -22,18 +24,17 @@
 import { ref } from 'vue';
 import { VRow, VCol } from 'vuetify/components';
 import { fantasyDraftState } from '../fantasyDraft';
+import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 
 const isDesktop = ref(window.outerWidth >= 600);
 
 const { selectedPlayer } = fantasyDraftState();
+const leagueStore = useFantasyLeagueStore();
 
 const getPositionIcon = (positionInt: number) => {
     if (positionInt == 0) return undefined;
     return `icons/pos_${positionInt}.png`
 }
-
-
-
 </script>
 
 <style scoped>

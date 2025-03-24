@@ -735,6 +735,27 @@ export const localApiService = {
         throw error
       })
   },
+  getFantasyPlayerViewModels(fantasyLeagueId: number) {
+    return fetch(`${baseUrl}/fantasyplayer/fantasyleague/${fantasyLeagueId}`)
+      .then(
+        function (response: any) {
+          if (!response.ok) {
+            throw response.status
+          } else {
+            return response.json()
+          }
+        }.bind(this)
+      )
+      .then(
+        function (data: any) {
+          return data
+        }.bind(this)
+      )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
   getPlayerFantasyStats(fantasyLeagueId: number) {
     return fetch(`${baseUrl}/fantasyleague/${fantasyLeagueId}/players/points`)
       .then(
@@ -863,27 +884,6 @@ export const localApiService = {
   },
   getHighlights(leagueId: number, numberOfHighlights: number) {
     return fetch(`${baseUrl}/fantasy/${leagueId}/highlights/${numberOfHighlights}`)
-      .then(
-        function (response: any) {
-          if (!response.ok) {
-            throw response.status
-          } else {
-            return response.json()
-          }
-        }.bind(this)
-      )
-      .then(
-        function (data: any) {
-          return data
-        }.bind(this)
-      )
-      .catch((error) => {
-        console.error('Error fetching data:', error)
-        throw error
-      })
-  },
-  getPlayerTopHeroes(fantasyPlayerId: number) {
-    return fetch(`${baseUrl}/player/${fantasyPlayerId}/topheroes`)
       .then(
         function (response: any) {
           if (!response.ok) {

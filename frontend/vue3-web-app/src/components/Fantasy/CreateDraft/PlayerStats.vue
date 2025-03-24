@@ -2,17 +2,21 @@
     <v-container class="player-stats pl-1">
         <v-row v-if="selectedPlayer" class="ml-0">
             <v-col>
-                <PlayerStatsBio :selected-player="selectedPlayer">
+                <PlayerStatsBio>
                 </PlayerStatsBio>
                 <v-row class="mt-4">
-                    <v-btn class="mr-1" style="width:55%;" color="primary" @click="draftPlayer()"
-                        :disabled="disabledPlayer(selectedPlayer)">Draft Player</v-btn>
-                    <v-btn class="ml-1" style="width:40%;" color="primary" @click="randomPlayer()">
+                    <v-btn class="mr-1" style="height:40px;width:55%;" color="primary" @click="draftPlayer()"
+                        :disabled="disabledPlayer(selectedPlayer)">
+                        <span class="ml-1">Draft Player <br> ({{ playerCost }}<img class="cost-coin"
+                                :src="coinSpinGif" />)</span>
+                    </v-btn>
+                    <v-btn class="ml-1" style="height:40px;width:40%;" color="primary" @click="randomPlayer()">
                         <font-awesome-icon :icon="faDice" />
                         <span class="ml-1">Random</span>
                     </v-btn>
                 </v-row>
-                <PlayerTopHeroes class="player-top-heroes mt-5 pa-1" :selected-player="selectedPlayer">
+                <PlayerTopHeroes v-if="playerTopHeroes" class="player-top-heroes mt-5 pa-1"
+                    :heroesPlayer="playerTopHeroes">
                 </PlayerTopHeroes>
                 <v-row class="mt-4" style="border:1px solid black">
                     <v-col>
@@ -30,18 +34,21 @@
 </template>
 
 <script setup lang="ts">
+import coinSpinGif from '@/assets/fantasy/coin/golden-coin.gif'
 import { ref, watch } from 'vue';
 import { VContainer, VRow, VCol, VBtn } from 'vuetify/components';
 import type { FantasyPlayerTopHeroes } from '../fantasyDraft';
-import { localApiService } from '@/services/localApiService'
 import { fantasyDraftState } from '../fantasyDraft';
 import PlayerStatsBio from '@/components/Fantasy/PlayerStats/PlayerStatsBio.vue'
 import PlayerTopHeroes from '@/components/Fantasy/PlayerStats/PlayerTopHeroes.vue'
 import PlayerRadarChart from '@/components/Fantasy/PlayerStats/PlayerRadarChart.vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faDice } from '@fortawesome/free-solid-svg-icons';
+import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 
 const { selectedPlayer, fantasyPlayerPointsAvailable, setFantasyPlayer, disabledPlayer } = fantasyDraftState();
+
+const leagueStore = useFantasyLeagueStore();
 
 const emit = defineEmits(['savePlayer']);
 
@@ -66,44 +73,46 @@ const scoreDataset = ref([0, 0, 0, 0]);
 
 const playerTopHeroes = ref<FantasyPlayerTopHeroes>();
 
+const playerCost = ref();
+
 watch(selectedPlayer, (newPlayer) => {
     if (newPlayer) {
-        localApiService.getPlayerTopHeroes(newPlayer.id)
-            .then((result) => (playerTopHeroes.value = result));
+        let playerStats = leagueStore.fantasyPlayersStats.find(fps => fps.fantasy_player.id == newPlayer.id);
+        playerTopHeroes.value = playerStats?.top_heroes[0];
 
-        localApiService.getPlayerFantasyAverages(newPlayer.id)
-            .then((result) => (formatPlayerAverages(result)))
+        playerCost.value = playerStats?.cost.toFixed(0) ?? 0;
+
+        formatPlayerAverages(playerStats?.player_stats)
     }
 });
 
 
-const formatPlayerAverages = (playerAverages: any[]) => {
-    if (playerAverages.length > 0) {
-        var firstPlayerAverages = playerAverages[0];
+const formatPlayerAverages = (playerAverages: any) => {
+    if (playerAverages) {
         //KDA
-        var killsAverage = firstPlayerAverages.avgKillsPoints;
-        var deathsAverage = firstPlayerAverages.avgDeathsPoints;
-        var assistsAverage = firstPlayerAverages.avgAssistsPoints;
+        var killsAverage = playerAverages.avgKillsPoints;
+        var deathsAverage = playerAverages.avgDeathsPoints;
+        var assistsAverage = playerAverages.avgAssistsPoints;
         var kdaTotal = (killsAverage * 100 + deathsAverage * 100 + assistsAverage * 100) / 3
         //Farm
         //last hits
-        var lastHitsAverage = firstPlayerAverages.avgLastHitsPoints;
+        var lastHitsAverage = playerAverages.avgLastHitsPoints;
         //gold per min
-        var goldPerMinAverage = firstPlayerAverages.avgGoldPerMinPoints;
+        var goldPerMinAverage = playerAverages.avgGoldPerMinPoints;
         //xp per min
-        var xpPerMinAverage = firstPlayerAverages.avgXpPerMinPoints;
+        var xpPerMinAverage = playerAverages.avgXpPerMinPoints;
         var farmTotal = (lastHitsAverage * 100 + goldPerMinAverage * 100 + xpPerMinAverage * 100) / 3
         //Supp
         //ob wards placed
-        var obsWardsAverage = firstPlayerAverages.avgObserverWardsPlacedPoints;
+        var obsWardsAverage = playerAverages.avgObserverWardsPlacedPoints;
         //camps stacked
-        var campsStacked = firstPlayerAverages.avgCampsStackedPoints;
+        var campsStacked = playerAverages.avgCampsStackedPoints;
         var supportTotal = (obsWardsAverage * 100 + campsStacked * 100) / 2
         //damage healing
         //stun damage
-        var damageHealingTotal = firstPlayerAverages.avgStunDurationPoints * 100;
+        var damageHealingTotal = playerAverages.avgStunDurationPoints * 100;
 
-        var matchesPlayed = firstPlayerAverages.totalMatches * 100;
+        var matchesPlayed = playerAverages.totalMatches * 100;
 
         fantasyDataset.value = [
             kdaTotal,
@@ -114,10 +123,10 @@ const formatPlayerAverages = (playerAverages: any[]) => {
         ]
 
         //Scores
-        var fightScore = firstPlayerAverages.avgFightScore * 100;
-        var farmScore = firstPlayerAverages.avgFarmScore * 100;
-        var supportScore = firstPlayerAverages.avgSupportScore * 100;
-        var pushScore = firstPlayerAverages.avgPushScore * 100;
+        var fightScore = playerAverages.avgFightScore * 100;
+        var farmScore = playerAverages.avgFarmScore * 100;
+        var supportScore = playerAverages.avgSupportScore * 100;
+        var pushScore = playerAverages.avgPushScore * 100;
 
         scoreDataset.value = [fightScore, farmScore, supportScore, pushScore]
     } else {
@@ -157,5 +166,10 @@ const randomPlayer = () => {
 
 .player-radar-chart {
     background: linear-gradient(to bottom, black, var(--aghanims-fantasy-main-4));
+}
+
+.cost-coin {
+    display: inline-block;
+    vertical-align: middle;
 }
 </style>

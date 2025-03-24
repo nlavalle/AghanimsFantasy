@@ -1,5 +1,3 @@
-import type { DotaAccount, DotaTeam } from '@/types/Dota';
-
 export interface FantasyMatchPlayer {
     fantasyMatchId: number,
     accountId: number,

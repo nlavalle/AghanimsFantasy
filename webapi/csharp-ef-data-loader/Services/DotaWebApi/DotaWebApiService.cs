@@ -62,6 +62,7 @@ public class DotaWebApiService : BackgroundService
         CreateLauncher<MatchMetadataContext>(commonCooldown, baseApiUri, baseQuery);
         CreateLauncher<TeamsContext>(commonCooldown, baseApiUri, baseQuery);
         CreateLauncher<FantasyNormalizedAveragesContext>(commonCooldown, baseApiUri, baseQuery);
+        CreateLauncher<FantasyPlayerBudgetProbabilityContext>(commonCooldown, baseApiUri, baseQuery);
         CreateLauncher<FantasyMatchContext>(commonCooldown, baseApiUri, baseQuery);
         CreateLauncher<DiscordUpdatesContext>(commonCooldown, baseApiUri, baseQuery);
 
@@ -78,6 +79,7 @@ public class DotaWebApiService : BackgroundService
             LoopOperation<MatchMetadataContext>(TimeSpan.FromMinutes(5), stoppingToken),
             LoopOperation<TeamsContext>(TimeSpan.FromDays(1), stoppingToken),
             LoopOperation<FantasyNormalizedAveragesContext>(TimeSpan.FromMinutes(5), stoppingToken),
+            LoopOperation<FantasyPlayerBudgetProbabilityContext>(TimeSpan.FromMinutes(5), stoppingToken),
             LoopOperation<FantasyMatchContext>(TimeSpan.FromMinutes(5), stoppingToken),
             LoopOperation<DiscordUpdatesContext>(TimeSpan.FromMinutes(5), stoppingToken),
         ];

@@ -52,30 +52,6 @@ namespace csharp_ef_webapi.Controllers
             return Ok(await _dbContext.Accounts.ToListAsync());
         }
 
-        // GET: api/Player/1/topheroes
-        [HttpGet("{fantasyPlayerId}/topheroes")]
-        public async Task<ActionResult<FantasyPlayerTopHeroes>> GetTopHeroes(long? fantasyPlayerId)
-        {
-            if (fantasyPlayerId == null)
-            {
-                return BadRequest("Please specify a Fantasy Player Id");
-            }
-
-            return Ok(await _fantasyPointsFacade.GetFantasyPlayerTopHeroesAsync(fantasyPlayerId.Value));
-        }
-
-        // GET: api/player/1/fantasyaverages
-        [HttpGet("{fantasyPlayerId}/fantasyaverages")]
-        public async Task<ActionResult<IEnumerable<FantasyNormalizedAveragesTable>>> GetFantasyPlayerAverages(long? fantasyPlayerId)
-        {
-            if (fantasyPlayerId == null)
-            {
-                return BadRequest("Please specify a Fantasy Player Id");
-            }
-
-            return Ok(await _fantasyPointsFacade.GetFantasyNormalizedAveragesAsync(fantasyPlayerId.Value));
-        }
-
         // POST: api/Player
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [Authorize]

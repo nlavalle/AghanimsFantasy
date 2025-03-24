@@ -14,8 +14,8 @@
                         :style="{ 'min-width': isDesktop ? '110px' : '60px', 'max-width': isDesktop ? '110px' : '60px' }"
                         @click="selectPlayer(player.fantasyPlayer)">
                         <draft-pick-card size="small" :fantasyPlayer="player.fantasyPlayer"
-                            :fantasyPoints="player.totalMatchFantasyPoints"
-                            :fantasyLeagueActive="fantasyLeagueActive" />
+                            :fantasyPoints="player.totalMatchFantasyPoints" :fantasyLeagueActive="fantasyLeagueActive"
+                            :fantasyPlayerCost="fantasyPlayerCost(player.fantasyPlayerId)" />
                     </v-col>
                 </v-row>
                 <!-- overlay without scroll-strategy bricks the page scrolling: https://github.com/vuetifyjs/vuetify/issues/15653 -->
@@ -30,22 +30,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, type PropType } from 'vue';
+import { computed, ref } from 'vue';
 import { fantasyDraftState, type FantasyPlayer, type FantasyPlayerPoints } from '../fantasyDraft';
 import { VContainer, VRow, VCol, VOverlay } from 'vuetify/components';
 import DraftPickCard from '@/components/Fantasy/DraftPickCard.vue';
-import type { FantasyLeague } from '@/types/FantasyLeague';
+import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 
-const { selectedPlayer, fantasyPlayerPointsAvailable, disabledPlayer, disabledTeam } = fantasyDraftState();
+const { selectedPlayer, fantasyPlayerPointsAvailable, setFantasyPlayerPoints, disabledPlayer, disabledTeam } = fantasyDraftState();
+const leagueStore = useFantasyLeagueStore();
 
 const isDesktop = ref(window.outerWidth >= 600);
-
-const props = defineProps({
-    FantasyLeague: {
-        type: Object as PropType<FantasyLeague>,
-        required: false,
-    }
-})
 
 const fantasyTeams = computed(() => {
     // We want the distinct teams
@@ -54,12 +48,16 @@ const fantasyTeams = computed(() => {
 })
 
 const fantasyLeagueActive = computed(() => {
-    if (props.FantasyLeague) {
-        return new Date() > new Date(props.FantasyLeague.leagueStartTime * 1000);
+    if (leagueStore.selectedFantasyLeague) {
+        return new Date() > new Date(leagueStore.selectedFantasyLeague.leagueStartTime * 1000);
     } else {
         return false
     }
 })
+
+const fantasyPlayerCost = (fantasyPlayerId: number) => {
+    return leagueStore.fantasyPlayersStats.find(fps => fps.fantasy_player.id == fantasyPlayerId)?.cost ?? 0
+}
 
 const fantasyPlayersByTeam = (teamId: number) => {
     return fantasyPlayerPointsAvailable.value.filter(player => player.fantasyPlayer.teamId == teamId).sort((playerA: FantasyPlayerPoints, playerB: FantasyPlayerPoints) => {

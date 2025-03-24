@@ -21,6 +21,9 @@
               Fantasy Pts
             </span>
           </div>
+          <div v-else>
+            <GoldSpan :gold-value="props.fantasyPlayerCost?.toFixed(0) ?? '0'" />
+          </div>
         </v-card-text>
       </div>
     </v-card>
@@ -62,6 +65,7 @@
 import { ref, type PropType } from 'vue';
 import { VCard, VCardTitle, VCardSubtitle, VCardText } from 'vuetify/components';
 import type { FantasyPlayer } from './fantasyDraft';
+import GoldSpan from '../Dom/GoldSpan.vue';
 
 const props = defineProps({
   size: {
@@ -78,6 +82,10 @@ const props = defineProps({
   },
   fantasyLeagueActive: {
     type: Boolean,
+    required: false
+  },
+  fantasyPlayerCost: {
+    type: Number,
     required: false
   }
 })

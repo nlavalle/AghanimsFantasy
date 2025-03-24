@@ -415,3 +415,127 @@ from nadcl.dota_fantasy_leagues fl
 		on fm.match_id = fmp.match_id and fmp."AccountId" = fp.dota_account_id
 group by fl.id, fp.id
 ;
+
+create or replace view nadcl.fantasy_player_probabilties as
+with quintiles as (
+    select
+        allfl.id as fantasy_league_id,
+        a.id as account_id,
+        fl.id as past_fantasy_league_id,
+        fl.league_end_time,
+        fppt.matches,
+        fppt.total_match_fantasy_points,
+        NTILE(5) over (partition by fl.id order by fppt.total_match_fantasy_points desc) as quintile,
+        fl.league_start_time,
+        row_number() over (partition by allfl.id, a.id order by fl.league_start_time desc) row_num
+    from nadcl.dota_fantasy_leagues allfl
+        left join nadcl.dota_fantasy_leagues fl
+            on allfl.league_start_time > fl.league_end_time
+        join nadcl.fantasy_player_point_totals fppt
+            on fppt.fantasy_league_id = fl.id
+        join nadcl.dota_fantasy_players fp
+            on fppt.fantasy_player_id = fp.id
+        join nadcl.dota_accounts a
+            on fp.dota_account_id = a.id
+    where fl.is_private = false
+        and fppt.matches > 0
+), recent_fantasies as (
+    select 
+        fantasy_league_id,
+        account_id,
+        quintile
+    from quintiles
+    where row_num <= 20
+), quintile_counts as (
+    select
+        fantasy_league_id,
+        account_id,
+        quintile,
+        count(*) as count_per_quintile
+    from recent_fantasies
+    group by fantasy_league_id, account_id, quintile
+), total_games as (
+    select
+        fantasy_league_id,
+        account_id,
+        sum(count_per_quintile) as total_games
+    from quintile_counts
+    group by fantasy_league_id, account_id
+), quintile_probabilities as (
+select
+    q.fantasy_league_id,
+    q.account_id,
+    q.quintile,
+    (q.count_per_quintile * 1.0 / t.total_games) as probability
+from quintile_counts q
+    join total_games t
+        on q.fantasy_league_id = t.fantasy_league_id and q.account_id = t.account_id
+), all_quintiles as (
+    select distinct 
+        q.id as fantasy_league_id,
+        p.id as account_id,
+        q.quintile
+    from (select distinct id from nadcl.dota_accounts) p
+    cross join (
+        select b.id, column1 as quintile 
+        from 
+            (values(1),(2),(3),(4),(5)) a
+            cross join (select id from nadcl.dota_fantasy_leagues) b
+    ) q
+)
+select distinct
+    a.fantasy_league_id,
+    a.account_id,
+    a.quintile,
+    round(coalesce(p.probability, 0.05), 4) as probability,
+    least(round(sum(coalesce(p.probability, 0.05)) over (partition by p.fantasy_league_id, a.account_id order by a.quintile),4), 1.0000) as cumulative_probability
+from all_quintiles a
+    left join quintile_probabilities p
+        on a.account_id = p.account_id 
+            and a.quintile = p.quintile
+            and a.fantasy_league_id = p.fantasy_league_id
+order by fantasy_league_id desc, account_id, quintile
+;
+
+create or replace view nadcl.fantasy_account_top_heroes as
+with player_games as (
+select
+    fmp.account_id, 
+    fmp."HeroId" as hero_id,
+    fmp.id, 
+    fmp.dota_team_side,
+    fm.radiant_win,
+    row_number() over (partition by fmp.account_id order by fm.start_time desc) row_num
+from nadcl.fantasy_match fm
+    join nadcl.fantasy_match_player fmp
+        on fm.match_id = fmp.match_id
+), win_loss as (
+select
+    account_id, 
+    hero_id, 
+    count(id) as count, 
+    sum(case 
+        when dota_team_side = false and radiant_win = true then 1
+        when dota_team_side = true and radiant_win = false then 1
+        else 0
+    end) as wins,
+    sum(case 
+        when dota_team_side = true and radiant_win = true then 1
+        when dota_team_side = false and radiant_win = false then 1
+        else 0
+    end) as losses,
+	row_number() over (partition by account_id order by count(id) desc) as row_num
+from player_games
+where row_num <= 30
+group by account_id, hero_id
+)
+select
+	account_id,
+	hero_id,
+	count,
+	wins,
+	losses
+from win_loss
+where row_num <= 3
+order by account_id, count desc
+;

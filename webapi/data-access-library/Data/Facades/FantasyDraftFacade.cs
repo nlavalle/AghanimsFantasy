@@ -33,6 +33,17 @@ public class FantasyDraftFacade
         return await userFantasyDraftQuery.FirstOrDefaultAsync();
     }
 
+    public async Task<List<FantasyPlayerBudgetProbabilityTable>> GetFantasyPlayerCostsAsync(int FantasyLeagueId)
+    {
+        _logger.LogInformation($"Getting Player Budget Probabilities");
+
+        return await _dbContext.FantasyPlayerBudgetProbability
+                .Include(fpbp => fpbp.Account)
+                .Include(fpbp => fpbp.FantasyLeague)
+                .Where(fpbp => fpbp.FantasyLeague.Id == FantasyLeagueId)
+                .ToListAsync();
+    }
+
     public async Task<FantasyDraft> AddPlayerPickAsync(FantasyDraft fantasyDraft, FantasyPlayer fantasyPlayerPick)
     {
         FantasyDraftPlayer? updateFantasyDraftPlayer = fantasyDraft.DraftPickPlayers
