@@ -177,7 +177,18 @@ public class FantasyService
         {
             throw new ArgumentException("Can only draft one of each team position");
         }
-        ;
+
+        var fantasyPlayerCosts = await _dbContext.FantasyPlayerBudgetProbability
+                .Where(fpbp => fpbp.FantasyLeague.Id == fantasyLeague.Id)
+                .ToListAsync();
+
+        if (fantasyPlayerCosts.Where(fpc => fantasyPlayers.Where(fp => fp.DotaAccount != null)
+                .Select(fp => fp.DotaAccount!.Id)
+                .Contains(fpc.Account.Id))
+                .Sum(fpc => fpc.EstimatedCost) > 600)
+        {
+            throw new ArgumentException("Draft exceeds 600g budget");
+        }
 
         if (existingUserDraft != null)
         {
@@ -205,7 +216,6 @@ public class FantasyService
                 existingUserDraft = await _fantasyDraftFacade.AddPlayerPickAsync(existingUserDraft, fantasyDraft.DraftPickPlayers[i].FantasyPlayer!);
             }
         }
-
 
         return existingUserDraft;
     }

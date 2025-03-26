@@ -1,5 +1,7 @@
 <template>
-  <v-container>
+  <v-progress-circular style="position:fixed;top:50%;left:50%;" v-if="!isMounted" color="primary"
+    indeterminate></v-progress-circular>
+  <v-container v-if="isMounted">
     <v-row style="width:100%">
       <v-col>
         <v-row>
@@ -10,6 +12,9 @@
             <v-tab value="match">Fantasy Matches</v-tab>
             <v-tab value="winnings">Winnings</v-tab>
           </v-tabs>
+        </v-row>
+        <v-row v-if="leagueStore.selectedFantasyLeague && !updateDisabled">
+          <fantasy-lock-timer class="ma-3" :target-time="leagueStore.selectedFantasyLeague.fantasyDraftLocked" />
         </v-row>
         <v-row>
           <v-tabs-window v-model="fantasyTab" style="width:100%;overflow: visible">
@@ -94,9 +99,14 @@
             </v-tabs-window-item>
             <v-tabs-window-item value="winnings">
               <v-col v-if="authenticated">
+                <v-row class="mt-1 align-center">
+                  <total-winnings class="totalWinnings" />
+                </v-row>
                 <v-row class="mt-1">
-                  <player-winnings-component class="playerWinningsComponent"
-                    :selectedDraft="leagueStore.selectedFantasyDraftPoints" />
+                  <winnings-breakdown class="winningsBreakdown" />
+                </v-row>
+                <v-row class="mt-1">
+                  <player-winnings class="playerWinnings" :selectedDraft="leagueStore.selectedFantasyDraftPoints" />
                 </v-row>
               </v-col>
               <v-col v-else>
@@ -126,7 +136,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
-import { VCard, VCardTitle, VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem } from 'vuetify/components';
+import { VCard, VCardTitle, VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem, VProgressCircular } from 'vuetify/components';
 import { useAuthStore, type User } from '@/stores/auth';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import CurrentDraft from '@/components/Fantasy/CurrentDraft.vue';
@@ -138,7 +148,10 @@ import AlertDialog from '@/components/AlertDialog.vue';
 import ErrorDialog from '@/components/ErrorDialog.vue';
 import { useFantasyDraftStore } from '@/stores/fantasyDraft';
 import LeaderboardComponent from '@/components/Fantasy/LeaderboardComponent.vue'
-import PlayerWinningsComponent from '@/components/Fantasy/PlayerWinningsComponent.vue';
+import PlayerWinnings from '@/components/Fantasy/Winnings/PlayerWinnings.vue';
+import TotalWinnings from '@/components/Fantasy/Winnings/TotalWinnings.vue';
+import WinningsBreakdown from '@/components/Fantasy/Winnings/WinningsBreakdown.vue';
+import FantasyLockTimer from '@/components/Fantasy/FantasyLockTimer.vue';
 
 const authStore = useAuthStore();
 const leagueStore = useFantasyLeagueStore();
@@ -156,6 +169,8 @@ const updateDraftVisibility = ref(false);
 const user = computed(() => {
   return authStore.user as User
 })
+
+const isMounted = ref(false);
 
 const updateDisabled = computed(() => {
   var currentDate = new Date();
@@ -201,13 +216,19 @@ const scrollAfterAlertDialog = () => {
 
 onMounted(() => {
   if (authStore.authenticated && leagueStore.selectedFantasyLeague) {
-    fantasyDraftStore.fetchLeaderboard();
-    leagueStore.fetchFantasyPlayerViewModels();
-    if (leagueStore.selectedFantasyDraftPoints && (leagueStore.selectedFantasyDraftPoints?.fantasyDraft.draftPickPlayers.length ?? 0 > 0)) {
-      setFantasyDraftPicks(leagueStore.selectedFantasyDraftPoints.fantasyDraft.draftPickPlayers);
-    }
+    fantasyDraftStore.fetchLeaderboard()?.then(() => {
+      leagueStore.fetchFantasyPlayerViewModels()?.then(() => {
+        leagueStore.fetchFantasyPlayerPoints()?.then(() => {
+          if (leagueStore.selectedFantasyDraftPoints && (leagueStore.selectedFantasyDraftPoints?.fantasyDraft.draftPickPlayers.length ?? 0 > 0)) {
+            setFantasyDraftPicks(leagueStore.selectedFantasyDraftPoints.fantasyDraft.draftPickPlayers);
+          }
+          isMounted.value = true;
+        });
+      });
+    });
   } else if (!authStore.authenticated && leagueStore.selectedFantasyLeague) {
     fantasyTab.value = 'draft';
+    isMounted.value = true;
   }
 });
 
@@ -247,7 +268,19 @@ const authenticated = computed(() => {
   max-width: 600px;
 }
 
-.playerWinningsComponent {
+.totalWinnings {
+  max-width: 300px;
+}
+
+.winningsBreakdown {
+  max-width: 300px;
+}
+
+.playerWinnings {
   max-width: 600px;
+}
+
+.transparent-tooltip .v-overlay__content {
+  background: transparent !important;
 }
 </style>

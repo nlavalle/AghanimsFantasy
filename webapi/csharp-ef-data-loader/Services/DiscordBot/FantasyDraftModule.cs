@@ -2,6 +2,7 @@ namespace csharp_ef_data_loader.Services.Modules;
 
 using DataAccessLibrary.Data;
 using DataAccessLibrary.Data.Facades;
+using DataAccessLibrary.Models;
 using DataAccessLibrary.Models.Discord;
 using DataAccessLibrary.Models.Fantasy;
 using Discord;
@@ -80,6 +81,11 @@ public class FantasyDraftModule : InteractionModuleBase<SocketInteractionContext
                 .ThenBy(fp => fp.DotaAccount!.Name)
             .ToListAsync();
 
+        var fantasyPlayerCosts = await _dbContext.FantasyPlayerBudgetProbability
+            .Include(fpbp => fpbp.Account)
+            .Where(fpbp => fpbp.FantasyLeague.Id == selectedFantasyLeague.Id)
+            .ToListAsync();
+
         List<FantasyPlayer> selectedFantasyPlayers = new List<FantasyPlayer>();
 
         for (int position = 1; position <= 5; position++)
@@ -90,7 +96,7 @@ public class FantasyDraftModule : InteractionModuleBase<SocketInteractionContext
                 var filteredPlayers = availableFantasyPlayers.Where(player =>
                     !fullTeams.Any(team => player.Team!.Id == team.Key)
                 ).ToList();
-                var fantasyPlayerMenu = BuildFantasyPlayerSelectMenu(filteredPlayers, position);
+                var fantasyPlayerMenu = BuildFantasyPlayerSelectMenu(filteredPlayers, position, fantasyPlayerCosts);
 
                 var fantasyPlayerBuilder = new ComponentBuilder()
                     .WithSelectMenu(fantasyPlayerMenu);
@@ -100,7 +106,9 @@ public class FantasyDraftModule : InteractionModuleBase<SocketInteractionContext
                     msg.Content = $@"
 Fantasy League: {selectedFantasyLeague.League!.Name} {selectedFantasyLeague.Name}
 Choose a Fantasy Player for position {position}
-{(selectedFantasyPlayers.Count() > 0 ? string.Join(", ", selectedFantasyPlayers.Select(fp => fp.DotaAccount!.Name)) : "")}
+{(selectedFantasyPlayers.Count() > 0 ?
+    string.Join(", ", selectedFantasyPlayers.Select(fp => $"{fp.DotaAccount!.Name} - {Math.Round(fantasyPlayerCosts.FirstOrDefault(fpc => fpc.Account.Id == fp.DotaAccountId)?.EstimatedCost ?? 0)}g")) :
+    "")}
 ";
                     msg.Components = fantasyPlayerBuilder.Build();
                 });
@@ -129,9 +137,22 @@ Choose a Fantasy Player for position {position}
             .WithButton("Confirm", customId: "confirm_draft", ButtonStyle.Success)
             .WithButton("Cancel", customId: "cancel_draft", ButtonStyle.Danger);
 
+        if (Math.Round(fantasyPlayerCosts.Where(fpc => selectedFantasyPlayers.Select(fp => fp.DotaAccountId).Contains(fpc.Account.Id)).Sum(fpc => fpc.EstimatedCost)) > 600)
+        {
+            // User spent too much money on players, TODO: add a back functionality but if this is unpopular it's low ROI right now
+            await ModifyOriginalResponseAsync(msg =>
+            {
+                msg.Content = $"You exceeded the budget of 600g, please retry the draft";
+                msg.Components = null;
+            });
+            return;
+        }
+
         await ModifyOriginalResponseAsync(msg =>
         {
-            msg.Content = $"Here's your picks: {string.Join(", ", selectedFantasyPlayers.Select(fp => fp.DotaAccount!.Name))}";
+            msg.Content = $@"
+Here's your picks: {string.Join(", ", selectedFantasyPlayers.Select(fp => $"{fp.DotaAccount!.Name} - {Math.Round(fantasyPlayerCosts.FirstOrDefault(fpc => fpc.Account.Id == fp.DotaAccountId)?.EstimatedCost ?? 0)}g"))}
+Total Cost: {Math.Round(fantasyPlayerCosts.Where(fpc => selectedFantasyPlayers.Select(fp => fp.DotaAccountId).Contains(fpc.Account.Id)).Sum(fpc => fpc.EstimatedCost))}g";
             msg.Components = draftConfirmBuilder.Build();
         });
 
@@ -143,6 +164,7 @@ Choose a Fantasy Player for position {position}
             {
                 msg.Content = $"Unknown selection, aborting";
             });
+            return;
         }
         else if (draftConfirm == true)
         {
@@ -205,13 +227,14 @@ Choose a Fantasy Player for position {position}
             .WithOptions(options);
     }
 
-    private SelectMenuBuilder BuildFantasyPlayerSelectMenu(IEnumerable<FantasyPlayer> fantasyPlayers, int teamPosition)
+    private SelectMenuBuilder BuildFantasyPlayerSelectMenu(IEnumerable<FantasyPlayer> fantasyPlayers, int teamPosition, IEnumerable<FantasyPlayerBudgetProbabilityTable> fantasyBudgets)
     {
         var options = new List<SelectMenuOptionBuilder>();
         foreach (FantasyPlayer fantasyPlayer in fantasyPlayers.Where(fp => fp.TeamPosition == teamPosition))
         {
+            var playerBudget = fantasyBudgets.FirstOrDefault(fb => fb.Account.Id == fantasyPlayer.DotaAccountId);
             options.Add(new SelectMenuOptionBuilder(
-                label: $"{fantasyPlayer.DotaAccount!.Name} - {fantasyPlayer.Team!.Name}",
+                label: $"{fantasyPlayer.DotaAccount!.Name} - {fantasyPlayer.Team!.Name} - {Math.Round(playerBudget?.EstimatedCost ?? 0)}g",
                 value: $"{fantasyPlayer.Id}"
             ));
         }
@@ -340,7 +363,18 @@ Choose a Fantasy Player for position {position}
         {
             throw new ArgumentException("Can only draft one of each team position");
         }
-        ;
+
+        var fantasyPlayerCosts = await _dbContext.FantasyPlayerBudgetProbability
+                .Where(fpbp => fpbp.FantasyLeague.Id == fantasyLeague.Id)
+                .ToListAsync();
+
+        if (fantasyPlayerCosts.Where(fpc => fantasyPlayers.Where(fp => fp.DotaAccount != null)
+                .Select(fp => fp.DotaAccount!.Id)
+                .Contains(fpc.Account.Id))
+                .Sum(fpc => fpc.EstimatedCost) > 600)
+        {
+            throw new ArgumentException("Draft exceeds 600g budget");
+        }
 
         if (existingUserDraft != null)
         {

@@ -18,9 +18,3 @@ import { VApp, VMain } from 'vuetify/components'
     </footer>
   </v-app>
 </template>
-
-<style scoped>
-main {
-  margin-top: 3rem;
-}
-</style>

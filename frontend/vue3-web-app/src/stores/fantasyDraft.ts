@@ -5,7 +5,6 @@ import type { League } from '@/types/League'
 import { localApiService } from '@/services/localApiService'
 import type { FantasyDraftPoints, FantasyPlayer } from '@/components/Fantasy/fantasyDraft'
 import type { Leaderboard, LeaderboardStats } from '@/types/Leaderboard';
-import type { User } from './auth';
 import type { LeaderboardItem } from '@/types/LeaderboardItem';
 
 export const useFantasyDraftStore = defineStore({

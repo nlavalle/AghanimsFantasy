@@ -1,7 +1,7 @@
 <template>
     <div class="player-winnings">
         <v-row class="d-flex justify-center">
-            <h1><trophy-svg /> Player Winnings</h1>
+            <h1>All Player Winnings</h1>
         </v-row>
         <div>
             <v-row class="justify-end">
@@ -12,7 +12,7 @@
         <li class="player-winnings-header">
             <div class="d-flex justify-evenly">
                 <span class="player-header-name">Player</span>
-                <span class="player-header-value">Winnings</span>
+                <span class="player-header-value">Net Gold Earned</span>
             </div>
         </li>
 
@@ -24,9 +24,11 @@
                 'quintile4': quintile == 4,
                 'quintile5': quintile == 5,
             }">
-                <span v-if="getQuintile(quintile).length > 0" class="quintile-top-span">Top {{ quintile * 20 }}%</span>
-                <li class="pt-0 player-winnings-item" :class="{ 'drafted-player': isDraftedPlayer(item.fantasyPlayer) }"
-                    v-for="item in getQuintile(quintile)" :key="item.position">
+                <span v-if="getQuintile(quintile).length > 0" class="quintile-top-span">{{ rankTitles[quintile - 1]
+                    }}</span>
+                <li class="pt-0 player-winnings-item"
+                    :class="{ 'drafted-player': !isDraftedPlayer(item.fantasyPlayer) }"
+                    v-for="item in getQuintile(quintile)" :key="item.position" :data-rank="item.position">
                     <div class="d-flex justify-around align-center">
                         <img class="player-winnings-portrait" height="48px" width="48px"
                             :src="item.fantasyPlayer.dotaAccount.steamProfilePicture" />
@@ -34,10 +36,15 @@
                             :style="{ fontWeight: isDraftedPlayer(item.fantasyPlayer) ? 'bold' : 'normal' }">
                             {{ item.fantasyPlayer.dotaAccount.name }}
                         </span>
-                        <span v-if="item.fantasyPlayer" class="player-data"
-                            :style="{ fontWeight: isDraftedPlayer(item.fantasyPlayer) ? 'bold' : 'normal' }">
-                            {{ getWinnings(quintile, item.fantasyPlayer).toFixed(0) }}<img class="gold-coin"
-                                :src="coinStatic" /></span>
+                        <v-tooltip>
+                            <template v-slot:activator="{ props }">
+                                <span v-if="item.fantasyPlayer" v-bind="props" class="player-data pr-5"
+                                    :style="{ fontWeight: isDraftedPlayer(item.fantasyPlayer) ? 'bold' : 'normal' }">
+                                    {{ getWinnings(quintile, item.fantasyPlayer).toFixed(0) }}<img class="gold-coin"
+                                        :src="coinStatic" /></span>
+                            </template>
+                            <span>{{ getBreakdown(quintile, item.fantasyPlayer) }}</span>
+                        </v-tooltip>
                     </div>
                 </li>
             </div>
@@ -46,13 +53,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch, type PropType } from 'vue';
+import { computed, ref, type PropType } from 'vue';
 import coinStatic from '@/assets/fantasy/coin/golden-coin.png'
-import TrophySvg from '@/components/icons/TrophySvg.vue'
-import { VRow, VCheckbox } from 'vuetify/components';
+import { VRow, VCheckbox, VTooltip } from 'vuetify/components';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
-import { localApiService } from '@/services/localApiService';
-import type { FantasyDraftPoints, FantasyPlayer, FantasyPlayerPoints } from './fantasyDraft';
+import type { FantasyDraftPoints, FantasyPlayer, FantasyPlayerPoints } from '../fantasyDraft';
 
 const props = defineProps({
     selectedDraft: {
@@ -65,19 +70,25 @@ const showAllPlayerWinnings = ref(true);
 
 const fantasyLeagueStore = useFantasyLeagueStore();
 
-const playerFantasyStats = ref<FantasyPlayerPoints[]>([]);
-
-const isDraftedPlayer = (fantasyPlayer: FantasyPlayer) => {
-    return props.selectedDraft?.fantasyDraft.draftPickPlayers.some(dpp => dpp.fantasyPlayerId == fantasyPlayer.id) ?? false;
-}
+const rankTitles = [
+    'Top 20%',
+    'Top 40%',
+    'Top 60%',
+    'Bottom 40%',
+    'Bottom 20%'
+]
 
 const playerFantasyStatsIndexed = computed(() => {
-    return playerFantasyStats.value
+    return fantasyLeagueStore.fantasyPlayerPoints
         .map((player: FantasyPlayerPoints, index) => ({
             ...player,
             position: index + 1
         }))
 })
+
+const isDraftedPlayer = (fantasyPlayer: FantasyPlayer) => {
+    return props.selectedDraft?.fantasyDraft.draftPickPlayers.some(dpp => dpp.fantasyPlayerId == fantasyPlayer.id) ?? false;
+}
 
 const getQuintile = (quintile: number) => {
     let quintileSize = playerFantasyStatsIndexed.value.length / 5;
@@ -92,19 +103,11 @@ const getWinnings = (quintile: number, fantasyPlayer: FantasyPlayer) => {
     return winnings - cost
 }
 
-onMounted(() => {
-    if (fantasyLeagueStore.selectedFantasyLeague) {
-        localApiService.getPlayerFantasyStats(fantasyLeagueStore.selectedFantasyLeague.id)
-            .then(result => playerFantasyStats.value = result);
-    }
-});
-
-watch(fantasyLeagueStore.selectedFantasyLeague, () => {
-    if (fantasyLeagueStore.selectedFantasyLeague) {
-        localApiService.getPlayerFantasyStats(fantasyLeagueStore.selectedFantasyLeague.id)
-            .then(result => playerFantasyStats.value = result);
-    }
-});
+const getBreakdown = (quintile: number, fantasyPlayer: FantasyPlayer) => {
+    let cost = fantasyLeagueStore.fantasyPlayersStats.find(fps => fps.fantasy_player.id == fantasyPlayer.id)?.cost ?? 0;
+    let winnings = 300 - 60 * quintile
+    return `(${winnings.toFixed(0)} Winnings - ${cost.toFixed(0)} Cost)`
+}
 
 </script>
 
@@ -127,7 +130,7 @@ div ::v-deep(.player-header-value) {
     font-style: normal;
     font-weight: 400;
     font-size: 18px;
-    text-align: center;
+    text-align: end;
     vertical-align: middle;
     margin-top: 4px;
     margin-left: 40px;
@@ -151,9 +154,9 @@ div ::v-deep(.player-data) {
     font-family: system-ui;
     font-style: normal;
     font-size: 18px;
-    text-align: center;
+    text-align: end;
     vertical-align: middle;
-    flex: 0.5 1;
+    flex: 0.4 1;
 }
 
 .gold-coin {
@@ -221,8 +224,8 @@ div ::v-deep(.player-data) {
     font-weight: bold;
     position: absolute;
     top: 50%;
-    left: 44%;
-    color: rgb(228, 228, 228);
+    left: 40%;
+    color: rgb(163, 163, 163);
     text-shadow:
         2px 2px 2px black,
         -2px -2px 2px black,
@@ -243,6 +246,7 @@ div ::v-deep(.player-data) {
     margin-bottom: 10px;
     margin-left: 5px;
     margin-right: 5px;
+    margin-top: 10px;
     height: max-content;
     flex: 1 0 300px;
 }
@@ -279,7 +283,6 @@ div ::v-deep(.player-data) {
 
 .player-winnings ol {
     margin-top: 0px;
-    counter-reset: player-winnings;
     list-style-type: none;
     padding: 0;
 }
@@ -288,7 +291,6 @@ div ::v-deep(.player-data) {
     position: relative;
     font-size: 16px;
     font-family: Arial, Helvetica, sans-serif;
-    counter-increment: player-winnings;
     padding: 12px 12px 12px 50px;
     backface-visibility: hidden;
     background-repeat: no-repeat;
@@ -296,7 +298,7 @@ div ::v-deep(.player-data) {
 }
 
 .player-winnings ol li::before {
-    content: counter(player-winnings);
+    content: attr(data-rank);
     position: absolute;
     z-index: 2;
     top: 15px;

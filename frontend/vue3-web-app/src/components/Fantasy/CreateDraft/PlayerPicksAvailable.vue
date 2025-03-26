@@ -36,7 +36,7 @@ import { VContainer, VRow, VCol, VOverlay } from 'vuetify/components';
 import DraftPickCard from '@/components/Fantasy/DraftPickCard.vue';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 
-const { selectedPlayer, fantasyPlayerPointsAvailable, setFantasyPlayerPoints, disabledPlayer, disabledTeam } = fantasyDraftState();
+const { selectedPlayer, fantasyPlayerPointsAvailable, disabledPlayer, disabledTeam } = fantasyDraftState();
 const leagueStore = useFantasyLeagueStore();
 
 const isDesktop = ref(window.outerWidth >= 600);
