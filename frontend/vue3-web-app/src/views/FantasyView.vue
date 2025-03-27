@@ -214,18 +214,15 @@ const scrollAfterAlertDialog = () => {
   }, 200);
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (authStore.authenticated && leagueStore.selectedFantasyLeague) {
-    fantasyDraftStore.fetchLeaderboard()?.then(() => {
-      leagueStore.fetchFantasyPlayerViewModels()?.then(() => {
-        leagueStore.fetchFantasyPlayerPoints()?.then(() => {
-          if (leagueStore.selectedFantasyDraftPoints && (leagueStore.selectedFantasyDraftPoints?.fantasyDraft.draftPickPlayers.length ?? 0 > 0)) {
-            setFantasyDraftPicks(leagueStore.selectedFantasyDraftPoints.fantasyDraft.draftPickPlayers);
-          }
-          isMounted.value = true;
-        });
-      });
-    });
+    await fantasyDraftStore.fetchLeaderboard()
+    await leagueStore.fetchFantasyPlayerViewModels()
+    await leagueStore.fetchFantasyPlayerPoints()
+    if (leagueStore.selectedFantasyDraftPoints && (leagueStore.selectedFantasyDraftPoints?.fantasyDraft.draftPickPlayers.length ?? 0 > 0)) {
+      setFantasyDraftPicks(leagueStore.selectedFantasyDraftPoints.fantasyDraft.draftPickPlayers);
+    }
+    isMounted.value = true;
   } else if (!authStore.authenticated && leagueStore.selectedFantasyLeague) {
     fantasyTab.value = 'draft';
     isMounted.value = true;
