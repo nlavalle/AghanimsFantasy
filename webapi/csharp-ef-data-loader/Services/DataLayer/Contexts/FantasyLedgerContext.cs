@@ -60,7 +60,6 @@ internal class FantasyLedgerContext : DotaOperationContext
                             DiscordId = unpaidDraft.DiscordAccountId.GetValueOrDefault(),
                             Amount = unpaidDraft.DraftPickPlayers.Sum(dpp =>
                             {
-                                var quintile = GetQuintile(dpp.FantasyPlayer!, fantasyResults);
                                 var winnings = 300 - GetQuintile(dpp.FantasyPlayer!, fantasyResults) * 60;
                                 var cost = fantasyBudgets.Where(fb => fb.Account.Id == dpp.FantasyPlayer!.DotaAccountId).Sum(fb => fb.EstimatedCost);
                                 return dpp.FantasyPlayer != null ? winnings - cost : 0; // 0 if no player drafted
