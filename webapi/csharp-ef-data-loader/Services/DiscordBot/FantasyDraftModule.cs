@@ -107,7 +107,7 @@ public class FantasyDraftModule : InteractionModuleBase<SocketInteractionContext
 Fantasy League: {selectedFantasyLeague.League!.Name} {selectedFantasyLeague.Name}
 Choose a Fantasy Player for position {position}
 {(selectedFantasyPlayers.Count() > 0 ?
-    string.Join(", ", selectedFantasyPlayers.Select(fp => $"{fp.DotaAccount!.Name} - {Math.Round(fantasyPlayerCosts.FirstOrDefault(fpc => fpc.Account.Id == fp.DotaAccountId)?.EstimatedCost ?? 0)}g")) :
+    string.Join(", ", selectedFantasyPlayers.Select(fp => $"{fp.DotaAccount!.Name} - {Math.Round(fantasyPlayerCosts.Where(fpc => fpc.Account.Id == fp.DotaAccountId).Sum(fpc => fpc.EstimatedCost))}g")) :
     "")}
 ";
                     msg.Components = fantasyPlayerBuilder.Build();
@@ -151,7 +151,7 @@ Choose a Fantasy Player for position {position}
         await ModifyOriginalResponseAsync(msg =>
         {
             msg.Content = $@"
-Here's your picks: {string.Join(", ", selectedFantasyPlayers.Select(fp => $"{fp.DotaAccount!.Name} - {Math.Round(fantasyPlayerCosts.FirstOrDefault(fpc => fpc.Account.Id == fp.DotaAccountId)?.EstimatedCost ?? 0)}g"))}
+Here's your picks: {string.Join(", ", selectedFantasyPlayers.Select(fp => $"{fp.DotaAccount!.Name} - {Math.Round(fantasyPlayerCosts.Where(fpc => fpc.Account.Id == fp.DotaAccountId).Sum(fpc => fpc.EstimatedCost))}g"))}
 Total Cost: {Math.Round(fantasyPlayerCosts.Where(fpc => selectedFantasyPlayers.Select(fp => fp.DotaAccountId).Contains(fpc.Account.Id)).Sum(fpc => fpc.EstimatedCost))}g";
             msg.Components = draftConfirmBuilder.Build();
         });
@@ -232,9 +232,9 @@ Total Cost: {Math.Round(fantasyPlayerCosts.Where(fpc => selectedFantasyPlayers.S
         var options = new List<SelectMenuOptionBuilder>();
         foreach (FantasyPlayer fantasyPlayer in fantasyPlayers.Where(fp => fp.TeamPosition == teamPosition))
         {
-            var playerBudget = fantasyBudgets.FirstOrDefault(fb => fb.Account.Id == fantasyPlayer.DotaAccountId);
+            var playerBudget = fantasyBudgets.Where(fb => fb.Account.Id == fantasyPlayer.DotaAccountId).Sum(fb => fb.EstimatedCost);
             options.Add(new SelectMenuOptionBuilder(
-                label: $"{fantasyPlayer.DotaAccount!.Name} - {fantasyPlayer.Team!.Name} - {Math.Round(playerBudget?.EstimatedCost ?? 0)}g",
+                label: $"{fantasyPlayer.DotaAccount!.Name} - {fantasyPlayer.Team!.Name} - {Math.Round(playerBudget)}g",
                 value: $"{fantasyPlayer.Id}"
             ));
         }

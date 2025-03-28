@@ -49,6 +49,7 @@ public class AghanimsFantasyContext : DbContext
     public DbSet<FantasyPlayerBudgetProbabilityTable> FantasyPlayerBudgetProbability { get; set; } = null!;
     public DbSet<AccountHeroCount> FantasyAccountTopHeroesView { get; set; } = null!;
     public DbSet<FantasyPrivateLeaguePlayer> FantasyPrivateLeaguePlayers { get; set; } = null!;
+    public DbSet<FantasyLedger> FantasyLedger { get; set; } = null!;
     #endregion
 
     #region Match
