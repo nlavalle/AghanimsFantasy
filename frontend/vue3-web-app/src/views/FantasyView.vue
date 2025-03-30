@@ -4,7 +4,7 @@
   <v-container v-if="isMounted">
     <v-row style="width:100%">
       <v-col>
-        <v-row>
+        <v-row class="align-center">
           <v-tabs v-model="fantasyTab" center-active show-arrows>
             <v-tab value="current">Current Draft</v-tab>
             <v-tab value="draft">Draft Players</v-tab>
@@ -12,6 +12,8 @@
             <v-tab value="match">Fantasy Matches</v-tab>
             <v-tab value="winnings">Winnings</v-tab>
           </v-tabs>
+          <v-spacer />
+          <UserBalance />
         </v-row>
         <v-row v-if="leagueStore.selectedFantasyLeague && !updateDisabled">
           <fantasy-lock-timer class="ma-3" :target-time="leagueStore.selectedFantasyLeague.fantasyDraftLocked" />
@@ -136,7 +138,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
-import { VCard, VCardTitle, VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem, VProgressCircular } from 'vuetify/components';
+import { VCard, VCardTitle, VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem, VSpacer, VProgressCircular } from 'vuetify/components';
 import { useAuthStore, type User } from '@/stores/auth';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import CurrentDraft from '@/components/Fantasy/CurrentDraft.vue';
@@ -152,6 +154,7 @@ import PlayerWinnings from '@/components/Fantasy/Winnings/PlayerWinnings.vue';
 import TotalWinnings from '@/components/Fantasy/Winnings/TotalWinnings.vue';
 import WinningsBreakdown from '@/components/Fantasy/Winnings/WinningsBreakdown.vue';
 import FantasyLockTimer from '@/components/Fantasy/FantasyLockTimer.vue';
+import UserBalance from '@/components/Fantasy/UserBalance.vue';
 
 const authStore = useAuthStore();
 const leagueStore = useFantasyLeagueStore();

@@ -961,6 +961,22 @@ export const localApiService = {
         throw error
       })
   },
+  getUserBalance() {
+    return fetch(`${baseUrl}/discord/balance`)
+      .then(
+        function (response: Response) {
+          if (!response.ok) {
+            throw response.status
+          } else {
+            return response.json()
+          }
+        }.bind(this)
+      )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
   saveFantasyDraft(league: any, draftPickArray: FantasyPlayer[]) {
     let draftPicks = [];
     for (let i = 1; i < 6; i++) {

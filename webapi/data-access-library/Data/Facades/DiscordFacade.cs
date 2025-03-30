@@ -18,8 +18,15 @@ public class DiscordFacade
     public async Task<List<FantasyMatch>> GetFantasyMatchesNotInDiscordOutboxAsync()
     {
         var outboxMessages = await _dbContext.DiscordOutbox.Where(ob => ob.EventObject == "FantasyMatch" && ob.EventType == "Scored").ToListAsync();
-        var fantasyMatches = await _dbContext.FantasyPlayerPointsView.Where(fppv => fppv.FantasyMatchPlayerId != null && fppv.FantasyMatchPlayer!.Match != null).Select(fppv => fppv.FantasyMatchPlayer!.Match!).ToListAsync();
+        var fantasyMatches = await _dbContext.FantasyPlayerPointsView
+            .Where(fppv => fppv.FantasyMatchPlayerId != null && fppv.FantasyMatchPlayer!.Match != null)
+            .Select(fppv => fppv.FantasyMatchPlayer!.Match!)
+            .ToListAsync();
 
-        return fantasyMatches.Where(fm => !outboxMessages.Any(obm => obm.ObjectKey == fm.MatchId.ToString())).Distinct().ToList();
+        return fantasyMatches
+            .Where(fm => !outboxMessages.Any(obm => obm.ObjectKey == fm.MatchId.ToString()))
+            .Where(fm => fm.MatchDetailParsed)
+            .Distinct()
+            .ToList();
     }
 }

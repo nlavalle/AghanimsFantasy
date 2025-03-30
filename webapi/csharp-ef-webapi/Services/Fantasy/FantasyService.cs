@@ -405,6 +405,11 @@ public class FantasyService
         return await _fantasyPointsFacade.GetLastNMatchHighlights(fantasyLeagueId, limit);
     }
 
+    public async Task<decimal> GetUserBalance(DiscordUser siteUser)
+    {
+        return await _dbContext.FantasyLedger.Where(fl => fl.DiscordId == siteUser.Id).SumAsync(fl => fl.Amount);
+    }
+
     private async Task<List<FantasyPlayer>> GetFantasyPlayerByFantasyLeagueAsync(FantasyLeague fantasyLeague)
     {
         _logger.LogDebug($"Get Fantasy Players by Fantasy League Id: {fantasyLeague.Id}");

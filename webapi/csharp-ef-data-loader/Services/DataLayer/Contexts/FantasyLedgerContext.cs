@@ -35,11 +35,11 @@ internal class FantasyLedgerContext : DotaOperationContext
 
             foreach (FantasyLeague unpaidFantasyLeague in unpaidFantasyLeagues)
             {
-                var fantasyBudgets = await _dbContext.FantasyPlayerBudgetProbability
+                List<FantasyPlayerBudgetProbabilityTable> fantasyBudgets = await _dbContext.FantasyPlayerBudgetProbability
                     .Include(fb => fb.Account)
                     .Where(fl => fl.FantasyLeague == unpaidFantasyLeague)
                     .ToListAsync();
-                var fantasyResults = await _dbContext.FantasyPlayerPointTotalsView
+                List<FantasyPlayerPointTotals> fantasyResults = await _dbContext.FantasyPlayerPointTotalsView
                     .Include(fppt => fppt.FantasyPlayer)
                     .Where(fppt => fppt.FantasyLeagueId == unpaidFantasyLeague.Id)
                     .ToListAsync();
@@ -49,30 +49,25 @@ internal class FantasyLedgerContext : DotaOperationContext
                     .Include(fd => fd.DraftPickPlayers)
                         .ThenInclude(dpp => dpp.FantasyPlayer)
                     .Where(fd => fd.FantasyLeagueId == unpaidFantasyLeague.Id)
+                    .Where(fd => _dbContext.DiscordUsers.Select(du => du.Id).Contains(fd.DiscordAccountId.GetValueOrDefault()))
                     .ToListAsync();
 
-                foreach (FantasyDraft unpaidDraft in unpaidFantasyDrafts)
-                {
-                    if (_dbContext.DiscordUsers.Select(du => du.Id).Contains(unpaidDraft.DiscordAccountId.GetValueOrDefault()))
+                List<FantasyLedger> newFantasyLedgers = unpaidFantasyDrafts
+                    .Select(fd => new FantasyLedger()
                     {
-                        FantasyLedger payoutLedgerRecord = new FantasyLedger()
-                        {
-                            DiscordId = unpaidDraft.DiscordAccountId.GetValueOrDefault(),
-                            Amount = unpaidDraft.DraftPickPlayers.Sum(dpp =>
+                        DiscordId = fd.DiscordAccountId.GetValueOrDefault(),
+                        Amount = fd.DraftPickPlayers.Sum(dpp =>
                             {
                                 var winnings = 300 - GetQuintile(dpp.FantasyPlayer!, fantasyResults) * 60;
                                 var cost = fantasyBudgets.Where(fb => fb.Account.Id == dpp.FantasyPlayer!.DotaAccountId).Sum(fb => fb.EstimatedCost);
                                 return dpp.FantasyPlayer != null ? winnings - cost : 0; // 0 if no player drafted
-                            }
+                            }),
+                        SourceId = unpaidFantasyLeague.Id,
+                        SourceType = "FantasyLeague"
+                    })
+                    .ToList();
 
-                        ),
-                            SourceId = unpaidFantasyLeague.Id,
-                            SourceType = "FantasyLeague"
-                        };
-                        await _dbContext.FantasyLedger.AddAsync(payoutLedgerRecord);
-                    }
-                }
-
+                await _dbContext.FantasyLedger.AddRangeAsync(newFantasyLedgers);
                 await _dbContext.SaveChangesAsync();
             }
 
