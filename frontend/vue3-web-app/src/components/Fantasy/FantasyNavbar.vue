@@ -38,7 +38,7 @@ const leagueStore = useFantasyLeagueStore()
 const route = useRoute();
 
 const leagueOptions = computed(() => {
-  return leagueStore.activeLeagues.sort((a, b) => b.league_id - a.league_id)
+  return leagueStore.activeLeagues.sort((a, b) => b.start_timestamp - a.start_timestamp)
 })
 
 const fantasyLeagueOptions = computed(() => {
