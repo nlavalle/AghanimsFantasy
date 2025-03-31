@@ -78,11 +78,14 @@ onMounted(() => {
 const isFantasyOpen = (leagueId: number) => {
   let currentDate = new Date();
   let fantasyLeagues = fantasyLeagueStore.activeFantasyLeagues.filter(fl => fl.leagueId == leagueId);
-  if (fantasyLeagues.some(fl => new Date(fl.fantasyDraftLocked * 1000) < currentDate)) {
+  if (fantasyLeagues.some(fl => new Date(fl.fantasyDraftLocked * 1000) > currentDate)) {
+    // Fantasy draft exists and still open
     return 1
-  } else if (fantasyLeagues.some(fl => new Date(fl.fantasyDraftLocked * 1000) > currentDate)) {
+  } else if (fantasyLeagues.some(fl => new Date(fl.fantasyDraftLocked * 1000) < currentDate)) {
+    // Fantasy draft exists but is closed
     return 2
   } else {
+    // No fantasy draft exists at all
     return 3
   }
 }
