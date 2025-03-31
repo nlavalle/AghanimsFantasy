@@ -18,7 +18,7 @@ const props = defineProps({
 });
 
 const timeLeft = ref(0);
-const interval = ref(0);
+const interval = ref<any>(0);
 
 const updateTimer = () => {
     const now = Math.floor(Date.now() / 1000); // Current time in seconds
