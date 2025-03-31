@@ -365,11 +365,13 @@ Total Cost: {Math.Round(fantasyPlayerCosts.Where(fpc => selectedFantasyPlayers.S
         }
 
         var fantasyPlayerCosts = await _dbContext.FantasyPlayerBudgetProbability
+                .Include(fpbp => fpbp.Account)
                 .Where(fpbp => fpbp.FantasyLeague.Id == fantasyLeague.Id)
                 .ToListAsync();
 
-        if (fantasyPlayerCosts.Where(fpc => fantasyPlayers.Where(fp => fp.DotaAccount != null)
-                .Select(fp => fp.DotaAccount!.Id)
+        if (fantasyPlayerCosts.Where(fpc => draftPickPlayers
+                .Where(dpp => dpp.FantasyPlayer != null)
+                .Select(dpp => dpp.FantasyPlayer!.DotaAccountId)
                 .Contains(fpc.Account.Id))
                 .Sum(fpc => fpc.EstimatedCost) > 600)
         {

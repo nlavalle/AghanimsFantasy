@@ -179,11 +179,20 @@ public class FantasyService
         }
 
         var fantasyPlayerCosts = await _dbContext.FantasyPlayerBudgetProbability
+                .Include(fpbp => fpbp.Account)
                 .Where(fpbp => fpbp.FantasyLeague.Id == fantasyLeague.Id)
                 .ToListAsync();
 
-        if (fantasyPlayerCosts.Where(fpc => fantasyPlayers.Where(fp => fp.DotaAccount != null)
-                .Select(fp => fp.DotaAccount!.Id)
+        var testPlayers = fantasyPlayerCosts.Where(fpc => fantasyDraft.DraftPickPlayers.Where(fp => fp.FantasyPlayer?.DotaAccount != null)
+                .Select(fp => fp.FantasyPlayer?.DotaAccount!.Id)
+                .Contains(fpc.Account.Id))
+                .ToList();
+
+        var testSum = testPlayers.Sum(fpc => fpc.EstimatedCost);
+
+        if (fantasyPlayerCosts.Where(fpc => fantasyDraft.DraftPickPlayers
+                .Where(fp => fp.FantasyPlayer != null)
+                .Select(fp => fp.FantasyPlayer!.DotaAccountId)
                 .Contains(fpc.Account.Id))
                 .Sum(fpc => fpc.EstimatedCost) > 600)
         {
