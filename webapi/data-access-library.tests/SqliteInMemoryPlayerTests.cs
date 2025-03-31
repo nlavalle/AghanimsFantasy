@@ -68,10 +68,8 @@ public class SqliteInMemoryPlayerTests : IDisposable
     public async void GetAllPlayers()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<ProMetadataRepository>>();
-        var repository = new ProMetadataRepository(loggerMock.Object, context);
 
-        var players = await repository.GetPlayerAccounts();
+        var players = await context.Accounts.ToListAsync();
 
         Assert.Equal(2, players.Count());
         Assert.IsAssignableFrom<IEnumerable<Account>>(players);

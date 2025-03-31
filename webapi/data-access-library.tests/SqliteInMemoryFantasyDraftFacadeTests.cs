@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using DataAccessLibrary.Models.ProMetadata;
 using DataAccessLibrary.Models.Fantasy;
 using DataAccessLibrary.Models.Discord;
-using DataAccessLibrary.Facades;
+using DataAccessLibrary.Data.Facades;
 
 
 namespace DataAccessLibrary.IntegrationTests.Data;
@@ -16,11 +16,7 @@ public class SqliteInMemoryFantasyDraftFacadeTests : IDisposable
     // private readonly ILogger<FantasyRepository> loggerMock = new Mock<ILogger<FantasyRepository>>();
     private readonly DbConnection _connection;
     private readonly DbContextOptions<AghanimsFantasyContext> _contextOptions;
-    private readonly ProMetadataRepository _proMetadataRepository;
-    private readonly DiscordUserRepository _discordUserRepository;
-    private readonly FantasyLeagueRepository _fantasyLeagueRepository;
-    private readonly FantasyDraftRepository _fantasyDraftRepository;
-    private readonly FantasyViewsRepository _fantasyViewsRepository;
+
 
     #region ConstructorAndDispose
     public SqliteInMemoryFantasyDraftFacadeTests()
@@ -318,14 +314,6 @@ public class SqliteInMemoryFantasyDraftFacadeTests : IDisposable
         );
 
         context.SaveChanges();
-
-
-        // Setup readonly to be used in all the tests
-        _proMetadataRepository = new ProMetadataRepository(new Mock<ILogger<ProMetadataRepository>>().Object, context);
-        _discordUserRepository = new DiscordUserRepository(new Mock<ILogger<DiscordUserRepository>>().Object, context);
-        _fantasyLeagueRepository = new FantasyLeagueRepository(new Mock<ILogger<FantasyLeagueRepository>>().Object, context);
-        _fantasyDraftRepository = new FantasyDraftRepository(new Mock<ILogger<FantasyDraftRepository>>().Object, context);
-        _fantasyViewsRepository = new FantasyViewsRepository(context);
     }
 
     AghanimsFantasyContext CreateContext() => new AghanimsFantasyContext(_contextOptions);
@@ -338,14 +326,7 @@ public class SqliteInMemoryFantasyDraftFacadeTests : IDisposable
     {
         using var context = CreateContext();
         var loggerMock = new Mock<ILogger<FantasyDraftFacade>>();
-        var fantasyDraftFacade = new FantasyDraftFacade(
-            loggerMock.Object,
-            _proMetadataRepository,
-            _discordUserRepository,
-            _fantasyLeagueRepository,
-            _fantasyDraftRepository,
-            _fantasyViewsRepository
-        );
+        var fantasyDraftFacade = new FantasyDraftFacade(loggerMock.Object, context);
 
         var fantasyLeague = await context.FantasyLeagues.FindAsync(1);
         var fantasyPlayerPoints = await fantasyDraftFacade.FantasyPlayerPointTotalsByFantasyLeagueAsync(fantasyLeague!);
@@ -362,14 +343,7 @@ public class SqliteInMemoryFantasyDraftFacadeTests : IDisposable
     {
         using var context = CreateContext();
         var loggerMock = new Mock<ILogger<FantasyDraftFacade>>();
-        var fantasyDraftFacade = new FantasyDraftFacade(
-            loggerMock.Object,
-            _proMetadataRepository,
-            _discordUserRepository,
-            _fantasyLeagueRepository,
-            _fantasyDraftRepository,
-            _fantasyViewsRepository
-        );
+        var fantasyDraftFacade = new FantasyDraftFacade(loggerMock.Object, context);
 
         var fantasyLeague = await context.FantasyLeagues.FindAsync(1);
         var fantasyPlayerPoints = await fantasyDraftFacade.FantasyPlayerPointTotalsByFantasyLeagueAsync(fantasyLeague!);

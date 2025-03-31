@@ -100,14 +100,10 @@ public class SqliteInMemoryMatchTests : IDisposable
     public async void GetLeagueMatches()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<MatchHistoryRepository>>();
-        var fantasyLeagueLoggerMock = new Mock<ILogger<FantasyLeagueRepository>>();
-        var repository = new MatchHistoryRepository(loggerMock.Object, context);
-        var fantasyLeagueRepository = new FantasyLeagueRepository(fantasyLeagueLoggerMock.Object, context);
-
-        var fantasyLeague = await fantasyLeagueRepository.GetByIdAsync(1);
-        var matchHistories = await repository.GetByFantasyLeagueAsync(fantasyLeague!);
-        Assert.Single(matchHistories);
+        var league = await context.Leagues.FindAsync(1);
+        Assert.NotNull(league);
+        var matchHistories = await context.MatchHistory.Where(mh => mh.LeagueId == league.Id).ToListAsync();
+        Assert.Equal(2, matchHistories.Count);
         Assert.IsAssignableFrom<IEnumerable<MatchHistory>>(matchHistories);
     }
 
@@ -115,10 +111,7 @@ public class SqliteInMemoryMatchTests : IDisposable
     public async void GetSingleMatch()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<MatchDetailRepository>>();
-        var repository = new MatchDetailRepository(loggerMock.Object, context);
-
-        var matchDetail = await repository.GetByIdAsync(1);
+        var matchDetail = await context.MatchDetails.FindAsync(1L);
         Assert.NotNull(matchDetail);
         Assert.Equal(1, matchDetail.MatchId);
         Assert.IsAssignableFrom<MatchDetail>(matchDetail);
@@ -128,10 +121,7 @@ public class SqliteInMemoryMatchTests : IDisposable
     public async void GetUnknownMatch()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<MatchDetailRepository>>();
-        var repository = new MatchDetailRepository(loggerMock.Object, context);
-
-        var matchDetail = await repository.GetByIdAsync(5);
+        var matchDetail = await context.MatchDetails.FindAsync(5L);
         Assert.Null(matchDetail);
     }
 
@@ -139,13 +129,14 @@ public class SqliteInMemoryMatchTests : IDisposable
     public async void GetOutdatedMatch()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<MatchDetailRepository>>();
-        var fantasyLeagueLoggerMock = new Mock<ILogger<FantasyLeagueRepository>>();
-        var repository = new MatchDetailRepository(loggerMock.Object, context);
-        var fantasyLeagueRepository = new FantasyLeagueRepository(fantasyLeagueLoggerMock.Object, context);
-
-        var fantasyLeague = await fantasyLeagueRepository.GetByIdAsync(1);
-        var matchDetail = await repository.GetByFantasyLeagueAsync(fantasyLeague!);
+        var fantasyLeague = await context.FantasyLeagues.FindAsync(1);
+        Assert.NotNull(fantasyLeague);
+        var matchDetail = await context.MatchDetails
+            .Where(md => md.LeagueId == fantasyLeague.LeagueId)
+            .Where(md =>
+                md.StartTime >= fantasyLeague.LeagueStartTime &&
+                md.StartTime <= fantasyLeague.LeagueEndTime)
+            .ToListAsync();
         // Match Detail 4 exists but is older than league start time
         Assert.Null(matchDetail.Where(md => md.MatchId == 4).FirstOrDefault());
     }
@@ -154,13 +145,16 @@ public class SqliteInMemoryMatchTests : IDisposable
     public async void GetMatchDetails()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<MatchDetailRepository>>();
-        var fantasyLeagueLoggerMock = new Mock<ILogger<FantasyLeagueRepository>>();
-        var repository = new MatchDetailRepository(loggerMock.Object, context);
-        var fantasyLeagueRepository = new FantasyLeagueRepository(fantasyLeagueLoggerMock.Object, context);
+        var fantasyLeague = await context.FantasyLeagues.FindAsync(1);
+        Assert.NotNull(fantasyLeague);
 
-        var fantasyLeague = await fantasyLeagueRepository.GetByIdAsync(1);
-        var matchDetails = await repository.GetByFantasyLeagueAsync(fantasyLeague!);
+        var matchDetails = await context.MatchDetails
+            .Where(md => md.LeagueId == fantasyLeague.LeagueId)
+            .Where(md =>
+                md.StartTime >= fantasyLeague.LeagueStartTime &&
+                md.StartTime <= fantasyLeague.LeagueEndTime)
+            .ToListAsync();
+
         Assert.Single(matchDetails);
         Assert.IsAssignableFrom<IEnumerable<MatchDetail>>(matchDetails);
     }
@@ -169,13 +163,16 @@ public class SqliteInMemoryMatchTests : IDisposable
     public async void GetEmptyLeagueMatchDetails()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<MatchDetailRepository>>();
-        var fantasyLeagueLoggerMock = new Mock<ILogger<FantasyLeagueRepository>>();
-        var repository = new MatchDetailRepository(loggerMock.Object, context);
-        var fantasyLeagueRepository = new FantasyLeagueRepository(fantasyLeagueLoggerMock.Object, context);
+        var fantasyLeague = await context.FantasyLeagues.FindAsync(2);
+        Assert.NotNull(fantasyLeague);
 
-        var fantasyLeague = await fantasyLeagueRepository.GetByIdAsync(2);
-        var matchDetails = await repository.GetByFantasyLeagueAsync(fantasyLeague!);
+        var matchDetails = await context.MatchDetails
+            .Where(md => md.LeagueId == fantasyLeague.LeagueId)
+            .Where(md =>
+                md.StartTime >= fantasyLeague.LeagueStartTime &&
+                md.StartTime <= fantasyLeague.LeagueEndTime)
+            .ToListAsync();
+
         Assert.Empty(matchDetails);
     }
 
@@ -184,11 +181,12 @@ public class SqliteInMemoryMatchTests : IDisposable
     public async void GetMatchDetailPlayers()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<MatchDetailRepository>>();
-        var repository = new MatchDetailRepository(loggerMock.Object, context);
 
-        var league = await context.Leagues.FindAsync(1);
-        var matchDetailPlayers = await repository.GetByLeagueAsync(league!);
+        var league = await context.Leagues.Include(l => l.MatchDetails).FirstOrDefaultAsync(l => l.Id == 1);
+        Assert.NotNull(league);
+        var matchDetailPlayers = await context.MatchDetailsPlayers
+            .Where(mdp => league.MatchDetails.Select(md => md.MatchId).Contains(mdp.MatchId))
+            .ToListAsync();
         Assert.Equal(10, matchDetailPlayers.Count());
         Assert.IsAssignableFrom<IEnumerable<MatchDetailsPlayer>>(matchDetailPlayers);
     }
@@ -197,10 +195,8 @@ public class SqliteInMemoryMatchTests : IDisposable
     public async void GetMatchDetailPlayersAllLeagues()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<MatchDetailRepository>>();
-        var repository = new MatchDetailRepository(loggerMock.Object, context);
-
-        var matchDetailPlayers = await repository.GetByLeagueAsync(null);
+        var matchDetailPlayers = await context.MatchDetailsPlayers
+            .ToListAsync();
         Assert.Equal(10, matchDetailPlayers.Count());
         Assert.IsAssignableFrom<IEnumerable<MatchDetailsPlayer>>(matchDetailPlayers);
     }

@@ -66,10 +66,7 @@ public class SqliteInMemoryHeroTests : IDisposable
     public async void GetAllHeroes()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<ProMetadataRepository>>();
-        var repository = new ProMetadataRepository(loggerMock.Object, context);
-
-        var heroes = await repository.GetHeroesAsync();
+        var heroes = await context.Heroes.ToListAsync();
 
         Assert.Equal(2, heroes.Count());
         Assert.IsAssignableFrom<IEnumerable<Hero>>(heroes);

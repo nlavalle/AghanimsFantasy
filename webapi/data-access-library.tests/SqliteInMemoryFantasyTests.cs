@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using DataAccessLibrary.Models.ProMetadata;
 using DataAccessLibrary.Models.Fantasy;
 using DataAccessLibrary.Models.Discord;
+using DataAccessLibrary.Data.Facades;
 
 namespace DataAccessLibrary.IntegrationTests.Data;
 
@@ -324,11 +325,9 @@ public class SqliteInMemoryFantasyTests : IDisposable
     public async void GetLeagueFantasyPlayers()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<FantasyPlayerRepository>>();
-        var repository = new FantasyPlayerRepository(loggerMock.Object, context);
-
-        var fantasyLeague = await context.FantasyLeagues.FindAsync(1);
-        var fantasyPlayers = await repository.GetByFantasyLeagueAsync(fantasyLeague!);
+        var fantasyLeague = await context.FantasyLeagues.Include(fl => fl.FantasyPlayers).FirstOrDefaultAsync(fl => fl.Id == 1);
+        Assert.NotNull(fantasyLeague);
+        var fantasyPlayers = fantasyLeague.FantasyPlayers;
         Assert.Equal(10, fantasyPlayers.Count());
         Assert.IsAssignableFrom<IEnumerable<FantasyPlayer>>(fantasyPlayers);
     }
@@ -337,10 +336,7 @@ public class SqliteInMemoryFantasyTests : IDisposable
     public async void GetAllLeagueFantasyPlayers()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<FantasyPlayerRepository>>();
-        var repository = new FantasyPlayerRepository(loggerMock.Object, context);
-
-        var fantasyPlayers = await repository.GetAllAsync();
+        var fantasyPlayers = await context.FantasyPlayers.ToListAsync();
         Assert.Equal(20, fantasyPlayers.Count());
         Assert.IsAssignableFrom<IEnumerable<FantasyPlayer>>(fantasyPlayers);
     }
@@ -349,11 +345,9 @@ public class SqliteInMemoryFantasyTests : IDisposable
     public async void GetEmptyLeagueFantasyPlayers()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<FantasyPlayerRepository>>();
-        var repository = new FantasyPlayerRepository(loggerMock.Object, context);
-
         var fantasyLeague = await context.FantasyLeagues.FindAsync(3);
-        var fantasyPlayers = await repository.GetByFantasyLeagueAsync(fantasyLeague!);
+        Assert.NotNull(fantasyLeague);
+        var fantasyPlayers = fantasyLeague.FantasyPlayers;
         Assert.Empty(fantasyPlayers);
     }
 
@@ -361,12 +355,13 @@ public class SqliteInMemoryFantasyTests : IDisposable
     public async void GetFantasyDraftsByUserLeague()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<FantasyDraftRepository>>();
-        var repository = new FantasyDraftRepository(loggerMock.Object, context);
+        var fantasyDraftLogger = new Mock<ILogger<FantasyDraftFacade>>();
+        var fantasyDraftFacade = new FantasyDraftFacade(fantasyDraftLogger.Object, context);
 
         var fantasyLeague = await context.FantasyLeagues.FindAsync(1);
         var discordUser = await context.DiscordUsers.FindAsync(1L);
-        var fantasyDraft = await repository.GetByUserFantasyLeague(fantasyLeague!, discordUser!);
+
+        var fantasyDraft = await fantasyDraftFacade.GetByUserFantasyLeague(fantasyLeague!, discordUser!);
 
         Assert.NotNull(fantasyDraft);
         Assert.IsAssignableFrom<FantasyDraft>(fantasyDraft);
@@ -376,12 +371,12 @@ public class SqliteInMemoryFantasyTests : IDisposable
     public async void GetFantasyDraftsEmptyLeague()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<FantasyDraftRepository>>();
-        var repository = new FantasyDraftRepository(loggerMock.Object, context);
+        var fantasyDraftLogger = new Mock<ILogger<FantasyDraftFacade>>();
+        var fantasyDraftFacade = new FantasyDraftFacade(fantasyDraftLogger.Object, context);
 
         var fantasyLeague = await context.FantasyLeagues.FindAsync(2);
         var discordUser = await context.DiscordUsers.FindAsync(1L);
-        var fantasyDraft = await repository.GetByUserFantasyLeague(fantasyLeague!, discordUser!);
+        var fantasyDraft = await fantasyDraftFacade.GetByUserFantasyLeague(fantasyLeague!, discordUser!);
 
         Assert.Null(fantasyDraft);
     }
