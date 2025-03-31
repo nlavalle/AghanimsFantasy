@@ -205,14 +205,14 @@ const teamsList = computed(() => {
 })
 
 onMounted(() => {
-    if (selectedFantasyLeague.value) {
+    if (selectedFantasyLeague.value && selectedFantasyLeague.value.id != 0) {
         localApiService.getPlayerFantasyStats(selectedFantasyLeague.value.id)
             .then(result => playerFantasyStats.value = result);
     }
 });
 
 watch(selectedFantasyLeague, () => {
-    if (selectedFantasyLeague.value) {
+    if (selectedFantasyLeague.value && selectedFantasyLeague.value.id != 0) {
         localApiService.getPlayerFantasyStats(selectedFantasyLeague.value.id)
             .then(result => playerFantasyStats.value = result);
     }

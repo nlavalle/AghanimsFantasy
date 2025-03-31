@@ -5,7 +5,6 @@ import type { League } from '@/types/League'
 import { localApiService } from '@/services/localApiService'
 import type { FantasyDraftPoints, FantasyPlayer } from '@/components/Fantasy/fantasyDraft'
 import type { Leaderboard, LeaderboardStats } from '@/types/Leaderboard';
-import type { User } from './auth';
 import type { LeaderboardItem } from '@/types/LeaderboardItem';
 
 export const useFantasyDraftStore = defineStore({
@@ -20,15 +19,17 @@ export const useFantasyDraftStore = defineStore({
   actions: {
     fetchLeaderboard() {
       if (this.leagueStore.selectedFantasyLeague.id) {
-        return localApiService.getTopTenDrafts(this.leagueStore.selectedFantasyLeague.id)
+        localApiService.getTopTenDrafts(this.leagueStore.selectedFantasyLeague.id)
           .then((result) => (this.fantasyLeaderboard = result))
-          .then(() => { this.fetchLeaderboardStats() })
+          .then(() => {
+            this.fetchLeaderboardStats()
+          })
       }
     },
 
     fetchLeaderboardStats() {
       if (this.leagueStore.selectedFantasyLeague.id) {
-        return localApiService.getLeaderboardStats(this.leagueStore.selectedFantasyLeague.id)
+        localApiService.getLeaderboardStats(this.leagueStore.selectedFantasyLeague.id)
           .then((result: any) => {
             this.fantasyLeaderboardStats = result;
           })

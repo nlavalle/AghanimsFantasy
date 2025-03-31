@@ -32,6 +32,10 @@
         <template v-slot:item.region="{ item }">
           <span>{{ regions[item.region] }}</span>
         </template>
+        <template v-slot:item.fantasyOpen="{ item }">
+          <span :class="fantasyStatuses[isFantasyOpen(item.league_id)].className">{{
+            fantasyStatuses[isFantasyOpen(item.league_id)].text }}</span>
+        </template>
       </v-data-table>
     </v-row>
   </v-container>
@@ -43,8 +47,26 @@ import { localApiService } from '@/services/localApiService';
 import type { League } from '@/types/League';
 import { onMounted, ref } from 'vue';
 import router from '@/router';
+import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 
 const leagueSchedules = ref<League[]>([]);
+
+const fantasyLeagueStore = useFantasyLeagueStore();
+
+const fantasyStatuses = {
+  1: {
+    text: 'Open!',
+    className: 'status-open'
+  },
+  2: {
+    text: 'Locked',
+    className: 'status-locked'
+  },
+  3: {
+    text: 'Coming Soon',
+    className: 'status-coming-soon'
+  }
+}
 
 onMounted(() => {
   router.isReady()
@@ -52,6 +74,18 @@ onMounted(() => {
       leagueSchedules.value = result.sort((a: League, b: League) => a.start_timestamp - b.start_timestamp);
     }));
 })
+
+const isFantasyOpen = (leagueId: number) => {
+  let currentDate = new Date();
+  let fantasyLeagues = fantasyLeagueStore.activeFantasyLeagues.filter(fl => fl.leagueId == leagueId);
+  if (fantasyLeagues.some(fl => new Date(fl.fantasyDraftLocked * 1000) < currentDate)) {
+    return 1
+  } else if (fantasyLeagues.some(fl => new Date(fl.fantasyDraftLocked * 1000) > currentDate)) {
+    return 2
+  } else {
+    return 3
+  }
+}
 
 const regions = [
   "Global", //0
@@ -67,7 +101,7 @@ const scheduleHeaders = [
   {
     title: 'Name',
     value: 'name',
-    width: '60%'
+    width: '40%'
   },
   {
     title: 'Dates',
@@ -77,8 +111,13 @@ const scheduleHeaders = [
   {
     title: 'Region',
     value: 'region',
-    width: '15%'
+    width: '10%'
   },
+  {
+    title: 'Fantasy Open?',
+    value: 'fantasyOpen',
+    width: '25%'
+  }
 ];
 
 </script>
@@ -90,5 +129,17 @@ const scheduleHeaders = [
 
 .schedule-table {
   max-width: 600px;
+}
+
+.status-open {
+  color: var(--gradient-blue-1);
+}
+
+.status-locked {
+  color: var(--aghanims-fantasy-main-1);
+}
+
+.status-coming-soon {
+  color: var(--aghanims-fantasy-white);
 }
 </style>

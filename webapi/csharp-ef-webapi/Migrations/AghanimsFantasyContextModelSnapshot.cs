@@ -80,6 +80,8 @@ namespace csharp_ef_webapi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("discord_users", "nadcl");
+
+                    b.HasAnnotation("Relational:JsonPropertyName", "discord_user");
                 });
 
             modelBuilder.Entity("DataAccessLibrary.Models.Fantasy.FantasyDraft", b =>
@@ -322,6 +324,45 @@ namespace csharp_ef_webapi.Migrations
                         .IsUnique();
 
                     b.ToTable("dota_fantasy_league_weights", "nadcl");
+                });
+
+            modelBuilder.Entity("DataAccessLibrary.Models.Fantasy.FantasyLedger", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id")
+                        .HasAnnotation("Relational:JsonPropertyName", "id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("amount");
+
+                    b.Property<long>("DiscordId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("discord_id")
+                        .HasAnnotation("Relational:JsonPropertyName", "discord_id");
+
+                    b.Property<long>("LedgerRecordedTime")
+                        .HasColumnType("bigint")
+                        .HasColumnName("ledger_recorded_time");
+
+                    b.Property<int>("SourceId")
+                        .HasColumnType("integer")
+                        .HasColumnName("source_id");
+
+                    b.Property<string>("SourceType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("source_type");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DiscordId");
+
+                    b.ToTable("fantasy_ledger", "nadcl");
                 });
 
             modelBuilder.Entity("DataAccessLibrary.Models.Fantasy.FantasyMatch", b =>
@@ -798,19 +839,23 @@ namespace csharp_ef_webapi.Migrations
 
                     b.Property<long>("DiscordUserId")
                         .HasColumnType("bigint")
-                        .HasColumnName("discord_user_id");
+                        .HasColumnName("discord_user_id")
+                        .HasAnnotation("Relational:JsonPropertyName", "discord_user_id");
 
                     b.Property<int>("FantasyLeagueId")
                         .HasColumnType("integer")
-                        .HasColumnName("fantasy_league_id");
+                        .HasColumnName("fantasy_league_id")
+                        .HasAnnotation("Relational:JsonPropertyName", "fantasy_league_id");
 
                     b.Property<long>("FantasyLeagueJoinDate")
                         .HasColumnType("bigint")
-                        .HasColumnName("fantasy_league_join_date");
+                        .HasColumnName("fantasy_league_join_date")
+                        .HasAnnotation("Relational:JsonPropertyName", "fantasy_league_join_date");
 
                     b.Property<bool>("IsAdmin")
                         .HasColumnType("boolean")
-                        .HasColumnName("is_admin");
+                        .HasColumnName("is_admin")
+                        .HasAnnotation("Relational:JsonPropertyName", "is_admin");
 
                     b.HasKey("Id");
 
@@ -948,6 +993,73 @@ namespace csharp_ef_webapi.Migrations
                     b.ToTable((string)null);
 
                     b.ToView("fantasy_normalized_averages", "nadcl");
+                });
+
+            modelBuilder.Entity("DataAccessLibrary.Models.FantasyPlayerBudgetProbability", b =>
+                {
+                    b.Property<long>("AccountId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_id");
+
+                    b.Property<decimal>("CumulativeProbability")
+                        .HasColumnType("numeric")
+                        .HasColumnName("cumulative_probability");
+
+                    b.Property<int>("FantasyLeagueId")
+                        .HasColumnType("integer")
+                        .HasColumnName("fantasy_league_id");
+
+                    b.Property<decimal>("Probability")
+                        .HasColumnType("numeric")
+                        .HasColumnName("probability");
+
+                    b.Property<int>("Quintile")
+                        .HasColumnType("integer")
+                        .HasColumnName("quintile");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("FantasyLeagueId");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("fantasy_player_probabilties", "nadcl");
+                });
+
+            modelBuilder.Entity("DataAccessLibrary.Models.FantasyPlayerBudgetProbabilityTable", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<decimal>("CumulativeProbability")
+                        .HasColumnType("numeric")
+                        .HasColumnName("cumulative_probability");
+
+                    b.Property<decimal>("Probability")
+                        .HasColumnType("numeric")
+                        .HasColumnName("probability");
+
+                    b.Property<int>("Quintile")
+                        .HasColumnType("integer")
+                        .HasColumnName("quintile");
+
+                    b.Property<long>("account_id")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("fantasy_league_id")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("account_id");
+
+                    b.HasIndex("fantasy_league_id");
+
+                    b.ToTable("dota_fantasy_budget_probability", "nadcl");
                 });
 
             modelBuilder.Entity("DataAccessLibrary.Models.FantasyPlayerPointTotals", b =>
@@ -2123,11 +2235,13 @@ namespace csharp_ef_webapi.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
-                        .HasColumnName("is_active");
+                        .HasColumnName("is_active")
+                        .HasAnnotation("Relational:JsonPropertyName", "is_active");
 
                     b.Property<bool>("IsScheduled")
                         .HasColumnType("boolean")
-                        .HasColumnName("is_scheduled");
+                        .HasColumnName("is_scheduled")
+                        .HasAnnotation("Relational:JsonPropertyName", "is_scheduled");
 
                     b.Property<long>("MostRecentActivity")
                         .HasColumnType("bigint")
@@ -2264,6 +2378,33 @@ namespace csharp_ef_webapi.Migrations
                     b.ToTable("dota_teams", "nadcl");
 
                     b.HasAnnotation("Relational:JsonPropertyName", "radiant_team_id");
+                });
+
+            modelBuilder.Entity("DataAccessLibrary.Models.ViewModels.AccountHeroCount", b =>
+                {
+                    b.Property<long>("AccountId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_id");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("integer")
+                        .HasColumnName("count");
+
+                    b.Property<int>("HeroId")
+                        .HasColumnType("integer")
+                        .HasColumnName("hero_id");
+
+                    b.Property<int>("Losses")
+                        .HasColumnType("integer")
+                        .HasColumnName("losses");
+
+                    b.Property<int>("Wins")
+                        .HasColumnType("integer")
+                        .HasColumnName("wins");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("fantasy_account_top_heroes", "nadcl");
                 });
 
             modelBuilder.Entity("DataAccessLibrary.Models.WebApi.MatchDetail", b =>
@@ -2942,6 +3083,17 @@ namespace csharp_ef_webapi.Migrations
                     b.Navigation("FantasyLeague");
                 });
 
+            modelBuilder.Entity("DataAccessLibrary.Models.Fantasy.FantasyLedger", b =>
+                {
+                    b.HasOne("DataAccessLibrary.Models.Discord.DiscordUser", "DiscordUser")
+                        .WithMany()
+                        .HasForeignKey("DiscordId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DiscordUser");
+                });
+
             modelBuilder.Entity("DataAccessLibrary.Models.Fantasy.FantasyMatch", b =>
                 {
                     b.HasOne("DataAccessLibrary.Models.ProMetadata.Team", "DireTeam")
@@ -3064,6 +3216,44 @@ namespace csharp_ef_webapi.Migrations
                         .IsRequired();
 
                     b.Navigation("FantasyPlayer");
+                });
+
+            modelBuilder.Entity("DataAccessLibrary.Models.FantasyPlayerBudgetProbability", b =>
+                {
+                    b.HasOne("DataAccessLibrary.Models.ProMetadata.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataAccessLibrary.Models.Fantasy.FantasyLeague", "FantasyLeague")
+                        .WithMany()
+                        .HasForeignKey("FantasyLeagueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("FantasyLeague");
+                });
+
+            modelBuilder.Entity("DataAccessLibrary.Models.FantasyPlayerBudgetProbabilityTable", b =>
+                {
+                    b.HasOne("DataAccessLibrary.Models.ProMetadata.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("account_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataAccessLibrary.Models.Fantasy.FantasyLeague", "FantasyLeague")
+                        .WithMany()
+                        .HasForeignKey("fantasy_league_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("FantasyLeague");
                 });
 
             modelBuilder.Entity("DataAccessLibrary.Models.FantasyPlayerPointTotals", b =>

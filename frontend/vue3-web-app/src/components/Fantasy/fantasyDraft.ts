@@ -160,7 +160,6 @@ export interface FantasyPlayer {
 
 export interface FantasyPlayerTopHeroes {
     fantasyPlayerId: number,
-    fantasyPlayer: FantasyPlayer,
     topHeroes: [{
         hero: {
             id: number,

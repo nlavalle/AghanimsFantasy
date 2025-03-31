@@ -19,7 +19,7 @@ We don't apply the ef database update right now because the database existed a l
 
 ### Removing migrations
 The env variables in the connection strings will probably mess up the `dotnet ef migrations remove` command.
-First export the Local `export ASPNETCORE_ENVIRONMENT=Local`
+First export the Local `export ASPNETCORE_ENVIRONMENT=Local` or `$env:ASPNETCORE_ENVIRONMENT='Local'` on windows
 Make sure `appsettings.Local.json` is defined then the command is:
 `dotnet ef migrations remove --configuration Local`
 

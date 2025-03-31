@@ -8,6 +8,7 @@ using DataAccessLibrary.Models.WebApi;
 using DataAccessLibrary.Models.GameCoordinator;
 using DataAccessLibrary.Models.ProMetadata;
 using DataAccessLibrary.Models.Fantasy;
+using DataAccessLibrary.Models.ViewModels;
 
 public class AghanimsFantasyContext : DbContext
 {
@@ -44,7 +45,11 @@ public class AghanimsFantasyContext : DbContext
     public DbSet<MetadataSummary> MetadataSummaries { get; set; } = null!;
     public DbSet<FantasyNormalizedAverages> FantasyNormalizedAveragesView { get; set; } = null!;
     public DbSet<FantasyNormalizedAveragesTable> FantasyNormalizedAverages { get; set; } = null!;
+    public DbSet<FantasyPlayerBudgetProbability> FantasyPlayerBudgetProbabilityView { get; set; } = null!;
+    public DbSet<FantasyPlayerBudgetProbabilityTable> FantasyPlayerBudgetProbability { get; set; } = null!;
+    public DbSet<AccountHeroCount> FantasyAccountTopHeroesView { get; set; } = null!;
     public DbSet<FantasyPrivateLeaguePlayer> FantasyPrivateLeaguePlayers { get; set; } = null!;
+    public DbSet<FantasyLedger> FantasyLedger { get; set; } = null!;
     #endregion
 
     #region Match
@@ -142,6 +147,14 @@ public class AghanimsFantasyContext : DbContext
         modelBuilder.Entity<MatchHighlights>().ToView("match_highlights", "nadcl")
             .HasNoKey();
 
+        modelBuilder.Entity<FantasyPlayerBudgetProbability>()
+            .ToView("fantasy_player_probabilties", "nadcl")
+            .HasNoKey();
+
+        modelBuilder.Entity<AccountHeroCount>()
+            .ToView("fantasy_account_top_heroes", "nadcl")
+            .HasNoKey();
+
         modelBuilder.Entity<FantasyPlayer>()
             .Navigation(fp => fp.Team)
             .AutoInclude();
@@ -168,6 +181,20 @@ public class AghanimsFantasyContext : DbContext
             .HasOne(fnat => fnat.FantasyPlayer)
             .WithOne()
             .HasForeignKey<FantasyNormalizedAveragesTable>("fantasy_player_id");
+
+        modelBuilder.Entity<FantasyPlayerBudgetProbabilityTable>()
+            .ToTable("dota_fantasy_budget_probability", "nadcl")
+            .HasKey(fpbp => fpbp.Id);
+
+        modelBuilder.Entity<FantasyPlayerBudgetProbabilityTable>()
+            .HasOne(fpbp => fpbp.Account)
+            .WithMany()
+            .HasForeignKey("account_id");
+
+        modelBuilder.Entity<FantasyPlayerBudgetProbabilityTable>()
+            .HasOne(fpbp => fpbp.FantasyLeague)
+            .WithMany()
+            .HasForeignKey("fantasy_league_id");
 
         #region Metadata
 

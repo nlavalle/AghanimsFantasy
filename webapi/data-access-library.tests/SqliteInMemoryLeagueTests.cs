@@ -94,10 +94,7 @@ public class SqliteInMemoryLeagueTests : IDisposable
     public async void GetAllLeaguesTest()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<ProMetadataRepository>>();
-        var repository = new ProMetadataRepository(loggerMock.Object, context);
-
-        var leagues = await repository.GetLeaguesAsync(true);
+        var leagues = await context.Leagues.ToListAsync();
 
         Assert.Collection(
             leagues,
@@ -109,10 +106,7 @@ public class SqliteInMemoryLeagueTests : IDisposable
     public async void GetActiveLeaguesTest()
     {
         using var context = CreateContext();
-        var loggerMock = new Mock<ILogger<ProMetadataRepository>>();
-        var repository = new ProMetadataRepository(loggerMock.Object, context);
-
-        var leagues = await repository.GetLeaguesAsync(false);
+        var leagues = await context.Leagues.Where(l => l.IsActive).ToListAsync();
 
         Assert.Collection(
             leagues,

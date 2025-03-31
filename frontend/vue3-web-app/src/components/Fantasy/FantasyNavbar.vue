@@ -13,9 +13,9 @@
     <v-tabs v-model="leagueStore.selectedFantasyLeague" selected-class="selected-tab">
       <v-tab v-for="fantasyLeague in fantasyLeagueOptions" :value="fantasyLeague"
         :variant="leagueStore.isDraftActive(fantasyLeague.leagueEndTime) ? 'text' : 'plain'">
-        {{ fantasyLeague.name }} ({{ leagueStore.fantasyDraftPoints.find(draft => draft?.fantasyDraft?.fantasyLeagueId
+        {{ fantasyLeague.name }} ({{leagueStore.fantasyDraftPoints.find(draft => draft?.fantasyDraft?.fantasyLeagueId
           ==
-          fantasyLeague.id)?.fantasyPlayerPoints.length ?? 0 }}/5)
+          fantasyLeague.id)?.fantasyPlayerPoints.length ?? 0}}/5)
         <v-icon v-if="!leagueStore.isDraftOpen(fantasyLeague.fantasyDraftLocked)" class="ml-1" icon="fa-solid fa-lock"
           size="x-small">
         </v-icon>
@@ -38,7 +38,7 @@ const leagueStore = useFantasyLeagueStore()
 const route = useRoute();
 
 const leagueOptions = computed(() => {
-  return leagueStore.activeLeagues.sort((a, b) => b.league_id - a.league_id)
+  return leagueStore.activeLeagues.sort((a, b) => b.start_timestamp - a.start_timestamp)
 })
 
 const fantasyLeagueOptions = computed(() => {
@@ -56,7 +56,10 @@ onMounted(() => {
       if (authStore.authenticated) {
         leagueStore.fetchFantasyDraftPoints()
       }
-
+      router.push({
+        path: route.path,
+        query: { fantasyLeagueId: leagueStore.selectedFantasyLeague.id }
+      })
     });
 })
 

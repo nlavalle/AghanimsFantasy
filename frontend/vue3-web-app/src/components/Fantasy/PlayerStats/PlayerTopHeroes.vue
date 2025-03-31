@@ -2,10 +2,10 @@
     <v-row class="player-top-heroes">
         <v-col :class="isDesktop ? 'tophero-text-desktop' : 'tophero-text-mobile'">
             <v-row>
-                <span>Most played heroes:</span>
+                <span>Most played heroes (last 30 games):</span>
             </v-row>
             <v-row>
-                <v-col v-for="(hero, index) in playerTopHeroes?.topHeroes" :key="index">
+                <v-col v-for="(hero, index) in props.heroesPlayer.topHeroes" :key="index">
                     <v-row justify="center">
                         <img :style="{ width: isDesktop ? '128px' : '72px', height: isDesktop ? '64px' : '36px' }"
                             :src="getHeroIcon(hero.hero.name)" />
@@ -22,19 +22,16 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch, type PropType } from 'vue';
+import { ref, type PropType } from 'vue';
 import { VRow, VCol } from 'vuetify/components';
-import { localApiService } from '@/services/localApiService';
-import type { FantasyPlayer, FantasyPlayerTopHeroes } from '../fantasyDraft';
+import type { FantasyPlayerTopHeroes } from '../fantasyDraft';
 
 const props = defineProps({
-    selectedPlayer: {
-        type: Object as PropType<FantasyPlayer>,
+    heroesPlayer: {
+        type: Object as PropType<FantasyPlayerTopHeroes>,
         required: true,
     }
 })
-
-const playerTopHeroes = ref<FantasyPlayerTopHeroes>();
 
 const isDesktop = ref(window.outerWidth >= 600);
 
@@ -43,20 +40,6 @@ const getHeroIcon = (heroIconString: string) => {
     var formattedString = heroIconString.replace('npc_dota_hero_', '');
     return `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${formattedString}.png`
 }
-
-onMounted(() => {
-    if (props.selectedPlayer) {
-        localApiService.getPlayerTopHeroes(props.selectedPlayer.id)
-            .then((result) => (playerTopHeroes.value = result));
-    }
-})
-
-watch(() => props.selectedPlayer, (newPlayer) => {
-    if (newPlayer) {
-        localApiService.getPlayerTopHeroes(newPlayer.id)
-            .then((result) => (playerTopHeroes.value = result));
-    }
-})
 
 </script>
 

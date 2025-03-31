@@ -34,6 +34,7 @@ builder.Services.AddScoped<DotaClient>();
 // Add WebApi and Steam Client Services
 builder.Services.AddHostedService<DotaWebApiService>();
 builder.Services.AddHostedService<DotaSteamClientService>();
+builder.Services.AddHostedService<DataLayerService>();
 
 // Add Discord Bot services
 builder.Services.AddSingleton(new DiscordSocketConfig

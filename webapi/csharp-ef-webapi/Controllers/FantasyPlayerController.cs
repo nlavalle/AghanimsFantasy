@@ -3,6 +3,7 @@ using DataAccessLibrary.Models.Fantasy;
 using Microsoft.AspNetCore.Authorization;
 using csharp_ef_webapi.Services;
 using DataAccessLibrary.Models.Discord;
+using csharp_ef_webapi.ViewModels;
 
 namespace csharp_ef_webapi.Controllers
 {
@@ -41,6 +42,29 @@ namespace csharp_ef_webapi.Controllers
                 }
 
                 return Ok(fantasyPlayer);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // GET: api/FantasyPlayer/5
+        [HttpGet("FantasyLeague/{fantasyLeagueId}")]
+        public async Task<ActionResult<IEnumerable<FantasyPlayerViewModel>>> GetFantasyPlayersByFantasyLeague(int fantasyLeagueId)
+        {
+            try
+            {
+                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
+
+                List<FantasyPlayerViewModel> fantasyPlayers = await _fantasyService.GetFantasyPlayerViewModelsAsync(discordUser, fantasyLeagueId);
+
+                if (fantasyPlayers == null || fantasyPlayers.Count == 0)
+                {
+                    return NotFound();
+                }
+
+                return Ok(fantasyPlayers);
             }
             catch (ArgumentException ex)
             {

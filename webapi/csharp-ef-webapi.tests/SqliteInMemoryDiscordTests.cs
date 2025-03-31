@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Net;
 using csharp_ef_webapi.Services;
+using DataAccessLibrary.Data.Facades;
 
 public class SqliteInMemoryDiscordTests : IDisposable
 {
@@ -56,9 +57,11 @@ public class SqliteInMemoryDiscordTests : IDisposable
         using var context = CreateContext();
         var httpClient = new HttpClient(new MockHttpMessageHandler(HttpStatusCode.Unauthorized));
         var loggerMock = new Mock<ILogger<DiscordWebApiService>>();
-        var discordRepositoryLogger = new Mock<ILogger<DiscordRepository>>();
-        var discordRepository = new DiscordRepository(discordRepositoryLogger.Object, context);
-        var discordApiService = new DiscordWebApiService(loggerMock.Object, httpClient, discordRepository);
+        var authFacadeLogger = new Mock<ILogger<AuthFacade>>();
+        var authFacade = new AuthFacade(authFacadeLogger.Object, context);
+        var discordFacadeLogger = new Mock<ILogger<DiscordFacade>>();
+        var discordFacade = new DiscordFacade(context);
+        var discordApiService = new DiscordWebApiService(loggerMock.Object, httpClient, context, authFacade, discordFacade);
 
         // Act
         await discordApiService.AddNewDiscordUserByIdAsync(1234L);
@@ -84,9 +87,11 @@ public class SqliteInMemoryDiscordTests : IDisposable
         var responseBody = "{\"id\": \"123\"}"; // Missing "id" field
         var httpClient = new HttpClient(new MockHttpMessageHandler(HttpStatusCode.OK, responseBody));
         var loggerMock = new Mock<ILogger<DiscordWebApiService>>();
-        var discordRepositoryLogger = new Mock<ILogger<DiscordRepository>>();
-        var discordRepository = new DiscordRepository(discordRepositoryLogger.Object, context);
-        var discordApiService = new DiscordWebApiService(loggerMock.Object, httpClient, discordRepository);
+        var authFacadeLogger = new Mock<ILogger<AuthFacade>>();
+        var authFacade = new AuthFacade(authFacadeLogger.Object, context);
+        var discordFacadeLogger = new Mock<ILogger<DiscordFacade>>();
+        var discordFacade = new DiscordFacade(context);
+        var discordApiService = new DiscordWebApiService(loggerMock.Object, httpClient, context, authFacade, discordFacade);
 
         // Act
         await discordApiService.AddNewDiscordUserByIdAsync(1234L);
@@ -112,9 +117,11 @@ public class SqliteInMemoryDiscordTests : IDisposable
         var responseBody = "{\"id\": \"123\", \"username\": \"pants\"}";
         var httpClient = new HttpClient(new MockHttpMessageHandler(HttpStatusCode.OK, responseBody));
         var loggerMock = new Mock<ILogger<DiscordWebApiService>>();
-        var discordRepositoryLogger = new Mock<ILogger<DiscordRepository>>();
-        var discordRepository = new DiscordRepository(discordRepositoryLogger.Object, context);
-        var discordApiService = new DiscordWebApiService(loggerMock.Object, httpClient, discordRepository);
+        var authFacadeLogger = new Mock<ILogger<AuthFacade>>();
+        var authFacade = new AuthFacade(authFacadeLogger.Object, context);
+        var discordFacadeLogger = new Mock<ILogger<DiscordFacade>>();
+        var discordFacade = new DiscordFacade(context);
+        var discordApiService = new DiscordWebApiService(loggerMock.Object, httpClient, context, authFacade, discordFacade);
 
         // Act
         await discordApiService.AddNewDiscordUserByIdAsync(123L);

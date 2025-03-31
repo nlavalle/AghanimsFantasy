@@ -735,6 +735,27 @@ export const localApiService = {
         throw error
       })
   },
+  getFantasyPlayerViewModels(fantasyLeagueId: number) {
+    return fetch(`${baseUrl}/fantasyplayer/fantasyleague/${fantasyLeagueId}`)
+      .then(
+        function (response: any) {
+          if (!response.ok) {
+            throw response.status
+          } else {
+            return response.json()
+          }
+        }.bind(this)
+      )
+      .then(
+        function (data: any) {
+          return data
+        }.bind(this)
+      )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
   getPlayerFantasyStats(fantasyLeagueId: number) {
     return fetch(`${baseUrl}/fantasyleague/${fantasyLeagueId}/players/points`)
       .then(
@@ -882,27 +903,6 @@ export const localApiService = {
         throw error
       })
   },
-  getPlayerTopHeroes(fantasyPlayerId: number) {
-    return fetch(`${baseUrl}/player/${fantasyPlayerId}/topheroes`)
-      .then(
-        function (response: any) {
-          if (!response.ok) {
-            throw response.status
-          } else {
-            return response.json()
-          }
-        }.bind(this)
-      )
-      .then(
-        function (data: any) {
-          return data
-        }.bind(this)
-      )
-      .catch((error) => {
-        console.error('Error fetching data:', error)
-        throw error
-      })
-  },
   getPlayerFantasyAverages(fantasyPlayerId: number) {
     return fetch(`${baseUrl}/player/${fantasyPlayerId}/fantasyaverages`)
       .then(
@@ -953,6 +953,22 @@ export const localApiService = {
             throw response.status
           } else {
             return response.text()
+          }
+        }.bind(this)
+      )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
+  getUserBalance() {
+    return fetch(`${baseUrl}/discord/balance`)
+      .then(
+        function (response: Response) {
+          if (!response.ok) {
+            throw response.status
+          } else {
+            return response.json()
           }
         }.bind(this)
       )

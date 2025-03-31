@@ -3,6 +3,7 @@ import type { FantasyLeague } from '@/types/FantasyLeague'
 import type { League } from '@/types/League'
 import { localApiService } from '@/services/localApiService'
 import type { FantasyDraftPoints, FantasyPlayerPoints } from '@/components/Fantasy/fantasyDraft'
+import type { FantasyPlayerStats } from '@/types/FantasyPlayerStats'
 
 export const useFantasyLeagueStore = defineStore({
   id: 'league',
@@ -23,6 +24,7 @@ export const useFantasyLeagueStore = defineStore({
       leagueStartTime: 0,
       leagueEndTime: 0
     } as FantasyLeague,
+    fantasyPlayersStats: [] as FantasyPlayerStats[],
     fantasyDraftPoints: [] as FantasyDraftPoints[],
     fantasyPlayerPoints: [] as FantasyPlayerPoints[]
   }),
@@ -53,9 +55,6 @@ export const useFantasyLeagueStore = defineStore({
             this.setSelectedFantasyLeague(this.defaultFantasyLeague);
           }
         })
-        .then(() => {
-          this.fetchFantasyPlayerPoints();
-        })
     },
 
     fetchFantasyDraftPoints() {
@@ -63,6 +62,15 @@ export const useFantasyLeagueStore = defineStore({
         return localApiService.getUserDraftPoints(this.selectedLeague.league_id).then((draftResult: FantasyDraftPoints[]) => {
           this.fantasyDraftPoints = draftResult;
         })
+      }
+    },
+
+    fetchFantasyPlayerViewModels() {
+      if (this.selectedFantasyLeague.id) {
+        return localApiService.getFantasyPlayerViewModels(this.selectedFantasyLeague.id)
+          .then((result: any) => {
+            this.fantasyPlayersStats = result;
+          })
       }
     },
 

@@ -1,3 +1,4 @@
+using csharp_ef_webapi.ViewModels;
 using DataAccessLibrary.Data;
 using DataAccessLibrary.Data.Facades;
 using DataAccessLibrary.Models;
@@ -38,6 +39,36 @@ public class FantasyService
         }
 
         return fantasyPlayer;
+    }
+
+    public async Task<List<FantasyPlayerViewModel>> GetFantasyPlayerViewModelsAsync(DiscordUser? siteUser, int fantasyLeagueId)
+    {
+        // Construct the complete view model object to return all the relevant FantasyPlayer data for the front end
+        List<FantasyLeague> fantasyLeagues = await GetAccessibleFantasyLeaguesAsync(siteUser);
+        FantasyLeague? fantasyLeague = fantasyLeagues.FirstOrDefault(fl => fl.Id == fantasyLeagueId);
+        if (fantasyLeague == null)
+        {
+            throw new ArgumentException("Fantasy League Id not found");
+        }
+
+        // FantasyPlayers
+        var fantasyPlayers = await _dbContext.FantasyPlayers.Where(fp => fp.FantasyLeagueId == fantasyLeagueId).ToListAsync();
+        // Costs
+        var costs = await _fantasyDraftFacade.GetFantasyPlayerCostsAsync(fantasyLeagueId);
+        // NormalizedAverages
+        var averages = await _fantasyPointsFacade.GetFantasyNormalizedAveragesAsync(fantasyLeagueId);
+        // TopHeroes
+        var topHeroes = await _fantasyPointsFacade.GetFantasyPlayerTopHeroesAsync(fantasyLeagueId);
+
+        return fantasyPlayers
+            .Select(fp => new FantasyPlayerViewModel()
+            {
+                fantasyPlayer = fp,
+                cost = costs.Where(c => c.Account.Id == fp.DotaAccountId).Sum(c => c.EstimatedCost),
+                normalizedAverages = averages.FirstOrDefault(a => a.FantasyPlayer.Id == fp.Id),
+                topHeroes = topHeroes.Where(th => th.FantasyPlayerId == fp.Id).ToList()
+            })
+            .ToList();
     }
 
     public async Task<FantasyLeagueWeight?> GetFantasyLeagueWeightAsync(DiscordUser? siteUser, int fantasyLeagueWeightId)
@@ -146,7 +177,27 @@ public class FantasyService
         {
             throw new ArgumentException("Can only draft one of each team position");
         }
-        ;
+
+        var fantasyPlayerCosts = await _dbContext.FantasyPlayerBudgetProbability
+                .Include(fpbp => fpbp.Account)
+                .Where(fpbp => fpbp.FantasyLeague.Id == fantasyLeague.Id)
+                .ToListAsync();
+
+        var testPlayers = fantasyPlayerCosts.Where(fpc => fantasyDraft.DraftPickPlayers.Where(fp => fp.FantasyPlayer?.DotaAccount != null)
+                .Select(fp => fp.FantasyPlayer?.DotaAccount!.Id)
+                .Contains(fpc.Account.Id))
+                .ToList();
+
+        var testSum = testPlayers.Sum(fpc => fpc.EstimatedCost);
+
+        if (fantasyPlayerCosts.Where(fpc => fantasyDraft.DraftPickPlayers
+                .Where(fp => fp.FantasyPlayer != null)
+                .Select(fp => fp.FantasyPlayer!.DotaAccountId)
+                .Contains(fpc.Account.Id))
+                .Sum(fpc => fpc.EstimatedCost) > 600)
+        {
+            throw new ArgumentException("Draft exceeds 600g budget");
+        }
 
         if (existingUserDraft != null)
         {
@@ -174,7 +225,6 @@ public class FantasyService
                 existingUserDraft = await _fantasyDraftFacade.AddPlayerPickAsync(existingUserDraft, fantasyDraft.DraftPickPlayers[i].FantasyPlayer!);
             }
         }
-
 
         return existingUserDraft;
     }
@@ -362,6 +412,11 @@ public class FantasyService
         limit = Math.Min(limit, 100);
 
         return await _fantasyPointsFacade.GetLastNMatchHighlights(fantasyLeagueId, limit);
+    }
+
+    public async Task<decimal> GetUserBalance(DiscordUser siteUser)
+    {
+        return await _dbContext.FantasyLedger.Where(fl => fl.DiscordId == siteUser.Id).SumAsync(fl => fl.Amount);
     }
 
     private async Task<List<FantasyPlayer>> GetFantasyPlayerByFantasyLeagueAsync(FantasyLeague fantasyLeague)
