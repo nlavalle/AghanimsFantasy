@@ -23,7 +23,7 @@ public class DataLayerService : BackgroundService
         _logger = logger;
         _serviceProvider = serviceProvider;
 
-        _logger.LogInformation("Dota WebApi Service constructed");
+        _logger.LogDebug("Dota WebApi Service constructed");
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

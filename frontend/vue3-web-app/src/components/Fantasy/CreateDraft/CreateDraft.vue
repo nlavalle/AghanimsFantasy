@@ -14,7 +14,7 @@
                 </div>
                 <v-btn class="btn-fantasy sticky-child" @click="clearDraft()">Clear Draft</v-btn>
                 <v-btn
-                    v-if="authenticated && leagueStore.selectedFantasyLeague && leagueStore.isDraftOpen(leagueStore.selectedFantasyLeague!.fantasyDraftLocked) && totalGold <= 600"
+                    v-if="authenticated && leagueStore.selectedFantasyLeague && leagueStore.isDraftOpen(leagueStore.selectedFantasyLeague!) && totalGold <= 600"
                     class="btn-fantasy sticky-child" @click="saveDraft()">Save Draft</v-btn>
                 <v-btn v-else class="btn-fantasy sticky-child" style="pointer-events: none;" disabled
                     @click="saveDraft()">Save Draft</v-btn>
@@ -41,7 +41,7 @@
                         @click="clearDraft()">Clear
                         Draft</v-btn>
                     <v-btn
-                        v-if="authenticated && leagueStore.selectedFantasyLeague && leagueStore.isDraftOpen(leagueStore.selectedFantasyLeague!.fantasyDraftLocked) && totalGold <= 600"
+                        v-if="authenticated && leagueStore.selectedFantasyLeague && leagueStore.isDraftOpen(leagueStore.selectedFantasyLeague!) && totalGold <= 600"
                         class="btn-fantasy sticky-child" style="top:10px;font-size:0.7rem" @click="saveDraft()">Save
                         Draft</v-btn>
                     <v-btn v-else class="btn-fantasy sticky-child"
@@ -96,6 +96,9 @@ const { selectedPlayer, fantasyDraftPicks, fantasyPlayerPointsAvailable, setFant
 onMounted(() => {
     if (fantasyPlayerPointsAvailable.value.length == 0) {
         leagueStore.fetchFantasyPlayerPoints()?.then(() => setFantasyPlayerPoints(leagueStore.fantasyPlayerPoints))
+    }
+    if (leagueStore.fantasyPlayersStats.length == 0) {
+        leagueStore.fetchFantasyPlayerViewModels();
     }
 })
 

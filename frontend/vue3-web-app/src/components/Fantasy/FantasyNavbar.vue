@@ -2,7 +2,7 @@
   <div class="league-select bg-primary">
     <v-tabs v-model="leagueStore.selectedLeague" selected-class="selected-tab">
       <v-tab v-for="league in leagueOptions" :value="league"
-        :variant="leagueStore.isLeagueActive(league) ? 'text' : 'plain'">
+        :variant="!leagueStore.isLeagueFinished(league) ? 'text' : 'plain'">
         {{ league.name }}
         <v-icon v-if="!leagueStore.isLeagueOpen(league)" class="ml-1" icon="fa-solid fa-lock" size="x-small">
         </v-icon>
@@ -12,12 +12,11 @@
   <div class="bg-secondary">
     <v-tabs v-model="leagueStore.selectedFantasyLeague" selected-class="selected-tab">
       <v-tab v-for="fantasyLeague in fantasyLeagueOptions" :value="fantasyLeague"
-        :variant="leagueStore.isDraftActive(fantasyLeague.leagueEndTime) ? 'text' : 'plain'">
+        :variant="!leagueStore.isDraftFinished(fantasyLeague) ? 'text' : 'plain'">
         {{ fantasyLeague.name }} ({{leagueStore.fantasyDraftPoints.find(draft => draft?.fantasyDraft?.fantasyLeagueId
           ==
           fantasyLeague.id)?.fantasyPlayerPoints.length ?? 0}}/5)
-        <v-icon v-if="!leagueStore.isDraftOpen(fantasyLeague.fantasyDraftLocked)" class="ml-1" icon="fa-solid fa-lock"
-          size="x-small">
+        <v-icon v-if="!leagueStore.isDraftOpen(fantasyLeague)" class="ml-1" icon="fa-solid fa-lock" size="x-small">
         </v-icon>
       </v-tab>
     </v-tabs>

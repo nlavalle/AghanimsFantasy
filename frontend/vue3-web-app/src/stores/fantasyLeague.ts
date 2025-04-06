@@ -132,21 +132,27 @@ export const useFantasyLeagueStore = defineStore({
     },
 
     // Validation methods
-    isDraftOpen(draftLockEpochTimestamp: number) {
-      return new Date() < new Date(draftLockEpochTimestamp * 1000);
+    isDraftOpen(fantasyLeague: FantasyLeague) {
+      return new Date() < new Date(fantasyLeague.fantasyDraftLocked * 1000);
     },
-    isDraftActive(leagueEndTimestamp: number) {
-      return new Date() < new Date(leagueEndTimestamp * 1000);
+    isDraftActive(fantasyLeague: FantasyLeague) {
+      return new Date() >= new Date(fantasyLeague.leagueStartTime * 1000) &&
+        new Date() <= new Date(fantasyLeague.leagueEndTime * 1000);
+    },
+    isDraftFinished(fantasyLeague: FantasyLeague) {
+      return new Date() > new Date(fantasyLeague.leagueEndTime * 1000);
     },
     isLeagueActive(league: League) {
-      return this.activeFantasyLeagues
-        .filter(fantasyLeague => fantasyLeague.leagueId == league.league_id)
-        .some(fantasyLeague => this.isDraftActive(fantasyLeague.leagueEndTime));
+      return new Date() >= new Date(league.start_timestamp * 1000) &&
+        new Date() <= new Date(league.end_timestamp * 1000);
     },
     isLeagueOpen(league: League) {
       return this.activeFantasyLeagues
         .filter(fantasyLeague => fantasyLeague.leagueId == league.league_id)
-        .some(fantasyLeague => this.isDraftOpen(fantasyLeague.fantasyDraftLocked));
+        .some(fantasyLeague => this.isDraftOpen(fantasyLeague));
+    },
+    isLeagueFinished(league: League) {
+      return new Date() > new Date(league.end_timestamp * 1000);
     }
   },
 
@@ -165,7 +171,7 @@ export const useFantasyLeagueStore = defineStore({
     },
     defaultLeague(): League {
       return this.activeLeagues.reduce((max, current) => {
-        return current.league_id > max.league_id ? current : max
+        return current.start_timestamp > max.start_timestamp ? current : max
       }, this.activeLeagues[0])
     },
     defaultFantasyLeague(): FantasyLeague {

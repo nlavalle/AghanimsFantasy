@@ -32,7 +32,7 @@ public class DiscordWebApiService
 
         _discordToken = Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN") ?? "";
 
-        _logger.LogInformation("Discord WebApi Service constructed");
+        _logger.LogDebug("Discord WebApi Service constructed");
     }
 
     public async Task<bool> CheckAdminUser(HttpContext httpContext)

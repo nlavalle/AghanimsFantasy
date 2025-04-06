@@ -23,7 +23,7 @@
                         {{ item.value.toFixed(2).toLocaleString() }}</span>
                 </div>
                 <div class="leaderboard-details bg-surface"
-                    v-if="!fantasyLeagueStore.isDraftOpen(fantasyLeagueStore.selectedFantasyLeague.fantasyDraftLocked)">
+                    v-if="!fantasyLeagueStore.isDraftOpen(fantasyLeagueStore.selectedFantasyLeague)">
                     <p v-for="pick in item.fantasyDraft.draftPickPlayers.sort((a, b) => a.draftOrder - b.draftOrder)"
                         style="text-align:right">
                         {{ pick.fantasyPlayer.dotaAccount.name }}: {{ item.playerPoints[pick.draftOrder - 1].toFixed(2)

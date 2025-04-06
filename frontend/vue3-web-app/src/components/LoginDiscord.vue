@@ -32,9 +32,9 @@ const authenticated = computed(() => {
   return authStore.authenticated
 })
 
-function login() {
+async function login() {
   // Open a new window or popup for OAuth login
-  const loginWindow = window.open('/api/auth/login', 'Login', 'width=800,height=650')
+  const loginWindow = window.open('/api/auth/login', 'Login', 'width=600,height=800')
 
   if (loginWindow) {
     const checkLoginStatus = setInterval(() => {
@@ -47,6 +47,7 @@ function login() {
     }, 1000)
   }
 }
+
 function logout() {
   fetch('/api/auth/signout', {
     credentials: 'include' // fetch won't send cookies unless you set credentials

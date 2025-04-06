@@ -25,7 +25,7 @@ public class DiscordBotService : IHostedService
         _commands = new CommandService();
         _interactionService = new InteractionService(_client.Rest);
 
-        _logger.LogInformation("Discord Bot Service constructed");
+        _logger.LogDebug("Discord Bot Service constructed");
     }
 
     public async Task StartAsync(CancellationToken stoppingToken)

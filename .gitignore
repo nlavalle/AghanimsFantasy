@@ -5,4 +5,5 @@ environments/development/*.env
 frontend/prod-nginx.conf
 frontend/quasar-web-app/public/logos/
 frontend/vue3-web-app/public/logos/
-frontend/aghanims-fantasy-spa.tar
+frontend/*.tar
+webapi/*.tar

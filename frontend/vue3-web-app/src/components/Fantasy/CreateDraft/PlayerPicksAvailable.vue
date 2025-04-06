@@ -14,7 +14,8 @@
                         :style="{ 'min-width': isDesktop ? '110px' : '60px', 'max-width': isDesktop ? '110px' : '60px' }"
                         @click="selectPlayer(player.fantasyPlayer)">
                         <draft-pick-card size="small" :fantasyPlayer="player.fantasyPlayer"
-                            :fantasyPoints="player.totalMatchFantasyPoints" :fantasyLeagueActive="fantasyLeagueActive"
+                            :fantasyPoints="player.totalMatchFantasyPoints"
+                            :fantasyLeagueActive="leagueStore.isDraftActive(leagueStore.selectedFantasyLeague)"
                             :fantasyPlayerCost="fantasyPlayerCost(player.fantasyPlayerId)" />
                     </v-col>
                 </v-row>
@@ -45,14 +46,6 @@ const fantasyTeams = computed(() => {
     // We want the distinct teams
     let teams = fantasyPlayerPointsAvailable.value.map(item => ({ teamId: item.fantasyPlayer.teamId, ...item.fantasyPlayer.team }))
     return [...new Map(teams.map(item => [item.teamId, item])).values()]
-})
-
-const fantasyLeagueActive = computed(() => {
-    if (leagueStore.selectedFantasyLeague) {
-        return new Date() > new Date(leagueStore.selectedFantasyLeague.leagueStartTime * 1000);
-    } else {
-        return false
-    }
 })
 
 const fantasyPlayerCost = (fantasyPlayerId: number) => {

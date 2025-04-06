@@ -107,7 +107,7 @@
                 <v-row class="mt-1">
                   <winnings-breakdown class="winningsBreakdown" />
                 </v-row>
-                <v-row class="mt-1">
+                <v-row class="mt-1" v-if="leagueStore.isDraftActive(leagueStore.selectedFantasyLeague)">
                   <player-winnings class="playerWinnings" :selectedDraft="leagueStore.selectedFantasyDraftPoints" />
                 </v-row>
               </v-col>
