@@ -1,5 +1,6 @@
 import type { DotaAccount, DotaTeam } from '@/types/Dota';
 import type { FantasyMatchPlayer } from '@/types/FantasyMatchPlayer';
+import type { FantasyPlayerStats } from '@/types/FantasyPlayerStats';
 import { ref } from 'vue';
 
 export interface FantasyDraftPoints {
@@ -253,6 +254,16 @@ export function fantasyDraftState() {
         return maxTeamCheck && minTeamsCheck;
     }
 
+    const totalDraftCost = (fantasyPlayerStats: FantasyPlayerStats[]) => {
+        return fantasyDraftPicks.value.reduce(function (accumulator, increment) {
+            return accumulator + (fantasyPlayerStats.find(fps => fps.fantasy_player.dotaAccountId == increment.dotaAccountId)?.cost ?? 0)
+        }, 0)
+    }
+
+    const currentDraftSlotCost = (fantasyPlayerStats: FantasyPlayerStats[]) => {
+        return fantasyPlayerStats.find(fps => fps.fantasy_player.dotaAccountId == fantasyDraftPicks.value[currentDraftSlotSelected.value]?.dotaAccountId)?.cost ?? 0;
+    }
+
     return {
         selectedPlayer,
         currentDraftSlotSelected,
@@ -263,6 +274,8 @@ export function fantasyDraftState() {
         setFantasyPlayer,
         clearFantasyDraftPicks,
         disabledPlayer,
-        disabledTeam
+        disabledTeam,
+        totalDraftCost,
+        currentDraftSlotCost
     }
 }

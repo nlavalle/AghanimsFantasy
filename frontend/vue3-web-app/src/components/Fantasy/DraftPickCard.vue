@@ -22,12 +22,14 @@
           </span>
         </div>
         <div v-else>
-          <GoldSpan :font-size="0.8" :gold-value="props.fantasyPlayerCost?.toFixed(0) ?? '0'" />
+          <GoldSpan :font-size="0.8" :validation="(fantasyPlayerBudget ?? 0) - (fantasyPlayerCost ?? 0) < 0"
+            :gold-value="props.fantasyPlayerCost?.toFixed(0) ?? '0'" />
         </div>
       </v-card-text>
       <v-card-text v-else class="pt-1 pl-1" style="min-height: 3rem;">
         <div>
-          <GoldSpan :font-size="0.8" :gold-value="props.fantasyPlayerCost?.toFixed(0) ?? '0'" />
+          <GoldSpan :font-size="0.8" :validation="(fantasyPlayerBudget ?? 0) - (fantasyPlayerCost ?? 0) < 0"
+            :gold-value="props.fantasyPlayerCost?.toFixed(0) ?? '0'" />
         </div>
       </v-card-text>
     </div>
@@ -89,6 +91,10 @@ const props = defineProps({
     required: false
   },
   fantasyPlayerCost: {
+    type: Number,
+    required: false
+  },
+  fantasyPlayerBudget: {
     type: Number,
     required: false
   }
