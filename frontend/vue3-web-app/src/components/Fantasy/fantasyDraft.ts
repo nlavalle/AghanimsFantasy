@@ -260,8 +260,9 @@ export function fantasyDraftState() {
         }, 0)
     }
 
-    const currentDraftSlotCost = (fantasyPlayerStats: FantasyPlayerStats[]) => {
-        return fantasyPlayerStats.find(fps => fps.fantasy_player.dotaAccountId == fantasyDraftPicks.value[currentDraftSlotSelected.value]?.dotaAccountId)?.cost ?? 0;
+    const currentDraftSlotCost = (fantasyPlayerStats: FantasyPlayerStats[], position: number) => {
+        return fantasyPlayerStats.find(fps => fps.fantasy_player.dotaAccountId ==
+            fantasyDraftPicks.value[position]?.dotaAccountId)?.cost ?? 0;
     }
 
     return {

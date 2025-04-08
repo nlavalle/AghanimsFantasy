@@ -15,7 +15,7 @@
                         @click="selectPlayer(player.fantasyPlayer)">
                         <draft-pick-card size="small" :fantasyPlayer="player.fantasyPlayer"
                             :fantasyPoints="player.totalMatchFantasyPoints"
-                            :fantasyLeagueActive="leagueStore.isDraftActive(leagueStore.selectedFantasyLeague)"
+                            :fantasyLeagueActive="!leagueStore.isDraftOpen(leagueStore.selectedFantasyLeague)"
                             :fantasyPlayerCost="fantasyPlayerCost(player.fantasyPlayerId)"
                             :fantasyPlayerBudget="600 + draftSlotCost(player.fantasyPlayer) - draftCost" />
                     </v-col>
@@ -54,7 +54,7 @@ const draftCost = computed(() => {
 })
 
 const draftSlotCost = (fantasyPlayer: FantasyPlayer) => {
-    return disabledPlayer(fantasyPlayer) ? 0 : currentDraftSlotCost(leagueStore.fantasyPlayersStats);
+    return currentDraftSlotCost(leagueStore.fantasyPlayersStats, fantasyPlayer.teamPosition);
 }
 
 const fantasyPlayerCost = (fantasyPlayerId: number) => {
