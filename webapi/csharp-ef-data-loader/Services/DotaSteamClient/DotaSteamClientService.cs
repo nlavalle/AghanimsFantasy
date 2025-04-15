@@ -23,7 +23,7 @@ public class DotaSteamClientService : BackgroundService
         _logger = logger;
         _serviceProvider = serviceProvider;
 
-        _logger.LogInformation("Dota Steam Client Service constructed");
+        _logger.LogDebug("Dota Steam Client Service constructed");
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

@@ -87,6 +87,17 @@ internal class HeroesContext : DotaOperationContext
             _dbContext.Heroes.Add(upsertHero);
         }
 
+        if (_dbContext.Heroes.Find(0) == null)
+        {
+            // Not a Hero ID but if a player disconnects in the draft they can end up with no hero (id = 0), handle this edge case
+            Hero nonHero = new Hero()
+            {
+                Id = 0,
+                Name = "not_picked"
+            };
+            _dbContext.Heroes.Add(nonHero);
+        }
+
         await _dbContext.SaveChangesAsync();
 
         return;

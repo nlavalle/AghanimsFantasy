@@ -1,6 +1,12 @@
 <template>
     <div class="total-winnings">
-        <v-row class="d-flex justify-left align-center pr-2">
+        <v-row v-if="fantasyLeagueStore.isDraftOpen(fantasyLeagueStore.selectedFantasyLeague)"
+            class="d-flex justify-left align-center pr-2">
+            <v-col class="v-col-9">
+                <h2>Games haven't started</h2>
+            </v-col>
+        </v-row>
+        <v-row v-else class="d-flex justify-left align-center pr-2">
             <v-col class="v-col-9">
                 <h1>Draft Winnings</h1>
             </v-col>
@@ -30,9 +36,12 @@ const playerFantasyStatsIndexed = computed(() => {
 })
 
 const totalWinnings = () => {
-    return playerFantasyStatsIndexed.value.reduce(function (total, current) {
-        return total + getWinnings(current.position, current.fantasyPlayer);
-    }, 0);
+    return Math.max(
+        playerFantasyStatsIndexed.value.reduce(function (total, current) {
+            return total + getWinnings(current.position, current.fantasyPlayer);
+        }, 0),
+        0 // Don't let winnings fall below 0
+    );
 }
 
 const getWinnings = (position: number, fantasyPlayer: FantasyPlayer) => {
@@ -63,6 +72,13 @@ const getWinnings = (position: number, fantasyPlayer: FantasyPlayer) => {
     font-size: 24px;
     color: var(--aghanims-fantasy-white);
     padding: 0px 13px 0px;
+    line-height: 3rem;
+}
+
+.total-winnings h2 {
+    font-size: 16px;
+    color: var(--aghanims-fantasy-white);
+    padding: 0px 10px;
     line-height: 3rem;
 }
 </style>

@@ -47,7 +47,7 @@ const props = defineProps({
 }
 
 .invalid {
-    color: red;
+    color: var(--aghanims-fantasy-accent)
 }
 
 .gold-coin {

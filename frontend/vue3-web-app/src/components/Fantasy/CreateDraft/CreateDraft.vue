@@ -11,10 +11,15 @@
                         style="top: 25px;">Cost:
                         <GoldSpan :font-size="1.0" :validation="totalGold > 600" :gold-value="totalGold.toFixed(0)" />
                     </span>
+                    <span :class="{ 'sticky-child': true, 'd-flex': true, 'gold': true, 'invalid': totalGold > 600 }"
+                        style="top: 45px;">Remaining:
+                        <GoldSpan :font-size="1.0" :validation="totalGold > 600"
+                            :gold-value="(600 - totalGold).toFixed(0)" />
+                    </span>
                 </div>
                 <v-btn class="btn-fantasy sticky-child" @click="clearDraft()">Clear Draft</v-btn>
                 <v-btn
-                    v-if="authenticated && leagueStore.selectedFantasyLeague && leagueStore.isDraftOpen(leagueStore.selectedFantasyLeague!.fantasyDraftLocked) && totalGold <= 600"
+                    v-if="authenticated && leagueStore.selectedFantasyLeague && leagueStore.isDraftOpen(leagueStore.selectedFantasyLeague!) && totalGold <= 600"
                     class="btn-fantasy sticky-child" @click="saveDraft()">Save Draft</v-btn>
                 <v-btn v-else class="btn-fantasy sticky-child" style="pointer-events: none;" disabled
                     @click="saveDraft()">Save Draft</v-btn>
@@ -36,12 +41,18 @@
                             <GoldSpan :font-size="0.8" :validation="totalGold > 600"
                                 :gold-value="totalGold.toFixed(0)" />
                         </span>
+                        <span
+                            :class="{ 'sticky-child': true, 'd-flex': true, 'gold': true, 'invalid': totalGold > 600 }"
+                            style="top: 45px;font-size:0.8rem">Remaining:
+                            <GoldSpan :font-size="0.8" :validation="totalGold > 600"
+                                :gold-value="(600 - totalGold).toFixed(0)" />
+                        </span>
                     </div>
                     <v-btn class="btn-fantasy sticky-child" style="top:10px;font-size:0.7rem"
                         @click="clearDraft()">Clear
                         Draft</v-btn>
                     <v-btn
-                        v-if="authenticated && leagueStore.selectedFantasyLeague && leagueStore.isDraftOpen(leagueStore.selectedFantasyLeague!.fantasyDraftLocked) && totalGold <= 600"
+                        v-if="authenticated && leagueStore.selectedFantasyLeague && leagueStore.isDraftOpen(leagueStore.selectedFantasyLeague!) && totalGold <= 600"
                         class="btn-fantasy sticky-child" style="top:10px;font-size:0.7rem" @click="saveDraft()">Save
                         Draft</v-btn>
                     <v-btn v-else class="btn-fantasy sticky-child"
@@ -54,7 +65,7 @@
         <!-- Set up collapsible (on mobile) player stats sidebar -->
         <div v-if="isDesktop">
             <div class="sticky-parent right-0" style="width:450px; margin-top:100px;">
-                <PlayerStats class="sticky-child" style="height:600px;top:50px" />
+                <PlayerStats class="sticky-child" style="height:600px;top:70px" />
             </div>
         </div>
         <div v-else>
@@ -91,11 +102,14 @@ const authStore = useAuthStore();
 const mobileDrawer = ref(false);
 
 const leagueStore = useFantasyLeagueStore();
-const { selectedPlayer, fantasyDraftPicks, fantasyPlayerPointsAvailable, setFantasyPlayerPoints, clearFantasyDraftPicks } = fantasyDraftState();
+const { selectedPlayer, fantasyPlayerPointsAvailable, setFantasyPlayerPoints, clearFantasyDraftPicks, totalDraftCost } = fantasyDraftState();
 
 onMounted(() => {
     if (fantasyPlayerPointsAvailable.value.length == 0) {
         leagueStore.fetchFantasyPlayerPoints()?.then(() => setFantasyPlayerPoints(leagueStore.fantasyPlayerPoints))
+    }
+    if (leagueStore.fantasyPlayersStats.length == 0) {
+        leagueStore.fetchFantasyPlayerViewModels();
     }
 })
 
@@ -122,9 +136,7 @@ const authenticated = computed(() => {
 })
 
 const totalGold = computed(() => {
-    return fantasyDraftPicks.value.reduce(function (accumulator, increment) {
-        return accumulator + (leagueStore.fantasyPlayersStats.find(fps => fps.fantasy_player.dotaAccountId == increment.dotaAccountId)?.cost ?? 0)
-    }, 0)
+    return totalDraftCost(leagueStore.fantasyPlayersStats);
 })
 
 </script>
@@ -156,9 +168,11 @@ const totalGold = computed(() => {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
+    width: max-content;
+    margin-left: auto;
 }
 
 .invalid {
-    color: red;
+    color: var(--aghanims-fantasy-accent)
 }
 </style>

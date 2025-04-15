@@ -35,6 +35,7 @@ services:
       - webapi.env
     volumes:
      - ./ssl_certs:/https/
+     - ./webapi-data:/webapi-data/
     depends_on:
       - postgres
   spa:

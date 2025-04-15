@@ -4,6 +4,8 @@ using DataAccessLibrary.Data.Facades;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Headers;
 using System.Security.Claims;
@@ -62,6 +64,9 @@ builder.Services.AddDbContext<AghanimsFantasyContext>(
     }
 );
 
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(@"/webapi-data"));
+
 // Add persistent HttpClient
 builder.Services.AddHttpClient();
 
@@ -77,21 +82,25 @@ builder.Services
     })
     .AddCookie(options =>
     {
-        options.ExpireTimeSpan = TimeSpan.FromDays(10);
-        options.Cookie.MaxAge = TimeSpan.FromDays(10);
+        options.ExpireTimeSpan = TimeSpan.FromDays(90);
+        options.Cookie.MaxAge = TimeSpan.FromDays(90);
     })
     .AddOAuth("OAuth", options =>
     {
         options.ClientId = Environment.GetEnvironmentVariable("DISCORD_APP_ID") ?? "";
         options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_APP_SECRET") ?? "";
 
+        string authEndpoint = QueryHelpers.AddQueryString("https://discordapp.com/api/oauth2/authorize", "prompt", "none");
+
+        options.AuthorizationEndpoint = authEndpoint;
         options.CallbackPath = new PathString("/api/auth/callback");
-        options.AuthorizationEndpoint = "https://discordapp.com/api/oauth2/authorize";
         options.TokenEndpoint = "https://discordapp.com/api/oauth2/token";
         options.UserInformationEndpoint = "https://discordapp.com/api/users/@me";
         options.AccessDeniedPath = new PathString("/api/auth/accessdenied");
         options.Scope.Add("identify");
         options.SaveTokens = true;
+
+        options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
 
         options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id", ClaimValueTypes.UInteger64);
         options.ClaimActions.MapJsonKey(ClaimTypes.Name, "username", ClaimValueTypes.String);

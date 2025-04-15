@@ -14,8 +14,10 @@
                         :style="{ 'min-width': isDesktop ? '110px' : '60px', 'max-width': isDesktop ? '110px' : '60px' }"
                         @click="selectPlayer(player.fantasyPlayer)">
                         <draft-pick-card size="small" :fantasyPlayer="player.fantasyPlayer"
-                            :fantasyPoints="player.totalMatchFantasyPoints" :fantasyLeagueActive="fantasyLeagueActive"
-                            :fantasyPlayerCost="fantasyPlayerCost(player.fantasyPlayerId)" />
+                            :fantasyPoints="player.totalMatchFantasyPoints"
+                            :fantasyLeagueActive="!leagueStore.isDraftOpen(leagueStore.selectedFantasyLeague)"
+                            :fantasyPlayerCost="fantasyPlayerCost(player.fantasyPlayerId)"
+                            :fantasyPlayerBudget="600 + draftSlotCost(player.fantasyPlayer) - draftCost" />
                     </v-col>
                 </v-row>
                 <!-- overlay without scroll-strategy bricks the page scrolling: https://github.com/vuetifyjs/vuetify/issues/15653 -->
@@ -36,7 +38,7 @@ import { VContainer, VRow, VCol, VOverlay } from 'vuetify/components';
 import DraftPickCard from '@/components/Fantasy/DraftPickCard.vue';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 
-const { selectedPlayer, fantasyPlayerPointsAvailable, disabledPlayer, disabledTeam } = fantasyDraftState();
+const { selectedPlayer, fantasyPlayerPointsAvailable, disabledPlayer, disabledTeam, totalDraftCost, currentDraftSlotCost } = fantasyDraftState();
 const leagueStore = useFantasyLeagueStore();
 
 const isDesktop = ref(window.outerWidth >= 600);
@@ -47,13 +49,13 @@ const fantasyTeams = computed(() => {
     return [...new Map(teams.map(item => [item.teamId, item])).values()]
 })
 
-const fantasyLeagueActive = computed(() => {
-    if (leagueStore.selectedFantasyLeague) {
-        return new Date() > new Date(leagueStore.selectedFantasyLeague.leagueStartTime * 1000);
-    } else {
-        return false
-    }
+const draftCost = computed(() => {
+    return totalDraftCost(leagueStore.fantasyPlayersStats);
 })
+
+const draftSlotCost = (fantasyPlayer: FantasyPlayer) => {
+    return currentDraftSlotCost(leagueStore.fantasyPlayersStats, fantasyPlayer.teamPosition);
+}
 
 const fantasyPlayerCost = (fantasyPlayerId: number) => {
     return leagueStore.fantasyPlayersStats.find(fps => fps.fantasy_player.id == fantasyPlayerId)?.cost ?? 0

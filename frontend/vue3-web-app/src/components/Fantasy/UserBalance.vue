@@ -1,6 +1,6 @@
 <template>
     <span class="balance-span">
-        Winnings:
+        Gold Stash:
     </span>
     <GoldSpan :animated="true" :font-size="1.0" :gold-value="userBalance.toFixed(0)" />
 </template>

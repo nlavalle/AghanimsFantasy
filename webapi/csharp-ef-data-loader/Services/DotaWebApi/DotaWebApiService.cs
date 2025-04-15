@@ -33,7 +33,7 @@ public class DotaWebApiService : BackgroundService
         _econApiUrl = _configuration.GetSection("DotaWebApi").GetValue<string>("EconUrl") ?? throw new Exception("Dota Web API - Econ URL not set");
         _steamKey = Environment.GetEnvironmentVariable("STEAM_KEY") ?? "";
 
-        _logger.LogInformation("Dota WebApi Service constructed");
+        _logger.LogDebug("Dota WebApi Service constructed");
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
