@@ -10,7 +10,6 @@
             <v-tab value="draft">Draft Players</v-tab>
             <v-tab value="leaderboard">Leaderboard</v-tab>
             <v-tab value="match">Fantasy Matches</v-tab>
-            <v-tab value="winnings">Winnings</v-tab>
           </v-tabs>
           <v-spacer />
           <UserBalance />
@@ -99,33 +98,6 @@
                 </v-row>
               </v-col>
             </v-tabs-window-item>
-            <v-tabs-window-item value="winnings">
-              <v-col v-if="authenticated">
-                <v-row class="mt-1 align-center">
-                  <total-winnings class="totalWinnings" />
-                </v-row>
-                <v-row class="mt-1">
-                  <winnings-breakdown class="winningsBreakdown" />
-                </v-row>
-                <v-row class="mt-1" v-if="leagueStore.isDraftActive(leagueStore.selectedFantasyLeague)">
-                  <player-winnings class="playerWinnings" :selectedDraft="leagueStore.selectedFantasyDraftPoints" />
-                </v-row>
-              </v-col>
-              <v-col v-else>
-                <v-card class="ma-5">
-                  <v-card-title style="text-wrap:wrap">
-                    <v-row>
-                      <v-col>
-                        <span class="not-authenticated">Please login to view your player winnings</span>
-                      </v-col>
-                      <v-col cols="4" class="mr-1" align-self="center">
-                        <LoginDiscord class="login-discord" />
-                      </v-col>
-                    </v-row>
-                  </v-card-title>
-                </v-card>
-              </v-col>
-            </v-tabs-window-item>
           </v-tabs-window>
         </v-row>
       </v-col>
@@ -150,9 +122,6 @@ import AlertDialog from '@/components/AlertDialog.vue';
 import ErrorDialog from '@/components/ErrorDialog.vue';
 import { useFantasyDraftStore } from '@/stores/fantasyDraft';
 import LeaderboardComponent from '@/components/Fantasy/LeaderboardComponent.vue'
-import PlayerWinnings from '@/components/Fantasy/Winnings/PlayerWinnings.vue';
-import TotalWinnings from '@/components/Fantasy/Winnings/TotalWinnings.vue';
-import WinningsBreakdown from '@/components/Fantasy/Winnings/WinningsBreakdown.vue';
 import FantasyLockTimer from '@/components/Fantasy/FantasyLockTimer.vue';
 import UserBalance from '@/components/Fantasy/UserBalance.vue';
 
@@ -266,21 +235,5 @@ const authenticated = computed(() => {
 
 .leaderboardComponent {
   max-width: 600px;
-}
-
-.totalWinnings {
-  max-width: 300px;
-}
-
-.winningsBreakdown {
-  max-width: 300px;
-}
-
-.playerWinnings {
-  max-width: 600px;
-}
-
-.transparent-tooltip .v-overlay__content {
-  background: transparent !important;
 }
 </style>

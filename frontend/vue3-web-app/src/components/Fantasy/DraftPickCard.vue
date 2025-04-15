@@ -11,23 +11,17 @@
       <img class="team-image" :src="getTeamLogo()" />
     </div>
     <div class="draft-body-small">
-      <v-card-text v-if="isDesktop" class="pt-1 pl-1" style="min-height: 3rem;">
+      <v-card-text class="pt-1 pl-1 pr-1" style="min-height: 3rem;">
         <div v-if="props.fantasyLeagueActive">
-          <span :style="{ 'font-size': '0.8rem', 'font-weight': 'bold' }">
-            {{ props.fantasyPoints?.toFixed(2) ?? 0 }}
+          <span :style="{ 'font-weight': 'bold', 'font-size': '0.8rem' }">
+            {{ props.fantasyPoints?.toFixed(isDesktop ? 2 : 0) ?? 0 }}
           </span>
-          <br />
-          <span :style="{ 'font-size': '0.8rem' }">
-            Fantasy Pts
+          <br v-if="isDesktop" />
+          <span :style="{ 'font-size': isDesktop ? '0.8rem' : '0.6rem' }">
+            {{ isDesktop ? 'Fantasy Pts' : 'Pts' }}
           </span>
         </div>
         <div v-else>
-          <GoldSpan :font-size="0.8" :validation="(fantasyPlayerBudget ?? 0) - (fantasyPlayerCost ?? 0) < 0"
-            :gold-value="props.fantasyPlayerCost?.toFixed(0) ?? '0'" />
-        </div>
-      </v-card-text>
-      <v-card-text v-else class="pt-1 pl-1" style="min-height: 3rem;">
-        <div>
           <GoldSpan :font-size="0.8" :validation="(fantasyPlayerBudget ?? 0) - (fantasyPlayerCost ?? 0) < 0"
             :gold-value="props.fantasyPlayerCost?.toFixed(0) ?? '0'" />
         </div>

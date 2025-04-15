@@ -188,7 +188,7 @@ const dialogDeleteFantasyTeam = ref(false);
 const deleteFantasyTeamItem = ref<DotaTeam>();
 
 const availableFantasyLeagues = computed(() => {
-    return leagueStore.activeFantasyLeagues
+    return leagueStore.allFantasyLeagues
 })
 
 const fantasyPlayersByTeam = (teamId: number) => {
@@ -249,7 +249,6 @@ const getImageUrl = (teamLogoId: number) => {
     if (teamLogoId == 0) return undefined;
     return `logos/teams_logo_${teamLogoId}.png`
 }
-
 
 const addTeam = () => {
     dialogAddFantasyTeam.value = true;

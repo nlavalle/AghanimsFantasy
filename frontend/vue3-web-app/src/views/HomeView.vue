@@ -80,7 +80,7 @@ const isFantasyOpen = (leagueId: number) => {
   if (fantasyLeagues.some(fl => fantasyLeagueStore.isDraftOpen(fl))) {
     // Fantasy draft exists and still open
     return 1
-  } else if (fantasyLeagues.some(fl => fantasyLeagueStore.isDraftActive(fl))) {
+  } else if (fantasyLeagues.some(fl => !fantasyLeagueStore.isDraftOpen(fl))) {
     // Fantasy draft exists but is closed
     return 2
   } else {

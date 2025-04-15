@@ -1,5 +1,8 @@
 <template>
     <v-container v-if="FantasyPoints?.fantasyDraft">
+        <v-row v-if="fantasyLeagueStore.fantasyPlayersStats" class="mt-1 align-center">
+            <total-winnings class="totalWinnings" />
+        </v-row>
         <v-row justify="space-evenly">
             <v-col class="ma-1 pa-1" v-for="(fantasyDraftPoints, index) in CombinedFantasyDraftPoints" :key="index">
                 <v-row class="mt-1" justify="center">
@@ -9,13 +12,19 @@
                 </v-row>
             </v-col>
         </v-row>
+        <v-row class="mt-10" v-if="!fantasyLeagueStore.isDraftOpen(fantasyLeagueStore.selectedFantasyLeague)">
+            <player-winnings class="playerWinnings" :selectedDraft="fantasyLeagueStore.selectedFantasyDraftPoints" />
+        </v-row>
     </v-container>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import DraftPickCardHover from '@/components/Fantasy/DraftPickCardHover.vue';
 import { VContainer, VRow, VCol } from 'vuetify/components';
+import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
+import DraftPickCardHover from '@/components/Fantasy/DraftPickCardHover.vue';
+import PlayerWinnings from '@/components/Fantasy/Winnings/PlayerWinnings.vue';
+import TotalWinnings from '@/components/Fantasy/Winnings/TotalWinnings.vue';
 
 const props = defineProps({
     FantasyPoints: {
@@ -23,6 +32,8 @@ const props = defineProps({
         required: false,
     }
 })
+
+const fantasyLeagueStore = useFantasyLeagueStore();
 
 const CombinedFantasyDraftPoints = computed(() => {
     return [
@@ -56,5 +67,13 @@ const CombinedFantasyDraftPoints = computed(() => {
     /* max-height: 350px; */
     height: 300px;
     margin: 20px;
+}
+
+.totalWinnings {
+    max-width: 300px;
+}
+
+.playerWinnings {
+    max-width: 600px;
 }
 </style>

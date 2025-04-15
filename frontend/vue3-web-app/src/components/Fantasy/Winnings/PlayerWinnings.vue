@@ -1,18 +1,26 @@
 <template>
     <div class="player-winnings">
-        <v-row class="d-flex justify-center">
+        <v-row class="d-flex justify-center align-center">
             <h1>All Player Winnings</h1>
         </v-row>
-        <div>
-            <v-row class="justify-end">
-                <v-checkbox class="pr-8 ma-0" density="compact" v-model="showAllPlayerWinnings"
-                    label="Filter Draft"></v-checkbox>
-            </v-row>
-        </div>
+        <v-row class="justify-end">
+            <v-tooltip v-model="show" location="end" class="transparentbg-tooltip">
+                <template v-slot:activator="{ props }">
+                    <v-btn class="mr-8" v-bind="props" variant="outlined" @click="show = !show">
+                        Breakdown
+                    </v-btn>
+                </template>
+                <winnings-breakdown class="winningsBreakdown" />
+            </v-tooltip>
+        </v-row>
+        <v-row class="justify-end">
+            <v-checkbox class="pr-8 ma-0" density="compact" v-model="showAllPlayerWinnings"
+                label="Filter Draft"></v-checkbox>
+        </v-row>
         <li class="player-winnings-header">
             <div class="d-flex justify-evenly">
                 <span class="player-header-name">Player</span>
-                <span class="player-header-value">Net Gold Earned</span>
+                <span class="player-header-value">Net Gold</span>
             </div>
         </li>
 
@@ -25,7 +33,7 @@
                 'quintile5': quintile == 5,
             }">
                 <span v-if="getQuintile(quintile).length > 0" class="quintile-top-span">{{ rankTitles[quintile - 1]
-                    }}</span>
+                }}</span>
                 <li class="pt-0 player-winnings-item"
                     :class="{ 'drafted-player': !isDraftedPlayer(item.fantasyPlayer) }"
                     v-for="item in getQuintile(quintile)" :key="item.position" :data-rank="item.position">
@@ -55,9 +63,10 @@
 <script setup lang="ts">
 import { computed, ref, type PropType } from 'vue';
 import coinStatic from '@/assets/fantasy/coin/golden-coin.png'
-import { VRow, VCheckbox, VTooltip } from 'vuetify/components';
+import { VRow, VCol, VBtn, VCheckbox, VTooltip } from 'vuetify/components';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import type { FantasyDraftPoints, FantasyPlayer, FantasyPlayerPoints } from '../fantasyDraft';
+import WinningsBreakdown from '@/components/Fantasy/Winnings/WinningsBreakdown.vue';
 
 const props = defineProps({
     selectedDraft: {
@@ -67,6 +76,7 @@ const props = defineProps({
 })
 
 const showAllPlayerWinnings = ref(true);
+const show = ref(false);
 
 const fantasyLeagueStore = useFantasyLeagueStore();
 
@@ -113,6 +123,11 @@ const getBreakdown = (quintile: number, fantasyPlayer: FantasyPlayer) => {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.transparentbg-tooltip :deep(.v-overlay__content) {
+    padding: 0.3rem !important;
+    background: var(--v-tooltip-bg, rgba(97, 97, 97, 0.9)) !important;
+}
+
 div ::v-deep(.player-header-name) {
     font-style: normal;
     font-weight: 400;
@@ -235,6 +250,10 @@ div ::v-deep(.player-data) {
 
 .drafted-player {
     background: rgba(191, 191, 191, 0.4);
+}
+
+.winningsBreakdown {
+    max-width: 300px;
 }
 
 /*-------------------- Player Winnings --------------------*/

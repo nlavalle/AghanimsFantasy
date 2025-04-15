@@ -1,11 +1,6 @@
 <template>
-    <div class="ml-5 mb-5">
-        <v-row class="mt-1 justify-center">
-            <h3>
-                Winnings Breakdown
-            </h3>
-        </v-row>
-        <v-row class="mt-0">
+    <div class="ma-0">
+        <v-row class="ma-0">
             <v-data-table class="winnings-breakdown-table" :items="statistics" :items-per-page="5"
                 :headers="statsHeaders" hide-default-footer density="compact">
             </v-data-table>
@@ -77,10 +72,9 @@ const statistics = [
 
 <style scoped>
 .winnings-breakdown-table {
-    margin-top: 10px;
-    width: 400px;
+    width: 300px;
     border: 2px solid var(--aghanims-fantasy-main-2);
-    border-radius: 10px;
+    border-radius: 5px;
 }
 
 h3 {
