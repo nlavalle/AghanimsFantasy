@@ -23,6 +23,13 @@ import {
 import { faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons';
 // import { far } from '@fortawesome/free-regular-svg-icons';
 
+// gtag.js for analytics
+import { configure } from 'vue-gtag';
+
+configure({
+  tagId: import.meta.env.VITE_GA_MEASUREMENT_ID
+})
+
 library.add(
   // Regular
   faSquare,

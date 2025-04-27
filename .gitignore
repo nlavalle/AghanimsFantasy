@@ -1,6 +1,7 @@
 .vscode
 vue-microfrontend/aghanims-wager-spa.tar
 environments/development/ssl_certs
+environments/development/webapi-data
 environments/development/*.env
 frontend/prod-nginx.conf
 frontend/quasar-web-app/public/logos/
