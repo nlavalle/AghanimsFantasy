@@ -2,6 +2,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using SteamKit2.GC.Dota.Internal;
+using DataAccessLibrary.Data.Identity;
 using DataAccessLibrary.Models;
 using DataAccessLibrary.Models.Discord;
 using DataAccessLibrary.Models.WebApi;
@@ -9,13 +10,11 @@ using DataAccessLibrary.Models.GameCoordinator;
 using DataAccessLibrary.Models.ProMetadata;
 using DataAccessLibrary.Models.Fantasy;
 using DataAccessLibrary.Models.ViewModels;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
-public class AghanimsFantasyContext : DbContext
+public class AghanimsFantasyContext : IdentityDbContext<AghanimsFantasyUser>
 {
-    public AghanimsFantasyContext()
-    {
-    }
-
     public AghanimsFantasyContext(DbContextOptions<AghanimsFantasyContext> options) : base(options)
     {
     }
@@ -75,6 +74,9 @@ public class AghanimsFantasyContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Needed for identity framework
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.HasDefaultSchema("nadcl");
 
         modelBuilder.Entity<CMsgDOTAMatch>().ToTable("dota_gc_match_details", "nadcl");
@@ -234,6 +236,18 @@ public class AghanimsFantasyContext : DbContext
             .HasMany(t => t.Kills)
             .WithOne()
             .OnDelete(DeleteBehavior.Cascade);
+
+        #endregion
+
+        #region Identity
+
+        List<IdentityRole> defaultRoles = new List<IdentityRole>() {
+            new IdentityRole("Admin"),
+            new IdentityRole("PrivateFantasyLeagueAdmin"),
+        };
+
+        modelBuilder.Entity<IdentityRole>()
+            .HasData(defaultRoles);
 
         #endregion
     }

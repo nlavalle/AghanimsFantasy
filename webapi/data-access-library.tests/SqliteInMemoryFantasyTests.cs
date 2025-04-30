@@ -5,8 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using DataAccessLibrary.Models.ProMetadata;
 using DataAccessLibrary.Models.Fantasy;
-using DataAccessLibrary.Models.Discord;
 using DataAccessLibrary.Data.Facades;
+using DataAccessLibrary.Data.Identity;
 
 namespace DataAccessLibrary.IntegrationTests.Data;
 
@@ -225,18 +225,18 @@ public class SqliteInMemoryFantasyTests : IDisposable
 
         // Fantasy draft with existing data
 
-        var discordUser = new DiscordUser
+        var user = new AghanimsFantasyUser
         {
-            Id = 1,
-            Username = "test"
+            Id = "testUserId",
+            UserName = "test"
         };
 
-        context.DiscordUsers.Add(discordUser);
+        context.Users.Add(user);
 
         var fantasyDraft = new FantasyDraft
         {
             Id = 1,
-            DiscordAccountId = 1,
+            UserId = "testUserId",
             DraftCreated = DateTime.UtcNow,
             DraftLastUpdated = DateTime.UtcNow,
             FantasyLeagueId = 1,
@@ -359,9 +359,9 @@ public class SqliteInMemoryFantasyTests : IDisposable
         var fantasyDraftFacade = new FantasyDraftFacade(fantasyDraftLogger.Object, context);
 
         var fantasyLeague = await context.FantasyLeagues.FindAsync(1);
-        var discordUser = await context.DiscordUsers.FindAsync(1L);
+        var user = await context.Users.FindAsync("testUserId");
 
-        var fantasyDraft = await fantasyDraftFacade.GetByUserFantasyLeague(fantasyLeague!, discordUser!);
+        var fantasyDraft = await fantasyDraftFacade.GetByUserFantasyLeague(fantasyLeague!, user!);
 
         Assert.NotNull(fantasyDraft);
         Assert.IsAssignableFrom<FantasyDraft>(fantasyDraft);
@@ -375,8 +375,8 @@ public class SqliteInMemoryFantasyTests : IDisposable
         var fantasyDraftFacade = new FantasyDraftFacade(fantasyDraftLogger.Object, context);
 
         var fantasyLeague = await context.FantasyLeagues.FindAsync(2);
-        var discordUser = await context.DiscordUsers.FindAsync(1L);
-        var fantasyDraft = await fantasyDraftFacade.GetByUserFantasyLeague(fantasyLeague!, discordUser!);
+        var user = await context.Users.FindAsync("testUserId");
+        var fantasyDraft = await fantasyDraftFacade.GetByUserFantasyLeague(fantasyLeague!, user!);
 
         Assert.Null(fantasyDraft);
     }

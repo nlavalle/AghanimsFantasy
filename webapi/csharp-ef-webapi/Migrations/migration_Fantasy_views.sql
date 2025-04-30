@@ -426,7 +426,7 @@ with quintiles as (
         fppt.matches,
         fppt.total_match_fantasy_points,
 		fppt.total_match_fantasy_points / fppt.matches as avg,
-        NTILE(5) over (partition by fl.id order by fppt.total_match_fantasy_points / fppt.matches desc) as quintile,
+        NTILE(5) over (partition by fl.id order by fppt.total_match_fantasy_points desc) as quintile,
         fl.league_start_time,
         row_number() over (partition by allfl.id, a.id order by fl.league_start_time desc) row_num
     from nadcl.dota_fantasy_leagues allfl

@@ -1,7 +1,8 @@
 using csharp_ef_webapi.Services;
+using DataAccessLibrary.Data.Identity;
 using DataAccessLibrary.Models.Fantasy;
-using DataAccessLibrary.Models.Discord;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace csharp_ef_webapi.Controllers
@@ -10,16 +11,16 @@ namespace csharp_ef_webapi.Controllers
     [ApiController]
     public class PrivateFantasyLeagueController : ControllerBase
     {
-        private readonly DiscordWebApiService _discordWebApiService;
         private readonly FantasyServicePrivateFantasyAdmin _fantasyServicePrivateFantasyAdmin;
+        private readonly UserManager<AghanimsFantasyUser> _userManager;
 
         public PrivateFantasyLeagueController(
-            DiscordWebApiService discordWebApiService,
-            FantasyServicePrivateFantasyAdmin fantasyServicePrivateFantasyAdmin
+            FantasyServicePrivateFantasyAdmin fantasyServicePrivateFantasyAdmin,
+            UserManager<AghanimsFantasyUser> userManager
         )
         {
-            _discordWebApiService = discordWebApiService;
             _fantasyServicePrivateFantasyAdmin = fantasyServicePrivateFantasyAdmin;
+            _userManager = userManager;
         }
 
         // GET: api/PrivateFantasyLeague/5
@@ -29,14 +30,7 @@ namespace csharp_ef_webapi.Controllers
         {
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-
-                if (discordUser == null)
-                {
-                    return NotFound();
-                }
-
-                var fantasyPlayer = await _fantasyServicePrivateFantasyAdmin.GetFantasyPrivateLeaguePlayerAsync(discordUser, privateFantasyPlayerId);
+                var fantasyPlayer = await _fantasyServicePrivateFantasyAdmin.GetFantasyPrivateLeaguePlayerAsync(HttpContext.User, privateFantasyPlayerId);
 
                 if (fantasyPlayer == null)
                 {
@@ -58,14 +52,7 @@ namespace csharp_ef_webapi.Controllers
         {
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-
-                if (discordUser == null)
-                {
-                    return NotFound();
-                }
-
-                return Ok(await _fantasyServicePrivateFantasyAdmin.GetFantasyPrivateLeaguePlayersAsync(discordUser, fantasyLeagueId));
+                return Ok(await _fantasyServicePrivateFantasyAdmin.GetFantasyPrivateLeaguePlayersAsync(HttpContext.User, fantasyLeagueId));
             }
             catch (ArgumentException ex)
             {
@@ -74,32 +61,20 @@ namespace csharp_ef_webapi.Controllers
         }
 
         // GET: api/PrivateFantasyLeague/Validate/DiscordUsername
-        [Authorize]
+        [Authorize(Roles = "PrivateFantasyLeagueAdmin")]
         [HttpGet("validate/{discordUsername}")]
-        public async Task<ActionResult<string>> ValidateDiscordUsername(string discordUsername)
+        public async Task<ActionResult<string>> ValidateUsername(string userName)
         {
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
+                var userLookup = await _userManager.FindByNameAsync(userName);
 
-                if (discordUser == null)
-                {
-                    return NotFound();
-                }
-
-                if (await _discordWebApiService.CheckPrivateFantasyAdminUser(discordUser.Id) == false)
-                {
-                    return NotFound();
-                }
-
-                var discordUserLookup = await _discordWebApiService.GetDiscordUserAsync(discordUsername);
-
-                if (discordUserLookup == null)
+                if (userLookup == null)
                 {
                     return Ok(0.ToString());
                 }
 
-                return Ok(discordUserLookup.Id.ToString());
+                return Ok(userLookup.Id.ToString());
             }
             catch (ArgumentException ex)
             {
@@ -114,14 +89,7 @@ namespace csharp_ef_webapi.Controllers
         {
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-
-                if (discordUser == null)
-                {
-                    return NotFound();
-                }
-
-                return Ok(await _fantasyServicePrivateFantasyAdmin.GetPrivateFantasyLeagues(discordUser));
+                return Ok(await _fantasyServicePrivateFantasyAdmin.GetPrivateFantasyLeagues(HttpContext.User));
             }
             catch (ArgumentException ex)
             {
@@ -136,14 +104,7 @@ namespace csharp_ef_webapi.Controllers
         {
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-
-                if (discordUser == null)
-                {
-                    return NotFound();
-                }
-
-                return Ok(await _fantasyServicePrivateFantasyAdmin.GetFantasyLeagueWeightsAsync(discordUser));
+                return Ok(await _fantasyServicePrivateFantasyAdmin.GetFantasyLeagueWeightsAsync(HttpContext.User));
             }
             catch (ArgumentException ex)
             {
@@ -153,26 +114,13 @@ namespace csharp_ef_webapi.Controllers
 
         // POST: api/PrivateFantasyLeague
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [Authorize]
+        [Authorize(Roles = "PrivateFantasyLeagueAdmin")] // Private Admin only operation
         [HttpPost]
         public async Task<ActionResult<FantasyLeague>> PostPrivateFantasyPlayers(FantasyPrivateLeaguePlayer fantasyPrivateLeaguePlayer)
         {
-            DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-
-            if (discordUser == null)
-            {
-                return Unauthorized();
-            }
-
-            // Private Fantasy Admin only operation
-            if (!await _discordWebApiService.CheckPrivateFantasyAdminUser(discordUser.Id))
-            {
-                return Unauthorized();
-            }
-
             try
             {
-                await _fantasyServicePrivateFantasyAdmin.AddPrivateFantasyPlayerAsync(discordUser, fantasyPrivateLeaguePlayer);
+                await _fantasyServicePrivateFantasyAdmin.AddPrivateFantasyPlayerAsync(HttpContext.User, fantasyPrivateLeaguePlayer);
                 return CreatedAtAction("GetPrivateFantasyPlayer", new { privateFantasyPlayerId = fantasyPrivateLeaguePlayer.Id }, fantasyPrivateLeaguePlayer);
             }
             catch (UnauthorizedAccessException)
@@ -183,27 +131,14 @@ namespace csharp_ef_webapi.Controllers
 
         // PUT: api/PrivateFantasyLeague/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [Authorize]
+        [Authorize(Roles = "PrivateFantasyLeagueAdmin")] // Private Admin only operation
         [HttpPut("{privateFantasyPlayerId}")]
         public async Task<IActionResult> PutPrivateFantasyPlayer(int privateFantasyPlayerId, FantasyPrivateLeaguePlayer fantasyPrivateLeaguePlayer)
         {
-            DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-
-            if (discordUser == null)
-            {
-                return Unauthorized();
-            }
-
-            // Private Fantasy Admin only operation
-            if (!await _discordWebApiService.CheckPrivateFantasyAdminUser(discordUser.Id))
-            {
-                return Unauthorized();
-            }
-
             try
             {
 
-                await _fantasyServicePrivateFantasyAdmin.UpdatePrivateFantasyPlayerAsync(discordUser, privateFantasyPlayerId, fantasyPrivateLeaguePlayer);
+                await _fantasyServicePrivateFantasyAdmin.UpdatePrivateFantasyPlayerAsync(HttpContext.User, privateFantasyPlayerId, fantasyPrivateLeaguePlayer);
                 return NoContent();
             }
             catch (UnauthorizedAccessException)
@@ -218,26 +153,13 @@ namespace csharp_ef_webapi.Controllers
 
         // PUT: api/PrivateFantasyLeague/FantasyLeagueWeight/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [Authorize]
+        [Authorize(Roles = "PrivateFantasyLeagueAdmin")] // Private Admin only operation
         [HttpPut("fantasyleagueweight/{fantasyLeagueWeightId}")]
         public async Task<IActionResult> PutFantasyLeagueWeight(int fantasyLeagueWeightId, FantasyLeagueWeight fantasyLeagueWeight)
         {
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-                if (discordUser == null)
-                {
-                    return Unauthorized();
-                }
-
-                bool isPrivateAdmin = await _fantasyServicePrivateFantasyAdmin.IsUserPrivateFantasyAdminAsync(discordUser);
-
-                if (!isPrivateAdmin)
-                {
-                    return Unauthorized();
-                }
-
-                await _fantasyServicePrivateFantasyAdmin.UpdateFantasyLeagueWeightAsync(discordUser, fantasyLeagueWeightId, fantasyLeagueWeight);
+                await _fantasyServicePrivateFantasyAdmin.UpdateFantasyLeagueWeightAsync(HttpContext.User, fantasyLeagueWeightId, fantasyLeagueWeight);
                 return NoContent();
             }
             catch (UnauthorizedAccessException)
@@ -251,26 +173,13 @@ namespace csharp_ef_webapi.Controllers
         }
 
         // DELETE: api/PrivateFantasyLeague/5
-        [Authorize]
+        [Authorize(Roles = "PrivateFantasyLeagueAdmin")] // Private Admin only operation
         [HttpDelete("{privateFantasyPlayerId}")]
         public async Task<IActionResult> DeletePrivateFantasyPlayer(int privateFantasyPlayerId)
         {
-            DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-
-            if (discordUser == null)
-            {
-                return Unauthorized();
-            }
-
-            // Private Fantasy Admin only operation
-            if (!await _discordWebApiService.CheckPrivateFantasyAdminUser(discordUser.Id))
-            {
-                return Unauthorized();
-            }
-
             try
             {
-                await _fantasyServicePrivateFantasyAdmin.DeletePrivateFantasyPlayerAsync(discordUser, privateFantasyPlayerId);
+                await _fantasyServicePrivateFantasyAdmin.DeletePrivateFantasyPlayerAsync(HttpContext.User, privateFantasyPlayerId);
                 return NoContent();
             }
             catch (UnauthorizedAccessException)

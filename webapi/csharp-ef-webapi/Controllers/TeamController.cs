@@ -1,6 +1,5 @@
 using csharp_ef_webapi.Services;
 using DataAccessLibrary.Data;
-using DataAccessLibrary.Models.Discord;
 using DataAccessLibrary.Models.ProMetadata;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,17 +12,14 @@ namespace csharp_ef_webapi.Controllers
     public class TeamController : ControllerBase
     {
         private readonly AghanimsFantasyContext _dbContext;
-        private readonly DiscordWebApiService _discordWebApiService;
         private readonly FantasyServiceAdmin _fantasyServiceAdmin;
 
         public TeamController(
             AghanimsFantasyContext dbContext,
-            DiscordWebApiService discordWebApiService,
             FantasyServiceAdmin fantasyServiceAdmin
         )
         {
             _dbContext = dbContext;
-            _discordWebApiService = discordWebApiService;
             _fantasyServiceAdmin = fantasyServiceAdmin;
         }
 
@@ -48,25 +44,13 @@ namespace csharp_ef_webapi.Controllers
 
         // POST: api/Team
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<Team>> PostTeam(Team team)
         {
-            // Admin only operation
-            if (!await _discordWebApiService.CheckAdminUser(HttpContext))
-            {
-                return Unauthorized();
-            }
-
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-                if (discordUser == null)
-                {
-                    return Unauthorized();
-                }
-
-                await _fantasyServiceAdmin.AddTeamAsync(discordUser, team);
+                await _fantasyServiceAdmin.AddTeamAsync(team);
                 return CreatedAtAction("GetTeam", new { teamId = team.Id }, team);
             }
             catch (UnauthorizedAccessException)
@@ -77,25 +61,13 @@ namespace csharp_ef_webapi.Controllers
 
         // PUT: api/Team/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{teamId}")]
         public async Task<IActionResult> PutTeam(long teamId, Team updateTeam)
         {
-            // Admin only operation
-            if (!await _discordWebApiService.CheckAdminUser(HttpContext))
-            {
-                return Unauthorized();
-            }
-
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-                if (discordUser == null)
-                {
-                    return Unauthorized();
-                }
-
-                await _fantasyServiceAdmin.UpdateTeamAsync(discordUser, teamId, updateTeam);
+                await _fantasyServiceAdmin.UpdateTeamAsync(teamId, updateTeam);
                 return NoContent();
             }
             catch (UnauthorizedAccessException)
@@ -109,25 +81,13 @@ namespace csharp_ef_webapi.Controllers
         }
 
         // DELETE: api/Team/5
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{teamId}")]
         public async Task<IActionResult> DeleteTeam(long teamId)
         {
-            // Admin only operation
-            if (!await _discordWebApiService.CheckAdminUser(HttpContext))
-            {
-                return Unauthorized();
-            }
-
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-                if (discordUser == null)
-                {
-                    return Unauthorized();
-                }
-
-                await _fantasyServiceAdmin.DeleteTeamAsync(discordUser, teamId);
+                await _fantasyServiceAdmin.DeleteTeamAsync(teamId);
                 return NoContent();
             }
             catch (UnauthorizedAccessException)

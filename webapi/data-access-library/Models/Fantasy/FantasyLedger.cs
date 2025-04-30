@@ -3,7 +3,7 @@ namespace DataAccessLibrary.Models.Fantasy;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
-using DataAccessLibrary.Models.Discord;
+using DataAccessLibrary.Data.Identity;
 
 [Table("fantasy_ledger")]
 public class FantasyLedger
@@ -19,8 +19,13 @@ public class FantasyLedger
     [JsonNumberHandling(JsonNumberHandling.WriteAsString | JsonNumberHandling.AllowReadingFromString)]
     public required long DiscordId { get; set; }
 
+    [ForeignKey("User")]
+    [Column("user_id")]
+    [JsonPropertyName("user_id")]
+    public required string UserId { get; set; }
+
     [JsonIgnore]
-    public DiscordUser? DiscordUser { get; set; }
+    public AghanimsFantasyUser? User { get; set; }
 
     [Column("source_type")]
     public string SourceType { get; set; } = "unknown";

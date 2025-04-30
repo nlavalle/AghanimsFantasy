@@ -5,8 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using DataAccessLibrary.Models.ProMetadata;
 using DataAccessLibrary.Models.Fantasy;
-using DataAccessLibrary.Models.Discord;
 using DataAccessLibrary.Data.Facades;
+using DataAccessLibrary.Data.Identity;
 
 
 namespace DataAccessLibrary.IntegrationTests.Data;
@@ -226,13 +226,12 @@ public class SqliteInMemoryFantasyDraftFacadeTests : IDisposable
 
         // Fantasy draft with existing data
 
-        var discordUser = new DiscordUser
+        var user = new AghanimsFantasyUser
         {
-            Id = 1,
-            Username = "test"
+            UserName = "test"
         };
 
-        context.DiscordUsers.Add(discordUser);
+        context.Users.Add(user);
 
         var fantasyDraft = new FantasyDraft
         {

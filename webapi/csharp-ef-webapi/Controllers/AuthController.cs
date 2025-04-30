@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using csharp_ef_webapi.Extensions;
+using DataAccessLibrary.Data.Identity;
+using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
-using csharp_ef_webapi.Services;
 
 namespace csharp_ef_webapi.Controllers
 {
@@ -10,16 +12,89 @@ namespace csharp_ef_webapi.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly DiscordWebApiService _discordService;
-        public AuthController(DiscordWebApiService discordService)
+        private readonly SignInManager<AghanimsFantasyUser> _signInManager;
+        private readonly UserManager<AghanimsFantasyUser> _userManager;
+        public AuthController(SignInManager<AghanimsFantasyUser> signInManager, UserManager<AghanimsFantasyUser> userManager)
         {
-            _discordService = discordService;
+            _signInManager = signInManager;
+            _userManager = userManager;
         }
 
+        [HttpGet("login-provider")]
+        public async Task<IActionResult> LoginProvider(string provider)
+        {
+            if (string.IsNullOrWhiteSpace(provider))
+            {
+                return BadRequest("Provider query parameter missing.");
+            }
+
+            if (!await HttpContext.IsProviderSupportedAsync(provider))
+            {
+                return BadRequest("Provider not supported.");
+            }
+
+            var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Auth", new { returnUrl = "/" });
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            return Challenge(properties, provider);
+        }
+
+        [HttpGet("callback-provider")]
+        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = "/")
+        {
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null)
+            {
+                return Redirect(Url.Action(nameof(FailedOAuthAccessDenied)) ?? "/");
+            }
+
+            // Try to login the user into identity with the external login
+            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: true);
+
+            if (result.Succeeded)
+            {
+                // User signed in with external login
+                await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme); // clean up identity external cookie now that they have aspnet cookie
+                return Ok("Login successful, you can close this window if it doesn't automatically close.");
+            }
+
+            // User doesn't exist with that external login, create a new user
+            var user = new AghanimsFantasyUser();
+
+            switch (info.LoginProvider)
+            {
+                case "Google":
+                    user.UserName = info.Principal.FindFirstValue(ClaimTypes.Name);
+                    user.Email = info.Principal.FindFirstValue(ClaimTypes.Email);
+                    break;
+                case "Discord":
+                    user.UserName = info.Principal.FindFirstValue(ClaimTypes.Name);
+                    if (long.TryParse(info.Principal.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty, out long discordId))
+                    {
+                        user.DiscordId = discordId;
+                    }
+                    user.DiscordHandle = info.Principal.FindFirstValue(ClaimTypes.Name) ?? string.Empty;
+                    // We don't get email from discord privileges
+                    break;
+            }
+
+            var createResult = await _userManager.CreateAsync(user);
+            if (createResult.Succeeded)
+            {
+                createResult = await _userManager.AddLoginAsync(user, info);
+                if (createResult.Succeeded)
+                {
+                    await _signInManager.SignInAsync(user, isPersistent: true);
+                    await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+                    return Ok("Login successful, you can close this window if it doesn't automatically close.");
+                }
+            }
+
+            return Redirect(Url.Action(nameof(FailedOAuthAccessDenied)) ?? "/");
+        }
 
         // GET: api/auth/authenticated
         [HttpGet("authenticated")]
-        public IActionResult DiscordIsAuthenicated()
+        public IActionResult IsAuthenicated()
         {
             bool IsAuthenticated = HttpContext.User?.Identity?.IsAuthenticated ?? false;
             return Ok(new { authenticated = IsAuthenticated });
@@ -28,49 +103,18 @@ namespace csharp_ef_webapi.Controllers
         // GET: api/auth/authorization
         [Authorize]
         [HttpGet("authorization")]
-        public async Task<IActionResult> DiscordAuthorization()
+        public IActionResult Authorization()
         {
-            var userClaims = HttpContext.User.Claims
-                .Select(c => new { c.Type, c.Value })
+            List<string> userClaims = HttpContext.User.Claims
+                .Where(c => c.Type == ClaimTypes.Role)
+                .Select(c => c.Value)
                 .ToList();
-
-            // Check database and assign user or admin role claim depending
-            var nameId = HttpContext.User?.Claims?.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-            if (nameId == null) return BadRequest("Invalid User Claims please contact admin");
-
-            bool getAccountId = long.TryParse(nameId.Value, out long userDiscordAccountId);
-            var discordUser = await _discordService.GetDiscordUserAsync(userDiscordAccountId);
-            var fantasyAdmin = await _discordService.CheckPrivateFantasyAdminUser(userDiscordAccountId);
-
-            if (discordUser != null && discordUser.IsAdmin)
-            {
-                userClaims.Add(new { Type = ClaimTypes.Role, Value = "admin" });
-            }
-            else
-            {
-                userClaims.Add(new { Type = ClaimTypes.Role, Value = "user" });
-            }
-
-            // Check for Admins of Private Fantasy Leagues
-            if (discordUser != null && fantasyAdmin == true)
-            {
-                userClaims.Add(new { Type = ClaimTypes.Role, Value = "privateFantasyAdmin" });
-            }
-
             return Ok(userClaims);
-        }
-
-        // GET: api/auth/login
-        [Authorize]
-        [HttpGet("login")]
-        public IActionResult DiscordLogin()
-        {
-            return NoContent();
         }
 
         // GET: api/auth/accessdenied
         [HttpGet("accessdenied")]
-        public IActionResult DiscordLoginAccessDenied()
+        public IActionResult FailedOAuthAccessDenied()
         {
             return BadRequest("OAuth Challenge failed");
         }

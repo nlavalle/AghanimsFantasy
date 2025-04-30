@@ -1,13 +1,12 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+using csharp_ef_webapi.Services;
 using csharp_ef_webapi.Utilities;
 using DataAccessLibrary.Data;
+using DataAccessLibrary.Models;
+using DataAccessLibrary.Models.GameCoordinator;
 using DataAccessLibrary.Models.ProMetadata;
 using DataAccessLibrary.Models.WebApi;
-using DataAccessLibrary.Models.GameCoordinator;
-using csharp_ef_webapi.Services;
-using DataAccessLibrary.Models.Discord;
-using DataAccessLibrary.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace csharp_ef_webapi.Controllers
@@ -16,19 +15,16 @@ namespace csharp_ef_webapi.Controllers
     [ApiController]
     public class LeagueController : ControllerBase
     {
-        private readonly DiscordWebApiService _discordWebApiService;
         private readonly FantasyService _fantasyService;
         private readonly FantasyServiceAdmin _fantasyServiceAdmin;
         private readonly AghanimsFantasyContext _dbContext;
 
         public LeagueController(
-            DiscordWebApiService discordWebApiService,
             FantasyService fantasyService,
             FantasyServiceAdmin fantasyServiceAdmin,
             AghanimsFantasyContext dbContext
         )
         {
-            _discordWebApiService = discordWebApiService;
             _fantasyService = fantasyService;
             _fantasyServiceAdmin = fantasyServiceAdmin;
             _dbContext = dbContext;
@@ -65,25 +61,13 @@ namespace csharp_ef_webapi.Controllers
 
         // POST: api/League
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [Authorize]
+        [Authorize(Roles = "Admin")] // Admin only operation
         [HttpPost]
         public async Task<ActionResult<League>> PostLeague(League league)
         {
-            // Admin only operation
-            if (!await _discordWebApiService.CheckAdminUser(HttpContext))
-            {
-                return Unauthorized();
-            }
-
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-                if (discordUser == null)
-                {
-                    return Unauthorized();
-                }
-
-                await _fantasyServiceAdmin.AddLeagueAsync(discordUser, league);
+                await _fantasyServiceAdmin.AddLeagueAsync(league);
                 return CreatedAtAction("GetLeague", new { id = league.Id }, league);
             }
             catch (UnauthorizedAccessException)
@@ -94,25 +78,13 @@ namespace csharp_ef_webapi.Controllers
 
         // PUT: api/League/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [Authorize]
+        [Authorize(Roles = "Admin")] // Admin only operation
         [HttpPut("{leagueId}")]
         public async Task<IActionResult> PutFantasyLeague(int leagueId, League league)
         {
-            // Admin only operation
-            if (!await _discordWebApiService.CheckAdminUser(HttpContext))
-            {
-                return Unauthorized();
-            }
-
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-                if (discordUser == null)
-                {
-                    return Unauthorized();
-                }
-
-                await _fantasyServiceAdmin.UpdateLeagueAsync(discordUser, leagueId, league);
+                await _fantasyServiceAdmin.UpdateLeagueAsync(leagueId, league);
                 return NoContent();
             }
             catch (UnauthorizedAccessException)
@@ -126,25 +98,13 @@ namespace csharp_ef_webapi.Controllers
         }
 
         // DELETE: api/League/5
-        [Authorize]
+        [Authorize(Roles = "Admin")] // Admin only operation
         [HttpDelete("{leagueId}")]
         public async Task<IActionResult> DeleteLeague(int leagueId)
         {
-            // Admin only operation
-            if (!await _discordWebApiService.CheckAdminUser(HttpContext))
-            {
-                return Unauthorized();
-            }
-
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-                if (discordUser == null)
-                {
-                    return Unauthorized();
-                }
-
-                await _fantasyServiceAdmin.DeleteLeagueAsync(discordUser, leagueId);
+                await _fantasyServiceAdmin.DeleteLeagueAsync(leagueId);
                 return NoContent();
             }
             catch (UnauthorizedAccessException)
@@ -255,14 +215,12 @@ namespace csharp_ef_webapi.Controllers
         {
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-
-                if (discordUser == null)
+                if (HttpContext.User == null)
                 {
                     return Ok(new List<FantasyDraftPointTotals>());
                 }
 
-                IEnumerable<FantasyDraftPointTotals> fantasyDraftPointTotals = await _fantasyService.GetFantasyDraftPointTotals(discordUser, leagueId);
+                IEnumerable<FantasyDraftPointTotals> fantasyDraftPointTotals = await _fantasyService.GetFantasyDraftPointTotals(HttpContext.User, leagueId);
 
                 return Ok(fantasyDraftPointTotals);
             }

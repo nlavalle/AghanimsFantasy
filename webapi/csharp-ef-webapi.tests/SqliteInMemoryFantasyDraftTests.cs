@@ -5,10 +5,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using DataAccessLibrary.Models.ProMetadata;
 using DataAccessLibrary.Models.Fantasy;
-using DataAccessLibrary.Models.Discord;
 using csharp_ef_webapi.Services;
-using csharp_ef_webapi.IntegrationTests.Data;
 using DataAccessLibrary.Data.Facades;
+using DataAccessLibrary.Data.Identity;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace csharp_ef_webapi.IntegrationTests.Data;
 
@@ -225,13 +226,13 @@ public class SqliteInMemoryFantasyDraftTests : IDisposable
 
         // Fantasy draft with existing data
 
-        var discordUser = new DiscordUser
+        var user = new AghanimsFantasyUser
         {
-            Id = 1,
-            Username = "test"
+            Id = "testUserId",
+            UserName = "test"
         };
 
-        context.DiscordUsers.Add(discordUser);
+        context.Users.Add(user);
         context.SaveChanges();
     }
 
@@ -250,9 +251,13 @@ public class SqliteInMemoryFantasyDraftTests : IDisposable
         var fantasyDraftFacade = new FantasyDraftFacade(fantasyDraftFacadeLogger.Object, context);
         var fantasyPointsFacadeLogger = new Mock<ILogger<FantasyPointsFacade>>();
         var fantasyPointsFacade = new FantasyPointsFacade(fantasyPointsFacadeLogger.Object, context);
-        var fantasyService = new FantasyService(loggerMock.Object, context, fantasyDraftFacade, fantasyPointsFacade);
+        var store = new Mock<IUserStore<AghanimsFantasyUser>>();
+        var userManagerMock = new Mock<UserManager<AghanimsFantasyUser>>(store.Object, null, null, null, null, null, null, null, null);
+        var fantasyService = new FantasyService(loggerMock.Object, context, fantasyDraftFacade, fantasyPointsFacade, userManagerMock.Object);
 
-        var discordUser = await context.DiscordUsers.FirstAsync();
+        var userClaimPrincipal = new Mock<ClaimsPrincipal>();
+        var user = await context.Users.FirstOrDefaultAsync();
+        userManagerMock.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).Returns(Task.FromResult(user));
         var fantasyLeague = await context.FantasyLeagues.FirstAsync();
 
         var fantasyDraft = new FantasyDraft
@@ -261,7 +266,7 @@ public class SqliteInMemoryFantasyDraftTests : IDisposable
             DraftPickPlayers = []
         };
 
-        var fantasyDraftPostResponse = await fantasyService.UpdateFantasyDraft(discordUser, fantasyDraft);
+        var fantasyDraftPostResponse = await fantasyService.UpdateFantasyDraft(userClaimPrincipal.Object, fantasyDraft);
 
         Assert.Empty(fantasyDraftPostResponse.DraftPickPlayers);
     }
@@ -275,9 +280,13 @@ public class SqliteInMemoryFantasyDraftTests : IDisposable
         var fantasyDraftFacade = new FantasyDraftFacade(fantasyDraftFacadeLogger.Object, context);
         var fantasyPointsFacadeLogger = new Mock<ILogger<FantasyPointsFacade>>();
         var fantasyPointsFacade = new FantasyPointsFacade(fantasyPointsFacadeLogger.Object, context);
-        var fantasyService = new FantasyService(loggerMock.Object, context, fantasyDraftFacade, fantasyPointsFacade);
+        var store = new Mock<IUserStore<AghanimsFantasyUser>>();
+        var userManagerMock = new Mock<UserManager<AghanimsFantasyUser>>(store.Object, null, null, null, null, null, null, null, null);
+        var fantasyService = new FantasyService(loggerMock.Object, context, fantasyDraftFacade, fantasyPointsFacade, userManagerMock.Object);
 
-        var discordUser = await context.DiscordUsers.FirstAsync();
+        var userClaimPrincipal = new Mock<ClaimsPrincipal>();
+        var user = await context.Users.FirstOrDefaultAsync();
+        userManagerMock.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).Returns(Task.FromResult(user));
         var fantasyLeague = await context.FantasyLeagues.FirstAsync();
 
         var draftPickPlayers = context.FantasyPlayers
@@ -296,7 +305,7 @@ public class SqliteInMemoryFantasyDraftTests : IDisposable
             DraftPickPlayers = draftPickPlayers
         };
 
-        var fantasyDraftPostResponse = await fantasyService.UpdateFantasyDraft(discordUser, fantasyDraft);
+        var fantasyDraftPostResponse = await fantasyService.UpdateFantasyDraft(userClaimPrincipal.Object, fantasyDraft);
 
         Assert.Single(fantasyDraftPostResponse.DraftPickPlayers);
         Assert.Equal(fantasyDraftPostResponse.DraftPickPlayers[0].FantasyPlayer, draftPickPlayers[0].FantasyPlayer);
@@ -311,9 +320,13 @@ public class SqliteInMemoryFantasyDraftTests : IDisposable
         var fantasyDraftFacade = new FantasyDraftFacade(fantasyDraftFacadeLogger.Object, context);
         var fantasyPointsFacadeLogger = new Mock<ILogger<FantasyPointsFacade>>();
         var fantasyPointsFacade = new FantasyPointsFacade(fantasyPointsFacadeLogger.Object, context);
-        var fantasyService = new FantasyService(loggerMock.Object, context, fantasyDraftFacade, fantasyPointsFacade);
+        var store = new Mock<IUserStore<AghanimsFantasyUser>>();
+        var userManagerMock = new Mock<UserManager<AghanimsFantasyUser>>(store.Object, null, null, null, null, null, null, null, null);
+        var fantasyService = new FantasyService(loggerMock.Object, context, fantasyDraftFacade, fantasyPointsFacade, userManagerMock.Object);
 
-        var discordUser = await context.DiscordUsers.FirstAsync();
+        var userClaimPrincipal = new Mock<ClaimsPrincipal>();
+        var user = await context.Users.FirstOrDefaultAsync();
+        userManagerMock.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).Returns(Task.FromResult(user));
         var fantasyLeague = await context.FantasyLeagues.FirstAsync();
 
         var draftPickPlayers = context.FantasyPlayers
@@ -357,7 +370,7 @@ public class SqliteInMemoryFantasyDraftTests : IDisposable
             ]
         };
 
-        var fantasyDraftPostResponse = await fantasyService.UpdateFantasyDraft(discordUser, fantasyDraft);
+        var fantasyDraftPostResponse = await fantasyService.UpdateFantasyDraft(userClaimPrincipal.Object, fantasyDraft);
 
         Assert.Equal(5, fantasyDraftPostResponse.DraftPickPlayers.Count());
     }

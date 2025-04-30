@@ -1,10 +1,11 @@
 using csharp_ef_webapi.Services;
 using DataAccessLibrary.Data;
 using DataAccessLibrary.Data.Facades;
+using DataAccessLibrary.Data.Identity;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Headers;
@@ -64,6 +65,11 @@ builder.Services.AddDbContext<AghanimsFantasyContext>(
     }
 );
 
+builder.Services.AddIdentity<AghanimsFantasyUser, IdentityRole>()
+    .AddEntityFrameworkStores<AghanimsFantasyContext>()
+    .AddDefaultTokenProviders()
+    .AddApiEndpoints();
+
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(@"/webapi-data"));
 
@@ -77,18 +83,26 @@ builder.Services.AddAntiforgery();
 builder.Services
     .AddAuthentication(options =>
     {
-        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = "OAuth";
+        options.DefaultScheme = IdentityConstants.ApplicationScheme;
+        options.DefaultChallengeScheme = IdentityConstants.ExternalScheme;
     })
     .AddCookie(options =>
     {
         options.ExpireTimeSpan = TimeSpan.FromDays(90);
         options.Cookie.MaxAge = TimeSpan.FromDays(90);
     })
-    .AddOAuth("OAuth", options =>
+    .AddGoogle(options =>
     {
-        options.ClientId = Environment.GetEnvironmentVariable("DISCORD_APP_ID") ?? "";
-        options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_APP_SECRET") ?? "";
+        options.ClientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID") ?? string.Empty;
+        options.ClientSecret = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_SECRET") ?? string.Empty;
+        options.SignInScheme = IdentityConstants.ExternalScheme;
+        // options.CallbackPath = new PathString("/signin-google"); // Default callback path
+    })
+    .AddOAuth("Discord", options =>
+    {
+        options.ClientId = Environment.GetEnvironmentVariable("DISCORD_APP_ID") ?? string.Empty;
+        options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_APP_SECRET") ?? string.Empty;
+        options.SignInScheme = IdentityConstants.ExternalScheme;
 
         string authEndpoint = QueryHelpers.AddQueryString("https://discordapp.com/api/oauth2/authorize", "prompt", "none");
 
@@ -134,7 +148,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Add Scoped services to be used by controllers
-builder.Services.AddScoped<DiscordWebApiService>();
 builder.Services.AddScoped<FantasyService>();
 builder.Services.AddScoped<FantasyServiceAdmin>();
 builder.Services.AddScoped<FantasyServicePrivateFantasyAdmin>();
@@ -149,7 +162,7 @@ builder.Services.AddScoped<FantasyPointsFacade>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName.Equals("Local"))
 {
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -161,6 +174,7 @@ app.UseCors(vueFrontEndOrigins);
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapIdentityApi<AghanimsFantasyUser>();
 
 app.UseSession();
 

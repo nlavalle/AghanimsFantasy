@@ -1,7 +1,9 @@
+using System.Security.Claims;
 using DataAccessLibrary.Data;
 using DataAccessLibrary.Data.Facades;
-using DataAccessLibrary.Models.Discord;
+using DataAccessLibrary.Data.Identity;
 using DataAccessLibrary.Models.Fantasy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace csharp_ef_webapi.Services;
@@ -10,40 +12,36 @@ public class FantasyServicePrivateFantasyAdmin
     private readonly ILogger<FantasyService> _logger;
     private readonly AghanimsFantasyContext _dbContext;
     private readonly AuthFacade _authFacade;
-    private readonly DiscordFacade _discordFacade;
+    private readonly UserManager<AghanimsFantasyUser> _userManager;
 
     public FantasyServicePrivateFantasyAdmin(
         ILogger<FantasyService> logger,
         AghanimsFantasyContext dbContext,
         AuthFacade authFacade,
-        DiscordFacade discordFacade
+        UserManager<AghanimsFantasyUser> userManager
     )
     {
         _logger = logger;
         _dbContext = dbContext;
         _authFacade = authFacade;
-        _discordFacade = discordFacade;
+        _userManager = userManager;
     }
 
-    public async Task<bool> IsUserPrivateFantasyAdminAsync(DiscordUser discordUser)
+    public async Task<List<FantasyLeague>> GetPrivateFantasyLeagues(ClaimsPrincipal siteUser)
     {
-        return await _authFacade.IsUserPrivateFantasyAdminAsync(discordUser.Id);
-    }
-
-    public async Task<List<FantasyLeague>> GetPrivateFantasyLeagues(DiscordUser discordUser)
-    {
+        AghanimsFantasyUser user = await GetUserFromContext(siteUser);
         var privateFantasyLeagues = await _dbContext.FantasyPrivateLeaguePlayers
             .Include(fplp => fplp.FantasyLeague)
-            .Where(fplp => fplp.DiscordUserId == discordUser.Id)
+            .Where(fplp => fplp.UserId == user.Id)
             .ToListAsync();
 
         return privateFantasyLeagues.Where(pfl => pfl.FantasyLeague != null).Select(pfl => pfl.FantasyLeague!).Distinct().ToList();
     }
 
-    public async Task<FantasyPrivateLeaguePlayer> GetFantasyPrivateLeaguePlayerAsync(DiscordUser discordUser, int privateFantasyPlayerId)
+    public async Task<FantasyPrivateLeaguePlayer> GetFantasyPrivateLeaguePlayerAsync(ClaimsPrincipal siteUser, int privateFantasyPlayerId)
     {
         FantasyPrivateLeaguePlayer? getPrivateFantasyPlayer = await _dbContext.FantasyPrivateLeaguePlayers
-            .Include(fplp => fplp.DiscordUser)
+            .Include(fplp => fplp.User)
             .FirstOrDefaultAsync(fplp => fplp.Id == privateFantasyPlayerId);
 
         if (getPrivateFantasyPlayer == null)
@@ -51,7 +49,8 @@ public class FantasyServicePrivateFantasyAdmin
             throw new ArgumentException("Private Fantasy Player Not Found");
         }
 
-        if (!await _authFacade.IsUserPrivateFantasyAdminAsync(discordUser.Id, getPrivateFantasyPlayer.FantasyLeagueId))
+        AghanimsFantasyUser user = await GetUserFromContext(siteUser);
+        if (!await _authFacade.IsUserPrivateFantasyAdminAsync(user.Id, getPrivateFantasyPlayer.FantasyLeagueId))
         {
             throw new UnauthorizedAccessException();
         }
@@ -59,7 +58,7 @@ public class FantasyServicePrivateFantasyAdmin
         return getPrivateFantasyPlayer;
     }
 
-    public async Task<List<FantasyLeagueWeight>> GetFantasyLeagueWeightsAsync(DiscordUser siteUser)
+    public async Task<List<FantasyLeagueWeight>> GetFantasyLeagueWeightsAsync(ClaimsPrincipal siteUser)
     {
         IEnumerable<FantasyLeague> fantasyLeagues = await GetPrivateFantasyLeagues(siteUser);
         IEnumerable<FantasyLeagueWeight> fantasyLeagueWeights = await _dbContext.FantasyLeagueWeights.ToListAsync();
@@ -67,9 +66,10 @@ public class FantasyServicePrivateFantasyAdmin
         return fantasyLeagueWeights.Where(flw => fantasyLeagues.Contains(flw.FantasyLeague)).ToList();
     }
 
-    public async Task UpdateFantasyLeagueWeightAsync(DiscordUser privateAdminUser, int fantasyLeagueWeightId, FantasyLeagueWeight updateFantasyLeagueWeight)
+    public async Task UpdateFantasyLeagueWeightAsync(ClaimsPrincipal privateAdminUser, int fantasyLeagueWeightId, FantasyLeagueWeight updateFantasyLeagueWeight)
     {
-        if (!await _authFacade.IsUserPrivateFantasyAdminAsync(privateAdminUser.Id))
+        AghanimsFantasyUser user = await GetUserFromContext(privateAdminUser);
+        if (!await _authFacade.IsUserPrivateFantasyAdminAsync(user.Id, updateFantasyLeagueWeight.FantasyLeagueId))
         {
             throw new UnauthorizedAccessException();
         }
@@ -83,35 +83,38 @@ public class FantasyServicePrivateFantasyAdmin
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<List<FantasyPrivateLeaguePlayer>> GetFantasyPrivateLeaguePlayersAsync(DiscordUser discordUser, int FantasyLeagueId)
+    public async Task<List<FantasyPrivateLeaguePlayer>> GetFantasyPrivateLeaguePlayersAsync(ClaimsPrincipal siteUser, int FantasyLeagueId)
     {
-        if (!await _authFacade.IsUserPrivateFantasyAdminAsync(discordUser.Id, FantasyLeagueId))
+        AghanimsFantasyUser user = await GetUserFromContext(siteUser);
+        if (!await _authFacade.IsUserPrivateFantasyAdminAsync(user.Id, FantasyLeagueId))
         {
             throw new UnauthorizedAccessException();
         }
 
-        return await _dbContext.FantasyPrivateLeaguePlayers.Include(fplp => fplp.DiscordUser).Where(fplp => fplp.FantasyLeagueId == FantasyLeagueId).ToListAsync();
+        return await _dbContext.FantasyPrivateLeaguePlayers.Include(fplp => fplp.User).Where(fplp => fplp.FantasyLeagueId == FantasyLeagueId).ToListAsync();
     }
 
-    public async Task AddPrivateFantasyPlayerAsync(DiscordUser adminUser, FantasyPrivateLeaguePlayer newPrivateFantasyPlayer)
+    public async Task AddPrivateFantasyPlayerAsync(ClaimsPrincipal adminUser, FantasyPrivateLeaguePlayer newPrivateFantasyPlayer)
     {
-        if (!await _authFacade.IsUserPrivateFantasyAdminAsync(adminUser.Id, newPrivateFantasyPlayer.FantasyLeagueId))
+        AghanimsFantasyUser user = await GetUserFromContext(adminUser);
+        if (!await _authFacade.IsUserPrivateFantasyAdminAsync(user.Id, newPrivateFantasyPlayer.FantasyLeagueId))
         {
             throw new UnauthorizedAccessException();
         }
 
-        if (newPrivateFantasyPlayer.DiscordUser == null)
+        if (newPrivateFantasyPlayer.User == null)
         {
-            newPrivateFantasyPlayer.DiscordUser = await _dbContext.DiscordUsers.FindAsync(newPrivateFantasyPlayer.DiscordUserId);
+            newPrivateFantasyPlayer.User = await _dbContext.Users.FindAsync(newPrivateFantasyPlayer.UserId);
         }
 
         await _dbContext.FantasyPrivateLeaguePlayers.AddAsync(newPrivateFantasyPlayer);
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task UpdatePrivateFantasyPlayerAsync(DiscordUser adminUser, int privateFantasyPlayerId, FantasyPrivateLeaguePlayer updatePrivateFantasyPlayer)
+    public async Task UpdatePrivateFantasyPlayerAsync(ClaimsPrincipal adminUser, int privateFantasyPlayerId, FantasyPrivateLeaguePlayer updatePrivateFantasyPlayer)
     {
-        if (!await _authFacade.IsUserPrivateFantasyAdminAsync(adminUser.Id, updatePrivateFantasyPlayer.FantasyLeagueId))
+        AghanimsFantasyUser user = await GetUserFromContext(adminUser);
+        if (!await _authFacade.IsUserPrivateFantasyAdminAsync(user.Id, updatePrivateFantasyPlayer.FantasyLeagueId))
         {
             throw new UnauthorizedAccessException();
         }
@@ -125,8 +128,9 @@ public class FantasyServicePrivateFantasyAdmin
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task DeletePrivateFantasyPlayerAsync(DiscordUser adminUser, int deletePrivateFantasyPlayerId)
+    public async Task DeletePrivateFantasyPlayerAsync(ClaimsPrincipal adminUser, int deletePrivateFantasyPlayerId)
     {
+        AghanimsFantasyUser user = await GetUserFromContext(adminUser);
         FantasyPrivateLeaguePlayer? deletePrivateFantasyPlayer = await _dbContext.FantasyPrivateLeaguePlayers.FindAsync(deletePrivateFantasyPlayerId);
 
         if (deletePrivateFantasyPlayer == null)
@@ -134,12 +138,17 @@ public class FantasyServicePrivateFantasyAdmin
             throw new ArgumentException("Private Fantasy Player Not Found");
         }
 
-        if (!await _authFacade.IsUserPrivateFantasyAdminAsync(adminUser.Id, deletePrivateFantasyPlayer.FantasyLeagueId))
+        if (!await _authFacade.IsUserPrivateFantasyAdminAsync(user.Id, deletePrivateFantasyPlayer.FantasyLeagueId))
         {
             throw new UnauthorizedAccessException();
         }
 
         _dbContext.FantasyPrivateLeaguePlayers.Remove(deletePrivateFantasyPlayer);
         await _dbContext.SaveChangesAsync();
+    }
+
+    private async Task<AghanimsFantasyUser> GetUserFromContext(ClaimsPrincipal siteUser)
+    {
+        return await _userManager.GetUserAsync(siteUser) ?? throw new Exception("Invalid user");
     }
 }
