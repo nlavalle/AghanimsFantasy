@@ -18,7 +18,8 @@ import { faSquare } from '@fortawesome/free-regular-svg-icons';
 import {
   faChevronLeft, faChevronRight, faChevronDown, faCaretDown, faArrowUp, faArrowDown,
   faStepForward, faStepBackward, faLock, faLockOpen,
-  faMagnifyingGlass, faCheckSquare, faTimesCircle
+  faMagnifyingGlass, faCheckSquare, faTimesCircle,
+  faEye, faEyeSlash
 } from '@fortawesome/free-solid-svg-icons';
 import { faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons';
 // import { far } from '@fortawesome/free-regular-svg-icons';
@@ -37,6 +38,7 @@ library.add(
   faChevronLeft, faChevronRight, faChevronDown, faCaretDown, faArrowUp, faArrowDown,
   faStepForward, faStepBackward, faLock, faLockOpen,
   faMagnifyingGlass, faCheckSquare, faTimesCircle,
+  faEye, faEyeSlash,
   // Brand
   faDiscord, faGithub
 );

@@ -18,15 +18,14 @@ var vueFrontEndOrigins = "vueFrontEnd";
 
 if (builder.Environment.IsDevelopment())
 {
-    //Set CORS
+    //Set CORS for Dev
     builder.Services.AddCors(
         options =>
         {
             options.AddPolicy(name: vueFrontEndOrigins,
                                 policy =>
                                 {
-                                    policy.WithOrigins("http://localhost:8080",
-                                                        "http://localhost:9000")
+                                    policy.WithOrigins("https://localhost:5001", "https://localhost:5173")
                                         .AllowAnyHeader()
                                         .WithMethods("GET", "POST")
                                         .AllowCredentials();
@@ -67,7 +66,6 @@ builder.Services.AddDbContext<AghanimsFantasyContext>(
 
 builder.Services.AddIdentity<AghanimsFantasyUser, IdentityRole>()
     .AddEntityFrameworkStores<AghanimsFantasyContext>()
-    .AddDefaultTokenProviders()
     .AddApiEndpoints();
 
 builder.Services.AddDataProtection()
@@ -78,19 +76,15 @@ builder.Services.AddHttpClient();
 
 // Add auth services
 builder.Services.AddDistributedMemoryCache(); // Required for Session
+builder.Services.AddOutputCache(options =>
+{
+    // Invalidate cache after 5min
+    options.DefaultExpirationTimeSpan = TimeSpan.FromMinutes(5);
+});
 builder.Services.AddSession();
 builder.Services.AddAntiforgery();
 builder.Services
-    .AddAuthentication(options =>
-    {
-        options.DefaultScheme = IdentityConstants.ApplicationScheme;
-        options.DefaultChallengeScheme = IdentityConstants.ExternalScheme;
-    })
-    .AddCookie(options =>
-    {
-        options.ExpireTimeSpan = TimeSpan.FromDays(90);
-        options.Cookie.MaxAge = TimeSpan.FromDays(90);
-    })
+    .AddAuthentication()
     .AddGoogle(options =>
     {
         options.ClientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID") ?? string.Empty;
@@ -169,12 +163,12 @@ if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName.Equals("L
 }
 
 app.UseHttpsRedirection();
-
 app.UseCors(vueFrontEndOrigins);
+app.UseOutputCache();
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapIdentityApi<AghanimsFantasyUser>();
+app.MapGroup("/identity").MapIdentityApi<AghanimsFantasyUser>();
 
 app.UseSession();
 

@@ -1,12 +1,15 @@
+using csharp_ef_webapi.Extensions;
 using csharp_ef_webapi.Services;
 using DataAccessLibrary.Models.Fantasy;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace csharp_ef_webapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AuthenticatedETag]
     public class FantasyLeagueWeightController : ControllerBase
     {
         private readonly FantasyService _fantasyService;

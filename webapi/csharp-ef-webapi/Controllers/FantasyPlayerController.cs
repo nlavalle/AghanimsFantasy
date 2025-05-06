@@ -1,9 +1,9 @@
+using csharp_ef_webapi.Extensions;
 using csharp_ef_webapi.Services;
 using csharp_ef_webapi.ViewModels;
 using DataAccessLibrary.Models.Fantasy;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
 
 namespace csharp_ef_webapi.Controllers
 {
@@ -25,6 +25,7 @@ namespace csharp_ef_webapi.Controllers
 
         // GET: api/FantasyPlayer/5
         [HttpGet("{fantasyPlayerId}")]
+        [AuthenticatedETag]
         public async Task<ActionResult<FantasyPlayer>> GetFantasyPlayer(int fantasyPlayerId)
         {
             try
@@ -46,6 +47,7 @@ namespace csharp_ef_webapi.Controllers
 
         // GET: api/FantasyPlayer/5
         [HttpGet("FantasyLeague/{fantasyLeagueId}")]
+        [AuthenticatedETag]
         public async Task<ActionResult<IEnumerable<FantasyPlayerViewModel>>> GetFantasyPlayersByFantasyLeague(int fantasyLeagueId)
         {
             try

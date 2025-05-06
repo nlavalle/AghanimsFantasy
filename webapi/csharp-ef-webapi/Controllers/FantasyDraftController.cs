@@ -1,3 +1,4 @@
+using csharp_ef_webapi.Extensions;
 using csharp_ef_webapi.Services;
 using DataAccessLibrary.Models;
 using DataAccessLibrary.Models.Fantasy;
@@ -22,6 +23,7 @@ namespace csharp_ef_webapi.Controllers
 
         // GET: api/fantasydraft/5
         [HttpGet("{fantasyLeagueId}")]
+        [AuthenticatedETag]
         public async Task<IActionResult> GetUserDraft(int fantasyLeagueId)
         {
             try
@@ -36,6 +38,7 @@ namespace csharp_ef_webapi.Controllers
 
         // GET: api/fantasydraft/5/matches/points
         [HttpGet("{fantasyLeagueId}/matches/points")]
+        [AuthenticatedETag]
         public async Task<ActionResult<List<FantasyPlayerPoints>>> GetDraftFantasyPlayersPointsByMatch(int? fantasyLeagueId, [FromQuery] int? limit)
         {
             if (fantasyLeagueId == null)

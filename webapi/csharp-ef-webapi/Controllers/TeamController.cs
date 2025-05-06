@@ -1,30 +1,37 @@
+using csharp_ef_webapi.Extensions;
 using csharp_ef_webapi.Services;
 using DataAccessLibrary.Data;
 using DataAccessLibrary.Models.ProMetadata;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
 
 namespace csharp_ef_webapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [OutputCache(Tags = new[] { "team" })]
     public class TeamController : ControllerBase
     {
         private readonly AghanimsFantasyContext _dbContext;
         private readonly FantasyServiceAdmin _fantasyServiceAdmin;
+        private readonly IOutputCacheStore _cache;
 
         public TeamController(
             AghanimsFantasyContext dbContext,
-            FantasyServiceAdmin fantasyServiceAdmin
+            FantasyServiceAdmin fantasyServiceAdmin,
+            IOutputCacheStore cache
         )
         {
             _dbContext = dbContext;
             _fantasyServiceAdmin = fantasyServiceAdmin;
+            _cache = cache;
         }
 
         // GET: api/Team/5
         [HttpGet("{teamId}")]
+        [ResponseETag]
         public async Task<ActionResult<Team?>> GetTeam(long? teamId)
         {
             if (teamId == null)
@@ -37,6 +44,7 @@ namespace csharp_ef_webapi.Controllers
 
         // GET: api/Team
         [HttpGet]
+        [ResponseETag]
         public async Task<ActionResult<IEnumerable<Team>>> GetTeams()
         {
             return Ok(await _dbContext.Teams.ToListAsync());
@@ -51,6 +59,7 @@ namespace csharp_ef_webapi.Controllers
             try
             {
                 await _fantasyServiceAdmin.AddTeamAsync(team);
+                await _cache.EvictByTagAsync("team", default);
                 return CreatedAtAction("GetTeam", new { teamId = team.Id }, team);
             }
             catch (UnauthorizedAccessException)
@@ -68,6 +77,7 @@ namespace csharp_ef_webapi.Controllers
             try
             {
                 await _fantasyServiceAdmin.UpdateTeamAsync(teamId, updateTeam);
+                await _cache.EvictByTagAsync("team", default);
                 return NoContent();
             }
             catch (UnauthorizedAccessException)
@@ -88,6 +98,7 @@ namespace csharp_ef_webapi.Controllers
             try
             {
                 await _fantasyServiceAdmin.DeleteTeamAsync(teamId);
+                await _cache.EvictByTagAsync("team", default);
                 return NoContent();
             }
             catch (UnauthorizedAccessException)

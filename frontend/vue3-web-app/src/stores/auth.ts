@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia'
 
 export interface User {
-  id: number
+  id: string
   name: string
+  discordName: string | undefined
   isAdmin: boolean
   isPrivateFantasyAdmin: boolean
 }
@@ -29,6 +30,11 @@ export const useAuthStore = defineStore('auth', {
           if (this.authenticated && this.user == null) {
             this.getUser()
           }
+
+          // If we logged out clear the user
+          if (!this.authenticated && this.user) {
+            this.user == null
+          }
         })
     },
 
@@ -48,30 +54,19 @@ export const useAuthStore = defineStore('auth', {
           .then((response) => response.json())
           .then((data) => {
             this.user = {
-              name: data.find(
-                (claim: { type: string }) =>
-                  claim.type === 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'
-              ).value,
-              id: data.find(
-                (claim: { type: string }) =>
-                  claim.type ===
-                  'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'
-              ).value,
-              isAdmin: (data.find(
-                (claim: { type: string, value: string }) =>
-                  claim.type ===
-                  'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
-                  && claim.value == "admin"
-              ) ?? "user").value == "admin",
-              isPrivateFantasyAdmin: (data.find(
-                (claim: { type: string, value: string }) =>
-                  claim.type ===
-                  'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
-                  && claim.value == "privateFantasyAdmin"
-              ) ?? "user").value == "privateFantasyAdmin"
+              id: data.id,
+              name: data.displayName,
+              discordName: data.discordHandle,
+              isAdmin: data.roles.some((role: string) => role == "Admin"),
+              isPrivateFantasyAdmin: data.roles.some((role: string) => role == "PrivateFantasyLeagueAdmin")
             }
           })
       }
+    }
+  },
+  getters: {
+    isAuthenticated(): boolean {
+      return this.authenticated
     }
   }
 })

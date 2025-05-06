@@ -14,6 +14,49 @@ namespace csharp_ef_webapi.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_dota_fantasy_private_league_players_discord_users_discord_u~",
+                schema: "nadcl",
+                table: "dota_fantasy_private_league_players");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_fantasy_ledger_discord_users_discord_id",
+                schema: "nadcl",
+                table: "fantasy_ledger");
+
+            migrationBuilder.DropIndex(
+                name: "IX_fantasy_ledger_discord_id",
+                schema: "nadcl",
+                table: "fantasy_ledger");
+
+            migrationBuilder.DropIndex(
+                name: "IX_dota_fantasy_private_league_players_discord_user_id",
+                schema: "nadcl",
+                table: "dota_fantasy_private_league_players");
+
+            migrationBuilder.AddColumn<string>(
+                name: "user_id",
+                schema: "nadcl",
+                table: "fantasy_ledger",
+                type: "text",
+                nullable: false,
+                defaultValue: "");
+
+            migrationBuilder.AddColumn<string>(
+                name: "user_id",
+                schema: "nadcl",
+                table: "dota_fantasy_private_league_players",
+                type: "text",
+                nullable: false,
+                defaultValue: "");
+
+            migrationBuilder.AddColumn<string>(
+                name: "user_id",
+                schema: "nadcl",
+                table: "dota_fantasy_drafts",
+                type: "text",
+                nullable: true);
+
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 schema: "nadcl",
@@ -35,6 +78,7 @@ namespace csharp_ef_webapi.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
+                    DisplayName = table.Column<string>(type: "text", nullable: false),
                     DiscordId = table.Column<long>(type: "bigint", nullable: false),
                     DiscordHandle = table.Column<string>(type: "text", nullable: false),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -180,9 +224,21 @@ namespace csharp_ef_webapi.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "96089755-0342-4970-acad-69c9a3fcee0a", null, "PrivateFantasyLeagueAdmin", null },
-                    { "c0f81f27-212f-4c09-84f1-0945bc5a9f27", null, "Admin", null }
+                    { "07aea6b5-5780-4779-875e-e7d457e90030", null, "Admin", null },
+                    { "d113700f-8542-43f1-90ec-b9dc05239b7e", null, "PrivateFantasyLeagueAdmin", null }
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_fantasy_ledger_user_id",
+                schema: "nadcl",
+                table: "fantasy_ledger",
+                column: "user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_dota_fantasy_private_league_players_user_id",
+                schema: "nadcl",
+                table: "dota_fantasy_private_league_players",
+                column: "user_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -227,11 +283,41 @@ namespace csharp_ef_webapi.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_dota_fantasy_private_league_players_AspNetUsers_user_id",
+                schema: "nadcl",
+                table: "dota_fantasy_private_league_players",
+                column: "user_id",
+                principalSchema: "nadcl",
+                principalTable: "AspNetUsers",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_fantasy_ledger_AspNetUsers_user_id",
+                schema: "nadcl",
+                table: "fantasy_ledger",
+                column: "user_id",
+                principalSchema: "nadcl",
+                principalTable: "AspNetUsers",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_dota_fantasy_private_league_players_AspNetUsers_user_id",
+                schema: "nadcl",
+                table: "dota_fantasy_private_league_players");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_fantasy_ledger_AspNetUsers_user_id",
+                schema: "nadcl",
+                table: "fantasy_ledger");
+
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims",
                 schema: "nadcl");
@@ -259,6 +345,63 @@ namespace csharp_ef_webapi.Migrations
             migrationBuilder.DropTable(
                 name: "AspNetUsers",
                 schema: "nadcl");
+
+            migrationBuilder.DropIndex(
+                name: "IX_fantasy_ledger_user_id",
+                schema: "nadcl",
+                table: "fantasy_ledger");
+
+            migrationBuilder.DropIndex(
+                name: "IX_dota_fantasy_private_league_players_user_id",
+                schema: "nadcl",
+                table: "dota_fantasy_private_league_players");
+
+            migrationBuilder.DropColumn(
+                name: "user_id",
+                schema: "nadcl",
+                table: "fantasy_ledger");
+
+            migrationBuilder.DropColumn(
+                name: "user_id",
+                schema: "nadcl",
+                table: "dota_fantasy_private_league_players");
+
+            migrationBuilder.DropColumn(
+                name: "user_id",
+                schema: "nadcl",
+                table: "dota_fantasy_drafts");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_fantasy_ledger_discord_id",
+                schema: "nadcl",
+                table: "fantasy_ledger",
+                column: "discord_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_dota_fantasy_private_league_players_discord_user_id",
+                schema: "nadcl",
+                table: "dota_fantasy_private_league_players",
+                column: "discord_user_id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_dota_fantasy_private_league_players_discord_users_discord_u~",
+                schema: "nadcl",
+                table: "dota_fantasy_private_league_players",
+                column: "discord_user_id",
+                principalSchema: "nadcl",
+                principalTable: "discord_users",
+                principalColumn: "id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_fantasy_ledger_discord_users_discord_id",
+                schema: "nadcl",
+                table: "fantasy_ledger",
+                column: "discord_id",
+                principalSchema: "nadcl",
+                principalTable: "discord_users",
+                principalColumn: "id",
+                onDelete: ReferentialAction.Cascade);
         }
     }
 }

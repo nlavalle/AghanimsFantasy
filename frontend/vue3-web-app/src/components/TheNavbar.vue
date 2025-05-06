@@ -12,7 +12,7 @@
                 width="140px">Private Admin</v-tab>
         </v-tabs>
         <v-spacer />
-        <LoginDiscord class="login-discord" />
+        <LoginModal class="login-modal" />
     </div>
     <div>
         <FantasyNavbar />
@@ -23,7 +23,7 @@
 import { ref, onMounted } from 'vue';
 import { VTab, VTabs, VSpacer } from 'vuetify/components';
 import FantasyNavbar from '@/components/Fantasy/FantasyNavbar.vue';
-import LoginDiscord from '@/components/LoginDiscord.vue';
+import LoginModal from '@/components/Auth/LoginModal.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faHouse } from '@fortawesome/free-solid-svg-icons';
 import { useAuthStore } from '@/stores/auth';
@@ -46,7 +46,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.login-discord {
+.login-modal {
     cursor: pointer;
 }
 </style>

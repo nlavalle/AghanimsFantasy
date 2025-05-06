@@ -29,6 +29,12 @@ const router = createRouter({
       component: () => import('../views/FantasyView.vue')
     },
     {
+      path: '/profile',
+      name: 'profile',
+      component: () => import('../views/ProfileView.vue')
+    },
+
+    {
       path: '/admin',
       name: 'admin',
       component: () => import('../views/AdminView.vue'),

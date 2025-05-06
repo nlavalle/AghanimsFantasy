@@ -416,7 +416,7 @@ from nadcl.dota_fantasy_leagues fl
 group by fl.id, fp.id
 ;
 
-create or replace view nadcl.fantasy_player_probabilties as
+create or replace view nadcl.fantasy_player_probabilities as
 with quintiles as (
     select
         allfl.id as fantasy_league_id,
@@ -438,6 +438,10 @@ with quintiles as (
             on fppt.fantasy_player_id = fp.id
         join nadcl.dota_accounts a
             on fp.dota_account_id = a.id
+        -- -- Filter this to only fantasy players
+        -- join nadcl.dota_fantasy_players fpfilter
+        --     on allfl.id = fpfilter.fantasy_league_id
+        --         and fp.dota_account_id = fpfilter.dota_account_id
     where fl.is_private = false
         and fppt.matches > 0
 ), recent_fantasies as (

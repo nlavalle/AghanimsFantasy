@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace csharp_ef_webapi.Migrations
 {
     [DbContext(typeof(AghanimsFantasyContext))]
-    [Migration("20250430060021_Identity")]
+    [Migration("20250505061804_Identity")]
     partial class Identity
     {
         /// <inheritdoc />
@@ -45,6 +45,10 @@ namespace csharp_ef_webapi.Migrations
 
                     b.Property<long>("DiscordId")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -96,6 +100,8 @@ namespace csharp_ef_webapi.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", "nadcl");
+
+                    b.HasAnnotation("Relational:JsonPropertyName", "user");
                 });
 
             modelBuilder.Entity("DataAccessLibrary.Models.Discord.DiscordOutbox", b =>
@@ -154,8 +160,6 @@ namespace csharp_ef_webapi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("discord_users", "nadcl");
-
-                    b.HasAnnotation("Relational:JsonPropertyName", "discord_user");
                 });
 
             modelBuilder.Entity("DataAccessLibrary.Models.Fantasy.FantasyDraft", b =>
@@ -182,6 +186,10 @@ namespace csharp_ef_webapi.Migrations
                     b.Property<int>("FantasyLeagueId")
                         .HasColumnType("integer")
                         .HasColumnName("fantasy_league_id");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("text")
+                        .HasColumnName("user_id");
 
                     b.HasKey("Id");
 
@@ -432,9 +440,15 @@ namespace csharp_ef_webapi.Migrations
                         .HasColumnType("text")
                         .HasColumnName("source_type");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("user_id")
+                        .HasAnnotation("Relational:JsonPropertyName", "user_id");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("DiscordId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("fantasy_ledger", "nadcl");
                 });
@@ -931,11 +945,17 @@ namespace csharp_ef_webapi.Migrations
                         .HasColumnName("is_admin")
                         .HasAnnotation("Relational:JsonPropertyName", "is_admin");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("user_id")
+                        .HasAnnotation("Relational:JsonPropertyName", "user_id");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("DiscordUserId");
-
                     b.HasIndex("FantasyLeagueId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("dota_fantasy_private_league_players", "nadcl");
                 });
@@ -1097,7 +1117,7 @@ namespace csharp_ef_webapi.Migrations
 
                     b.ToTable((string)null);
 
-                    b.ToView("fantasy_player_probabilties", "nadcl");
+                    b.ToView("fantasy_player_probabilities", "nadcl");
                 });
 
             modelBuilder.Entity("DataAccessLibrary.Models.FantasyPlayerBudgetProbabilityTable", b =>
@@ -3004,12 +3024,12 @@ namespace csharp_ef_webapi.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "c0f81f27-212f-4c09-84f1-0945bc5a9f27",
+                            Id = "07aea6b5-5780-4779-875e-e7d457e90030",
                             Name = "Admin"
                         },
                         new
                         {
-                            Id = "96089755-0342-4970-acad-69c9a3fcee0a",
+                            Id = "d113700f-8542-43f1-90ec-b9dc05239b7e",
                             Name = "PrivateFantasyLeagueAdmin"
                         });
                 });
@@ -3303,13 +3323,13 @@ namespace csharp_ef_webapi.Migrations
 
             modelBuilder.Entity("DataAccessLibrary.Models.Fantasy.FantasyLedger", b =>
                 {
-                    b.HasOne("DataAccessLibrary.Models.Discord.DiscordUser", "DiscordUser")
+                    b.HasOne("DataAccessLibrary.Data.Identity.AghanimsFantasyUser", "User")
                         .WithMany()
-                        .HasForeignKey("DiscordId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("DiscordUser");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DataAccessLibrary.Models.Fantasy.FantasyMatch", b =>
@@ -3408,21 +3428,21 @@ namespace csharp_ef_webapi.Migrations
 
             modelBuilder.Entity("DataAccessLibrary.Models.Fantasy.FantasyPrivateLeaguePlayer", b =>
                 {
-                    b.HasOne("DataAccessLibrary.Models.Discord.DiscordUser", "DiscordUser")
-                        .WithMany()
-                        .HasForeignKey("DiscordUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("DataAccessLibrary.Models.Fantasy.FantasyLeague", "FantasyLeague")
                         .WithMany("FantasyPrivateLeaguePlayers")
                         .HasForeignKey("FantasyLeagueId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("DiscordUser");
+                    b.HasOne("DataAccessLibrary.Data.Identity.AghanimsFantasyUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("FantasyLeague");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DataAccessLibrary.Models.FantasyNormalizedAverages", b =>

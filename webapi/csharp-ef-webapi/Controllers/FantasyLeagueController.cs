@@ -3,11 +3,13 @@ using DataAccessLibrary.Models;
 using DataAccessLibrary.Models.Fantasy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using csharp_ef_webapi.Extensions;
 
 namespace csharp_ef_webapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AuthenticatedETag]
     public class FantasyLeagueController : ControllerBase
     {
         private readonly FantasyService _fantasyService;
@@ -87,7 +89,7 @@ namespace csharp_ef_webapi.Controllers
                 return BadRequest("Please provide a League ID to fetch fantasy player points of");
             }
 
-            limit = limit ?? 10;
+            limit ??= 10;
 
             limit = limit > 100 ? 100 : limit;
 

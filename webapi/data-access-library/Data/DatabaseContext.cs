@@ -150,7 +150,7 @@ public class AghanimsFantasyContext : IdentityDbContext<AghanimsFantasyUser>
             .HasNoKey();
 
         modelBuilder.Entity<FantasyPlayerBudgetProbability>()
-            .ToView("fantasy_player_probabilties", "nadcl")
+            .ToView("fantasy_player_probabilities", "nadcl")
             .HasNoKey();
 
         modelBuilder.Entity<AccountHeroCount>()

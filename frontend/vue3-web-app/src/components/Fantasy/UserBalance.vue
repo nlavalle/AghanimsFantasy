@@ -1,15 +1,15 @@
 <template>
     <span class="balance-span">
-        Gold Stash:
+        Shard Stash:
     </span>
-    <GoldSpan :animated="true" :font-size="1.0" :gold-value="userBalance.toFixed(0)" />
+    <ShardSpan :animated="true" :font-size="1.0" :bold="true" :gold-value="userBalance.toFixed(0)" />
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import GoldSpan from "../Dom/GoldSpan.vue";
 import { useAuthStore } from "@/stores/auth";
 import { localApiService } from "@/services/localApiService";
+import ShardSpan from "../Dom/ShardSpan.vue";
 
 const authStore = useAuthStore();
 
@@ -27,7 +27,8 @@ onMounted(() => {
 
 <style scoped>
 .balance-span {
-    color: rgb(249, 194, 43);
+    color: var(--gradient-blue-2);
+    font-weight: bold;
     margin: 5px;
 }
 </style>

@@ -997,18 +997,16 @@ export const localApiService = {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(updateRequest)
+    }).then(
+      function (response: any) {
+        if (!response.ok) {
+          return response.text().then((response: any) => { throw new Error(response) })
+        } else {
+          return response.json()
+        }
+      }.bind(this)
+    ).catch((error) => {
+      throw (error)
     })
-      .then(
-        function (response: any) {
-          if (!response.ok) {
-            return response.text().then((response: any) => { throw new Error(response) })
-          } else {
-            return response.json()
-          }
-        }.bind(this)
-      )
-      .catch((error) => {
-        throw (error)
-      })
   }
 }

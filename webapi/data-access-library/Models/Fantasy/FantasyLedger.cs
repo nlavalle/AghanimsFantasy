@@ -17,7 +17,7 @@ public class FantasyLedger
     [Column("discord_id")]
     [JsonPropertyName("discord_id")]
     [JsonNumberHandling(JsonNumberHandling.WriteAsString | JsonNumberHandling.AllowReadingFromString)]
-    public required long DiscordId { get; set; }
+    public long DiscordId { get; set; }
 
     [ForeignKey("User")]
     [Column("user_id")]

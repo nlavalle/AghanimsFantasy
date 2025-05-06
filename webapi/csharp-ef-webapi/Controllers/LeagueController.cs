@@ -1,3 +1,4 @@
+using csharp_ef_webapi.Extensions;
 using csharp_ef_webapi.Services;
 using csharp_ef_webapi.Utilities;
 using DataAccessLibrary.Data;
@@ -7,31 +8,37 @@ using DataAccessLibrary.Models.ProMetadata;
 using DataAccessLibrary.Models.WebApi;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
 
 namespace csharp_ef_webapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [OutputCache(Tags = new[] { "league" })]
     public class LeagueController : ControllerBase
     {
         private readonly FantasyService _fantasyService;
         private readonly FantasyServiceAdmin _fantasyServiceAdmin;
         private readonly AghanimsFantasyContext _dbContext;
+        private readonly IOutputCacheStore _cache;
 
         public LeagueController(
             FantasyService fantasyService,
             FantasyServiceAdmin fantasyServiceAdmin,
-            AghanimsFantasyContext dbContext
+            AghanimsFantasyContext dbContext,
+            IOutputCacheStore cache
         )
         {
             _fantasyService = fantasyService;
             _fantasyServiceAdmin = fantasyServiceAdmin;
             _dbContext = dbContext;
+            _cache = cache;
         }
 
         // GET: api/League
         [HttpGet]
+        [ResponseETag]
         public async Task<ActionResult<IEnumerable<League>>> GetLeagues(bool include_inactive = false)
         {
             return Ok(await _dbContext.Leagues.Where(l => include_inactive || l.IsActive).ToListAsync());
@@ -68,6 +75,7 @@ namespace csharp_ef_webapi.Controllers
             try
             {
                 await _fantasyServiceAdmin.AddLeagueAsync(league);
+                await _cache.EvictByTagAsync("league", default);
                 return CreatedAtAction("GetLeague", new { id = league.Id }, league);
             }
             catch (UnauthorizedAccessException)
@@ -85,6 +93,7 @@ namespace csharp_ef_webapi.Controllers
             try
             {
                 await _fantasyServiceAdmin.UpdateLeagueAsync(leagueId, league);
+                await _cache.EvictByTagAsync("league", default);
                 return NoContent();
             }
             catch (UnauthorizedAccessException)
@@ -105,6 +114,7 @@ namespace csharp_ef_webapi.Controllers
             try
             {
                 await _fantasyServiceAdmin.DeleteLeagueAsync(leagueId);
+                await _cache.EvictByTagAsync("league", default);
                 return NoContent();
             }
             catch (UnauthorizedAccessException)
@@ -211,6 +221,7 @@ namespace csharp_ef_webapi.Controllers
 
         // GET: api/league/5/drafts/points
         [HttpGet("{leagueId}/drafts/points")]
+        [AuthenticatedETag]
         public async Task<ActionResult<IEnumerable<FantasyDraftPointTotals>>> GetUserDraftFantasyPoints(int leagueId)
         {
             try
