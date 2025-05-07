@@ -20,6 +20,7 @@ public class DiscordFacade
         var outboxMessages = await _dbContext.DiscordOutbox.Where(ob => ob.EventObject == "FantasyMatch" && ob.EventType == "Scored").ToListAsync();
         var fantasyMatches = await _dbContext.FantasyPlayerPointsView
             .Where(fppv => fppv.FantasyMatchPlayerId != null && fppv.FantasyMatchPlayer!.Match != null)
+            .Where(fppv => fppv.FantasyMatchPlayer != null && fppv.FantasyMatchPlayer.GcMetadataPlayerParsed)
             .Select(fppv => fppv.FantasyMatchPlayer!.Match!)
             .ToListAsync();
 
