@@ -60,7 +60,7 @@
               <v-col v-if="authStore.isAuthenticated">
                 <v-row class="mt-1">
                   <leaderboard-component class="leaderboardComponent" leaderboardTitle="Fantasy Leaderboard"
-                    headerName="Draft Player" headerValue="Points" :authenticatedUser="user"
+                    headerName="Draft Player" headerValue="Points" :authenticatedUser="authStore.currentUser"
                     :boardData="fantasyDraftStore.fantasyLeaderboardData" />
                 </v-row>
                 <v-row class="ma-1" style="max-width: 600px">
@@ -137,10 +137,6 @@ const errorDetails = ref<Error>();
 
 const fantasyTab = ref('current')
 const updateDraftVisibility = ref(false);
-
-const user = computed(() => {
-  return authStore.user as User
-})
 
 const isMounted = ref(false);
 

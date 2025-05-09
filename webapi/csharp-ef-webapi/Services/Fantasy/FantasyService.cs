@@ -405,7 +405,7 @@ public class FantasyService
 
         AghanimsFantasyUser user = await GetUserFromContext(siteUser);
         // Percentile = (Number of Values Below “x” / Total Number of Values) × 100
-        var siteUserPoints = fantasyPoints.FirstOrDefault(fp => fp.UserName == user.UserName)?.DraftTotalFantasyPoints ?? 0;
+        var siteUserPoints = fantasyPoints.FirstOrDefault(fp => fp.UserName == user.DisplayName)?.DraftTotalFantasyPoints ?? 0;
         leaderboardStats.DrafterPercentile = decimal.Divide(fantasyPoints.Count(fp => fp.DraftTotalFantasyPoints < siteUserPoints), fantasyPoints.Count()) * 100;
 
         return leaderboardStats;

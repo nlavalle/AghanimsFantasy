@@ -22,6 +22,20 @@ public class FantasyDraftFacade
         _dbContext = dbContext;
     }
 
+    public async Task HistoricalUpdateDiscordUserDraftsAsync(long DiscordId, AghanimsFantasyUser user)
+    {
+        _logger.LogInformation($"Updating Previous Fantasy Drafts for Discord ID {DiscordId}");
+
+        List<FantasyDraft> userFantasyDrafts = await _dbContext.FantasyDrafts
+                    .Include(fd => fd.DraftPickPlayers)
+                    .Where(fd => fd.DiscordAccountId == DiscordId)
+                    .ToListAsync();
+
+        userFantasyDrafts.ForEach(fd => fd.UserId = user.Id);
+        _dbContext.UpdateRange(userFantasyDrafts);
+        await _dbContext.SaveChangesAsync();
+    }
+
     public async Task<FantasyDraft?> GetByUserFantasyLeague(FantasyLeague fantasyLeague, AghanimsFantasyUser user)
     {
         _logger.LogDebug($"Fetching Fantasy League {fantasyLeague.Name} Draft for User {user.UserName}");
@@ -149,7 +163,7 @@ public class FantasyDraftFacade
             .Select(fd => new FantasyDraftPointTotals
             {
                 FantasyDraft = fd,
-                UserName = users.FirstOrDefault(u => u.Id == fd.UserId)?.UserName ?? "Unknown User",
+                UserName = users.FirstOrDefault(u => u.Id == fd.UserId)?.DisplayName ?? "Unknown User",
                 FantasyPlayerPoints = playerTotals.Where(pt => fd.DraftPickPlayers.Select(dpp => dpp.FantasyPlayer!.Id).Contains(pt.FantasyPlayer.Id)).ToList()
             })
             .ToList();

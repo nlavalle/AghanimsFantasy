@@ -1,6 +1,7 @@
 namespace DataAccessLibrary.Data.Facades;
 
 using DataAccessLibrary.Data;
+using DataAccessLibrary.Data.Identity;
 using DataAccessLibrary.Models.Fantasy;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +14,18 @@ public class DiscordFacade
     )
     {
         _dbContext = dbContext;
+    }
+
+    public async Task HistoricalUpdateDiscordFantasyLedgersAsync(long DiscordId, AghanimsFantasyUser user)
+    {
+        List<FantasyLedger> fantasyLedgers = await _dbContext.FantasyLedger
+            .Where(fl => fl.DiscordId == DiscordId)
+            .ToListAsync();
+
+        fantasyLedgers.ForEach(fl => fl.UserId = user.Id);
+
+        _dbContext.UpdateRange(fantasyLedgers);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task<List<FantasyMatch>> GetFantasyMatchesNotInDiscordOutboxAsync()

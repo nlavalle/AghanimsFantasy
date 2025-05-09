@@ -3,7 +3,7 @@ export interface Leaderboard {
         id: number,
     },
     isTeam: boolean,
-    discordName: string,
+    userName: string,
     teamId: number,
     draftTotalFantasyPoints: number,
     draftPickOnePoints: number,

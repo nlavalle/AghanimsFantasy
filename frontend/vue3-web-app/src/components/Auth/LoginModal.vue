@@ -1,9 +1,9 @@
 <template>
   <div class="login-modal">
     <div v-if="authStore.isAuthenticated" style="display:flex">
-      <v-btn v-if="authStore.user && authStore.user.name != ''" class="text-none" density="compact" variant="flat"
-        height="40px" to="/profile">
-        Welcome, {{ authStore.user!.name }}
+      <v-btn v-if="authStore.currentUser && authStore.currentUser.name != ''" class="text-none" density="compact"
+        variant="flat" height="40px" to="/profile">
+        Welcome, {{ authStore.currentUser!.name }}
       </v-btn>
       <v-btn @click="logout" density="compact" variant="outlined" size="x-small" height="40px" style="text-align:left">
         <span>Logout<font-awesome-icon class="icon" :icon="faRightFromBracket" /></span>
@@ -74,15 +74,16 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import { VRow, VCol, VBtn, VDialog, VCard, VCardActions, VCardText } from 'vuetify/components';
 import LoginForm from './LoginForm.vue';
-import { authApiService } from '@/services/authApiService';
+import { useRouter } from 'vue-router';
 
 
 const authStore = useAuthStore()
+const router = useRouter()
 
 const updateDisplayNameDialog = ref(false)
 const displayName = ref('')
 
-watch(() => authStore.user, (user: User | null) => {
+watch(() => authStore.user, (user: Partial<User>) => {
   updateDisplayNameDialog.value = user?.name == ''
 })
 
@@ -99,7 +100,6 @@ async function login(provider: String) {
       if (authStore.isAuthenticated || loginWindow.closed) {
         loginWindow.close()
         clearInterval(checkLoginStatus)
-        authStore.getUser()
       }
       authStore.checkAuthenticatedAsync()
     }, 1000)
@@ -108,21 +108,17 @@ async function login(provider: String) {
 
 const updateDisplayName = () => {
   if (!displayName.value || displayName.value == '') return
-  authApiService.updateDisplayName(displayName.value).then(() => {
-    authStore.getUser()
+  authStore.updateDisplayName(displayName.value)?.then(() => {
     updateDisplayNameDialog.value = false
   })
 }
 
-function logout() {
-  fetch('/api/auth/signout', {
-    credentials: 'include' // fetch won't send cookies unless you set credentials
-  }).then((response) => {
-    if (response.ok) {
-      authStore.checkAuthenticatedAsync()
-    }
+const logout = () => {
+  authStore.logout().then(() => {
+    router.push({ path: '/' })
   })
 }
+
 </script>
 
 <style scoped>

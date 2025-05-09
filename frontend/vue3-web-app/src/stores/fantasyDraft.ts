@@ -80,9 +80,7 @@ export const useFantasyDraftStore = defineStore({
       }
       return this.fantasyLeaderboard.map((leaderboard: Leaderboard) => ({
         id: leaderboard.fantasyDraft.id,
-        isTeam: leaderboard.isTeam,
-        teamId: leaderboard.teamId,
-        description: leaderboard.discordName,
+        userName: leaderboard.userName,
         value: leaderboard.draftTotalFantasyPoints,
         fantasyDraft: leaderboard.fantasyDraft,
         playerPoints: [

@@ -1,11 +1,12 @@
-using Microsoft.AspNetCore.Mvc;
+using csharp_ef_webapi.Extensions;
+using csharp_ef_webapi.ViewModels;
+using DataAccessLibrary.Data.Facades;
+using DataAccessLibrary.Data.Identity;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using csharp_ef_webapi.Extensions;
-using DataAccessLibrary.Data.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using csharp_ef_webapi.ViewModels;
 using System.Text.Json;
 
 namespace csharp_ef_webapi.Controllers
@@ -17,14 +18,20 @@ namespace csharp_ef_webapi.Controllers
         private readonly ILogger<AuthController> _logger;
         private readonly SignInManager<AghanimsFantasyUser> _signInManager;
         private readonly UserManager<AghanimsFantasyUser> _userManager;
+        private readonly FantasyDraftFacade _fantasyDraftFacade;
+        private readonly DiscordFacade _discordFacade;
         public AuthController(
             ILogger<AuthController> logger,
             SignInManager<AghanimsFantasyUser> signInManager,
-            UserManager<AghanimsFantasyUser> userManager)
+            UserManager<AghanimsFantasyUser> userManager,
+            FantasyDraftFacade fantasyDraftFacade,
+            DiscordFacade discordFacade)
         {
             _logger = logger;
             _signInManager = signInManager;
             _userManager = userManager;
+            _fantasyDraftFacade = fantasyDraftFacade;
+            _discordFacade = discordFacade;
         }
 
         [HttpGet("login-provider")]
@@ -51,7 +58,30 @@ namespace csharp_ef_webapi.Controllers
             var info = await _signInManager.GetExternalLoginInfoAsync();
             if (info == null)
             {
-                return Redirect(Url.Action(nameof(FailedOAuthAccessDenied)) ?? "/");
+                return Redirect(Url.Action(nameof(FailedOAuthAccessDenied)) ?? returnUrl);
+            }
+
+            // Check if user is already logged in, if so add it to the current user
+            var existingUser = await _userManager.GetUserAsync(HttpContext.User);
+            if (existingUser != null)
+            {
+                var addLoginResult = await _userManager.AddLoginAsync(existingUser, info);
+                if (!addLoginResult.Succeeded)
+                {
+                    return BadRequest("Error: " + string.Join(',', addLoginResult.Errors.Select(err => err.Description).ToList()));
+                }
+                if (info.LoginProvider == "Discord")
+                {
+                    if (long.TryParse(info.Principal.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty, out long discordId))
+                    {
+                        existingUser.DiscordId = discordId;
+                    }
+                    existingUser.DiscordHandle = info.Principal.FindFirstValue(ClaimTypes.Name) ?? string.Empty;
+                    await MapOldDiscordToNewUser(existingUser, info);
+                    await _userManager.UpdateAsync(existingUser);
+                }
+                await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme); // clean up identity external cookie now that they have aspnet cookie
+                return Ok("Login attached, you can close this window if it doesn't automatically close.");
             }
 
             // Try to login the user into identity with the external login
@@ -88,7 +118,7 @@ namespace csharp_ef_webapi.Controllers
             if (createResult.Succeeded)
             {
                 createResult = await _userManager.AddLoginAsync(user, info);
-                if (info.LoginProvider == "Discord") MapOldDiscordToNewUser(user, info);
+                if (info.LoginProvider == "Discord") await MapOldDiscordToNewUser(user, info);
                 if (createResult.Succeeded)
                 {
                     await _signInManager.SignInAsync(user, isPersistent: true);
@@ -97,7 +127,7 @@ namespace csharp_ef_webapi.Controllers
                 }
             }
 
-            return Redirect(Url.Action(nameof(FailedOAuthAccessDenied)) ?? "/");
+            return Redirect(Url.Action(nameof(FailedOAuthAccessDenied)) ?? returnUrl);
         }
 
         // POST: api/auth/change-display-name
@@ -115,6 +145,24 @@ namespace csharp_ef_webapi.Controllers
             await _userManager.UpdateAsync(user);
 
             return Ok("Display name successfully updated");
+        }
+
+        // GET: api/auth/external-logins
+        [HttpGet("external-logins")]
+        public async Task<IActionResult> GetExternalLogins()
+        {
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            if (user == null)
+            {
+                return BadRequest("Unknown user");
+            }
+
+            var logins = await _userManager.GetLoginsAsync(user);
+            if (await _userManager.HasPasswordAsync(user))
+            {
+                logins.Add(new UserLoginInfo("Email", user.Id, user.Email));
+            }
+            return Ok(logins);
         }
 
         // GET: api/auth/authenticated
@@ -241,12 +289,18 @@ namespace csharp_ef_webapi.Controllers
             return Redirect("~/");
         }
 
-        private void MapOldDiscordToNewUser(AghanimsFantasyUser user, ExternalLoginInfo loginInfo)
+        private async Task MapOldDiscordToNewUser(AghanimsFantasyUser user, ExternalLoginInfo loginInfo)
         {
-            // Temporary function to map things
+            // Temporary function to map things for historical doto playos
+            if (long.TryParse(loginInfo.ProviderKey, out var discordId))
+            {
+                _logger.LogInformation($"Linking previous Discord Id {discordId} to new user {user.UserName}");
+                // Map fantasy drafts
+                await _fantasyDraftFacade.HistoricalUpdateDiscordUserDraftsAsync(discordId, user);
 
-            // TODO: Map fantasy drafts
-            // TODO: Map ledger
+                // Map ledger
+                await _discordFacade.HistoricalUpdateDiscordFantasyLedgersAsync(discordId, user);
+            }
         }
     }
 }

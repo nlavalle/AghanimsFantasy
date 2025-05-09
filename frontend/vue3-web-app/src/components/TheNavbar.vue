@@ -7,8 +7,9 @@
             <v-tab to="/fantasy" min-width="90px" width="90px">Fantasy</v-tab>
             <v-tab to="/stats" min-width="70px" width="70px">Stats</v-tab>
             <v-tab to="/about" min-width="80px" width="80px">About</v-tab>
-            <v-tab v-show="authStore.user?.isAdmin ?? false" to="/admin" min-width="80px" width="80px">Admin</v-tab>
-            <v-tab v-show="authStore.user?.isPrivateFantasyAdmin ?? false" to="/privatefantasy" min-width="140px"
+            <v-tab v-show="authStore.currentUser?.isAdmin ?? false" to="/admin" min-width="80px"
+                width="80px">Admin</v-tab>
+            <v-tab v-show="authStore.currentUser?.isPrivateFantasyAdmin ?? false" to="/privatefantasy" min-width="140px"
                 width="140px">Private Admin</v-tab>
         </v-tabs>
         <v-spacer />

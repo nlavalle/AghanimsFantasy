@@ -10,7 +10,6 @@ namespace csharp_ef_webapi.Controllers
     [ApiController]
     public class AdminController : ControllerBase
     {
-
         private readonly FantasyServiceAdmin _fantasyServiceAdmin;
 
         public AdminController(

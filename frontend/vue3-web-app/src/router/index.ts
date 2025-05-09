@@ -51,13 +51,13 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const userStore = useAuthStore();
+  const authStore = useAuthStore();
 
-  userStore.getUser();
+  authStore.loadUserAuthInfo();
 
-  if (to.meta.requiresAdmin && !userStore.user?.isAdmin) {
+  if (to.meta.requiresAdmin && !authStore.user?.isAdmin) {
     next('/');
-  } else if (to.meta.requiresPrivateFantasyAdmin && !userStore.user?.isPrivateFantasyAdmin) {
+  } else if (to.meta.requiresPrivateFantasyAdmin && !authStore.user?.isPrivateFantasyAdmin) {
     next('/');
   } else {
     next();
