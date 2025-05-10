@@ -1,5 +1,8 @@
 <template>
-    <v-card title="External Logins">
+    <v-card title="Sync Login Methods">
+        <v-card-text>
+            Use this if you'd like to log into your account with alternative methods (Email, Discord, Google)
+        </v-card-text>
         <v-card-text v-if="!currentLoginProviders.some(login => login.loginProvider == 'Email')">
             <v-text-field v-model="email" name="email" placeholder="Email" required />
             <v-text-field v-model="password" name="password" placeholder="Password" required
@@ -9,20 +12,21 @@
                 :append-icon="confirmPassShow ? 'eye' : 'eye-slash'" :rules="passwordRuleArray"
                 :type="confirmPassShow ? 'text' : 'password'" @click:append="confirmPassShow = !confirmPassShow" />
             <v-btn variant="outlined" @click="addEmailLogin(email, password)">
-                Register
+                Register Email
             </v-btn>
         </v-card-text>
+        <v-divider />
         <v-card-text v-if="!currentLoginProviders.some(login => login.loginProvider == 'Discord')">
             <v-btn @click="login('Discord')" density="compact" variant="outlined" size="x-small" height="40px"
-                style="text-align:left">
-                <span>Login with Discord</span>
+                style="text-align:left; background-color: #7289DA;">
+                <font-awesome-icon class="icon" style="height: 20px; width: 20px;" :icon="faDiscord" /><span>Sign In
+                    with Discord</span>
             </v-btn>
         </v-card-text>
+        <v-divider />
         <v-card-text v-if="!currentLoginProviders.some(login => login.loginProvider == 'Google')">
-            <v-btn @click="login('Google')" density="compact" variant="outlined" size="x-small" height="40px"
-                style="text-align:left">
-                <span>Login with Google</span>
-            </v-btn>
+            <img :src="GoogleSignIn" alt="Google logo" style="height: 40px; width: 175px; cursor: pointer;"
+                @click="login('Google')" />
         </v-card-text>
     </v-card>
     <ErrorDialog v-model="showErrorModal" :error="errorDetails!" />
@@ -32,9 +36,12 @@
 import { authApiService } from '@/services/authApiService';
 import { useAuthStore } from '@/stores/auth';
 import { computed, onBeforeMount, ref } from 'vue';
-import { VCard, VCardText } from 'vuetify/components'
+import { VCard, VCardText, VDivider } from 'vuetify/components'
 import ErrorDialog from '@/components/ErrorDialog.vue';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { passwordRules } from '@/utilities/PasswordRules';
+import { faDiscord } from '@fortawesome/free-brands-svg-icons';
+import GoogleSignIn from '@/assets/icons/google-sign-in.png'
 
 
 
@@ -74,7 +81,7 @@ const addEmailLogin = (email: string, pass: string) => {
     if (!email || !pass) return;
     authApiService.addEmailLogin(email, pass)
         .then(() => {
-            authStore.checkAuthenticatedAsync()
+            authStore.loadUserExternalLogins()
         })
         .catch((error: Error) => {
             showError(error)

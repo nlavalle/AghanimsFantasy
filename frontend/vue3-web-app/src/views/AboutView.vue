@@ -62,7 +62,7 @@
       </div>
       <div class="mt-5">
         <h2 id="how-to-play">How to Play</h2>
-        <p class="text-white" style="max-width: 500px;">
+        <p class="text-white" style="max-width: 800px;">
           Dota refers to their tournaments as leagues, and custom lobbies in that tournament will be ticketed as that
           league. You can identify available leagues to draft in with the navigation bar at the top. Any league without
           a lock icon is open to draft in, so clicking on them will show the fantasy leagues available for that league.
@@ -93,7 +93,7 @@
       </div>
       <div class="mt-5">
         <h2 id="discord-authentication">Discord Authentication</h2>
-        <p class="text-white" style="max-width: 500px;">
+        <p class="text-white" style="max-width: 800px;">
           This site uses <a href="https://discord.com/developers/docs/topics/oauth2">Discord OAuth2</a> to identify
           which Fantasy drafts belong to which players. OAuth2 works by having you log into Discord via Discord's
           portal, then Aghanim's Fantasy requests a token that allows it to identify the current user through the <a

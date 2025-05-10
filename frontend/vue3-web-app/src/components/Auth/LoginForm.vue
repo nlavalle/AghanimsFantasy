@@ -5,11 +5,11 @@
             <v-tab value="register">Sign Up</v-tab>
         </v-tabs>
         <v-tabs-window v-model="registerTab">
-            <v-tabs-window-item value="register">
-                <RegisterCard />
-            </v-tabs-window-item>
             <v-tabs-window-item value="login">
                 <LoginCard />
+            </v-tabs-window-item>
+            <v-tabs-window-item value="register">
+                <RegisterCard />
             </v-tabs-window-item>
         </v-tabs-window>
     </div>

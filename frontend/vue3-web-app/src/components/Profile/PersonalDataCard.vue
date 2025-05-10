@@ -52,9 +52,12 @@
 import { authApiService } from '@/services/authApiService';
 import { useAuthStore } from '@/stores/auth';
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { VRow, VCard, VCardText } from 'vuetify/components'
 
 const authStore = useAuthStore()
+const router = useRouter()
+
 const showDeleteConfirm = ref(false);
 const password = ref('');
 const passShow = ref(false);
@@ -66,8 +69,10 @@ const downloadPersonalData = () => {
 const onOKClick = () => {
     showDeleteConfirm.value = false;
     authApiService.deletePersonalData(password.value).then(() => {
-        authStore.checkAuthenticatedAsync()
-        scrollAfterAlertDialog()
+        authStore.checkAuthenticatedAsync().then(() => {
+            scrollAfterAlertDialog()
+            router.push({ path: '/' })
+        })
     })
 }
 

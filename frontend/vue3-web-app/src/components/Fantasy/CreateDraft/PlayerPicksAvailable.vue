@@ -2,7 +2,7 @@
     <v-container>
         <v-row justify="space-around">
             <v-col class="available-team ma-2 pa-2" v-for="(team, teamIndex) in fantasyTeams" :key="teamIndex"
-                :style="{ 'min-width': isDesktop ? '600px' : '340px', 'max-width': isDesktop ? '600px' : '340px' }">
+                :style="{ 'min-width': !display.mobile.value ? '600px' : '340px', 'max-width': !display.mobile.value ? '600px' : '340px' }">
                 <v-row class="available-team-title">
                     <img :src="getImageUrl(team.teamId)" />
                     <span>{{ team.name }}</span>
@@ -11,7 +11,7 @@
                     <v-col class="available-player ma-1 pa-0"
                         :class="{ 'disabled-player': disabledPlayer(player.fantasyPlayer), 'selected-player': selectedPlayerCheck(player.fantasyPlayer.id) }"
                         v-for="(player, playerIndex) in fantasyPlayersByTeam(team.teamId)" :key="playerIndex"
-                        :style="{ 'min-width': isDesktop ? '110px' : '60px', 'max-width': isDesktop ? '110px' : '60px' }"
+                        :style="{ 'min-width': !display.mobile.value ? '110px' : '60px', 'max-width': !display.mobile.value ? '110px' : '60px' }"
                         @click="selectPlayer(player.fantasyPlayer)">
                         <draft-pick-card size="small" :fantasyPlayer="player.fantasyPlayer"
                             :fantasyPoints="player.totalMatchFantasyPoints"
@@ -32,16 +32,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { fantasyDraftState, type FantasyPlayer, type FantasyPlayerPoints } from '../fantasyDraft';
 import { VContainer, VRow, VCol, VOverlay } from 'vuetify/components';
 import DraftPickCard from '@/components/Fantasy/DraftPickCard.vue';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
+import { useDisplay } from 'vuetify';
 
 const { selectedPlayer, fantasyPlayerPointsAvailable, disabledPlayer, disabledTeam, totalDraftCost, currentDraftSlotCost } = fantasyDraftState();
 const leagueStore = useFantasyLeagueStore();
 
-const isDesktop = ref(window.outerWidth >= 600);
+const display = useDisplay()
 
 const fantasyTeams = computed(() => {
     // We want the distinct teams

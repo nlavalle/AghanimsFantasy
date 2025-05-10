@@ -100,7 +100,7 @@ namespace csharp_ef_webapi.Controllers
             switch (info.LoginProvider)
             {
                 case "Google":
-                    user.UserName = info.Principal.FindFirstValue(ClaimTypes.Name);
+                    user.UserName = info.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
                     user.Email = info.Principal.FindFirstValue(ClaimTypes.Email);
                     break;
                 case "Discord":
@@ -110,6 +110,7 @@ namespace csharp_ef_webapi.Controllers
                         user.DiscordId = discordId;
                     }
                     user.DiscordHandle = info.Principal.FindFirstValue(ClaimTypes.Name) ?? string.Empty;
+                    user.Email = "";
                     // We don't get email from discord privileges
                     break;
             }
@@ -148,6 +149,7 @@ namespace csharp_ef_webapi.Controllers
         }
 
         // GET: api/auth/external-logins
+        [Authorize]
         [HttpGet("external-logins")]
         public async Task<IActionResult> GetExternalLogins()
         {
@@ -156,6 +158,34 @@ namespace csharp_ef_webapi.Controllers
             {
                 return BadRequest("Unknown user");
             }
+
+            var logins = await _userManager.GetLoginsAsync(user);
+            if (await _userManager.HasPasswordAsync(user))
+            {
+                logins.Add(new UserLoginInfo("Email", user.Id, user.Email));
+            }
+            return Ok(logins);
+        }
+
+        // POST: api/auth/add-email
+        [Authorize]
+        [HttpPost("add-email")]
+        public async Task<IActionResult> AddEmailLogin(AddEmail addEmailRequest)
+        {
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            if (user == null)
+            {
+                return BadRequest("Unknown user");
+            }
+
+            if (await _userManager.HasPasswordAsync(user))
+            {
+                return BadRequest("User already has email/password registered");
+            }
+
+            user.Email = addEmailRequest.Email;
+            await _userManager.AddPasswordAsync(user, addEmailRequest.Password);
+            await _userManager.UpdateAsync(user);
 
             var logins = await _userManager.GetLoginsAsync(user);
             if (await _userManager.HasPasswordAsync(user))

@@ -15,7 +15,7 @@
                     multiple clearable hide-details single-line />
             </v-col>
         </v-row>
-        <v-row v-if="!isDesktop" dense>
+        <v-row v-if="!display.mobile.value" dense>
             <v-tabs v-model="fantasyTab" density="compact">
                 <v-tab value="kda" min-width="70px" width="70px">K/D/A</v-tab>
                 <v-tab value="farm" min-width="70px" width="70px">Farm</v-tab>
@@ -26,9 +26,9 @@
         <v-row>
             <v-data-table class="fantasy-table" :items="playerFantasyStatsIndexed" :headers="displayedFantasyColumns"
                 density="compact" :items-per-page="itemsPerPage" v-model:page="page"
-                :style="{ 'font-size': isDesktop ? '0.8rem' : '0.7rem' }">
+                :style="{ 'font-size': !display.mobile.value ? '0.8rem' : '0.7rem' }">
                 <template v-slot:item.fantasyPlayer="{ value }">
-                    <v-row v-if="isDesktop" class="ma-1 pa-1">
+                    <v-row v-if="!display.mobile.value" class="ma-1 pa-1">
                         <v-col class="mr-2" style="max-width:60px;width:60px;">
                             <v-row>
                                 <img height="60px" width="60px" :src="value.playerPicture" />
@@ -156,12 +156,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineModel, onMounted, watch, computed } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { VRow, VCol, VDataTable, VPagination, VTabs, VTab, VTextField, VSelect } from 'vuetify/components';
 import { localApiService } from '@/services/localApiService';
 import type { FantasyPlayerPoints } from '../Fantasy/fantasyDraft';
 import { useDebouncedRef } from '@/services/debounce'
 import type { FantasyLeague } from '@/types/FantasyLeague';
+import { useDisplay } from 'vuetify';
+
+const display = useDisplay()
 
 const fantasyFilter = useDebouncedRef('');
 const roleFilter = ref([]);
@@ -220,8 +223,6 @@ watch(selectedFantasyLeague, () => {
 
 const fantasyTab = ref('kda');
 
-const isDesktop = ref(window.outerWidth >= 600);
-
 // const showFantasyFilters = ref(false);
 
 const playerFantasyStats = ref<FantasyPlayerPoints[]>([]);
@@ -248,13 +249,13 @@ const commonFantasyColumns = [
                 totalMatches: row.totalMatches
             };
         },
-        width: isDesktop.value ? '240px' : '120px',
+        width: !display.mobile.value ? '240px' : '120px',
         sortable: true,
         sort: (a: any, b: any) => a.playerName > b.playerName
     },
     {
         key: 'totalPoints',
-        title: isDesktop.value ? 'Total Points' : 'Pts',
+        title: !display.mobile.value ? 'Total Points' : 'Pts',
         align: 'left',
         value: (row: any) => row.totalMatchFantasyPoints.toFixed(1),
         format: (val: number) => `${val.toLocaleString()}`,
@@ -264,7 +265,7 @@ const commonFantasyColumns = [
     },
     {
         key: 'pointsPerMatch',
-        title: isDesktop.value ? 'Avg Points' : 'FP/M',
+        title: !display.mobile.value ? 'Avg Points' : 'FP/M',
         align: 'left',
         value: (row: any) => row.totalMatches > 1 ? (row.totalMatchFantasyPoints.toFixed(1) / row.totalMatches).toFixed(1) : 0,
         format: (val: number) => `${val.toLocaleString()}`,
@@ -276,7 +277,7 @@ const commonFantasyColumns = [
 const kdaFantasyColumns = [
     {
         key: 'totalKills',
-        title: isDesktop.value ? 'Kills' : 'K',
+        title: !display.mobile.value ? 'Kills' : 'K',
         align: 'left',
         value: (row: any) => {
             return {
@@ -289,7 +290,7 @@ const kdaFantasyColumns = [
     },
     {
         key: 'totalDeaths',
-        title: isDesktop.value ? 'Deaths' : 'D',
+        title: !display.mobile.value ? 'Deaths' : 'D',
         align: 'left',
         value: (row: any) => {
             return {
@@ -302,7 +303,7 @@ const kdaFantasyColumns = [
     },
     {
         key: 'totalAssists',
-        title: isDesktop.value ? 'Assists' : 'A',
+        title: !display.mobile.value ? 'Assists' : 'A',
         align: 'left',
         value: (row: any) => {
             return {
@@ -317,7 +318,7 @@ const kdaFantasyColumns = [
 const farmFantasyColumns = [
     {
         key: 'totalLastHits',
-        title: isDesktop.value ? 'Last Hits' : 'LH',
+        title: !display.mobile.value ? 'Last Hits' : 'LH',
         align: 'left',
         value: (row: any) => {
             return {
@@ -330,7 +331,7 @@ const farmFantasyColumns = [
     },
     {
         key: 'totalGoldPerMin',
-        title: isDesktop.value ? 'Avg GPM' : 'G',
+        title: !display.mobile.value ? 'Avg GPM' : 'G',
         align: 'left',
         value: (row: any) => {
             return {
@@ -343,7 +344,7 @@ const farmFantasyColumns = [
     },
     {
         key: 'totalXpPerMin',
-        title: isDesktop.value ? 'Avg XPM' : 'XP',
+        title: !display.mobile.value ? 'Avg XPM' : 'XP',
         align: 'left',
         value: (row: any) => {
             return {
@@ -358,7 +359,7 @@ const farmFantasyColumns = [
 const supportFantasyColumns = [
     {
         key: 'totalSupportGoldSpent',
-        title: isDesktop.value ? 'Supp. Gold Spent' : 'SG',
+        title: !display.mobile.value ? 'Supp. Gold Spent' : 'SG',
         align: 'left',
         value: (row: any) => {
             return {
@@ -371,7 +372,7 @@ const supportFantasyColumns = [
     },
     {
         key: 'totalObsPlaced',
-        title: isDesktop.value ? 'Obs Placed' : 'OB',
+        title: !display.mobile.value ? 'Obs Placed' : 'OB',
         align: 'left',
         value: (row: any) => {
             return {
@@ -384,7 +385,7 @@ const supportFantasyColumns = [
     },
     {
         key: 'totalSentriesPlaced',
-        title: isDesktop.value ? 'Sentries Placed' : 'SN',
+        title: !display.mobile.value ? 'Sentries Placed' : 'SN',
         align: 'left',
         value: (row: any) => {
             return {
@@ -397,7 +398,7 @@ const supportFantasyColumns = [
     },
     {
         key: 'totalWardsDewarded',
-        title: isDesktop.value ? 'Dewards' : 'DW',
+        title: !display.mobile.value ? 'Dewards' : 'DW',
         align: 'left',
         value: (row: any) => {
             return {
@@ -410,7 +411,7 @@ const supportFantasyColumns = [
     },
     {
         key: 'totalCampsStacked',
-        title: isDesktop.value ? 'Camps Stacked' : 'C',
+        title: !display.mobile.value ? 'Camps Stacked' : 'C',
         align: 'left',
         value: (row: any) => {
             return {
@@ -425,7 +426,7 @@ const supportFantasyColumns = [
 const damageHealingFantasyColumns = [
     {
         key: 'totalHeroDamage',
-        title: isDesktop.value ? 'Hero Dmg' : 'HD',
+        title: !display.mobile.value ? 'Hero Dmg' : 'HD',
         align: 'left',
         value: (row: any) => {
             return {
@@ -438,7 +439,7 @@ const damageHealingFantasyColumns = [
     },
     {
         key: 'totalTowerDamage',
-        title: isDesktop.value ? 'Tower Dmg' : 'TD',
+        title: !display.mobile.value ? 'Tower Dmg' : 'TD',
         align: 'left',
         value: (row: any) => {
             return {
@@ -451,7 +452,7 @@ const damageHealingFantasyColumns = [
     },
     {
         key: 'totalHeroHealing',
-        title: isDesktop.value ? 'Hero Healing' : 'HH',
+        title: !display.mobile.value ? 'Hero Healing' : 'HH',
         align: 'left',
         value: (row: any) => {
             return {
@@ -464,7 +465,7 @@ const damageHealingFantasyColumns = [
     },
     {
         key: 'totalStunDuration',
-        title: isDesktop.value ? 'Stun Dur.' : 'SD',
+        title: !display.mobile.value ? 'Stun Dur.' : 'SD',
         align: 'left',
         value: (row: any) => {
             return {
@@ -558,7 +559,7 @@ const playerFantasyStatsIndexed = computed(() => {
 });
 
 const displayedFantasyColumns = computed<any>(() => {
-    if (isDesktop.value) {
+    if (!display.mobile.value) {
         return [...commonFantasyColumns, ...kdaFantasyColumns, ...farmFantasyColumns, ...supportFantasyColumns, ...damageHealingFantasyColumns];
     }
     else {

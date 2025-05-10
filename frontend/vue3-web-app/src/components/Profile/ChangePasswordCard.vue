@@ -1,5 +1,5 @@
 <template>
-    <v-card title="Personal Data">
+    <v-card title="Personal Data" class="pa-3 pt-1">
         <v-text-field v-model="currentPassword" label="Current Password" required
             :append-icon="currentPasswordShow ? 'eye' : 'eye-slash'" :rules="currentPasswordRuleArray"
             :type="currentPasswordShow ? 'text' : 'password'"

@@ -1,34 +1,34 @@
 <template>
-    <v-row class="gallery" style="max-width:700px">
+    <v-row class="gallery" style="max-width:800px">
         <v-col v-for="index in 5" :key="index" class="gallery-item">
             <v-row v-if="fantasyDraftPicks[index]" @click="changeActiveDraftPlayer(index)">
                 <v-col>
-                    <v-row v-if="!isDesktop">
+                    <v-row v-if="display.mobile.value">
                         <GoldSpan :gold-value="getPlayerCost(fantasyDraftPicks[index].dotaAccount.id).toString()" />
                     </v-row>
                     <v-row class="parallelogram" justify="center"
-                        :style="{ width: isDesktop ? '120px' : '60px', height: isDesktop ? '80px' : '40px', 'margin-left': isDesktop ? '5px' : '' }"
+                        :style="{ width: !display.mobile.value ? '140px' : '60px', height: !display.mobile.value ? '80px' : '40px', 'margin-left': !display.mobile.value ? '5px' : '' }"
                         :class="{ 'glow-active-slot': currentActiveDraftPlayerCheck(index) }">
-                        <GoldSpan v-if="isDesktop" class="gold"
+                        <GoldSpan v-if="!display.mobile.value" class="gold"
                             :gold-value="getPlayerCost(fantasyDraftPicks[index].dotaAccount.id).toString()" />
                         <img :src="fantasyDraftPicks[index].dotaAccount.steamProfilePicture"
                             :alt="fantasyDraftPicks[index].dotaAccount.name" />
                     </v-row>
                     <v-row class="caption" justify="center"
-                        :style="{ 'font-size': isDesktop ? '1rem' : '0.8rem', 'max-width': isDesktop ? '120px' : '60px' }">{{
+                        :style="{ 'font-size': !display.mobile.value ? '1rem' : '0.8rem', 'max-width': !display.mobile.value ? '140px' : '60px' }">{{
                             fantasyDraftPicks[index].dotaAccount.name }}</v-row>
                 </v-col>
             </v-row>
             <v-row v-else @click="changeActiveDraftPlayer(index)">
                 <v-col>
                     <v-row class="parallelogram" justify="center" align="center"
-                        :style="{ 'max-width': isDesktop ? '120px' : '60px', 'min-width': isDesktop ? '120px' : '60px', 'min-height': isDesktop ? '80px' : '40px', 'margin-left': isDesktop ? '5px' : '' }"
+                        :style="{ 'max-width': !display.mobile.value ? '120px' : '60px', 'min-width': !display.mobile.value ? '120px' : '60px', 'min-height': !display.mobile.value ? '80px' : '40px', 'margin-left': !display.mobile.value ? '5px' : '' }"
                         :class="{ 'glow-active-slot': currentActiveDraftPlayerCheck(index) }">
-                        <img :style="{ width: isDesktop ? '70px' : '20px', height: isDesktop ? '70px' : '20px' }"
+                        <img :style="{ width: !display.mobile.value ? '70px' : '20px', height: !display.mobile.value ? '70px' : '20px' }"
                             :src="`icons/pos_${index}.png`" />
                     </v-row>
                     <v-row class="caption" justify="center"
-                        :style="{ 'min-height': isDesktop ? '1.5rem' : '1.2rem', 'max-width': isDesktop ? '120px' : '60px', 'padding-left': isDesktop ? '30px' : '10px' }"></v-row>
+                        :style="{ 'min-height': !display.mobile.value ? '1.5rem' : '1.2rem', 'max-width': !display.mobile.value ? '120px' : '60px', 'padding-left': !display.mobile.value ? '30px' : '10px' }"></v-row>
                 </v-col>
             </v-row>
         </v-col>
@@ -36,13 +36,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
 import { fantasyDraftState } from '../fantasyDraft';
 import { VRow, VCol } from 'vuetify/components';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import GoldSpan from '@/components/Dom/GoldSpan.vue';
+import { useDisplay } from 'vuetify';
 
-const isDesktop = ref(window.outerWidth >= 600);
+const display = useDisplay()
 
 const { selectedPlayer, currentDraftSlotSelected, fantasyDraftPicks } = fantasyDraftState();
 const leagueStore = useFantasyLeagueStore();
@@ -100,6 +100,7 @@ const getPlayerCost = (accountId: number) => {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
+    margin-left: 10px;
 }
 
 .gold {

@@ -1,13 +1,13 @@
 <template>
     <v-row class="player-top-heroes">
-        <v-col :class="isDesktop ? 'tophero-text-desktop' : 'tophero-text-mobile'">
+        <v-col :class="!display.mobile.value ? 'tophero-text-desktop' : 'tophero-text-mobile'">
             <v-row>
                 <span>Most played heroes (last 30 games):</span>
             </v-row>
             <v-row>
                 <v-col v-for="(hero, index) in props.heroesPlayer.topHeroes" :key="index">
                     <v-row justify="center">
-                        <img :style="{ width: isDesktop ? '128px' : '72px', height: isDesktop ? '64px' : '36px' }"
+                        <img :style="{ width: !display.mobile.value ? '128px' : '72px', height: !display.mobile.value ? '64px' : '36px' }"
                             :src="getHeroIcon(hero.hero.name)" />
                     </v-row>
                     <v-row justify="center">
@@ -25,6 +25,7 @@
 import { ref, type PropType } from 'vue';
 import { VRow, VCol } from 'vuetify/components';
 import type { FantasyPlayerTopHeroes } from '../fantasyDraft';
+import { useDisplay } from 'vuetify';
 
 const props = defineProps({
     heroesPlayer: {
@@ -33,7 +34,7 @@ const props = defineProps({
     }
 })
 
-const isDesktop = ref(window.outerWidth >= 600);
+const display = useDisplay()
 
 const getHeroIcon = (heroIconString: string) => {
     if (heroIconString == '') return undefined;

@@ -1,9 +1,12 @@
 <template>
   <div class="login-modal">
     <div v-if="authStore.isAuthenticated" style="display:flex">
-      <v-btn v-if="authStore.currentUser && authStore.currentUser.name != ''" class="text-none" density="compact"
-        variant="flat" height="40px" to="/profile">
-        Welcome, {{ authStore.currentUser!.name }}
+      <v-btn v-if="!display.mobile.value" class="text-none" density="compact" variant="flat" height="40px"
+        to="/profile">
+        Welcome, {{ isCurrentNameBlank ? 'Unknown User' : authStore.currentUser.name }}
+      </v-btn>
+      <v-btn v-else class="text-none mr-2" density="compact" variant="flat" height="40px" width="40px" to="/profile"
+        icon="fa-regular fa-circle-user">
       </v-btn>
       <v-btn @click="logout" density="compact" variant="outlined" size="x-small" height="40px" style="text-align:left">
         <span>Logout<font-awesome-icon class="icon" :icon="faRightFromBracket" /></span>
@@ -14,6 +17,8 @@
             <v-card-text>
               <v-text-field v-model="displayName" name="displayName" placeholder="World's best drafter" required />
               <span>You can change this later</span>
+              <br />
+              <span style="font-size:0.8rem">* If it's offensive I'm choosing it</span>
             </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
@@ -34,24 +39,27 @@
         </template>
 
         <template v-slot:default="{ isActive }">
-          <v-card title="Dialog">
+          <v-card title="Sign In">
             <v-card-text>
-              <v-row>
-                <v-col>
+              <v-row justify="center" align="center">
+                <v-col :cols="12" :sm="10" :md="8" :lg="6">
                   <LoginForm class="login-form" />
-                </v-col>
-                <v-col>
-                  <v-row>
-                    <v-btn @click="login('Discord')" density="compact" variant="outlined" size="x-small" height="40px"
-                      style="text-align:left">
-                      <span>Login with Discord<font-awesome-icon class="icon" :icon="faRightFromBracket" /></span>
-                    </v-btn>
-                  </v-row>
-                  <v-row>
-                    <v-btn @click="login('Google')" density="compact" variant="outlined" size="x-small" height="40px"
-                      style="text-align:left">
-                      <span>Login with Google<font-awesome-icon class="icon" :icon="faRightFromBracket" /></span>
-                    </v-btn>
+                  <v-divider class="my-6" />
+                  <div class="text-center text-subtitle-2 mb-4">
+                    <span>Or sign in with one of these providers:</span>
+                  </div>
+                  <v-row dense>
+                    <v-col class="d-flex justify-center mb-2" :cols="12" :sm="6">
+                      <v-btn @click="login('Discord')" density="compact" variant="outlined" size="x-small" height="40px"
+                        style="text-align:left; background-color: #7289DA;">
+                        <font-awesome-icon class="icon" style="height: 20px; width: 20px;"
+                          :icon="faDiscord" /><span>Sign In with Discord</span>
+                      </v-btn>
+                    </v-col>
+                    <v-col class="d-flex justify-center mb-2" :cols="12" :sm="6">
+                      <img :src="GoogleSignIn" alt="Google logo" style="height: 40px; width: 175px; cursor: pointer;"
+                        @click="login('Google')" />
+                    </v-col>
                   </v-row>
                 </v-col>
               </v-row>
@@ -69,22 +77,26 @@
 
 <script setup lang="ts">
 import { useAuthStore, type User } from '@/stores/auth'
-import { onBeforeMount, ref, watch } from 'vue'
+import { computed, onBeforeMount, ref, watch } from 'vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
-import { VRow, VCol, VBtn, VDialog, VCard, VCardActions, VCardText } from 'vuetify/components';
+import { VRow, VCol, VDivider, VBtn, VDialog, VCard, VCardActions, VCardText, VImg } from 'vuetify/components';
 import LoginForm from './LoginForm.vue';
 import { useRouter } from 'vue-router';
+import { useDisplay } from 'vuetify';
+import { faDiscord } from '@fortawesome/free-brands-svg-icons';
+import GoogleSignIn from '@/assets/icons/google-sign-in.png'
 
 
 const authStore = useAuthStore()
 const router = useRouter()
+const display = useDisplay()
 
 const updateDisplayNameDialog = ref(false)
 const displayName = ref('')
 
-watch(() => authStore.user, (user: Partial<User>) => {
-  updateDisplayNameDialog.value = user?.name == ''
+watch(() => authStore.currentUser, (user: Partial<User>) => {
+  updateDisplayNameDialog.value = !user.name || user.name == ''
 })
 
 onBeforeMount(async () => {
@@ -105,6 +117,10 @@ async function login(provider: String) {
     }, 1000)
   }
 }
+
+const isCurrentNameBlank = computed(() => {
+  return !authStore.currentUser.name || authStore.currentUser.name == ''
+})
 
 const updateDisplayName = () => {
   if (!displayName.value || displayName.value == '') return

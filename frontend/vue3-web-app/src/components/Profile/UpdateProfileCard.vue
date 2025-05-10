@@ -9,7 +9,7 @@
                     placeholder="World's best drafter" required />
             </v-col>
             <v-col>
-                <v-btn @click="authStore.updateDisplayName(displayName)">Save</v-btn>
+                <v-btn @click="authStore.updateDisplayName(updateDisplayName)">Save</v-btn>
             </v-col>
         </v-row>
         <v-row>
@@ -36,6 +36,7 @@ import { computed, ref } from 'vue';
 import { VCard, VTextField, VBtn } from 'vuetify/components'
 
 const authStore = useAuthStore()
+const updateDisplayName = ref()
 
 const userId = computed({
     get: () => authStore.user.id,
@@ -43,7 +44,7 @@ const userId = computed({
 })
 const displayName = computed({
     get: () => authStore.user.name,
-    set: () => { }
+    set: (newDisplayName) => updateDisplayName.value = newDisplayName
 })
 const email = computed({
     get: () => authStore.user.email,

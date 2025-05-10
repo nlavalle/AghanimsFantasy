@@ -32,7 +32,7 @@
                         </v-row>
                         <v-row class="available-team ma-2 pa-2" v-for="(team, teamIndex) in fantasyTeams"
                             :key="teamIndex"
-                            :style="{ 'min-width': isDesktop ? '800px' : '400px', 'max-width': isDesktop ? '800px' : '400px' }">
+                            :style="{ 'min-width': !display.mobile.value ? '800px' : '400px', 'max-width': !display.mobile.value ? '800px' : '400px' }">
                             <v-col><v-row class="available-team-title">
                                     <v-col>
                                         <img :src="getImageUrl(team.id)" />
@@ -46,15 +46,15 @@
                                     <v-col class="available-player ma-1"
                                         v-for="(player, playerIndex) in fantasyPlayersByTeam(team.id)"
                                         :key="playerIndex"
-                                        :style="{ 'min-width': isDesktop ? '110px' : '60px', 'max-width': isDesktop ? '110px' : '60px' }">
+                                        :style="{ 'min-width': !display.mobile.value ? '110px' : '60px', 'max-width': !display.mobile.value ? '110px' : '60px' }">
                                         <v-row justify="center">
                                             <img :src="player.dotaAccount!.steamProfilePicture"
                                                 :alt="player.dotaAccount!.name"
-                                                :style="{ width: isDesktop ? '80px' : '40px', height: isDesktop ? '80px' : '40px' }" />
+                                                :style="{ width: !display.mobile.value ? '80px' : '40px', height: !display.mobile.value ? '80px' : '40px' }" />
                                         </v-row>
                                         <v-row class="available-player-caption">
                                             <span style="width: 100%"
-                                                :style="{ 'font-size': isDesktop ? '0.8em' : '0.5em' }">{{
+                                                :style="{ 'font-size': !display.mobile.value ? '0.8em' : '0.5em' }">{{
                                                     player.dotaAccount!.name }}</span>
                                         </v-row>
                                         <v-row>
@@ -153,8 +153,9 @@ import type { FantasyPlayer } from '../Fantasy/fantasyDraft';
 import type { DotaAccount, DotaTeam } from '@/types/Dota';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faDeleteLeft, faPencil } from '@fortawesome/free-solid-svg-icons';
+import { useDisplay } from 'vuetify';
 
-const isDesktop = ref(window.outerWidth >= 600);
+const display = useDisplay()
 
 const leagueStore = useFantasyLeagueStore();
 const selectedFantasyLeague = ref<FantasyLeague>();

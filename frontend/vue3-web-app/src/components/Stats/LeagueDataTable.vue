@@ -15,7 +15,7 @@
                     multiple clearable hide-details single-line />
             </v-col>
         </v-row>
-        <v-row v-if="!isDesktop" dense>
+        <v-row v-if="display.mobile.value" dense>
             <v-tabs v-model="leagueTab" density="compact">
                 <v-tab value="kda" min-width="70px" width="70px">K/D/A</v-tab>
                 <v-tab value="farm" min-width="70px" width="70px">Farm</v-tab>
@@ -26,9 +26,9 @@
         <v-row>
             <v-data-table class="league-table" :items="leagueMetadataStatsIndexed" :headers="displayedLeagueColumns"
                 density="compact" :items-per-page="itemsPerPage" v-model:page="page"
-                :style="{ 'font-size': isDesktop ? '0.8rem' : '0.7rem' }">
+                :style="{ 'font-size': !display.mobile.value ? '0.8rem' : '0.7rem' }">
                 <template v-slot:item.leaguePlayer="{ value }">
-                    <v-row v-if="isDesktop" class="ma-1 pa-1">
+                    <v-row v-if="!display.mobile.value" class="ma-1 pa-1">
                         <v-col class="mr-2" style="max-width:60px;width:60px;">
                             <v-row>
                                 <img height="60px" width="60px" :src="value.playerPicture" />
@@ -96,14 +96,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineModel, onMounted, watch, computed } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { VRow, VCol, VDataTable, VPagination, VTabs, VTab, VTextField, VSelect } from 'vuetify/components';
 import { localApiService } from '@/services/localApiService';
 import type { LeagueMetadata } from '@/types/LeagueMetadata';
 import { useDebouncedRef } from '@/services/debounce'
 import type { FantasyLeague } from '@/types/FantasyLeague';
+import { useDisplay } from 'vuetify';
 
-const isDesktop = ref(window.outerWidth >= 600);
+const display = useDisplay()
 
 const leagueFilter = useDebouncedRef('');
 const roleFilter = ref([]);
@@ -177,7 +178,7 @@ const commonLeagueColumns = [
                 totalMatches: row.matchesPlayed
             };
         },
-        width: isDesktop.value ? '240px' : '200px',
+        width: !display.mobile.value ? '240px' : '200px',
         sortable: true,
         sort: (a: any, b: any) => a.playerName > b.playerName
     },
@@ -185,7 +186,7 @@ const commonLeagueColumns = [
 const kdaLeagueColumns = [
     {
         key: 'totalKills',
-        title: isDesktop.value ? 'Kills' : 'K',
+        title: !display.mobile.value ? 'Kills' : 'K',
         align: 'left',
         value: (row: any) => row.kills,
         sortable: true,
@@ -193,7 +194,7 @@ const kdaLeagueColumns = [
     },
     {
         key: 'totalDeaths',
-        title: isDesktop.value ? 'Deaths' : 'D',
+        title: !display.mobile.value ? 'Deaths' : 'D',
         align: 'left',
         value: (row: any) => row.deaths,
         sortable: true,
@@ -201,7 +202,7 @@ const kdaLeagueColumns = [
     },
     {
         key: 'totalAssists',
-        title: isDesktop.value ? 'Assists' : 'A',
+        title: !display.mobile.value ? 'Assists' : 'A',
         align: 'left',
         value: (row: any) => row.assists,
         sortable: true,
@@ -211,7 +212,7 @@ const kdaLeagueColumns = [
 const farmLeagueColumns = [
     {
         key: 'totalLastHits',
-        title: isDesktop.value ? 'Last Hits' : 'LH',
+        title: !display.mobile.value ? 'Last Hits' : 'LH',
         align: 'left',
         value: (row: any) => row.lastHits,
         sortable: true,
@@ -219,7 +220,7 @@ const farmLeagueColumns = [
     },
     {
         key: 'totalDenies',
-        title: isDesktop.value ? 'Denies' : 'DN',
+        title: !display.mobile.value ? 'Denies' : 'DN',
         align: 'left',
         value: (row: any) => row.denies,
         sortable: true,
@@ -227,7 +228,7 @@ const farmLeagueColumns = [
     },
     {
         key: 'totalGoldPerMin',
-        title: isDesktop.value ? 'Avg GPM' : 'G',
+        title: !display.mobile.value ? 'Avg GPM' : 'G',
         align: 'left',
         value: (row: any) => row.goldPerMinAverage,
         sortable: true,
@@ -235,7 +236,7 @@ const farmLeagueColumns = [
     },
     {
         key: 'totalXpPerMin',
-        title: isDesktop.value ? 'Avg XPM' : 'XP',
+        title: !display.mobile.value ? 'Avg XPM' : 'XP',
         align: 'left',
         value: (row: any) => row.xpPerMinAverage,
         sortable: true,
@@ -245,7 +246,7 @@ const farmLeagueColumns = [
 const supportLeagueColumns = [
     {
         key: 'totalSupportGoldSpent',
-        title: isDesktop.value ? 'Supp. Gold Spent' : 'SG',
+        title: !display.mobile.value ? 'Supp. Gold Spent' : 'SG',
         align: 'left',
         value: (row: any) => row.supportGoldSpent ?? 0,
         sortable: true,
@@ -253,7 +254,7 @@ const supportLeagueColumns = [
     },
     {
         key: 'totalObsPlaced',
-        title: isDesktop.value ? 'Obs Placed' : 'OB',
+        title: !display.mobile.value ? 'Obs Placed' : 'OB',
         align: 'left',
         value: (row: any) => row.observerWardsPlaced ?? 0,
         sortable: true,
@@ -261,7 +262,7 @@ const supportLeagueColumns = [
     },
     {
         key: 'totalSentriesPlaced',
-        title: isDesktop.value ? 'Sentries Placed' : 'SN',
+        title: !display.mobile.value ? 'Sentries Placed' : 'SN',
         align: 'left',
         value: (row: any) => row.sentryWardsPlaced ?? 0,
         sortable: true,
@@ -269,7 +270,7 @@ const supportLeagueColumns = [
     },
     {
         key: 'totalWardsDewarded',
-        title: isDesktop.value ? 'Dewards' : 'DW',
+        title: !display.mobile.value ? 'Dewards' : 'DW',
         align: 'left',
         value: (row: any) => row.wardsDewarded ?? 0,
         sortable: true,
@@ -277,7 +278,7 @@ const supportLeagueColumns = [
     },
     {
         key: 'totalCampsStacked',
-        title: isDesktop.value ? 'Camps Stacked' : 'C',
+        title: !display.mobile.value ? 'Camps Stacked' : 'C',
         align: 'left',
         value: (row: any) => row.campsStacked ?? 0,
         sortable: true,
@@ -287,7 +288,7 @@ const supportLeagueColumns = [
 const damageHealingLeagueColumns = [
     {
         key: 'totalHeroDamage',
-        title: isDesktop.value ? 'Hero Dmg' : 'HD',
+        title: !display.mobile.value ? 'Hero Dmg' : 'HD',
         align: 'left',
         value: (row: any) => row.heroDamage ?? 0,
         sortable: true,
@@ -295,7 +296,7 @@ const damageHealingLeagueColumns = [
     },
     {
         key: 'totalTowerDamage',
-        title: isDesktop.value ? 'Tower Dmg' : 'TD',
+        title: !display.mobile.value ? 'Tower Dmg' : 'TD',
         align: 'left',
         value: (row: any) => row.towerDamage ?? 0,
         sortable: true,
@@ -303,7 +304,7 @@ const damageHealingLeagueColumns = [
     },
     {
         key: 'totalHeroHealing',
-        title: isDesktop.value ? 'Hero Healing' : 'HH',
+        title: !display.mobile.value ? 'Hero Healing' : 'HH',
         align: 'left',
         value: (row: any) => row.heroHealing ?? 0,
         sortable: true,
@@ -311,7 +312,7 @@ const damageHealingLeagueColumns = [
     },
     {
         key: 'totalStunDuration',
-        title: isDesktop.value ? 'Stun Dur.' : 'SD',
+        title: !display.mobile.value ? 'Stun Dur.' : 'SD',
         align: 'left',
         value: (row: any) => row.stunDuration ?? 0,
         sortable: true,
@@ -409,7 +410,7 @@ watch(selectedFantasyLeague, () => {
 });
 
 const displayedLeagueColumns = computed<any>(() => {
-    if (isDesktop.value) {
+    if (!display.mobile.value) {
         return [...commonLeagueColumns, ...kdaLeagueColumns, ...farmLeagueColumns, ...supportLeagueColumns, ...damageHealingLeagueColumns];
     }
     else {
