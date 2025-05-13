@@ -1,13 +1,13 @@
 <template>
-    <v-form>
-        <v-text-field v-model="email" name="email" placeholder="Email" required />
+    <v-form v-model="isFormValid">
+        <v-text-field v-model="email" name="email" placeholder="Email" required :rules="[passwordRules.required]" />
         <v-text-field v-model="password" name="password" placeholder="Password" required
             :append-icon="passShow ? 'eye' : 'eye-slash'" :rules="passwordRuleArray"
             :type="passShow ? 'text' : 'password'" @click:append="passShow = !passShow" />
         <v-text-field v-model="confirmPassword" name="confirmPassword" placeholder="Confirm Password" required
-            :append-icon="confirmPassShow ? 'eye' : 'eye-slash'" :rules="passwordRuleArray"
+            :append-icon="confirmPassShow ? 'eye' : 'eye-slash'" :rules="confirmPasswordRuleArray"
             :type="confirmPassShow ? 'text' : 'password'" @click:append="confirmPassShow = !confirmPassShow" />
-        <v-btn variant="outlined" @click="register(email, password)">
+        <v-btn variant="outlined" @click="register(email, password)" :disabled="!isFormValid">
             Register
         </v-btn>
     </v-form>
@@ -33,6 +33,7 @@ const confirmPassword = ref('');
 const passShow = ref(false)
 const confirmPassShow = ref(false)
 
+const isFormValid = ref(false)
 
 const passwordRuleArray = [
     passwordRules.required,
@@ -40,8 +41,12 @@ const passwordRuleArray = [
     passwordRules.hasLower,
     passwordRules.hasDigit,
     passwordRules.hasSymbol,
-    passwordRules.min,
-    passwordRules.confirmMatch(password.value, confirmPassword.value)
+    passwordRules.min
+]
+
+const confirmPasswordRuleArray = [
+    ...passwordRuleArray,
+    (value: string) => value === password.value || 'Passwords must match'
 ]
 
 const register = (email: string, pass: string) => {
