@@ -32,6 +32,9 @@ public class FantasyDraftModule : InteractionModuleBase<SocketInteractionContext
     [SlashCommand("set-fantasy-draft", "Draft your 5 Fantasy Players for a given Fantasy League")]
     public async Task FantasyDraft()
     {
+        await FollowupAsync("Temporarily disabled due to the recent login changes, please draft your team via the AghanimsFantasy.com site", ephemeral: true);
+        return;
+
         await CheckUserAsync();
 
         await RespondAsync($"Let's begin drafting fantasy players", ephemeral: true);

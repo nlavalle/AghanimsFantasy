@@ -1,5 +1,5 @@
 <template>
-    <v-card title="Personal Data" class="pa-3 pt-1">
+    <v-card title="Change Password" class="pa-3 pt-1">
         <v-text-field v-model="currentPassword" label="Current Password" required
             :append-icon="currentPasswordShow ? 'eye' : 'eye-slash'" :rules="currentPasswordRuleArray"
             :type="currentPasswordShow ? 'text' : 'password'"
@@ -11,9 +11,15 @@
             :append-icon="confirmNewPasswordShow ? 'eye' : 'eye-slash'" :rules="passwordRuleArray"
             :type="confirmNewPasswordShow ? 'text' : 'password'"
             @click:append="confirmNewPasswordShow = !confirmNewPasswordShow" />
-        <v-btn variant="outlined" @click="authStore.changePassword(currentPassword, newPassword)">
+        <v-btn variant="outlined" @click="changePassword()">
             Update Password
         </v-btn>
+        <v-snackbar v-model="showPasswordSuccess" timeout="5000" location="top right" color="success" elevation="4">
+            Successfully updated password
+        </v-snackbar>
+        <v-snackbar v-model="showPasswordError" timeout="5000" location="top right" color="error" elevation="4">
+            {{ showPasswordErrorMessage }}
+        </v-snackbar>
     </v-card>
 </template>
 
@@ -31,6 +37,10 @@ const currentPasswordShow = ref(false)
 const newPasswordShow = ref(false)
 const confirmNewPasswordShow = ref(false)
 
+const showPasswordSuccess = ref(false)
+const showPasswordError = ref(false)
+const showPasswordErrorMessage = ref('')
+
 const passwordRules = {
     required: (value: string) => !!value || 'Required',
     hasUpper: (value: string) => /[A-Z]/.test(value) || 'Requires an uppercase letter',
@@ -43,10 +53,10 @@ const passwordRules = {
 
 const currentPasswordRuleArray = [
     passwordRules.required,
-    passwordRules.hasUpper,
-    passwordRules.hasLower,
-    passwordRules.hasDigit,
-    passwordRules.hasSymbol,
+    // passwordRules.hasUpper,
+    // passwordRules.hasLower,
+    // passwordRules.hasDigit,
+    // passwordRules.hasSymbol,
     passwordRules.min
 ]
 
@@ -54,5 +64,17 @@ const passwordRuleArray = [
     ...currentPasswordRuleArray,
     passwordRules.confirmMatch
 ]
+
+const changePassword = () => {
+    if (!currentPassword.value || !newPassword.value || !confirmNewPassword.value) return
+    authStore.changePassword(currentPassword.value, newPassword.value)
+        .then(() => {
+            showPasswordSuccess.value = true
+        })
+        .catch((error) => {
+            showPasswordError.value = true
+            showPasswordErrorMessage.value = error
+        })
+}
 
 </script>

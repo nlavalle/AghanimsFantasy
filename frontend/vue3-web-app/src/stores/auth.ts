@@ -103,7 +103,16 @@ export const useAuthStore = defineStore('auth', {
     },
 
     changePassword(currentPassword: string, newPassword: string) {
-      authApiService.changePassword(currentPassword, newPassword).then((manageInfo) => {
+      return authApiService.changePassword(currentPassword, newPassword).then((manageInfo) => {
+        if (manageInfo) {
+          this.user.email = manageInfo.email
+          this.user.emailConfirmed = manageInfo.isEmailConfirmed
+        }
+      })
+    },
+
+    changeEmail(newEmail: string) {
+      return authApiService.changeEmail(newEmail).then((manageInfo) => {
         if (manageInfo) {
           this.user.email = manageInfo.email
           this.user.emailConfirmed = manageInfo.isEmailConfirmed

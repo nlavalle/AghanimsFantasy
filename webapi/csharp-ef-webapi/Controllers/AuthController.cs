@@ -183,9 +183,21 @@ namespace csharp_ef_webapi.Controllers
                 return BadRequest("User already has email/password registered");
             }
 
+            user.UserName = addEmailRequest.Email;
             user.Email = addEmailRequest.Email;
-            await _userManager.AddPasswordAsync(user, addEmailRequest.Password);
-            await _userManager.UpdateAsync(user);
+            var addPasswordResult = await _userManager.AddPasswordAsync(user, addEmailRequest.Password);
+
+            if (!addPasswordResult.Succeeded)
+            {
+                return BadRequest(string.Join(',', addPasswordResult.Errors.Select(err => err.Description).ToList()));
+            }
+
+            var updateResult = await _userManager.UpdateAsync(user);
+
+            if (!updateResult.Succeeded)
+            {
+                return BadRequest(string.Join(',', updateResult.Errors.Select(err => err.Description).ToList()));
+            }
 
             var logins = await _userManager.GetLoginsAsync(user);
             if (await _userManager.HasPasswordAsync(user))

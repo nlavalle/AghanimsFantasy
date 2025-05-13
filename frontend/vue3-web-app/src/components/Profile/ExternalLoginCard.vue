@@ -28,16 +28,20 @@
             <img :src="GoogleSignIn" alt="Google logo" style="height: 40px; width: 175px; cursor: pointer;"
                 @click="login('Google')" />
         </v-card-text>
+        <v-snackbar v-model="showSuccess" timeout="5000" location="top right" color="success" elevation="4">
+            Successfully added login
+        </v-snackbar>
+        <v-snackbar v-model="showError" timeout="5000" location="top right" color="error" elevation="4">
+            {{ showErrorMessage }}
+        </v-snackbar>
     </v-card>
-    <ErrorDialog v-model="showErrorModal" :error="errorDetails!" />
 </template>
 
 <script setup lang="ts">
 import { authApiService } from '@/services/authApiService';
 import { useAuthStore } from '@/stores/auth';
 import { computed, onBeforeMount, ref } from 'vue';
-import { VCard, VCardText, VDivider } from 'vuetify/components'
-import ErrorDialog from '@/components/ErrorDialog.vue';
+import { VCard, VCardText, VDivider, VSnackbar } from 'vuetify/components'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { passwordRules } from '@/utilities/PasswordRules';
 import { faDiscord } from '@fortawesome/free-brands-svg-icons';
@@ -54,8 +58,9 @@ const confirmPassword = ref('');
 const passShow = ref(false)
 const confirmPassShow = ref(false)
 
-const showErrorModal = ref(false);
-const errorDetails = ref<Error>();
+const showSuccess = ref(false);
+const showError = ref(false);
+const showErrorMessage = ref('');
 
 const passwordRuleArray = [
     passwordRules.required,
@@ -81,10 +86,12 @@ const addEmailLogin = (email: string, pass: string) => {
     if (!email || !pass) return;
     authApiService.addEmailLogin(email, pass)
         .then(() => {
-            authStore.loadUserExternalLogins()
+            authStore.loadUser()
+            showSuccess.value = true
         })
-        .catch((error: Error) => {
-            showError(error)
+        .catch((error) => {
+            showError.value = true
+            showErrorMessage.value = error
         });
 }
 
@@ -96,21 +103,12 @@ async function login(provider: String) {
         const checkLoginStatus = setInterval(() => {
             if (currentLoginProviders.value.some(login => login.loginProvider == provider) || loginWindow.closed) {
                 loginWindow.close()
+                showSuccess.value = true
                 clearInterval(checkLoginStatus)
             }
             authStore.loadUserExternalLogins()
         }, 1000)
     }
-}
-
-const showError = (error: Error) => {
-    errorDetails.value = error;
-    showErrorModal.value = true;
-    window.scrollTo({
-        top: 0,
-        left: 0,
-        behavior: 'smooth'
-    });
 }
 
 </script>

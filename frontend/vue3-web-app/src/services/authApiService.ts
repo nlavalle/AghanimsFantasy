@@ -105,11 +105,34 @@ export const authApiService = {
         email: email,
         password: pass
       })
-    }).then(
-      function (response: any) {
+    }).then((response: any) => {
+      if (!response.ok) {
+        return response.text().then((errorBody: any) => {
+          throw new Error(errorBody);
+        });
+      } else {
         return response
       }
-    )
+    })
+  },
+  changeEmail(newEmail: string) {
+    return fetch(`${identityBaseUrl}/manage/info`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        newEmail: newEmail
+      })
+    })
+      .then((response: any) => {
+        if (!response.ok) {
+          throw response.status
+        } else {
+          return response.json()
+        }
+      })
   },
   changePassword(currentPassword: string, newPassword: string) {
     return fetch(`${identityBaseUrl}/manage/info`, {
@@ -166,7 +189,9 @@ export const authApiService = {
     })
       .then((response: Response) => {
         if (!response.ok) {
-          throw response.status
+          return response.text().then((errorBody: any) => {
+            throw new Error(errorBody);
+          });
         } else {
           return response
         }

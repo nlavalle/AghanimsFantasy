@@ -76,17 +76,16 @@
 </template>
 
 <script setup lang="ts">
-import { useAuthStore, type User } from '@/stores/auth'
+import { useAuthStore } from '@/stores/auth'
 import { computed, onBeforeMount, ref, watch } from 'vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
-import { VRow, VCol, VDivider, VBtn, VDialog, VCard, VCardActions, VCardText, VImg } from 'vuetify/components';
+import { VRow, VCol, VDivider, VBtn, VDialog, VCard, VCardActions, VCardText } from 'vuetify/components';
 import LoginForm from './LoginForm.vue';
 import { useRouter } from 'vue-router';
 import { useDisplay } from 'vuetify';
 import { faDiscord } from '@fortawesome/free-brands-svg-icons';
 import GoogleSignIn from '@/assets/icons/google-sign-in.png'
-
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -95,8 +94,8 @@ const display = useDisplay()
 const updateDisplayNameDialog = ref(false)
 const displayName = ref('')
 
-watch(() => authStore.currentUser, (user: Partial<User>) => {
-  updateDisplayNameDialog.value = !user.name || user.name == ''
+watch(() => authStore.user.id, () => {
+  updateDisplayNameDialog.value = authStore.isAuthenticated && authStore.currentUser.name == ''
 })
 
 onBeforeMount(async () => {

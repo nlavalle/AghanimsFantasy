@@ -9,11 +9,13 @@
                     placeholder="World's best drafter" required />
             </v-col>
             <v-col>
-                <v-btn @click="authStore.updateDisplayName(updateDisplayName)">Save</v-btn>
+                <v-btn @click="changeDisplayName()">Save</v-btn>
             </v-col>
         </v-row>
         <v-row>
-            <v-text-field v-model="email" label="Email" name="email" disabled />
+            <v-col>
+                <v-text-field v-model="email" label="Email" name="email" disabled />
+            </v-col>
         </v-row>
         <!-- <v-row>
             <v-col>
@@ -27,16 +29,21 @@
         <v-row>
             <v-text-field v-model="discordName" label="Discord Name" name="discordName" disabled />
         </v-row>
+        <v-snackbar v-model="showNameSuccess" timeout="5000" location="top right" color="success" elevation="4">
+            Successfully updated name
+        </v-snackbar>
     </v-card>
 </template>
 
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth';
 import { computed, ref } from 'vue';
-import { VCard, VTextField, VBtn } from 'vuetify/components'
+import { VCard, VTextField, VBtn, VSnackbar } from 'vuetify/components'
 
 const authStore = useAuthStore()
 const updateDisplayName = ref()
+const updateEmail = ref()
+const showNameSuccess = ref(false)
 
 const userId = computed({
     get: () => authStore.user.id,
@@ -48,12 +55,18 @@ const displayName = computed({
 })
 const email = computed({
     get: () => authStore.user.email,
-    set: () => { }
+    set: (newEmail) => updateEmail.value = newEmail
 })
 const isEmailConfirmed = ref(false)
 const discordName = computed({
     get: () => authStore.user.discordName,
     set: () => { }
 })
+
+const changeDisplayName = () => {
+    authStore.updateDisplayName(updateDisplayName.value)?.then(() => {
+        showNameSuccess.value = true
+    })
+}
 
 </script>

@@ -31,7 +31,8 @@
                         <p>Are you sure you want to delete all of your data? This cannot be undone.</p>
                     </v-card-text>
 
-                    <v-card-text>
+                    <v-card-text
+                        v-if="authStore.currentUser.loginProviders?.some(provider => provider.loginProvider == 'Email')">
                         <v-text-field v-model="password" name="password" placeholder="Password" required
                             :append-icon="passShow ? 'eye' : 'eye-slash'" :type="passShow ? 'text' : 'password'"
                             @click:append="passShow = !passShow" />
@@ -45,6 +46,9 @@
                 </v-card>
             </template>
         </v-dialog>
+        <v-snackbar v-model="showError" timeout="5000" location="top right" color="error" elevation="4">
+            {{ showErrorMessage }}
+        </v-snackbar>
     </v-card>
 </template>
 
@@ -62,6 +66,9 @@ const showDeleteConfirm = ref(false);
 const password = ref('');
 const passShow = ref(false);
 
+const showError = ref(false);
+const showErrorMessage = ref('');
+
 const downloadPersonalData = () => {
     return authApiService.downloadPersonalData()
 }
@@ -73,6 +80,9 @@ const onOKClick = () => {
             scrollAfterAlertDialog()
             router.push({ path: '/' })
         })
+    }).catch((error) => {
+        showError.value = true
+        showErrorMessage.value = error
     })
 }
 

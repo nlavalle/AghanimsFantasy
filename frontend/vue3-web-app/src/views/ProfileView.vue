@@ -5,7 +5,7 @@
                 <v-col :sm="8" :md="4" :lg="3">
                     <v-tabs v-model="profileTab" direction="vertical">
                         <v-tab value="profile">Profile</v-tab>
-                        <v-tab value="password">Change Password</v-tab>
+                        <v-tab v-if="hasEmail" value="password">Change Password</v-tab>
                         <v-tab value="external-login">External Login Providers</v-tab>
                         <!-- <v-tab value="notifications">Notifications</v-tab> -->
                         <v-tab value="personal">Personal data</v-tab>
@@ -40,10 +40,16 @@ import ChangePasswordCard from '@/components/Profile/ChangePasswordCard.vue';
 import ExternalLoginCard from '@/components/Profile/ExternalLoginCard.vue';
 import PersonalDataCard from '@/components/Profile/PersonalDataCard.vue';
 import UpdateProfileCard from '@/components/Profile/UpdateProfileCard.vue';
-import { ref } from 'vue';
+import { useAuthStore } from '@/stores/auth';
+import { computed, ref } from 'vue';
 import { VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem } from 'vuetify/components'
 
 const profileTab = ref(0)
+const authStore = useAuthStore()
+
+const hasEmail = computed(() => {
+    return authStore.user.loginProviders?.some((provider) => provider.loginProvider == 'Email')
+})
 
 </script>
 
