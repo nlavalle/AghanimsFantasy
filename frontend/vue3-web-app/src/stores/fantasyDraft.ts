@@ -11,7 +11,7 @@ import { useAuthStore } from './auth';
 export const useFantasyDraftStore = defineStore({
   id: 'fantasyDraft',
   state: () => ({
-    fantasyDraftPollInterval: 0,
+    fantasyDraftPollInterval: null as ReturnType<typeof setInterval> | null,
     fantasyDraftFailureCount: 0,
     authStore: useAuthStore(),
     leagueStore: useFantasyLeagueStore(),
@@ -39,7 +39,10 @@ export const useFantasyDraftStore = defineStore({
     },
 
     stopFantasyDraftPolling() {
-      clearInterval(this.fantasyDraftPollInterval);
+      if (this.fantasyDraftPollInterval) {
+        clearInterval(this.fantasyDraftPollInterval);
+        this.fantasyDraftPollInterval = null;
+      }
     },
 
     fetchLeaderboard() {

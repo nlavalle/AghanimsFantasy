@@ -57,7 +57,7 @@ const draftFiltered = false;
 
 onMounted(() => {
   if (leagueStore.selectedFantasyLeague.id == 0) {
-    leagueStore.fetchFantasyLeagues(undefined)
+    leagueStore.fetchFantasyLeagues()
   }
 })
 

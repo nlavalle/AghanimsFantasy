@@ -8,9 +8,9 @@ import type { FantasyPlayerStats } from '@/types/FantasyPlayerStats'
 export const useFantasyLeagueStore = defineStore({
   id: 'league',
   state: () => ({
-    fantasyLeaguePollInterval: 0,
+    fantasyLeaguePollInterval: null as ReturnType<typeof setInterval> | null,
     fantasyLeaguePollFailureCount: 0,
-    fantasyViewPollInterval: 0,
+    fantasyViewPollInterval: null as ReturnType<typeof setInterval> | null,
     fantasyViewPollFailureCount: 0,
     leagues: [] as League[],
     fantasyLeagues: [] as FantasyLeague[],
@@ -50,7 +50,10 @@ export const useFantasyLeagueStore = defineStore({
     },
 
     stopFantasyLeaguePolling() {
-      clearInterval(this.fantasyLeaguePollInterval);
+      if (this.fantasyLeaguePollInterval) {
+        clearInterval(this.fantasyLeaguePollInterval);
+        this.fantasyLeaguePollInterval = null;
+      }
     },
 
     startFantasyViewPolling() {
@@ -69,7 +72,10 @@ export const useFantasyLeagueStore = defineStore({
     },
 
     stopFantasyViewPolling() {
-      clearInterval(this.fantasyViewPollInterval);
+      if (this.fantasyViewPollInterval) {
+        clearInterval(this.fantasyViewPollInterval);
+        this.fantasyViewPollInterval = null;
+      }
     },
 
     fetchLeagues() {
