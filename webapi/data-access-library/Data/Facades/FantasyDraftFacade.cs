@@ -132,7 +132,7 @@ public class FantasyDraftFacade
         if (fantasyDraft.DiscordAccountId.HasValue)
         {
             teamDiscordIdLookup = await _dbContext.Teams.FindAsync(fantasyDraft.DiscordAccountId.Value);
-            userLookup = await _dbContext.Users.FindAsync(fantasyDraft.DiscordAccountId.Value);
+            userLookup = await _dbContext.Users.FindAsync(fantasyDraft.UserId);
         }
 
         var fantasyDraftPoints = new FantasyDraftPointTotals
