@@ -438,10 +438,10 @@ with quintiles as (
             on fppt.fantasy_player_id = fp.id
         join nadcl.dota_accounts a
             on fp.dota_account_id = a.id
-        -- -- Filter this to only fantasy players
-        -- join nadcl.dota_fantasy_players fpfilter
-        --     on allfl.id = fpfilter.fantasy_league_id
-        --         and fp.dota_account_id = fpfilter.dota_account_id
+        -- Filter this to only fantasy players
+        join nadcl.dota_fantasy_players fpfilter
+            on allfl.id = fpfilter.fantasy_league_id
+                and fp.dota_account_id = fpfilter.dota_account_id
     where fl.is_private = false
         and fppt.matches > 0
 ), recent_fantasies as (
@@ -463,39 +463,24 @@ with quintiles as (
     select
         fantasy_league_id,
         account_id,
+        cross_quintile as quintile,
         sum(count_per_quintile) as total_games
     from quintile_counts
-    group by fantasy_league_id, account_id
-), quintile_probabilities as (
-select
-    q.fantasy_league_id,
-    q.account_id,
-    q.quintile,
-    (q.count_per_quintile * 1.0 / t.total_games) as probability
-from quintile_counts q
-    join total_games t
-        on q.fantasy_league_id = t.fantasy_league_id and q.account_id = t.account_id
-), all_quintiles as (
-    select distinct 
-        q.id as fantasy_league_id,
-        p.id as account_id,
-        q.quintile
-    from (select distinct id from nadcl.dota_accounts) p
     cross join (
-        select b.id, column1 as quintile 
-        from 
-            (values(1),(2),(3),(4),(5)) a
-            cross join (select id from nadcl.dota_fantasy_leagues) b
-    ) q
+        select column1 as cross_quintile
+        from (values(1),(2),(3),(4),(5))
+    )
+    group by fantasy_league_id, account_id, cross_quintile
 )
 select distinct
     a.fantasy_league_id,
     a.account_id,
     a.quintile,
-    round(coalesce(p.probability, 0.05), 4) as probability,
-    least(round(sum(coalesce(p.probability, 0.05)) over (partition by p.fantasy_league_id, a.account_id order by a.quintile),4), 1.0000) as cumulative_probability
-from all_quintiles a
-    left join quintile_probabilities p
+	-- Doing a dirichlet prior of [1, 1, 1, 1, 1] to help even out players with v few games
+    round((coalesce(p.count_per_quintile, 0) + 1) / (a.total_games + 5), 4) as probability,
+    round(sum((coalesce(p.count_per_quintile, 0) + 1) / (a.total_games + 5)) over (partition by a.fantasy_league_id, a.account_id order by a.quintile),4) as cumulative_probability
+from total_games a
+    left join quintile_counts p
         on a.account_id = p.account_id 
             and a.quintile = p.quintile
             and a.fantasy_league_id = p.fantasy_league_id

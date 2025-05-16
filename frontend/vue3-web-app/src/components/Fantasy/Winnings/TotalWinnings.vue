@@ -11,7 +11,7 @@
                 <h1>Draft Winnings</h1>
             </v-col>
             <v-col class="v-col-3">
-                <GoldSpan :animated="true" :bold="true" :font-size="1.5" :gold-value="totalWinnings().toFixed(0)" />
+                <GoldSpan :animated="true" :bold="true" :font-size="1.5" :gold-value="totalWinnings.toFixed(0)" />
             </v-col>
         </v-row>
     </div>
@@ -35,14 +35,14 @@ const playerFantasyStatsIndexed = computed(() => {
         .filter(pfsi => fantasyLeagueStore.selectedFantasyDraftPoints?.fantasyDraft.draftPickPlayers.some(dpp => dpp.fantasyPlayerId == pfsi.fantasyPlayerId))
 })
 
-const totalWinnings = () => {
+const totalWinnings = computed(() => {
     return Math.max(
         playerFantasyStatsIndexed.value.reduce(function (total, current) {
             return total + getWinnings(current.position, current.fantasyPlayer);
         }, 0),
         0 // Don't let winnings fall below 0
     );
-}
+})
 
 const getWinnings = (position: number, fantasyPlayer: FantasyPlayer) => {
     let quintileSize = fantasyLeagueStore.fantasyPlayerPoints.length / 5;

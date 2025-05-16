@@ -715,7 +715,7 @@ export const localApiService = {
       })
   },
   getUserDraftPoints(leagueId: number) {
-    return fetch(`${baseUrl}/league/${leagueId}/drafts/points`)
+    return fetch(`${baseUrl}/fantasydraft/${leagueId}/drafts/points`)
       .then(
         function (response: any) {
           if (!response.ok) {

@@ -1,4 +1,5 @@
 import { authApiService } from '@/services/authApiService'
+import { localApiService } from '@/services/localApiService'
 import { defineStore } from 'pinia'
 
 export interface User {
@@ -10,6 +11,7 @@ export interface User {
   isAdmin: boolean
   isPrivateFantasyAdmin: boolean
   loginProviders: LoginProvider[]
+  stashBalance: number | undefined
 }
 
 interface LoginProvider {
@@ -61,7 +63,8 @@ export const useAuthStore = defineStore('auth', {
       this.loadUserAuthInfo()?.then(() => {
         Promise.all([
           this.loadUserManageInfo(),
-          this.loadUserExternalLogins()
+          this.loadUserExternalLogins(),
+          this.loadUserBalance()
         ])
       })
     },
@@ -92,6 +95,12 @@ export const useAuthStore = defineStore('auth', {
         if (response) {
           this.user.loginProviders = response
         }
+      })
+    },
+
+    loadUserBalance() {
+      return localApiService.getUserBalance().then((response: any) => {
+        this.user.stashBalance = response
       })
     },
 

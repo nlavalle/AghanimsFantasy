@@ -36,6 +36,28 @@ namespace csharp_ef_webapi.Controllers
             }
         }
 
+        // GET: api/fantasydraft/5/drafts/points
+        [HttpGet("{leagueId}/drafts/points")]
+        [AuthenticatedETag]
+        public async Task<ActionResult<IEnumerable<FantasyDraftPointTotals>>> GetUserDraftFantasyPoints(int leagueId)
+        {
+            try
+            {
+                if (HttpContext.User == null)
+                {
+                    return Ok(new List<FantasyDraftPointTotals>());
+                }
+
+                IEnumerable<FantasyDraftPointTotals> fantasyDraftPointTotals = await _fantasyService.GetFantasyDraftPointTotals(HttpContext.User, leagueId);
+
+                return Ok(fantasyDraftPointTotals);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         // GET: api/fantasydraft/5/matches/points
         [HttpGet("{fantasyLeagueId}/matches/points")]
         [AuthenticatedETag]
