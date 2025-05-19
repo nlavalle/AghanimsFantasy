@@ -37,6 +37,7 @@ public class DataLayerService : BackgroundService
         CreateLauncher<FantasyPlayerBudgetProbabilityContext>(commonCooldown);
         CreateLauncher<FantasyMatchContext>(commonCooldown);
         CreateLauncher<FantasyLedgerContext>(commonCooldown);
+        CreateLauncher<MissingAccountsContext>(commonCooldown);
 
         // Ready
         _tcsReadyForRequests.SetResult();
@@ -48,6 +49,7 @@ public class DataLayerService : BackgroundService
             LoopOperation<FantasyPlayerBudgetProbabilityContext>(TimeSpan.FromDays(1), stoppingToken),
             LoopOperation<FantasyMatchContext>(TimeSpan.FromMinutes(5), stoppingToken),
             LoopOperation<FantasyLedgerContext>(TimeSpan.FromHours(1), stoppingToken),
+            LoopOperation<MissingAccountsContext>(TimeSpan.FromMinutes(5), stoppingToken),
         ];
         await Task.WhenAll(tasks);
     }

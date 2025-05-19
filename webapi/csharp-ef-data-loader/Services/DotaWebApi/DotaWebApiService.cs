@@ -74,7 +74,7 @@ public class DotaWebApiService : BackgroundService
             LoopOperation<LeagueHistoryContext>(TimeSpan.FromMinutes(5), stoppingToken),
             // LoopOperation<MatchDetailsContext>(TimeSpan.FromMinutes(5), stoppingToken),
             LoopOperation<MatchMetadataContext>(TimeSpan.FromMinutes(5), stoppingToken),
-            LoopOperation<TeamsContext>(TimeSpan.FromDays(1), stoppingToken),
+            LoopOperation<TeamsContext>(TimeSpan.FromMinutes(5), stoppingToken),
             LoopOperation<DiscordUpdatesContext>(TimeSpan.FromMinutes(5), stoppingToken),
         ];
         await Task.WhenAll(tasks);
