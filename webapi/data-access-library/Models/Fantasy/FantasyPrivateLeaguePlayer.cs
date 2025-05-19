@@ -3,6 +3,7 @@ namespace DataAccessLibrary.Models.Fantasy;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using DataAccessLibrary.Data.Identity;
 using DataAccessLibrary.Models.Discord;
 
 [Table("dota_fantasy_private_league_players")]
@@ -26,8 +27,13 @@ public class FantasyPrivateLeaguePlayer
     [JsonNumberHandling(JsonNumberHandling.WriteAsString | JsonNumberHandling.AllowReadingFromString)]
     public required long DiscordUserId { get; set; }
 
-    [JsonPropertyName("discord_user")]
-    public DiscordUser? DiscordUser { get; set; }
+    [ForeignKey("User")]
+    [Column("user_id")]
+    [JsonPropertyName("user_id")]
+    public required string UserId { get; set; }
+
+    [JsonPropertyName("user")]
+    public AghanimsFantasyUser? User { get; set; }
 
     [Column("is_admin")]
     [JsonPropertyName("is_admin")]

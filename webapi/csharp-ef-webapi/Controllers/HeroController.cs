@@ -1,12 +1,14 @@
 using DataAccessLibrary.Data;
 using DataAccessLibrary.Models.ProMetadata;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
 
 namespace csharp_ef_webapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [OutputCache]
     public class HeroController : ControllerBase
     {
         private readonly AghanimsFantasyContext _dbContext;

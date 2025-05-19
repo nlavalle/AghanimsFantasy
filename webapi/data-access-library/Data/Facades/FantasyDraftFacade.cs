@@ -1,8 +1,8 @@
 namespace DataAccessLibrary.Data.Facades;
 
 using DataAccessLibrary.Data;
+using DataAccessLibrary.Data.Identity;
 using DataAccessLibrary.Models;
-using DataAccessLibrary.Models.Discord;
 using DataAccessLibrary.Models.Fantasy;
 using DataAccessLibrary.Models.ProMetadata;
 using Microsoft.EntityFrameworkCore;
@@ -22,13 +22,27 @@ public class FantasyDraftFacade
         _dbContext = dbContext;
     }
 
-    public async Task<FantasyDraft?> GetByUserFantasyLeague(FantasyLeague fantasyLeague, DiscordUser user)
+    public async Task HistoricalUpdateDiscordUserDraftsAsync(long DiscordId, AghanimsFantasyUser user)
     {
-        _logger.LogDebug($"Fetching Fantasy League {fantasyLeague.Name} Draft for User {user.Username}");
+        _logger.LogInformation($"Updating Previous Fantasy Drafts for Discord ID {DiscordId}");
+
+        List<FantasyDraft> userFantasyDrafts = await _dbContext.FantasyDrafts
+                    .Include(fd => fd.DraftPickPlayers)
+                    .Where(fd => fd.DiscordAccountId == DiscordId)
+                    .ToListAsync();
+
+        userFantasyDrafts.ForEach(fd => fd.UserId = user.Id);
+        _dbContext.UpdateRange(userFantasyDrafts);
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task<FantasyDraft?> GetByUserFantasyLeague(FantasyLeague fantasyLeague, AghanimsFantasyUser user)
+    {
+        _logger.LogDebug($"Fetching Fantasy League {fantasyLeague.Name} Draft for User {user.UserName}");
 
         var userFantasyDraftQuery = _dbContext.FantasyDrafts
                     .Include(fd => fd.DraftPickPlayers)
-                    .Where(fd => fd.FantasyLeagueId == fantasyLeague.Id && fd.DiscordAccountId == user.Id);
+                    .Where(fd => fd.FantasyLeagueId == fantasyLeague.Id && fd.UserId == user.Id);
 
         return await userFantasyDraftQuery.FirstOrDefaultAsync();
     }
@@ -113,18 +127,18 @@ public class FantasyDraftFacade
 
         var playerTotals = await FantasyPlayerPointTotalsByFantasyLeagueAsync(fantasyLeague);
         Team? teamDiscordIdLookup = null;
-        DiscordUser? discordUserLookup = null;
+        AghanimsFantasyUser? userLookup = null;
 
         if (fantasyDraft.DiscordAccountId.HasValue)
         {
             teamDiscordIdLookup = await _dbContext.Teams.FindAsync(fantasyDraft.DiscordAccountId.Value);
-            discordUserLookup = await _dbContext.DiscordUsers.FindAsync(fantasyDraft.DiscordAccountId.Value);
+            userLookup = await _dbContext.Users.FindAsync(fantasyDraft.UserId);
         }
 
         var fantasyDraftPoints = new FantasyDraftPointTotals
         {
             FantasyDraft = fantasyDraft,
-            DiscordName = discordUserLookup?.Username ?? "Unknown User",
+            UserName = userLookup?.UserName ?? "Unknown User",
             FantasyPlayerPoints = playerTotals.Where(pt => fantasyDraft.DraftPickPlayers.Select(dpp => dpp.FantasyPlayer!.Id).Contains(pt.FantasyPlayer.Id)).ToList()
         };
 
@@ -138,7 +152,7 @@ public class FantasyDraftFacade
         var playerTotals = await FantasyPlayerPointTotalsByFantasyLeagueAsync(FantasyLeague);
 
         var allTeams = await _dbContext.Teams.ToListAsync();
-        var discordUsers = await _dbContext.DiscordUsers.ToListAsync();
+        var users = await _dbContext.Users.ToListAsync();
 
         var fantasyDraftPointsByLeague = await _dbContext.FantasyDrafts
             .Where(fl => fl.FantasyLeagueId == FantasyLeague.Id)
@@ -149,7 +163,7 @@ public class FantasyDraftFacade
             .Select(fd => new FantasyDraftPointTotals
             {
                 FantasyDraft = fd,
-                DiscordName = discordUsers.FirstOrDefault(u => u.Id == (fd.DiscordAccountId.HasValue ? fd.DiscordAccountId.Value : 0))?.Username ?? "Unknown User",
+                UserName = users.FirstOrDefault(u => u.Id == fd.UserId)?.DisplayName ?? "Unknown User",
                 FantasyPlayerPoints = playerTotals.Where(pt => fd.DraftPickPlayers.Select(dpp => dpp.FantasyPlayer!.Id).Contains(pt.FantasyPlayer.Id)).ToList()
             })
             .ToList();

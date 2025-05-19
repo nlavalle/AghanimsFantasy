@@ -6,10 +6,14 @@ import { localApiService } from '@/services/localApiService'
 import type { FantasyDraftPoints, FantasyPlayer } from '@/components/Fantasy/fantasyDraft'
 import type { Leaderboard, LeaderboardStats } from '@/types/Leaderboard';
 import type { LeaderboardItem } from '@/types/LeaderboardItem';
+import { useAuthStore } from './auth';
 
 export const useFantasyDraftStore = defineStore({
   id: 'fantasyDraft',
   state: () => ({
+    fantasyDraftPollInterval: null as ReturnType<typeof setInterval> | null,
+    fantasyDraftFailureCount: 0,
+    authStore: useAuthStore(),
     leagueStore: useFantasyLeagueStore(),
     fantasyPlayers: [] as FantasyPlayer[],
     fantasyLeaderboardStats: {} as LeaderboardStats,
@@ -17,9 +21,33 @@ export const useFantasyDraftStore = defineStore({
   }),
 
   actions: {
+    startFantasyDraftPolling() {
+      this.fantasyDraftPollInterval = setInterval(() => {
+        if (this.authStore.isAuthenticated) {
+          this.fetchLeaderboard()
+            ?.then(() => this.fantasyDraftFailureCount = 0) // reset on success
+            .catch(() => {
+              this.fantasyDraftFailureCount++
+              if (this.fantasyDraftFailureCount > 3) {
+                console.log("Too many failures encountered, stopping fantasy draft polling")
+                this.stopFantasyDraftPolling()
+              }
+            })
+        }
+      },
+        30000) // poll every 30sec
+    },
+
+    stopFantasyDraftPolling() {
+      if (this.fantasyDraftPollInterval) {
+        clearInterval(this.fantasyDraftPollInterval);
+        this.fantasyDraftPollInterval = null;
+      }
+    },
+
     fetchLeaderboard() {
       if (this.leagueStore.selectedFantasyLeague.id) {
-        localApiService.getTopTenDrafts(this.leagueStore.selectedFantasyLeague.id)
+        return localApiService.getTopTenDrafts(this.leagueStore.selectedFantasyLeague.id)
           .then((result) => (this.fantasyLeaderboard = result))
           .then(() => {
             this.fetchLeaderboardStats()
@@ -55,9 +83,7 @@ export const useFantasyDraftStore = defineStore({
       }
       return this.fantasyLeaderboard.map((leaderboard: Leaderboard) => ({
         id: leaderboard.fantasyDraft.id,
-        isTeam: leaderboard.isTeam,
-        teamId: leaderboard.teamId,
-        description: leaderboard.discordName,
+        userName: leaderboard.userName,
         value: leaderboard.draftTotalFantasyPoints,
         fantasyDraft: leaderboard.fantasyDraft,
         playerPoints: [

@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, watch } from 'vue';
+import { computed, onBeforeMount, onMounted, watch } from 'vue';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import { useAuthStore } from '@/stores/auth';
 import { VIcon, VTab, VTabs } from 'vuetify/components'
@@ -41,34 +41,19 @@ const leagueOptions = computed(() => {
 })
 
 const fantasyLeagueOptions = computed(() => {
+  if (!leagueStore.selectedLeague) return
   return leagueStore.activeFantasyLeagues
     .filter(fantasyLeague => fantasyLeague.leagueId == leagueStore.selectedLeague.league_id)
     .sort((a, b) => a.id - b.id)
 })
 
-onMounted(() => {
+onBeforeMount(() => {
   router.isReady()
-    .then(() => authStore.checkAuthenticatedAsync())
-    .then(() => leagueStore.fetchLeagues())
-    .then(() => leagueStore.fetchFantasyLeagues(Number(route.query.fantasyLeagueId)))
     .then(() => {
       if (authStore.authenticated) {
         leagueStore.fetchFantasyDraftPoints()
       }
-      router.push({
-        path: route.path,
-        query: { fantasyLeagueId: leagueStore.selectedFantasyLeague.id }
-      })
     });
-})
-
-watch(() => authStore.authenticated, () => {
-  if (leagueStore.allLeagues.length != 0) {
-    // If mounted hasn't fetched leagues yet then ignore this first watch
-    leagueStore.fetchLeagues()
-      .then(() => leagueStore.fetchFantasyLeagues(Number(route.query.fantasyLeagueId)))
-      .then(() => leagueStore.fetchFantasyDraftPoints());
-  }
 })
 
 watch(() => leagueStore.selectedLeague, () => {
@@ -82,10 +67,12 @@ watch(() => leagueStore.selectedLeague, () => {
 })
 
 watch(() => leagueStore.selectedFantasyLeague, () => {
-  router.push({
-    path: route.path,
-    query: { fantasyLeagueId: leagueStore.selectedFantasyLeague.id }
-  })
+  if (leagueStore.selectedFantasyLeague) {
+    router.push({
+      path: route.path,
+      query: { fantasyLeagueId: leagueStore.selectedFantasyLeague.id }
+    })
+  }
 })
 
 </script>

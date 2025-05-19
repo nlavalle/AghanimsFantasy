@@ -21,6 +21,9 @@ public class FantasyDraft
     [Column("discord_account_id")]
     public long? DiscordAccountId { get; set; }
 
+    [Column("user_id")]
+    public string? UserId { get; set; }
+
     [Column("draft_created")]
     public DateTime? DraftCreated { get; set; }
 

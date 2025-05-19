@@ -49,13 +49,14 @@ internal class FantasyLedgerContext : DotaOperationContext
                     .Include(fd => fd.DraftPickPlayers)
                         .ThenInclude(dpp => dpp.FantasyPlayer)
                     .Where(fd => fd.FantasyLeagueId == unpaidFantasyLeague.Id)
+                    .Where(fd => fd.UserId != null)
                     .Where(fd => _dbContext.DiscordUsers.Select(du => du.Id).Contains(fd.DiscordAccountId.GetValueOrDefault()))
                     .ToListAsync();
 
                 List<FantasyLedger> newFantasyLedgers = unpaidFantasyDrafts
                     .Select(fd => new FantasyLedger()
                     {
-                        DiscordId = fd.DiscordAccountId.GetValueOrDefault(),
+                        UserId = fd.UserId!,
                         Amount = fd.DraftPickPlayers.Sum(dpp =>
                             {
                                 var winnings = 300 - GetQuintile(dpp.FantasyPlayer!, fantasyResults) * 60;

@@ -14,19 +14,19 @@
           <v-spacer />
           <UserBalance />
         </v-row>
-        <v-row v-if="leagueStore.selectedFantasyLeague && !updateDisabled">
-          <fantasy-lock-timer class="ma-3" :target-time="leagueStore.selectedFantasyLeague.fantasyDraftLocked" />
+        <v-row v-if="fantasyLeagueStore.selectedFantasyLeague && !updateDisabled">
+          <fantasy-lock-timer class="ma-3" :target-time="fantasyLeagueStore.selectedFantasyLeague.fantasyDraftLocked" />
         </v-row>
         <v-row>
           <v-tabs-window v-model="fantasyTab" style="width:100%;overflow: visible">
             <v-tabs-window-item value="current">
-              <div v-if="leagueStore.selectedFantasyDraftPoints">
-                <CurrentDraft :FantasyPoints="leagueStore.selectedFantasyDraftPoints" />
+              <div v-if="fantasyLeagueStore.selectedFantasyDraftPoints">
+                <CurrentDraft :FantasyPoints="fantasyLeagueStore.selectedFantasyDraftPoints" />
               </div>
             </v-tabs-window-item>
             <v-tabs-window-item value="draft" style="overflow: visible !important">
               <v-col>
-                <v-row v-if="!authenticated">
+                <v-row v-if="!authStore.isAuthenticated">
                   <v-card class="ma-5">
                     <v-card-title style="text-wrap:wrap">
                       <v-row>
@@ -34,7 +34,7 @@
                           <span class="not-authenticated">Please login to save your draft</span>
                         </v-col>
                         <v-col cols="4" class="mr-1" align-self="center">
-                          <LoginDiscord class="login-discord" />
+                          <LoginModal class="login-modal" />
                         </v-col>
                       </v-row>
                     </v-card-title>
@@ -43,13 +43,13 @@
                 <v-row v-if="updateDraftVisibility || updateDisabled">
                   <v-card class="ma-5" disabled>
                     <v-card-title style="text-wrap:wrap">
-                      {{ `Drafting for Fantasy League: ${leagueStore.selectedLeague!.name} is locked` }}
+                      {{ `Drafting for Fantasy League: ${fantasyLeagueStore.selectedLeague!.name} is locked` }}
                     </v-card-title>
                   </v-card>
                 </v-row>
                 <v-row>
                   <v-col>
-                    <v-row v-if="leagueStore.selectedFantasyLeague">
+                    <v-row v-if="fantasyLeagueStore.selectedFantasyLeague">
                       <CreateDraft @saveDraft="saveDraft" />
                     </v-row>
                   </v-col>
@@ -57,10 +57,10 @@
               </v-col>
             </v-tabs-window-item>
             <v-tabs-window-item value="leaderboard">
-              <v-col v-if="authenticated">
+              <v-col v-if="authStore.isAuthenticated">
                 <v-row class="mt-1">
                   <leaderboard-component class="leaderboardComponent" leaderboardTitle="Fantasy Leaderboard"
-                    headerName="Draft Player" headerValue="Points" :authenticatedUser="user"
+                    headerName="Draft Player" headerValue="Points" :authenticatedUser="authStore.currentUser"
                     :boardData="fantasyDraftStore.fantasyLeaderboardData" />
                 </v-row>
                 <v-row class="ma-1" style="max-width: 600px">
@@ -82,7 +82,7 @@
                         <span class="not-authenticated">Please login to view the leaderboard</span>
                       </v-col>
                       <v-col cols="4" class="mr-1" align-self="center">
-                        <LoginDiscord class="login-discord" />
+                        <LoginModal class="login-modal" />
                       </v-col>
                     </v-row>
                   </v-card-title>
@@ -91,8 +91,8 @@
             </v-tabs-window-item>
             <v-tabs-window-item value="match">
               <v-col>
-                <v-row v-if="leagueStore.selectedFantasyDraftPoints && fantasyTab == 'match'">
-                  <MatchDataTable v-model:selectedFantasyLeague="leagueStore.selectedFantasyLeague"
+                <v-row v-if="fantasyLeagueStore.selectedFantasyDraftPoints && fantasyTab == 'match'">
+                  <MatchDataTable v-model:selectedFantasyLeague="fantasyLeagueStore.selectedFantasyLeague"
                     v-model:draftFiltered="draftFiltered">
                   </MatchDataTable>
                 </v-row>
@@ -109,7 +109,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onBeforeMount, ref, watch } from 'vue';
 import { VCard, VCardTitle, VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem, VSpacer, VProgressCircular } from 'vuetify/components';
 import { useAuthStore, type User } from '@/stores/auth';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
@@ -117,7 +117,7 @@ import CurrentDraft from '@/components/Fantasy/CurrentDraft.vue';
 import CreateDraft from '@/components/Fantasy/CreateDraft/CreateDraft.vue';
 import MatchDataTable from '@/components/Stats/MatchDataTable.vue';
 import { fantasyDraftState } from '@/components/Fantasy/fantasyDraft';
-import LoginDiscord from '@/components/LoginDiscord.vue';
+import LoginModal from '@/components/Auth/LoginModal.vue';
 import AlertDialog from '@/components/AlertDialog.vue';
 import ErrorDialog from '@/components/ErrorDialog.vue';
 import { useFantasyDraftStore } from '@/stores/fantasyDraft';
@@ -126,7 +126,7 @@ import FantasyLockTimer from '@/components/Fantasy/FantasyLockTimer.vue';
 import UserBalance from '@/components/Fantasy/UserBalance.vue';
 
 const authStore = useAuthStore();
-const leagueStore = useFantasyLeagueStore();
+const fantasyLeagueStore = useFantasyLeagueStore();
 const fantasyDraftStore = useFantasyDraftStore();
 const { fantasyDraftPicks, setFantasyDraftPicks, setFantasyPlayerPoints, clearFantasyDraftPicks } = fantasyDraftState();
 const draftFiltered = true;
@@ -138,15 +138,11 @@ const errorDetails = ref<Error>();
 const fantasyTab = ref('current')
 const updateDraftVisibility = ref(false);
 
-const user = computed(() => {
-  return authStore.user as User
-})
-
 const isMounted = ref(false);
 
 const updateDisabled = computed(() => {
   var currentDate = new Date();
-  var draftLockEpoch: number = leagueStore.selectedFantasyLeague ? leagueStore.selectedFantasyLeague.fantasyDraftLocked : 0;
+  var draftLockEpoch: number = fantasyLeagueStore.selectedFantasyLeague ? fantasyLeagueStore.selectedFantasyLeague.fantasyDraftLocked : 0;
   var lockDate = new Date(draftLockEpoch * 1000);
   //return currentDate > lockDate && userDraftPoints.value != {}; // TODO: Rethink logic on people who draft late
   return currentDate > lockDate;
@@ -162,7 +158,7 @@ const saveDraft = async () => {
         left: 0,
         behavior: 'smooth'
       });
-      leagueStore.fetchFantasyDraftPoints()?.then(() => fantasyDraftStore.fetchLeaderboard());
+      fantasyLeagueStore.fetchFantasyDraftPoints()?.then(() => fantasyDraftStore.fetchLeaderboard());
       fantasyTab.value = 'current';
     })
     .catch(error => {
@@ -186,39 +182,37 @@ const scrollAfterAlertDialog = () => {
   }, 200);
 }
 
-onMounted(async () => {
-  if (authStore.authenticated && leagueStore.selectedFantasyLeague) {
+onBeforeMount(async () => {
+  if (authStore.authenticated && fantasyLeagueStore.selectedFantasyLeague) {
     await fantasyDraftStore.fetchLeaderboard()
-    await leagueStore.fetchFantasyPlayerViewModels()
-    await leagueStore.fetchFantasyPlayerPoints()
-    if (leagueStore.selectedFantasyDraftPoints && (leagueStore.selectedFantasyDraftPoints?.fantasyDraft.draftPickPlayers.length ?? 0 > 0)) {
-      setFantasyDraftPicks(leagueStore.selectedFantasyDraftPoints.fantasyDraft.draftPickPlayers);
+    await fantasyLeagueStore.fetchFantasyPlayerViewModels()
+    await fantasyLeagueStore.fetchFantasyPlayerPoints()
+    if (fantasyLeagueStore.selectedFantasyDraftPoints && (fantasyLeagueStore.selectedFantasyDraftPoints?.fantasyDraft.draftPickPlayers.length ?? 0 > 0)) {
+      setFantasyDraftPicks(fantasyLeagueStore.selectedFantasyDraftPoints.fantasyDraft.draftPickPlayers);
     }
     isMounted.value = true;
-  } else if (!authStore.authenticated && leagueStore.selectedFantasyLeague) {
+  } else if (!authStore.authenticated && fantasyLeagueStore.selectedFantasyLeague) {
     fantasyTab.value = 'draft';
     isMounted.value = true;
   }
+  fantasyDraftStore.startFantasyDraftPolling();
+  fantasyLeagueStore.startFantasyViewPolling();
 });
 
-watch(() => leagueStore.selectedFantasyLeague, () => {
-  leagueStore.fetchFantasyPlayerPoints()?.then(() => setFantasyPlayerPoints(leagueStore.fantasyPlayerPoints))
+watch(() => fantasyLeagueStore.selectedFantasyLeague, () => {
+  fantasyLeagueStore.fetchFantasyPlayerPoints()?.then(() => setFantasyPlayerPoints(fantasyLeagueStore.fantasyPlayerPoints))
     .then(() => {
       if (authStore.authenticated) fantasyDraftStore.fetchLeaderboard()
-      leagueStore.fetchFantasyPlayerViewModels();
+      fantasyLeagueStore.fetchFantasyPlayerViewModels();
     })
 })
 
-watch(() => leagueStore.selectedFantasyDraftPoints, () => {
-  if (authStore.authenticated && leagueStore.selectedFantasyDraftPoints?.fantasyDraft && leagueStore.selectedFantasyDraftPoints.fantasyDraft.draftPickPlayers.length > 0) {
-    setFantasyDraftPicks(leagueStore.selectedFantasyDraftPoints.fantasyDraft.draftPickPlayers);
+watch(() => fantasyLeagueStore.selectedFantasyDraftPoints, () => {
+  if (authStore.authenticated && fantasyLeagueStore.selectedFantasyDraftPoints?.fantasyDraft && fantasyLeagueStore.selectedFantasyDraftPoints.fantasyDraft.draftPickPlayers.length > 0) {
+    setFantasyDraftPicks(fantasyLeagueStore.selectedFantasyDraftPoints.fantasyDraft.draftPickPlayers);
   } else {
     clearFantasyDraftPicks()
   }
-})
-
-const authenticated = computed(() => {
-  return authStore.authenticated
 })
 
 </script>
@@ -229,7 +223,7 @@ const authenticated = computed(() => {
   font-size: 16px;
 }
 
-.login-discord {
+.login-modal {
   cursor: pointer;
 }
 

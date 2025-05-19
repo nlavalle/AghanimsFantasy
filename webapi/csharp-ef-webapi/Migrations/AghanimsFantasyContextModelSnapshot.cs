@@ -19,10 +19,87 @@ namespace csharp_ef_webapi.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("nadcl")
-                .HasAnnotation("ProductVersion", "8.0.1")
+                .HasAnnotation("ProductVersion", "8.0.15")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("DataAccessLibrary.Data.Identity.AghanimsFantasyUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("text");
+
+                    b.Property<string>("DiscordHandle")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("DiscordId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex");
+
+                    b.ToTable("AspNetUsers", "nadcl");
+
+                    b.HasAnnotation("Relational:JsonPropertyName", "user");
+                });
 
             modelBuilder.Entity("DataAccessLibrary.Models.Discord.DiscordOutbox", b =>
                 {
@@ -80,8 +157,6 @@ namespace csharp_ef_webapi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("discord_users", "nadcl");
-
-                    b.HasAnnotation("Relational:JsonPropertyName", "discord_user");
                 });
 
             modelBuilder.Entity("DataAccessLibrary.Models.Fantasy.FantasyDraft", b =>
@@ -108,6 +183,10 @@ namespace csharp_ef_webapi.Migrations
                     b.Property<int>("FantasyLeagueId")
                         .HasColumnType("integer")
                         .HasColumnName("fantasy_league_id");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("text")
+                        .HasColumnName("user_id");
 
                     b.HasKey("Id");
 
@@ -358,9 +437,15 @@ namespace csharp_ef_webapi.Migrations
                         .HasColumnType("text")
                         .HasColumnName("source_type");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("user_id")
+                        .HasAnnotation("Relational:JsonPropertyName", "user_id");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("DiscordId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("fantasy_ledger", "nadcl");
                 });
@@ -857,11 +942,17 @@ namespace csharp_ef_webapi.Migrations
                         .HasColumnName("is_admin")
                         .HasAnnotation("Relational:JsonPropertyName", "is_admin");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("user_id")
+                        .HasAnnotation("Relational:JsonPropertyName", "user_id");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("DiscordUserId");
-
                     b.HasIndex("FantasyLeagueId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("dota_fantasy_private_league_players", "nadcl");
                 });
@@ -1023,7 +1114,7 @@ namespace csharp_ef_webapi.Migrations
 
                     b.ToTable((string)null);
 
-                    b.ToView("fantasy_player_probabilties", "nadcl");
+                    b.ToView("fantasy_player_probabilities", "nadcl");
                 });
 
             modelBuilder.Entity("DataAccessLibrary.Models.FantasyPlayerBudgetProbabilityTable", b =>
@@ -2902,6 +2993,150 @@ namespace csharp_ef_webapi.Migrations
                     b.HasAnnotation("Relational:JsonPropertyName", "players");
                 });
 
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex");
+
+                    b.ToTable("AspNetRoles", "nadcl");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "07aea6b5-5780-4779-875e-e7d457e90030",
+                            Name = "Admin"
+                        },
+                        new
+                        {
+                            Id = "d113700f-8542-43f1-90ec-b9dc05239b7e",
+                            Name = "PrivateFantasyLeagueAdmin"
+                        });
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RoleId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims", "nadcl");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserClaims", "nadcl");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserLogins", "nadcl");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RoleId")
+                        .HasColumnType("text");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles", "nadcl");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("text");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens", "nadcl");
+                });
+
             modelBuilder.Entity("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch", b =>
                 {
                     b.Property<decimal>("match_id")
@@ -3085,13 +3320,13 @@ namespace csharp_ef_webapi.Migrations
 
             modelBuilder.Entity("DataAccessLibrary.Models.Fantasy.FantasyLedger", b =>
                 {
-                    b.HasOne("DataAccessLibrary.Models.Discord.DiscordUser", "DiscordUser")
+                    b.HasOne("DataAccessLibrary.Data.Identity.AghanimsFantasyUser", "User")
                         .WithMany()
-                        .HasForeignKey("DiscordId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("DiscordUser");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DataAccessLibrary.Models.Fantasy.FantasyMatch", b =>
@@ -3190,21 +3425,21 @@ namespace csharp_ef_webapi.Migrations
 
             modelBuilder.Entity("DataAccessLibrary.Models.Fantasy.FantasyPrivateLeaguePlayer", b =>
                 {
-                    b.HasOne("DataAccessLibrary.Models.Discord.DiscordUser", "DiscordUser")
-                        .WithMany()
-                        .HasForeignKey("DiscordUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("DataAccessLibrary.Models.Fantasy.FantasyLeague", "FantasyLeague")
                         .WithMany("FantasyPrivateLeaguePlayers")
                         .HasForeignKey("FantasyLeagueId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("DiscordUser");
+                    b.HasOne("DataAccessLibrary.Data.Identity.AghanimsFantasyUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("FantasyLeague");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DataAccessLibrary.Models.FantasyNormalizedAverages", b =>
@@ -3421,6 +3656,57 @@ namespace csharp_ef_webapi.Migrations
                         .IsRequired();
 
                     b.Navigation("Match");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+                {
+                    b.HasOne("DataAccessLibrary.Data.Identity.AghanimsFantasyUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+                {
+                    b.HasOne("DataAccessLibrary.Data.Identity.AghanimsFantasyUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataAccessLibrary.Data.Identity.AghanimsFantasyUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+                {
+                    b.HasOne("DataAccessLibrary.Data.Identity.AghanimsFantasyUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("SteamKit2.GC.Dota.Internal.CMsgDOTAMatch", b =>

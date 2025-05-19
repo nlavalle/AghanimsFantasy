@@ -8,6 +8,10 @@ import type { FantasyPlayerStats } from '@/types/FantasyPlayerStats'
 export const useFantasyLeagueStore = defineStore({
   id: 'league',
   state: () => ({
+    fantasyLeaguePollInterval: null as ReturnType<typeof setInterval> | null,
+    fantasyLeaguePollFailureCount: 0,
+    fantasyViewPollInterval: null as ReturnType<typeof setInterval> | null,
+    fantasyViewPollFailureCount: 0,
     leagues: [] as League[],
     fantasyLeagues: [] as FantasyLeague[],
     selectedLeague: {
@@ -30,30 +34,60 @@ export const useFantasyLeagueStore = defineStore({
   }),
 
   actions: {
+    startFantasyLeaguePolling() {
+      this.fantasyLeaguePollInterval = setInterval(() =>
+        this.fetchLeagues()
+          .then(() => this.fetchFantasyLeagues())
+          .then(() => this.fantasyLeaguePollFailureCount = 0) // reset on success
+          .catch(() => {
+            this.fantasyLeaguePollFailureCount++
+            if (this.fantasyLeaguePollFailureCount > 3) {
+              console.log("Too many failures encountered, stopping fantasy league polling")
+              this.stopFantasyLeaguePolling()
+            }
+          }),
+        30000) // poll every 30sec
+    },
+
+    stopFantasyLeaguePolling() {
+      if (this.fantasyLeaguePollInterval) {
+        clearInterval(this.fantasyLeaguePollInterval);
+        this.fantasyLeaguePollInterval = null;
+      }
+    },
+
+    startFantasyViewPolling() {
+      this.fantasyViewPollInterval = setInterval(() =>
+        this.fetchFantasyPlayerViewModels()
+          ?.then(() => this.fetchFantasyPlayerPoints())
+          .then(() => this.fantasyViewPollFailureCount = 0) // reset on success
+          .catch(() => {
+            this.fantasyViewPollFailureCount++
+            if (this.fantasyViewPollFailureCount > 3) {
+              console.log("Too many failures encountered, stopping fantasy view polling")
+              this.stopFantasyViewPolling()
+            }
+          }),
+        30000) // poll every 30sec
+    },
+
+    stopFantasyViewPolling() {
+      if (this.fantasyViewPollInterval) {
+        clearInterval(this.fantasyViewPollInterval);
+        this.fantasyViewPollInterval = null;
+      }
+    },
+
     fetchLeagues() {
       return localApiService.getLeagues().then((leagueResult: any) => {
         this.setLeagues(leagueResult);
-        if (this.selectedLeague.league_id == 0) this.setSelectedLeague(this.defaultLeague);
       })
     },
 
-    fetchFantasyLeagues(selectFantasyLeagueId: number | undefined) {
-      if (this.leagues.length == 0) this.fetchLeagues();
+    fetchFantasyLeagues() {
       return localApiService.getFantasyLeagues()
         .then((fantasyLeagueResult: any) => {
           this.setFantasyLeagues(fantasyLeagueResult);
-          if (selectFantasyLeagueId) {
-            let fantasyLeagueLookup = this.fantasyLeagues.find(fl => fl.id == selectFantasyLeagueId)
-            if (fantasyLeagueLookup) {
-              let leagueLookup = this.leagues.find(l => l.league_id == fantasyLeagueLookup.leagueId)
-              if (leagueLookup) {
-                this.setSelectedLeague(leagueLookup);
-                this.setSelectedFantasyLeague(fantasyLeagueLookup);
-              }
-            }
-          } else if (this.selectedFantasyLeague.id == 0) {
-            this.setSelectedFantasyLeague(this.defaultFantasyLeague);
-          }
         })
     },
 
@@ -75,6 +109,7 @@ export const useFantasyLeagueStore = defineStore({
     },
 
     fetchFantasyPlayerPoints() {
+      if (!this.selectedFantasyLeague) return
       if (this.selectedFantasyLeague.id) {
         return localApiService.getPlayerFantasyStats(this.selectedFantasyLeague.id)
           .then((result: any) => {
@@ -105,6 +140,22 @@ export const useFantasyLeagueStore = defineStore({
 
     setSelectedFantasyLeague(fantasyLeagues: FantasyLeague) {
       this.selectedFantasyLeague = fantasyLeagues
+    },
+
+    setSelectedFantasyLeagueId(selectFantasyLeagueId: number) {
+      if (selectFantasyLeagueId) {
+        let fantasyLeagueLookup = this.fantasyLeagues.find(fl => fl.id == selectFantasyLeagueId)
+        if (fantasyLeagueLookup) {
+          let leagueLookup = this.leagues.find(l => l.league_id == fantasyLeagueLookup.leagueId)
+          if (leagueLookup) {
+            this.setSelectedLeague(leagueLookup);
+            this.setSelectedFantasyLeague(fantasyLeagueLookup);
+          }
+        }
+      } else if (this.selectedFantasyLeague.id == 0) {
+        this.setSelectedLeague(this.defaultLeague);
+        this.setSelectedFantasyLeague(this.defaultFantasyLeague);
+      }
     },
 
     clearSelectedLeague() {

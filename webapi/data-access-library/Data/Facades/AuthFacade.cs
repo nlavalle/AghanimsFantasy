@@ -16,38 +16,14 @@ public class AuthFacade
         _dbContext = dbContext;
     }
 
-    public async Task<bool> IsUserAdminAsync(long UserDiscordId)
+    public async Task<bool> IsUserPrivateFantasyAdminAsync(string UserId, long FantasyLeagueId)
     {
-        _logger.LogDebug($"Checking if Discord ID {UserDiscordId} is admin.");
+        _logger.LogDebug($"Checking if User ID {UserId} is admin for a private fantasy league {FantasyLeagueId}.");
 
-        var discordUser = await _dbContext.DiscordUsers.FindAsync(UserDiscordId);
-        if (discordUser == null) return false;
+        var user = await _dbContext.FantasyPrivateLeaguePlayers.Where(fplp => fplp.FantasyLeagueId == FantasyLeagueId && fplp.UserId == UserId).FirstOrDefaultAsync();
+        if (user == null) return false;
 
-        if (discordUser.IsAdmin) return true;
-
-        return false;
-    }
-
-    public async Task<bool> IsUserPrivateFantasyAdminAsync(long UserDiscordId)
-    {
-        _logger.LogDebug($"Checking if Discord ID {UserDiscordId} is admin for any private fantasy league.");
-
-        var discordUser = await _dbContext.FantasyPrivateLeaguePlayers.Where(fplp => fplp.DiscordUserId == UserDiscordId).ToListAsync();
-        if (discordUser == null) return false;
-
-        if (discordUser.Where(du => du.IsAdmin).Count() > 0) return true;
-
-        return false;
-    }
-
-    public async Task<bool> IsUserPrivateFantasyAdminAsync(long UserDiscordId, long FantasyLeagueId)
-    {
-        _logger.LogDebug($"Checking if Discord ID {UserDiscordId} is admin for a private fantasy league {FantasyLeagueId}.");
-
-        var discordUser = await _dbContext.FantasyPrivateLeaguePlayers.Where(fplp => fplp.FantasyLeagueId == FantasyLeagueId && fplp.DiscordUserId == UserDiscordId).FirstOrDefaultAsync();
-        if (discordUser == null) return false;
-
-        if (discordUser.IsAdmin) return true;
+        if (user.IsAdmin) return true;
 
         return false;
     }

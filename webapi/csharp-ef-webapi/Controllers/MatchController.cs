@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using DataAccessLibrary.Data;
 using DataAccessLibrary.Models.GameCoordinator;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace csharp_ef_webapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [OutputCache]
     public class MatchController : ControllerBase
     {
         private readonly AghanimsFantasyContext _dbContext;

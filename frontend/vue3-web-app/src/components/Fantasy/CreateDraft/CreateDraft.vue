@@ -1,7 +1,7 @@
 <template>
     <div>
         <!-- Set up the sticky top objects -->
-        <div v-if="isDesktop" style="margin-top:40px">
+        <div v-if="!display.mobile.value" style="margin-top:40px">
             <div class="sticky-parent right-0 d-flex">
                 <div class="sticky-child" style="min-width: 100px;">
                     <span class="sticky-child gold d-flex">Budget:
@@ -63,7 +63,7 @@
             </div>
         </div>
         <!-- Set up collapsible (on mobile) player stats sidebar -->
-        <div v-if="isDesktop">
+        <div v-if="!display.mobile.value">
             <div class="sticky-parent right-0" style="width:450px; margin-top:100px;">
                 <PlayerStats class="sticky-child" style="height:600px;top:70px" />
             </div>
@@ -75,7 +75,7 @@
         </div>
 
 
-        <div v-if="isDesktop" style="margin-top:120px;margin-right:450px;min-height:620px;">
+        <div v-if="!display.mobile.value" style="margin-top:120px;margin-right:450px;min-height:620px;">
             <PlayerPicksAvailable class="picks-available" />
         </div>
         <div v-else style="margin-top:140px;">
@@ -94,8 +94,9 @@ import GoldSpan from '@/components/Dom/GoldSpan.vue';
 import { useAuthStore } from '@/stores/auth';
 import { fantasyDraftState } from '../fantasyDraft';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
+import { useDisplay } from 'vuetify';
 
-const isDesktop = ref(window.outerWidth >= 600);
+const display = useDisplay()
 
 const authStore = useAuthStore();
 

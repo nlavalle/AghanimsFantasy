@@ -1,48 +1,32 @@
-using Microsoft.AspNetCore.Mvc;
+using csharp_ef_webapi.Services;
 using DataAccessLibrary.Models.Fantasy;
 using Microsoft.AspNetCore.Authorization;
-using csharp_ef_webapi.Services;
-using DataAccessLibrary.Models.Discord;
+using Microsoft.AspNetCore.Mvc;
 
 namespace csharp_ef_webapi.Controllers
 {
+    [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     [ApiController]
     public class AdminController : ControllerBase
     {
-        private readonly DiscordWebApiService _discordWebApiService;
         private readonly FantasyServiceAdmin _fantasyServiceAdmin;
 
         public AdminController(
-            DiscordWebApiService discordWebApiService,
             FantasyServiceAdmin fantasyServiceAdmin
         )
         {
-            _discordWebApiService = discordWebApiService;
             _fantasyServiceAdmin = fantasyServiceAdmin;
         }
 
         // GET: api/Admin/FantasyLeague
-        [Authorize]
         [HttpGet("fantasyleague")]
         public async Task<ActionResult<IEnumerable<FantasyLeague>>> GetAdminFantasyLeagues()
         {
             // Custom URL for admin page to always fetch everything incl. private leagues
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-
-                if (discordUser == null)
-                {
-                    return Unauthorized();
-                }
-
-                if (!discordUser.IsAdmin)
-                {
-                    return Unauthorized();
-                }
-
-                return Ok(await _fantasyServiceAdmin.GetFantasyLeaguesAsync(discordUser));
+                return Ok(await _fantasyServiceAdmin.GetFantasyLeaguesAsync());
             }
             catch (ArgumentException ex)
             {
@@ -53,26 +37,12 @@ namespace csharp_ef_webapi.Controllers
 
         // POST: api/admin/fantasyleague/5/team/1
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [Authorize]
         [HttpPost("fantasyleague/{fantasyLeagueId}/team/{teamId}")]
         public async Task<ActionResult> PostFantasyPlayersByTeam(int fantasyLeagueId, long teamId)
         {
-            // Admin only operation
-            DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-
-            if (discordUser == null)
-            {
-                return Unauthorized();
-            }
-
-            if (!discordUser.IsAdmin)
-            {
-                return Unauthorized();
-            }
-
             try
             {
-                await _fantasyServiceAdmin.AddFantasyPlayersByTeam(discordUser, teamId, fantasyLeagueId);
+                await _fantasyServiceAdmin.AddFantasyPlayersByTeam(teamId, fantasyLeagueId);
                 return Created();
             }
             catch (UnauthorizedAccessException)

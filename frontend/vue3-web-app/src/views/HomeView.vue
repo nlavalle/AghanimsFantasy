@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-row>
-      <h1><i>Welcome to Aghanim's Fantasy League for Dota 2</i></h1>
+      <h1><i>Welcome to Aghanim's Dota 2 Fantasy League!</i></h1>
     </v-row>
     <v-row>
       <v-card class="ma-2 pa-1" variant="elevated" color="primary" to="/fantasy">

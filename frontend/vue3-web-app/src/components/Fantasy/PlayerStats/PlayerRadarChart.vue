@@ -1,11 +1,12 @@
 <template>
-    <v-row :class="isDesktop ? 'radar-text-desktop' : `radar-text-mobile`">
+    <v-row :class="!display.mobile.value ? 'radar-text-desktop' : `radar-text-mobile`">
         <v-col>
             <v-row justify="center">
                 <span>{{ props.title }}</span>
             </v-row>
             <v-row justify="center">
-                <Radar :style="{ width: isDesktop ? '200px' : '280px', height: isDesktop ? '180px' : '180px' }"
+                <Radar
+                    :style="{ width: !display.mobile.value ? '200px' : '280px', height: !display.mobile.value ? '180px' : '180px' }"
                     :data="chartData" :options="options">
                 </Radar>
             </v-row>
@@ -26,6 +27,7 @@ import {
     Tooltip,
     Legend
 } from 'chart.js'
+import { useDisplay } from 'vuetify';
 
 ChartJS.register(
     RadialLinearScale,
@@ -51,7 +53,7 @@ const props = defineProps({
     }
 })
 
-const isDesktop = ref(window.outerWidth >= 600);
+const display = useDisplay()
 
 const options = {
     responsive: true,
@@ -100,8 +102,6 @@ const chartData = ref<any>({
         },
     ]
 })
-
-// const isDesktop = ref(window.outerWidth >= 600);
 
 onMounted(() => {
     if (props.chartDataset) {

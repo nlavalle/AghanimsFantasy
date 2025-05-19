@@ -13,13 +13,12 @@
         <ol>
             <li class="leaderboard-item" v-for="item in props.boardData" :key="item.id">
                 <div class="d-flex justify-around">
-                    <span v-if="item.description" class="player-descriptors"
-                        :style="{ fontWeight: item.description == props.authenticatedUser?.name ? 'bold' : 'normal' }">
-                        <img v-if="item.isTeam" height="25px" width="25px" :src="getImageUrl(item.teamId)" />
-                        {{ item.description }}
+                    <span v-if="item.userName" class="player-descriptors"
+                        :style="{ fontWeight: item.userName == props.authenticatedUser?.name ? 'bold' : 'normal' }">
+                        {{ item.userName }}
                     </span>
                     <span v-if="item.value" class="player-data"
-                        :style="{ fontWeight: item.description == props.authenticatedUser?.name ? 'bold' : 'normal' }">
+                        :style="{ fontWeight: item.userName == props.authenticatedUser?.name ? 'bold' : 'normal' }">
                         {{ item.value.toFixed(2).toLocaleString() }}</span>
                 </div>
                 <div class="leaderboard-details bg-surface"
@@ -58,17 +57,12 @@ const props = defineProps({
         required: true
     },
     authenticatedUser: {
-        type: Object as PropType<User>,
+        type: Object as PropType<Partial<User>>,
         required: false
     }
 })
 
 const fantasyLeagueStore = useFantasyLeagueStore();
-
-const getImageUrl = (teamId: number) => {
-    if (teamId == 0) return undefined
-    return `logos/teams_logo_${teamId}.png`
-}
 
 </script>
 

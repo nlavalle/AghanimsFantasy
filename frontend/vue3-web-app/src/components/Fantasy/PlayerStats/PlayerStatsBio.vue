@@ -3,10 +3,10 @@
         <v-col class="v-col-auto">
             <v-row>
                 <img style="height:250px;" :src="selectedPlayer!.dotaAccount.steamProfilePicture"
-                    :style="{ height: isDesktop ? '180px' : '140px' }" />
+                    :style="{ height: !display.mobile.value ? '180px' : '140px' }" />
             </v-row>
         </v-col>
-        <v-col style="width:100%" :class="isDesktop ? 'bio-text-desktop' : 'bio-text-mobile'">
+        <v-col style="width:100%" :class="!display.mobile.value ? 'bio-text-desktop' : 'bio-text-mobile'">
             <v-row class="d-flex flex-column" style="width:100%;height:100%" justify="space-evenly">
                 <span>Name: <b>{{ selectedPlayer!.dotaAccount.name }}</b></span>
                 <span>Team: <b>{{ selectedPlayer!.team.name }}</b></span>
@@ -21,12 +21,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
 import { VRow, VCol } from 'vuetify/components';
 import { fantasyDraftState } from '../fantasyDraft';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
+import { useDisplay } from 'vuetify';
 
-const isDesktop = ref(window.outerWidth >= 600);
+const display = useDisplay()
 
 const { selectedPlayer } = fantasyDraftState();
 const leagueStore = useFantasyLeagueStore();

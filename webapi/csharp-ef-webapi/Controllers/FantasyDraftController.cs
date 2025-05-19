@@ -1,43 +1,56 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using DataAccessLibrary.Models;
-using DataAccessLibrary.Models.Discord;
-using DataAccessLibrary.Models.Fantasy;
+using csharp_ef_webapi.Extensions;
 using csharp_ef_webapi.Services;
+using DataAccessLibrary.Models;
+using DataAccessLibrary.Models.Fantasy;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace csharp_ef_webapi.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class FantasyDraftController : ControllerBase
     {
-        private readonly DiscordWebApiService _discordWebApiService;
         private readonly FantasyService _fantasyService;
 
         public FantasyDraftController(
-            DiscordWebApiService discordWebApiService,
             FantasyService fantasyService
         )
         {
-            _discordWebApiService = discordWebApiService;
             _fantasyService = fantasyService;
         }
 
         // GET: api/fantasydraft/5
-        [Authorize]
         [HttpGet("{fantasyLeagueId}")]
+        [AuthenticatedETag]
         public async Task<IActionResult> GetUserDraft(int fantasyLeagueId)
         {
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
+                return Ok(await _fantasyService.GetFantasyDraft(HttpContext.User, fantasyLeagueId));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
-                if (discordUser == null)
+        // GET: api/fantasydraft/5/drafts/points
+        [HttpGet("{leagueId}/drafts/points")]
+        [AuthenticatedETag]
+        public async Task<ActionResult<IEnumerable<FantasyDraftPointTotals>>> GetUserDraftFantasyPoints(int leagueId)
+        {
+            try
+            {
+                if (HttpContext.User == null)
                 {
-                    return NotFound();
+                    return Ok(new List<FantasyDraftPointTotals>());
                 }
 
-                return Ok(await _fantasyService.GetFantasyDraft(discordUser, fantasyLeagueId));
+                IEnumerable<FantasyDraftPointTotals> fantasyDraftPointTotals = await _fantasyService.GetFantasyDraftPointTotals(HttpContext.User, leagueId);
+
+                return Ok(fantasyDraftPointTotals);
             }
             catch (ArgumentException ex)
             {
@@ -46,8 +59,8 @@ namespace csharp_ef_webapi.Controllers
         }
 
         // GET: api/fantasydraft/5/matches/points
-        [Authorize]
         [HttpGet("{fantasyLeagueId}/matches/points")]
+        [AuthenticatedETag]
         public async Task<ActionResult<List<FantasyPlayerPoints>>> GetDraftFantasyPlayersPointsByMatch(int? fantasyLeagueId, [FromQuery] int? limit)
         {
             if (fantasyLeagueId == null)
@@ -61,14 +74,7 @@ namespace csharp_ef_webapi.Controllers
 
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-
-                if (discordUser == null)
-                {
-                    return NotFound();
-                }
-
-                return Ok(await _fantasyService.GetFantasyPlayerPoints(discordUser, fantasyLeagueId.Value, limit.Value));
+                return Ok(await _fantasyService.GetFantasyPlayerPoints(HttpContext.User, fantasyLeagueId.Value, limit.Value));
             }
             catch (ArgumentException ex)
             {
@@ -78,21 +84,12 @@ namespace csharp_ef_webapi.Controllers
 
         // POST: api/fantasydraft
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [Authorize]
         [HttpPost]
         public async Task<ActionResult> PostUserDraft(FantasyDraft fantasyDraft)
         {
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-
-                if (discordUser == null)
-                {
-                    // If we still don't have a discord user something failed and we need to throw a not found to the site user
-                    return NotFound();
-                }
-
-                var fantasyDraftPostResponse = await _fantasyService.UpdateFantasyDraft(discordUser, fantasyDraft);
+                var fantasyDraftPostResponse = await _fantasyService.UpdateFantasyDraft(HttpContext.User, fantasyDraft);
                 return CreatedAtAction(nameof(GetUserDraft), new { fantasyLeagueId = fantasyDraft.FantasyLeagueId }, fantasyDraftPostResponse);
             }
             catch (ArgumentException ex)

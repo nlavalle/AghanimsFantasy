@@ -7,7 +7,8 @@
                 </v-card-text>
 
                 <v-card-text>
-                    <p>There was an issue updating the fantasy draft. {{ props.error }}
+                    <p>
+                        {{ props.error }}
                     </p>
                 </v-card-text>
 

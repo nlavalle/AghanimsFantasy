@@ -1,10 +1,11 @@
 using csharp_ef_webapi.Services;
 using DataAccessLibrary.Data;
 using DataAccessLibrary.Data.Facades;
+using DataAccessLibrary.Data.Identity;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Headers;
@@ -17,15 +18,14 @@ var vueFrontEndOrigins = "vueFrontEnd";
 
 if (builder.Environment.IsDevelopment())
 {
-    //Set CORS
+    //Set CORS for Dev
     builder.Services.AddCors(
         options =>
         {
             options.AddPolicy(name: vueFrontEndOrigins,
                                 policy =>
                                 {
-                                    policy.WithOrigins("http://localhost:8080",
-                                                        "http://localhost:9000")
+                                    policy.WithOrigins("https://localhost:5001", "https://localhost:5173")
                                         .AllowAnyHeader()
                                         .WithMethods("GET", "POST")
                                         .AllowCredentials();
@@ -64,6 +64,10 @@ builder.Services.AddDbContext<AghanimsFantasyContext>(
     }
 );
 
+builder.Services.AddIdentity<AghanimsFantasyUser, IdentityRole>()
+    .AddEntityFrameworkStores<AghanimsFantasyContext>()
+    .AddApiEndpoints();
+
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(@"/webapi-data"));
 
@@ -72,23 +76,27 @@ builder.Services.AddHttpClient();
 
 // Add auth services
 builder.Services.AddDistributedMemoryCache(); // Required for Session
+builder.Services.AddOutputCache(options =>
+{
+    // Invalidate cache after 5min
+    options.DefaultExpirationTimeSpan = TimeSpan.FromMinutes(5);
+});
 builder.Services.AddSession();
 builder.Services.AddAntiforgery();
 builder.Services
-    .AddAuthentication(options =>
+    .AddAuthentication()
+    .AddGoogle(options =>
     {
-        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = "OAuth";
+        options.ClientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID") ?? string.Empty;
+        options.ClientSecret = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_SECRET") ?? string.Empty;
+        options.SignInScheme = IdentityConstants.ExternalScheme;
+        // options.CallbackPath = new PathString("/signin-google"); // Default callback path
     })
-    .AddCookie(options =>
+    .AddOAuth("Discord", options =>
     {
-        options.ExpireTimeSpan = TimeSpan.FromDays(90);
-        options.Cookie.MaxAge = TimeSpan.FromDays(90);
-    })
-    .AddOAuth("OAuth", options =>
-    {
-        options.ClientId = Environment.GetEnvironmentVariable("DISCORD_APP_ID") ?? "";
-        options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_APP_SECRET") ?? "";
+        options.ClientId = Environment.GetEnvironmentVariable("DISCORD_APP_ID") ?? string.Empty;
+        options.ClientSecret = Environment.GetEnvironmentVariable("DISCORD_APP_SECRET") ?? string.Empty;
+        options.SignInScheme = IdentityConstants.ExternalScheme;
 
         string authEndpoint = QueryHelpers.AddQueryString("https://discordapp.com/api/oauth2/authorize", "prompt", "none");
 
@@ -134,7 +142,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Add Scoped services to be used by controllers
-builder.Services.AddScoped<DiscordWebApiService>();
 builder.Services.AddScoped<FantasyService>();
 builder.Services.AddScoped<FantasyServiceAdmin>();
 builder.Services.AddScoped<FantasyServicePrivateFantasyAdmin>();
@@ -149,18 +156,19 @@ builder.Services.AddScoped<FantasyPointsFacade>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName.Equals("Local"))
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
-
 app.UseCors(vueFrontEndOrigins);
+app.UseOutputCache();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapGroup("/identity").MapIdentityApi<AghanimsFantasyUser>();
 
 app.UseSession();
 

@@ -1,40 +1,37 @@
-using Microsoft.AspNetCore.Mvc;
-using DataAccessLibrary.Models;
-using DataAccessLibrary.Data;
-using DataAccessLibrary.Data.Facades;
-using DataAccessLibrary.Models.ProMetadata;
-using DataAccessLibrary.Models.Fantasy;
-using Microsoft.AspNetCore.Authorization;
+using csharp_ef_webapi.Extensions;
 using csharp_ef_webapi.Services;
-using DataAccessLibrary.Models.Discord;
+using DataAccessLibrary.Data;
+using DataAccessLibrary.Models.ProMetadata;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
 
 namespace csharp_ef_webapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [OutputCache(Tags = new[] { "player" })]
     public class PlayerController : ControllerBase
     {
         private readonly AghanimsFantasyContext _dbContext;
-        private readonly DiscordWebApiService _discordWebApiService;
         private readonly FantasyServiceAdmin _fantasyServiceAdmin;
-        private readonly FantasyPointsFacade _fantasyPointsFacade;
+        private readonly IOutputCacheStore _cache;
 
         public PlayerController(
             AghanimsFantasyContext dbContext,
-            DiscordWebApiService discordWebApiService,
             FantasyServiceAdmin fantasyServiceAdmin,
-            FantasyPointsFacade fantasyPointsFacade
+            IOutputCacheStore cache
         )
         {
             _dbContext = dbContext;
-            _discordWebApiService = discordWebApiService;
             _fantasyServiceAdmin = fantasyServiceAdmin;
-            _fantasyPointsFacade = fantasyPointsFacade;
+            _cache = cache;
         }
 
         // GET: api/Player/account/{accountId}
         [HttpGet("account/{accountId}")]
+        [ResponseETag]
         public async Task<ActionResult<IEnumerable<Account>>> GetAccount(long? accountId)
         {
             if (accountId == null)
@@ -47,6 +44,7 @@ namespace csharp_ef_webapi.Controllers
 
         // GET: api/Player/accounts
         [HttpGet("accounts")]
+        [ResponseETag]
         public async Task<ActionResult<IEnumerable<Account>>> GetAccounts()
         {
             return Ok(await _dbContext.Accounts.ToListAsync());
@@ -54,25 +52,14 @@ namespace csharp_ef_webapi.Controllers
 
         // POST: api/Player
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [Authorize]
+        [Authorize(Roles = "Admin")] // Admin only operation
         [HttpPost]
         public async Task<ActionResult<Account>> PostAccount(Account account)
         {
-            // Admin only operation
-            if (!await _discordWebApiService.CheckAdminUser(HttpContext))
-            {
-                return Unauthorized();
-            }
-
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-                if (discordUser == null)
-                {
-                    return Unauthorized();
-                }
-
-                await _fantasyServiceAdmin.AddAccountAsync(discordUser, account);
+                await _fantasyServiceAdmin.AddAccountAsync(account);
+                await _cache.EvictByTagAsync("player", default);
                 return CreatedAtAction("GetAccount", new { accountId = account.Id }, account);
             }
             catch (UnauthorizedAccessException)
@@ -83,25 +70,14 @@ namespace csharp_ef_webapi.Controllers
 
         // PUT: api/Player/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [Authorize]
+        [Authorize(Roles = "Admin")] // Admin only operation
         [HttpPut("{accountId}")]
         public async Task<IActionResult> PutAccount(long accountId, Account updateAcount)
         {
-            // Admin only operation
-            if (!await _discordWebApiService.CheckAdminUser(HttpContext))
-            {
-                return Unauthorized();
-            }
-
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-                if (discordUser == null)
-                {
-                    return Unauthorized();
-                }
-
-                await _fantasyServiceAdmin.UpdateAccountAsync(discordUser, accountId, updateAcount);
+                await _fantasyServiceAdmin.UpdateAccountAsync(accountId, updateAcount);
+                await _cache.EvictByTagAsync("player", default);
                 return NoContent();
             }
             catch (UnauthorizedAccessException)
@@ -115,25 +91,14 @@ namespace csharp_ef_webapi.Controllers
         }
 
         // DELETE: api/Player/5
-        [Authorize]
+        [Authorize(Roles = "Admin")] // Admin only operation
         [HttpDelete("{accountId}")]
         public async Task<IActionResult> DeleteAccount(long accountId)
         {
-            // Admin only operation
-            if (!await _discordWebApiService.CheckAdminUser(HttpContext))
-            {
-                return Unauthorized();
-            }
-
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-                if (discordUser == null)
-                {
-                    return Unauthorized();
-                }
-
-                await _fantasyServiceAdmin.DeleteAccountAsync(discordUser, accountId);
+                await _fantasyServiceAdmin.DeleteAccountAsync(accountId);
+                await _cache.EvictByTagAsync("player", default);
                 return NoContent();
             }
             catch (UnauthorizedAccessException)

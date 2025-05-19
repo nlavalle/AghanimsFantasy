@@ -120,7 +120,7 @@ New Match Id: {fantasyMatch.MatchId}
         var leaderboardString = "";
         for (int i = 1; i <= top10Drafts.Count(); i++)
         {
-            leaderboardString += $"{i}.  {top10Drafts[i - 1].DiscordName}\n";
+            leaderboardString += $"{i}.  {top10Drafts[i - 1].UserName} - {Math.Round(top10Drafts[i - 1].DraftTotalFantasyPoints)}\n";
         }
 
         return $"""

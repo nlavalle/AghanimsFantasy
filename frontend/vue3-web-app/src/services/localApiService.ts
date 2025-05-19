@@ -715,7 +715,7 @@ export const localApiService = {
       })
   },
   getUserDraftPoints(leagueId: number) {
-    return fetch(`${baseUrl}/league/${leagueId}/drafts/points`)
+    return fetch(`${baseUrl}/fantasydraft/${leagueId}/drafts/points`)
       .then(
         function (response: any) {
           if (!response.ok) {
@@ -997,18 +997,16 @@ export const localApiService = {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(updateRequest)
+    }).then(
+      function (response: any) {
+        if (!response.ok) {
+          return response.text().then((response: any) => { throw new Error(response) })
+        } else {
+          return response.json()
+        }
+      }.bind(this)
+    ).catch((error) => {
+      throw (error)
     })
-      .then(
-        function (response: any) {
-          if (!response.ok) {
-            return response.text().then((response: any) => { throw new Error(response) })
-          } else {
-            return response.json()
-          }
-        }.bind(this)
-      )
-      .catch((error) => {
-        throw (error)
-      })
   }
 }

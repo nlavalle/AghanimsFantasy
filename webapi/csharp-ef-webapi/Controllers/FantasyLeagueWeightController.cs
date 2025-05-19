@@ -1,26 +1,25 @@
-using Microsoft.AspNetCore.Mvc;
+using csharp_ef_webapi.Extensions;
+using csharp_ef_webapi.Services;
 using DataAccessLibrary.Models.Fantasy;
 using Microsoft.AspNetCore.Authorization;
-using csharp_ef_webapi.Services;
-using DataAccessLibrary.Models.Discord;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace csharp_ef_webapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AuthenticatedETag]
     public class FantasyLeagueWeightController : ControllerBase
     {
-        private readonly DiscordWebApiService _discordWebApiService;
         private readonly FantasyService _fantasyService;
         private readonly FantasyServiceAdmin _fantasyServiceAdmin;
 
         public FantasyLeagueWeightController(
-            DiscordWebApiService discordWebApiService,
             FantasyService fantasyService,
             FantasyServiceAdmin fantasyServiceAdmin
         )
         {
-            _discordWebApiService = discordWebApiService;
             _fantasyService = fantasyService;
             _fantasyServiceAdmin = fantasyServiceAdmin;
         }
@@ -31,9 +30,7 @@ namespace csharp_ef_webapi.Controllers
         {
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-
-                return Ok(await _fantasyService.GetFantasyLeagueWeightsAsync(discordUser));
+                return Ok(await _fantasyService.GetFantasyLeagueWeightsAsync(HttpContext.User));
             }
             catch (ArgumentException ex)
             {
@@ -47,9 +44,7 @@ namespace csharp_ef_webapi.Controllers
         {
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-
-                return Ok(await _fantasyService.GetFantasyLeagueWeightAsync(discordUser, fantasyLeagueWeightId));
+                return Ok(await _fantasyService.GetFantasyLeagueWeightAsync(HttpContext.User, fantasyLeagueWeightId));
             }
             catch (ArgumentException ex)
             {
@@ -59,25 +54,13 @@ namespace csharp_ef_webapi.Controllers
 
         // POST: api/FantasyLeagueWeight
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [Authorize]
+        [Authorize(Roles = "Admin")] // Admin only operation
         [HttpPost]
         public async Task<ActionResult<FantasyLeagueWeight>> PostFantasyLeagueWeight(FantasyLeagueWeight fantasyLeagueWeight)
         {
-            // Admin only operation
-            if (!await _discordWebApiService.CheckAdminUser(HttpContext))
-            {
-                return Unauthorized();
-            }
-
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-                if (discordUser == null)
-                {
-                    return Unauthorized();
-                }
-
-                await _fantasyServiceAdmin.AddFantasyLeagueWeightAsync(discordUser, fantasyLeagueWeight);
+                await _fantasyServiceAdmin.AddFantasyLeagueWeightAsync(fantasyLeagueWeight);
                 return CreatedAtAction("GetFantasyLeagueWeight", new { fantasyLeagueWeightId = fantasyLeagueWeight.Id }, fantasyLeagueWeight);
             }
             catch (UnauthorizedAccessException)
@@ -88,25 +71,13 @@ namespace csharp_ef_webapi.Controllers
 
         // PUT: api/FantasyLeagueWeight/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [Authorize]
+        [Authorize(Roles = "Admin")] // Admin only operation
         [HttpPut("{fantasyLeagueWeightId}")]
         public async Task<IActionResult> PutFantasyLeagueWeight(int fantasyLeagueWeightId, FantasyLeagueWeight fantasyLeagueWeight)
         {
-            // Admin only operation
-            if (!await _discordWebApiService.CheckAdminUser(HttpContext))
-            {
-                return Unauthorized();
-            }
-
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-                if (discordUser == null)
-                {
-                    return Unauthorized();
-                }
-
-                await _fantasyServiceAdmin.UpdateFantasyLeagueWeightAsync(discordUser, fantasyLeagueWeightId, fantasyLeagueWeight);
+                await _fantasyServiceAdmin.UpdateFantasyLeagueWeightAsync(fantasyLeagueWeightId, fantasyLeagueWeight);
                 return NoContent();
             }
             catch (UnauthorizedAccessException)
@@ -120,25 +91,13 @@ namespace csharp_ef_webapi.Controllers
         }
 
         // DELETE: api/FantasyLeagueWeight/5
-        [Authorize]
+        [Authorize(Roles = "Admin")] // Admin only operation
         [HttpDelete("{fantasyLeagueWeightId}")]
         public async Task<IActionResult> DeleteFantasyLeagueWeight(int fantasyLeagueWeightId)
         {
-            // Admin only operation
-            if (!await _discordWebApiService.CheckAdminUser(HttpContext))
-            {
-                return Unauthorized();
-            }
-
             try
             {
-                DiscordUser? discordUser = await _discordWebApiService.LookupHttpContextUser(HttpContext);
-                if (discordUser == null)
-                {
-                    return Unauthorized();
-                }
-
-                await _fantasyServiceAdmin.DeleteFantasyLeagueWeightAsync(discordUser, fantasyLeagueWeightId);
+                await _fantasyServiceAdmin.DeleteFantasyLeagueWeightAsync(fantasyLeagueWeightId);
                 return NoContent();
             }
             catch (UnauthorizedAccessException)
