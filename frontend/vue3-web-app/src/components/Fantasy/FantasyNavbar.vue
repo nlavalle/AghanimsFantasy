@@ -53,10 +53,6 @@ onBeforeMount(() => {
       if (authStore.authenticated) {
         leagueStore.fetchFantasyDraftPoints()
       }
-      router.push({
-        path: route.path,
-        query: { fantasyLeagueId: leagueStore.selectedFantasyLeague.id }
-      })
     });
 })
 

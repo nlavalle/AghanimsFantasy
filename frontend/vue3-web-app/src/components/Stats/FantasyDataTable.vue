@@ -267,7 +267,7 @@ const commonFantasyColumns = [
         key: 'pointsPerMatch',
         title: !display.mobile.value ? 'Avg Points' : 'FP/M',
         align: 'left',
-        value: (row: any) => row.totalMatches > 1 ? (row.totalMatchFantasyPoints.toFixed(1) / row.totalMatches).toFixed(1) : 0,
+        value: (row: any) => row.totalMatches > 0 ? (row.totalMatchFantasyPoints.toFixed(1) / row.totalMatches).toFixed(1) : 0,
         format: (val: number) => `${val.toLocaleString()}`,
         width: '50px',
         sortable: true,

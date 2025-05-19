@@ -18,7 +18,7 @@
               <v-text-field v-model="displayName" name="displayName" placeholder="World's best drafter" required />
               <span>You can change this later</span>
               <br />
-              <span style="font-size:0.8rem">* If it's offensive I'm choosing it</span>
+              <span style="font-size:0.8rem">* If it's offensive I'm changing it</span>
             </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
