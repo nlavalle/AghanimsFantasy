@@ -268,7 +268,7 @@ const defaultItem = computed(() => {
 })
 
 const leagueDefaultItemSpecified = {
-  id: 0,
+  league_id: 0,
   name: "string",
   is_active: true,
   is_scheduled: true,

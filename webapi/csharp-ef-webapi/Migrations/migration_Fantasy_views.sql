@@ -461,16 +461,25 @@ with quintiles as (
     group by fantasy_league_id, account_id, quintile
 ), total_games as (
     select
-        fantasy_league_id,
-        account_id,
+        all_players.fantasy_league_id,
+        all_players.account_id,
         cross_quintile as quintile,
-        sum(count_per_quintile) as total_games
-    from quintile_counts
-    cross join (
-        select column1 as cross_quintile
-        from (values(1),(2),(3),(4),(5))
-    )
-    group by fantasy_league_id, account_id, cross_quintile
+        coalesce(sum(count_per_quintile),0) as total_games
+    from (
+        select 
+            fantasy_league_id, 
+            dota_account_id as account_id,
+            cross_quintile
+        from nadcl.dota_fantasy_players fp
+        cross join (
+            select column1 as cross_quintile
+            from (values(1),(2),(3),(4),(5))
+        )
+    ) as all_players
+    left join quintile_counts qc
+        on all_players.fantasy_league_id = qc.fantasy_league_id
+            and all_players.account_id = qc.account_id
+    group by 1, 2, 3
 )
 select distinct
     a.fantasy_league_id,

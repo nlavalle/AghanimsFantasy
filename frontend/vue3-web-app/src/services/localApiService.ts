@@ -819,6 +819,27 @@ export const localApiService = {
         throw error
       })
   },
+  getFantasyPlayerTop8MatchStats(fantasyLeagueId: number) {
+    return fetch(`${baseUrl}/fantasyleague/${fantasyLeagueId}/players/top8`)
+      .then(
+        function (response: any) {
+          if (!response.ok) {
+            throw response.status
+          } else {
+            return response.json()
+          }
+        }.bind(this)
+      )
+      .then(
+        function (data: any) {
+          return data
+        }.bind(this)
+      )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
   getDraftPlayerFantasyMatchStats(fantasyLeagueId: number) {
     return fetch(`${baseUrl}/fantasydraft/${fantasyLeagueId}/matches/points?limit=100`)
       .then(

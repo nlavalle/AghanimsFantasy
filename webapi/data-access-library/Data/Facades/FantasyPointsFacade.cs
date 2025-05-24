@@ -61,6 +61,31 @@ public class FantasyPointsFacade
         return await fantasyPlayerPointsByLeagueQuery.ToListAsync();
     }
 
+    public async Task<List<FantasyPlayerPoints>> FantasyPlayersTopNMatchesByFantasyLeagueAsync(int FantasyLeagueId, int limit)
+    {
+        _logger.LogInformation($"Fetching Fantasy Points for Fantasy League Id: {FantasyLeagueId}");
+
+        var fantasyPlayerPointsByLeague = await _dbContext.FantasyPlayerPointsView
+            .Include(fppv => fppv.FantasyPlayer)
+                .ThenInclude(fp => fp.DotaAccount)
+            .Include(fppv => fppv.FantasyPlayer)
+                .ThenInclude(fp => fp.Team)
+            .Include(fppv => fppv.FantasyMatchPlayer)
+                .ThenInclude(fmp => fmp!.Hero)
+            .Where(fpp => fpp.FantasyLeagueId == FantasyLeagueId)
+            .Where(fpp => fpp.FantasyMatchPlayer != null)
+            .Where(fpp => fpp.FantasyMatchPlayer!.GcMetadataPlayerParsed && fpp.FantasyMatchPlayer!.MatchDetailPlayerParsed)
+            .ToListAsync();
+
+        return fantasyPlayerPointsByLeague
+            .GroupBy(fpp => fpp.FantasyPlayer.DotaAccountId)
+            .SelectMany(group => group.OrderByDescending(gp => gp.TotalMatchFantasyPoints).Take(limit))
+            .OrderByDescending(fpp => fpp.FantasyMatchPlayer!.FantasyMatchId)
+            .ThenBy(fpp => fpp.FantasyMatchPlayer!.Team!.Name)
+            .ThenBy(fpp => fpp.FantasyPlayer.TeamPosition)
+            .ToList();
+    }
+
     public async Task<List<FantasyPlayerTopHeroes>> GetFantasyPlayerTopHeroesAsync(int FantasyLeagueId)
     {
         _logger.LogInformation($"Getting Fantasy Player Top Heroes");

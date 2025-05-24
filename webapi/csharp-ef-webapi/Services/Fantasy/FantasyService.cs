@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace csharp_ef_webapi.Services;
+
 public class FantasyService
 {
     private readonly ILogger<FantasyService> _logger;
@@ -309,6 +310,18 @@ public class FantasyService
         }
 
         return await _fantasyPointsFacade.FantasyPlayerPointsByFantasyLeagueAsync(fantasyLeague.Id, limit);
+    }
+
+    public async Task<IEnumerable<FantasyPlayerPoints>> FantasyPlayersTopNMatchesByFantasyLeagueAsync(ClaimsPrincipal siteUser, int fantasyLeagueId, int limit)
+    {
+        FantasyLeague? fantasyLeague = await GetAccessibleFantasyLeagueAsync(siteUser, fantasyLeagueId);
+
+        if (fantasyLeague == null)
+        {
+            throw new ArgumentException("Fantasy League Id not found");
+        }
+
+        return await _fantasyPointsFacade.FantasyPlayersTopNMatchesByFantasyLeagueAsync(fantasyLeague.Id, limit);
     }
 
     public async Task<IEnumerable<MetadataSummary>> GetMetadataSummariesByFantasyLeagueAsync(ClaimsPrincipal siteUser, int fantasyLeagueId)

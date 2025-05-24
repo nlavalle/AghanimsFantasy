@@ -66,7 +66,7 @@ internal class MissingAccountsContext : DotaOperationContext
         .Select(group => new Account
         {
             Id = group.Key,
-            Name = group.First().pro_name ?? group.First().player_name,
+            Name = group.First().pro_name == string.Empty ? group.First().player_name : group.First().pro_name,
             SteamProfilePicture = "https://aghanimsfantasy.com/logos/unknown.png"
         })
         .ToListAsync();

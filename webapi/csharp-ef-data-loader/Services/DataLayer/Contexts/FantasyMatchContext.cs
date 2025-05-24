@@ -67,6 +67,7 @@ internal class FantasyMatchContext : DotaOperationContext
                 }
 
                 await _dbContext.FantasyMatches.AddRangeAsync(newHistoryFantasyMatches);
+                await _dbContext.SaveChangesAsync();
 
                 _logger.LogInformation($"{newMatchHistories.Count} new fantasy matches added to table");
             }
