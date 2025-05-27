@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeMount, onMounted, watch } from 'vue';
+import { computed, onBeforeMount, watch } from 'vue';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import { useAuthStore } from '@/stores/auth';
 import { VIcon, VTab, VTabs } from 'vuetify/components'
@@ -37,7 +37,10 @@ const leagueStore = useFantasyLeagueStore()
 const route = useRoute();
 
 const leagueOptions = computed(() => {
-  return leagueStore.activeLeagues.sort((a, b) => b.start_timestamp - a.start_timestamp)
+  const league_ids = new Set(leagueStore.activeFantasyLeagues.map(fl => fl.leagueId))
+  return leagueStore.activeLeagues
+    .filter(league => league_ids.has(league.league_id))
+    .sort((a, b) => b.start_timestamp - a.start_timestamp)
 })
 
 const fantasyLeagueOptions = computed(() => {

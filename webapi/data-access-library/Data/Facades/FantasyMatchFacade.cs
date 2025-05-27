@@ -32,6 +32,7 @@ public class FantasyMatchFacade
                     !_dbContext.FantasyMatchPlayers.Any(fmp => fmp.FantasyMatchId == (long)gcmp.Match.match_id && fmp.Account != null && fmp.Account.Id == gcmp.MatchPlayer.account_id)
                     && (gcmp.Match.match_outcome == EMatchOutcome.k_EMatchOutcome_RadVictory || gcmp.Match.match_outcome == EMatchOutcome.k_EMatchOutcome_DireVictory) // Filter out cancelled games
                 )
+                .OrderBy(gcm => gcm.Match.match_id)
                 .Take(takeAmount);
 
         _logger.LogDebug($"GetGcDotaMatchesNotInFantasyMatchPlayers SQL Query: {newGcDotaMatchQuery.ToQueryString()}");
@@ -49,6 +50,8 @@ public class FantasyMatchFacade
                 .Where(
                     fm => !fm.GcMetadataPlayerParsed &&
                     _dbContext.GcMatchMetadata.Any(md => md.MatchId == fm.FantasyMatchId))
+                .Where(fmp => fmp.Match != null)
+                .OrderBy(fmp => fmp.Match!.MatchId)
                 .Take(takeAmount);
 
         _logger.LogDebug($"GetFantasyMatchPlayersNotGcDetailParsed SQL Query: {matchDetailsToParse.ToQueryString()}");
@@ -63,6 +66,7 @@ public class FantasyMatchFacade
         var matchDetailsToParse = _dbContext.FantasyMatches
                 .Where(
                     fm => !fm.MatchDetailParsed && _dbContext.GcDotaMatches.Any(md => (long)md.match_id == fm.MatchId))
+                .OrderBy(fm => fm.MatchId)
                 .Take(takeAmount);
 
         _logger.LogDebug($"GetFantasyMatchesNotGcDetailParsed SQL Query: {matchDetailsToParse.ToQueryString()}");
@@ -77,6 +81,7 @@ public class FantasyMatchFacade
         var matchDetailsToParse = _dbContext.FantasyMatches
                 .Where(
                     fm => !fm.MatchDetailParsed && _dbContext.MatchDetails.Any(md => md.MatchId == fm.MatchId))
+                .OrderBy(fm => fm.MatchId)
                 .Take(takeAmount);
 
         _logger.LogDebug($"GetFantasyMatchesNotDetailParsed SQL Query: {matchDetailsToParse.ToQueryString()}");

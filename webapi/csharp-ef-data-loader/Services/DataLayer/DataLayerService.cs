@@ -47,7 +47,7 @@ public class DataLayerService : BackgroundService
         [
             LoopOperation<FantasyNormalizedAveragesContext>(TimeSpan.FromHours(1), stoppingToken),
             LoopOperation<FantasyPlayerBudgetProbabilityContext>(TimeSpan.FromDays(1), stoppingToken),
-            LoopOperation<FantasyMatchContext>(TimeSpan.FromMinutes(5), stoppingToken),
+            LoopOperation<FantasyMatchContext>(TimeSpan.FromMinutes(1), stoppingToken),
             LoopOperation<FantasyLedgerContext>(TimeSpan.FromHours(1), stoppingToken),
             LoopOperation<MissingAccountsContext>(TimeSpan.FromMinutes(5), stoppingToken),
         ];
