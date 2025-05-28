@@ -57,7 +57,7 @@ select
 	fmp.dewards * dflw.wards_dewarded_weight as wards_dewarded_points,
 	fmp.stun_duration as stun_duration,
 	fmp.stun_duration * dflw.stun_duration_weight as stun_duration_points,	
-	(
+	round((
 		coalesce(fmp.kills * dflw.kills_weight, 0) +
 		coalesce(fmp.deaths * dflw.deaths_weight, 0) + 
 		coalesce(fmp.assists * dflw.assists_weight, 0) + 
@@ -85,7 +85,7 @@ select
 		coalesce(fmp.sentry_wards_placed * dflw.sentry_wards_placed_weight, 0) +
 		coalesce(fmp.dewards * dflw.wards_dewarded_weight, 0) +
 		coalesce(fmp.stun_duration * dflw.stun_duration_weight, 0)	
-	)::numeric as total_match_fantasy_points	
+	)::numeric, 4) as total_match_fantasy_points	
 from nadcl.dota_fantasy_leagues dfl
 	join nadcl.dota_fantasy_league_weights dflw 
 		on dfl.id = dflw.fantasy_league_id
