@@ -63,6 +63,7 @@ public class AghanimsFantasyContext : IdentityDbContext<AghanimsFantasyUser>
 
     #region DotaClient
     public DbSet<CMsgDOTAMatch> GcDotaMatches { get; set; } = null!;
+    public DbSet<CMatchHeroSelectEvent> GcDotaMatchPicksBans { get; set; }
     public DbSet<GcMatchMetadata> GcMatchMetadata { get; set; } = null!;
     public DbSet<GcMatchMetadataItemPurchase> GcMatchMetadataItemPurchases { get; set; } = null!;
     public DbSet<GcMatchMetadataPlayer> GcMatchMetadataPlayers { get; set; } = null!;
@@ -114,6 +115,14 @@ public class AghanimsFantasyContext : IdentityDbContext<AghanimsFantasyUser>
                     damage_received.Property<int>("Id");
                     damage_received.HasKey("Id");
                 });
+            });
+
+            match.OwnsMany(m => m.picks_bans, pick_ban =>
+            {
+                pick_ban.ToTable("dota_gc_match_detail_picks_bans", "nadcl");
+                pick_ban.WithOwner().HasForeignKey("MatchId");
+                pick_ban.Property<int>("Id");
+                pick_ban.HasKey("Id");
             });
         });
 

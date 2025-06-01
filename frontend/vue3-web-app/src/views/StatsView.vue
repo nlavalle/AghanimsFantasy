@@ -7,6 +7,7 @@
             <v-tab value="fantasy">Fantasy</v-tab>
             <v-tab value="league">League</v-tab>
             <v-tab value="match">Matches</v-tab>
+            <!-- <v-tab value="topeight">Top 8</v-tab> -->
           </v-tabs>
         </v-row>
       </v-col>
@@ -38,6 +39,15 @@
             </v-row>
           </v-col>
         </v-tabs-window-item>
+        <!-- <v-tabs-window-item value="topeight">
+          <v-col>
+            <v-row v-if="leagueStore.selectedFantasyLeague">
+              <Top8DataTable v-model:selectedFantasyLeague="leagueStore.selectedFantasyLeague"
+                v-model:draftFiltered="draftFiltered">
+              </Top8DataTable>
+            </v-row>
+          </v-col>
+        </v-tabs-window-item> -->
       </v-tabs-window>
     </v-row>
   </v-container>
@@ -50,6 +60,7 @@ import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import FantasyDataTable from '@/components/Stats/FantasyDataTable.vue';
 import LeagueDataTable from '@/components/Stats/LeagueDataTable.vue';
 import MatchDataTable from '@/components/Stats/MatchDataTable.vue';
+// import Top8DataTable from '@/components/Stats/Top8DataTable.vue'; // NADCL special
 
 const statsTab = ref('fantasy')
 const leagueStore = useFantasyLeagueStore();

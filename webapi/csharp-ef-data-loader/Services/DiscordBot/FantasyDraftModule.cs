@@ -2,8 +2,8 @@ namespace csharp_ef_data_loader.Services.Modules;
 
 using DataAccessLibrary.Data;
 using DataAccessLibrary.Data.Facades;
+using DataAccessLibrary.Data.Identity;
 using DataAccessLibrary.Models;
-using DataAccessLibrary.Models.Discord;
 using DataAccessLibrary.Models.Fantasy;
 using Discord;
 using Discord.Interactions;
@@ -16,7 +16,7 @@ public class FantasyDraftModule : InteractionModuleBase<SocketInteractionContext
     private readonly ILogger<FantasyDraftModule> _logger;
     private readonly AghanimsFantasyContext _dbContext;
     private readonly FantasyDraftFacade _fantasyDraftFacade;
-    private DiscordUser? _discordUser;
+    private AghanimsFantasyUser? _aghanimsUser;
 
     public FantasyDraftModule(
         ILogger<FantasyDraftModule> logger,
@@ -32,9 +32,6 @@ public class FantasyDraftModule : InteractionModuleBase<SocketInteractionContext
     [SlashCommand("set-fantasy-draft", "Draft your 5 Fantasy Players for a given Fantasy League")]
     public async Task FantasyDraft()
     {
-        await FollowupAsync("Temporarily disabled due to the recent login changes, please draft your team via the AghanimsFantasy.com site", ephemeral: true);
-        return;
-
         await CheckUserAsync();
 
         await RespondAsync($"Let's begin drafting fantasy players", ephemeral: true);
@@ -190,25 +187,16 @@ Total Cost: {Math.Round(fantasyPlayerCosts.Where(fpc => selectedFantasyPlayers.S
 
     private async Task CheckUserAsync()
     {
-        var discordUser = await _dbContext.DiscordUsers.FindAsync((long)Context.User.Id);
-        if (discordUser != null)
+        var discordUser = await _dbContext.Users.FirstOrDefaultAsync(u => u.DiscordId == (long)Context.User.Id);
+        if (discordUser == null)
         {
-            _discordUser = discordUser;
+            await FollowupAsync("Discord User not found, please register on aghanimsfantasy.com or connect your discord if you already have an account", ephemeral: true);
             return;
         }
         else
         {
-            DiscordUser newUser = new DiscordUser()
-            {
-                Id = (long)Context.User.Id,
-                IsAdmin = false,
-                Username = Context.User.Username
-            };
-            await _dbContext.DiscordUsers.AddAsync(newUser);
-            await _dbContext.SaveChangesAsync();
-            _discordUser = newUser;
+            _aghanimsUser = discordUser;
         }
-        return;
     }
 
     private SelectMenuBuilder BuildFantasyLeagueSelectMenu(IEnumerable<FantasyLeague> fantasyLeagues)

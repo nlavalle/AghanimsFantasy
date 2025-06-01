@@ -142,6 +142,29 @@ namespace csharp_ef_webapi.Controllers
             }
         }
 
+        // GET: api/fantasyleague/5/players/top8
+        [HttpGet("{fantasyLeagueId}/players/top8")]
+        public async Task<ActionResult<List<FantasyPlayerPoints>>> GetPlayersTop8Matches(int? fantasyLeagueId, [FromQuery] int? limit)
+        {
+            if (fantasyLeagueId == null)
+            {
+                return BadRequest("Please provide a League ID to fetch fantasy player points of");
+            }
+
+            limit ??= 8;
+
+            limit = limit > 10 ? 10 : limit;
+
+            try
+            {
+                return Ok(await _fantasyService.FantasyPlayersTopNMatchesByFantasyLeagueAsync(HttpContext.User, fantasyLeagueId.Value, limit.Value));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         // GET: api/fantasyleague/5/drafters/stats
         [Authorize]
         [HttpGet("{fantasyLeagueId}/drafters/stats")]

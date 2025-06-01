@@ -31,7 +31,7 @@ internal class TeamsContext : DotaOperationContext
     {
         try
         {
-            _logger.LogInformation($"Fetching heroes");
+            _logger.LogInformation($"Fetching missing teams");
             List<long> newTeams = await _dbContext.MatchHistory
             .Select(mh => mh.RadiantTeamId)
             .Union(_dbContext.MatchHistory.Select(mh => mh.DireTeamId))
@@ -59,6 +59,8 @@ internal class TeamsContext : DotaOperationContext
                 {
                     await _dbContext.Teams.AddAsync(team);
                 }
+
+                await _dbContext.SaveChangesAsync();
             }
 
             _logger.LogInformation($"Missing team details fetch done");

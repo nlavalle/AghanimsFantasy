@@ -57,7 +57,7 @@ select
 	fmp.dewards * dflw.wards_dewarded_weight as wards_dewarded_points,
 	fmp.stun_duration as stun_duration,
 	fmp.stun_duration * dflw.stun_duration_weight as stun_duration_points,	
-	(
+	round((
 		coalesce(fmp.kills * dflw.kills_weight, 0) +
 		coalesce(fmp.deaths * dflw.deaths_weight, 0) + 
 		coalesce(fmp.assists * dflw.assists_weight, 0) + 
@@ -85,7 +85,7 @@ select
 		coalesce(fmp.sentry_wards_placed * dflw.sentry_wards_placed_weight, 0) +
 		coalesce(fmp.dewards * dflw.wards_dewarded_weight, 0) +
 		coalesce(fmp.stun_duration * dflw.stun_duration_weight, 0)	
-	)::numeric as total_match_fantasy_points	
+	)::numeric, 4) as total_match_fantasy_points	
 from nadcl.dota_fantasy_leagues dfl
 	join nadcl.dota_fantasy_league_weights dflw 
 		on dfl.id = dflw.fantasy_league_id
@@ -461,16 +461,25 @@ with quintiles as (
     group by fantasy_league_id, account_id, quintile
 ), total_games as (
     select
-        fantasy_league_id,
-        account_id,
+        all_players.fantasy_league_id,
+        all_players.account_id,
         cross_quintile as quintile,
-        sum(count_per_quintile) as total_games
-    from quintile_counts
-    cross join (
-        select column1 as cross_quintile
-        from (values(1),(2),(3),(4),(5))
-    )
-    group by fantasy_league_id, account_id, cross_quintile
+        coalesce(sum(count_per_quintile),0) as total_games
+    from (
+        select 
+            fantasy_league_id, 
+            dota_account_id as account_id,
+            cross_quintile
+        from nadcl.dota_fantasy_players fp
+        cross join (
+            select column1 as cross_quintile
+            from (values(1),(2),(3),(4),(5))
+        )
+    ) as all_players
+    left join quintile_counts qc
+        on all_players.fantasy_league_id = qc.fantasy_league_id
+            and all_players.account_id = qc.account_id
+    group by 1, 2, 3
 )
 select distinct
     a.fantasy_league_id,
