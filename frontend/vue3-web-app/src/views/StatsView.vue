@@ -1,5 +1,7 @@
 <template>
-  <v-container>
+  <v-progress-circular style="position:fixed;top:50%;left:50%;" v-if="!isMounted" color="primary"
+    indeterminate></v-progress-circular>
+  <v-container v-if="isMounted">
     <v-row>
       <v-col>
         <v-row>
@@ -9,6 +11,9 @@
             <v-tab value="match">Matches</v-tab>
             <!-- <v-tab value="topeight">Top 8</v-tab> -->
           </v-tabs>
+          <v-btn icon="fa-refresh" @click="refreshStats" :loading="!loaded" :disabled="!loaded" size="small"
+            variant="outlined">
+          </v-btn>
         </v-row>
       </v-col>
     </v-row>
@@ -55,22 +60,43 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem } from 'vuetify/components';
+import { VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem, VProgressCircular, VBtn } from 'vuetify/components';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import FantasyDataTable from '@/components/Stats/FantasyDataTable.vue';
 import LeagueDataTable from '@/components/Stats/LeagueDataTable.vue';
 import MatchDataTable from '@/components/Stats/MatchDataTable.vue';
+import { localApiService } from '@/services/localApiService';
 // import Top8DataTable from '@/components/Stats/Top8DataTable.vue'; // NADCL special
 
 const statsTab = ref('fantasy')
 const leagueStore = useFantasyLeagueStore();
 const draftFiltered = false;
 
+const isMounted = ref(false);
+const loaded = ref(true);
+
 onMounted(() => {
   if (leagueStore.selectedFantasyLeague.id == 0) {
-    leagueStore.fetchFantasyLeagues()
+    leagueStore.fetchFantasyLeagues().then(() => isMounted.value = true)
+  } else {
+    isMounted.value = true
   }
 })
+
+const refreshStats = () => {
+  loaded.value = false
+  Promise.all([
+    localApiService.getPlayerFantasyStats(leagueStore.selectedFantasyLeague.id),
+    localApiService.getFantasyLeagueMetadataStats(leagueStore.selectedFantasyLeague.id),
+    localApiService.getPlayerFantasyMatchStats(leagueStore.selectedFantasyLeague.id),
+  ])
+    ?.then(() => {
+      loaded.value = true
+    })
+    .catch(() => {
+      loaded.value = true
+    })
+}
 
 </script>
 

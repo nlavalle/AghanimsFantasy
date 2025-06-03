@@ -1,11 +1,13 @@
 using DataAccessLibrary.Data;
 using DataAccessLibrary.Data.Facades;
-using DataAccessLibrary.Models.Discord;
+using DataAccessLibrary.Data.Identity;
+using DataAccessLibrary.Models;
 using DataAccessLibrary.Models.Fantasy;
 using DataAccessLibrary.Models.ProMetadata;
 using Microsoft.EntityFrameworkCore;
 
 namespace csharp_ef_webapi.Services;
+
 public class FantasyServiceAdmin
 {
     private readonly ILogger<FantasyService> _logger;
@@ -58,6 +60,12 @@ public class FantasyServiceAdmin
     {
         return await _dbContext.FantasyLeagues.ToListAsync();
     }
+
+    public async Task<List<AghanimsFantasyUser>> GetUsers()
+    {
+        return await _dbContext.Users.ToListAsync();
+    }
+
 
     public async Task AddFantasyLeagueAsync(FantasyLeague addFantasyLeague)
     {
@@ -134,6 +142,8 @@ public class FantasyServiceAdmin
     {
         await _dbContext.FantasyPlayers.AddAsync(addFantasyPlayer);
         await _dbContext.SaveChangesAsync();
+
+        await AddPlayerBudgets(addFantasyPlayer);
     }
 
     public async Task UpdateFantasyPlayerAsync(long fantasyPlayerId, FantasyPlayer updateFantasyPlayer)
@@ -143,18 +153,34 @@ public class FantasyServiceAdmin
             throw new ArgumentException("Fantasy Player ID to Update FantasyPlayer mismatch");
         }
 
+        // Delete budget fantasy player
+        FantasyPlayer? deletePlayerBudget = await _dbContext.FantasyPlayers.FindAsync(fantasyPlayerId);
+        if (deletePlayerBudget != null)
+        {
+            await DeletePlayerBudgets(deletePlayerBudget);
+        }
+
         _dbContext.Entry(updateFantasyPlayer).State = EntityState.Modified;
         await _dbContext.SaveChangesAsync();
+
+        await AddPlayerBudgets(updateFantasyPlayer);
     }
 
     public async Task UpdateFantasyPlayersAsync(IEnumerable<FantasyPlayer> updateFantasyPlayers)
     {
         foreach (FantasyPlayer updateFantasyPlayer in updateFantasyPlayers)
         {
-            _dbContext.Entry(updateFantasyPlayer).State = EntityState.Modified;
-        }
+            // Delete budget fantasy player
+            FantasyPlayer? deletePlayerBudget = await _dbContext.FantasyPlayers.FindAsync(updateFantasyPlayer.Id);
+            if (deletePlayerBudget != null)
+            {
+                await DeletePlayerBudgets(deletePlayerBudget);
+            }
 
-        await _dbContext.SaveChangesAsync();
+            _dbContext.Entry(updateFantasyPlayer).State = EntityState.Modified;
+            await _dbContext.SaveChangesAsync();
+            await AddPlayerBudgets(updateFantasyPlayer);
+        }
     }
 
     public async Task DeleteFantasyPlayerAsync(long deleteFantasyPlayerId)
@@ -165,6 +191,8 @@ public class FantasyServiceAdmin
         {
             throw new ArgumentException("Fantasy Player Id Not Found");
         }
+
+        await DeletePlayerBudgets(deleteFantasyPlayer);
 
         _dbContext.FantasyPlayers.Remove(deleteFantasyPlayer);
         await _dbContext.SaveChangesAsync();
@@ -253,9 +281,61 @@ public class FantasyServiceAdmin
                     DotaAccountId = recentFantasyPlayer.DotaAccountId,
                     TeamPosition = recentFantasyPlayer.TeamPosition
                 };
-                await _dbContext.FantasyPlayers.AddAsync(newFantasyPlayer);
+                await AddFantasyPlayerAsync(newFantasyPlayer);
             }
             await _dbContext.SaveChangesAsync();
         }
+    }
+
+    private async Task DeletePlayerBudgets(FantasyPlayer deletePlayerBudget)
+    {
+        // Delete any cost rows for this player if they already existed
+        await _dbContext.FantasyPlayerBudgetProbability
+            .Include(fpbp => fpbp.Account)
+            .Include(fpbp => fpbp.FantasyLeague)
+            .Where(fpbp =>
+                fpbp.FantasyLeague.Id == deletePlayerBudget.FantasyLeagueId &&
+                fpbp.Account.Id == deletePlayerBudget.DotaAccountId
+            )
+            .ExecuteDeleteAsync();
+        await _dbContext.SaveChangesAsync();
+    }
+
+    private async Task AddPlayerBudgets(FantasyPlayer addPlayerBudget)
+    {
+        FantasyLeague fantasyLeague = await _dbContext.FantasyLeagues.FindAsync(addPlayerBudget.FantasyLeagueId) ?? throw new Exception("Unknown Fantasy League for Player");
+        Account dotaAccount = await _dbContext.Accounts.FindAsync(addPlayerBudget.DotaAccountId) ?? throw new Exception("Unknown Account ID for Player");
+
+        // Add cost for fantasy player at this time so there's never a period where it's 0
+        FantasyPlayerBudgetProbability? fantasyPlayerBudgetProbabilities = await _dbContext.FantasyPlayerBudgetProbabilityView
+            .Include(fpbp => fpbp.Account)
+            .Include(fpbp => fpbp.FantasyLeague)
+            .Where(fpbp => fpbp.Account.Id == addPlayerBudget.DotaAccountId
+                && fpbp.FantasyLeagueId == addPlayerBudget.FantasyLeagueId)
+            .FirstOrDefaultAsync();
+
+        FantasyPlayerBudgetProbabilityTable newFantasyPlayerBudget;
+
+        if (fantasyPlayerBudgetProbabilities != null)
+        {
+            newFantasyPlayerBudget = new FantasyPlayerBudgetProbabilityTable
+            {
+                FantasyLeague = fantasyLeague,
+                Account = dotaAccount,
+                Cost = fantasyPlayerBudgetProbabilities.Cost
+            };
+        }
+        else
+        {
+            newFantasyPlayerBudget = new FantasyPlayerBudgetProbabilityTable
+            {
+                FantasyLeague = fantasyLeague,
+                Account = dotaAccount,
+                Cost = 120 // Default cost
+            };
+        }
+
+        await _dbContext.FantasyPlayerBudgetProbability.AddAsync(newFantasyPlayerBudget);
+        await _dbContext.SaveChangesAsync();
     }
 }

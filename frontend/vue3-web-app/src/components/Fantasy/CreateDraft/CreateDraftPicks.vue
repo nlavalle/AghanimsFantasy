@@ -7,7 +7,7 @@
                         <GoldSpan :gold-value="getPlayerCost(fantasyDraftPicks[index].dotaAccount.id).toString()" />
                     </v-row>
                     <v-row class="parallelogram" justify="center"
-                        :style="{ width: !display.mobile.value ? '140px' : '60px', height: !display.mobile.value ? '80px' : '40px', 'margin-left': !display.mobile.value ? '5px' : '' }"
+                        :style="{ width: !display.mobile.value ? '120px' : '60px', height: !display.mobile.value ? '80px' : '40px', 'margin-left': !display.mobile.value ? '5px' : '' }"
                         :class="{ 'glow-active-slot': currentActiveDraftPlayerCheck(index) }">
                         <GoldSpan v-if="!display.mobile.value" class="gold"
                             :gold-value="getPlayerCost(fantasyDraftPicks[index].dotaAccount.id).toString()" />
@@ -21,6 +21,9 @@
             </v-row>
             <v-row v-else @click="changeActiveDraftPlayer(index)">
                 <v-col>
+                    <v-row v-if="display.mobile.value">
+                        <GoldSpan :gold-value="0" />
+                    </v-row>
                     <v-row class="parallelogram" justify="center" align="center"
                         :style="{ 'max-width': !display.mobile.value ? '120px' : '60px', 'min-width': !display.mobile.value ? '120px' : '60px', 'min-height': !display.mobile.value ? '80px' : '40px', 'margin-left': !display.mobile.value ? '5px' : '' }"
                         :class="{ 'glow-active-slot': currentActiveDraftPlayerCheck(index) }">
@@ -100,7 +103,6 @@ const getPlayerCost = (accountId: number) => {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
-    margin-left: 10px;
 }
 
 .gold {

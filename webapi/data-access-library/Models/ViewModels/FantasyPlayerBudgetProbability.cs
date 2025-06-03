@@ -15,12 +15,6 @@ public class FantasyPlayerBudgetProbability
     public long AccountId { get; set; }
     public Account Account { get; set; } = null!;
 
-    [Column("quintile")]
-    public int Quintile { get; set; }
-
-    [Column("probability")]
-    public decimal Probability { get; set; }
-
-    [Column("cumulative_probability")]
-    public decimal CumulativeProbability { get; set; }
+    [Column("cost")]
+    public decimal Cost { get; set; }
 }

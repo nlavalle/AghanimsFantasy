@@ -22,11 +22,11 @@ import ErrorDialog from '@/components/ErrorDialog.vue';
 import { passwordRules } from '@/utilities/PasswordRules';
 
 const authStore = useAuthStore()
+const email = defineModel<string>('email')
 
 const showErrorModal = ref(false);
 const errorDetails = ref<Error>();
 
-const email = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 
@@ -49,7 +49,7 @@ const confirmPasswordRuleArray = [
     (value: string) => value === password.value || 'Passwords must match'
 ]
 
-const register = (email: string, pass: string) => {
+const register = (email: string | undefined, pass: string) => {
     if (!email || !pass) return;
     return authStore.register(email, pass)
         ?.catch((error: Error) => {

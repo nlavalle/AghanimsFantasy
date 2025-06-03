@@ -129,6 +129,27 @@ export const useAuthStore = defineStore('auth', {
       })
     },
 
+    forgotPassword(email: string) {
+      if (!email) return;
+      return authApiService.forgotPassword(email)
+        .then((responseStatusCode: number) => {
+          switch (responseStatusCode) {
+            case 401:
+              throw new Error("Invalid Email")
+            default:
+              this.checkAuthenticatedAsync()
+          }
+        })
+    },
+
+    resetPassword(email: string, confirmationCode: string, newPassword: string) {
+      return authApiService.resetPassword(email, confirmationCode, newPassword)
+        .then((response: Response) => {
+          if (response.ok)
+            this.login(email, newPassword)
+        })
+    },
+
     login(email: string, password: string) {
       if (!email || !password) return;
       return authApiService.login(email, password)

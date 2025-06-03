@@ -13,6 +13,7 @@
             <v-tab value="fantasyPlayer">Fantasy Players</v-tab>
             <v-tab value="account">Accounts</v-tab>
             <v-tab value="team">Teams</v-tab>
+            <v-tab value="user">Users</v-tab>
           </v-tabs>
         </v-row>
       </v-col>
@@ -21,7 +22,7 @@
       <v-tabs-window v-model="statsTab" style="width:100%">
         <v-tabs-window-item value="league">
           <CrudTable :table-columns="columns" :table-items="items" :default-item-specified="defaultItem"
-            @save="saveItem" @edit="editItem" @delete="deleteItem" />
+            :itemsPerPage="25" @save="saveItem" @edit="editItem" @delete="deleteItem" />
         </v-tabs-window-item>
         <v-tabs-window-item value="fantasyLeague">
           <CrudTable :table-columns="columns" :table-items="items" :default-item-specified="defaultItem"
@@ -39,6 +40,10 @@
             @save="saveItem" @edit="editItem" @delete="deleteItem" />
         </v-tabs-window-item>
         <v-tabs-window-item value="team">
+          <CrudTable :table-columns="columns" :table-items="items" :default-item-specified="defaultItem"
+            @save="saveItem" @edit="editItem" @delete="deleteItem" />
+        </v-tabs-window-item>
+        <v-tabs-window-item value="user">
           <CrudTable :table-columns="columns" :table-items="items" :default-item-specified="defaultItem"
             @save="saveItem" @edit="editItem" @delete="deleteItem" />
         </v-tabs-window-item>
@@ -67,6 +72,7 @@ const fantasyLeagueData = ref<FantasyLeague[]>([]);
 const fantasyLeagueWeightData = ref([]);
 const accountData = ref<DotaAccount[]>([]);
 const teamData = ref<DotaTeam[]>([]);
+const userData = ref([]);
 
 const isMounted = ref(false);
 
@@ -86,6 +92,9 @@ onMounted(() => {
   })
   localApiService.getTeams().then((result: any) => {
     teamData.value = result;
+  })
+  localApiAdminService.getUsers().then((result: any) => {
+    userData.value = result;
   })
   isMounted.value = true;
 })
@@ -224,6 +233,8 @@ const columns = computed(() => {
       return accountColumns;
     case "team":
       return teamColumns;
+    case "user":
+      return userColumns;
   }
   return [];
 });
@@ -231,7 +242,13 @@ const columns = computed(() => {
 const items = computed(() => {
   switch (statsTab.value) {
     case "league":
-      return leagueData.value
+      return leagueData.value.map(league => {
+        return {
+          ...league,
+          startTimeFormatted: new Date(league.start_timestamp * 1000).toLocaleString(),
+          endTimeFormatted: new Date(league.end_timestamp * 1000).toLocaleString(),
+        }
+      })
     case "fantasyLeague":
       return fantasyLeagueData.value.map(fantasyLeague => {
         return {
@@ -247,6 +264,8 @@ const items = computed(() => {
       return accountData.value
     case "team":
       return teamData.value
+    case "user":
+      return userData.value
   }
   return [];
 })
@@ -356,11 +375,13 @@ const teamDefaultItemSpecified = {
 const leagueColumns = [
   {
     title: 'ID',
-    value: 'league_id'
+    value: 'league_id',
+    sortable: true
   },
   {
     title: 'League Name',
     value: 'name',
+    sortable: true
   },
   {
     title: 'Active?',
@@ -377,10 +398,20 @@ const leagueColumns = [
   {
     title: 'Start',
     value: 'start_timestamp',
+    sortable: true
+  },
+  {
+    title: 'Start',
+    value: 'startTimeFormatted',
   },
   {
     title: 'End',
     value: 'end_timestamp',
+    sortable: true
+  },
+  {
+    title: 'End',
+    value: 'endTimeFormatted',
   },
   {
     title: 'Prize Pool',
@@ -392,14 +423,17 @@ const fantasyLeagueColumns = [
   {
     title: 'League ID',
     value: 'leagueId',
+    sortable: true
   },
   {
     title: 'Fantasy League ID',
-    value: 'id'
+    value: 'id',
+    sortable: true
   },
   {
     title: 'Fantasy League Name',
     value: 'name',
+    sortable: true
   },
   {
     title: 'Active?',
@@ -412,6 +446,7 @@ const fantasyLeagueColumns = [
   {
     title: 'Fantasy Lock Time Raw',
     value: 'fantasyDraftLocked',
+    sortable: true
   },
   {
     title: 'Fantasy Lock Time',
@@ -420,6 +455,7 @@ const fantasyLeagueColumns = [
   {
     title: 'League Start Time Raw',
     value: 'leagueStartTime',
+    sortable: true
   },
   {
     title: 'League Start Time',
@@ -428,6 +464,7 @@ const fantasyLeagueColumns = [
   {
     title: 'League End Time Raw',
     value: 'leagueEndTime',
+    sortable: true
   },
   {
     title: 'League End Time',
@@ -514,6 +551,39 @@ const teamColumns = [
     title: 'Time Created',
     value: 'time_created'
   }
+];
+
+const userColumns = [
+  {
+    title: 'ID',
+    value: 'id',
+    sortable: true
+  },
+  {
+    title: 'Name',
+    value: 'displayName',
+    sortable: true
+  },
+  {
+    title: 'Discord Id',
+    value: 'discordId',
+  },
+  {
+    title: 'Discord Handle',
+    value: 'discordHandle',
+  },
+  {
+    title: 'Username',
+    value: 'userName',
+  },
+  {
+    title: 'Email',
+    value: 'email',
+  },
+  {
+    title: 'Email Confirmed?',
+    value: 'emailConfirmed',
+  },
 ];
 
 </script>

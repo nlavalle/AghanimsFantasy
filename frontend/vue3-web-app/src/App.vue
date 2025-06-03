@@ -27,7 +27,6 @@ const fantasyLeagueStore = useFantasyLeagueStore();
 const route = useRoute();
 
 onBeforeMount(() => {
-  // Get Leagues/Fantasy Leagues and begin polling for fantasy league updates
   router.isReady()
     .then(() => {
       authStore.checkAuthenticatedAsync().then(
@@ -35,7 +34,6 @@ onBeforeMount(() => {
           fantasyLeagueStore.fetchLeagues()
             .then(() => fantasyLeagueStore.fetchFantasyLeagues())
             .then(() => fantasyLeagueStore.setSelectedFantasyLeagueId(Number(route.query.fantasyLeagueId)))
-            .then(() => fantasyLeagueStore.startFantasyLeaguePolling())
         }
       );
     })

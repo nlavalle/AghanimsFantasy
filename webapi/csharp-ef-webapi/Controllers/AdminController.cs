@@ -1,4 +1,5 @@
 using csharp_ef_webapi.Services;
+using DataAccessLibrary.Data.Identity;
 using DataAccessLibrary.Models.Fantasy;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +28,20 @@ namespace csharp_ef_webapi.Controllers
             try
             {
                 return Ok(await _fantasyServiceAdmin.GetFantasyLeaguesAsync());
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // GET: api/Admin/Users
+        [HttpGet("users")]
+        public async Task<ActionResult<IEnumerable<AghanimsFantasyUser>>> GetAdminUsers()
+        {
+            try
+            {
+                return Ok(await _fantasyServiceAdmin.GetUsers());
             }
             catch (ArgumentException ex)
             {

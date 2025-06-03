@@ -70,7 +70,7 @@ public class FantasyService
             .Select(fp => new FantasyPlayerViewModel()
             {
                 fantasyPlayer = fp,
-                cost = costs.Where(c => c.Account.Id == fp.DotaAccountId).Sum(c => c.EstimatedCost),
+                cost = costs.FirstOrDefault(c => c.Account.Id == fp.DotaAccountId)?.Cost ?? 120,
                 normalizedAverages = averages.FirstOrDefault(a => a.FantasyPlayer.Id == fp.Id),
                 topHeroes = topHeroes.Where(th => th.FantasyPlayerId == fp.Id).ToList()
             })
@@ -195,18 +195,11 @@ public class FantasyService
                 .Where(fpbp => fpbp.FantasyLeague.Id == fantasyLeague.Id)
                 .ToListAsync();
 
-        var testPlayers = fantasyPlayerCosts.Where(fpc => fantasyDraft.DraftPickPlayers.Where(fp => fp.FantasyPlayer?.DotaAccount != null)
-                .Select(fp => fp.FantasyPlayer?.DotaAccount!.Id)
-                .Contains(fpc.Account.Id))
-                .ToList();
-
-        var testSum = testPlayers.Sum(fpc => fpc.EstimatedCost);
-
         if (fantasyPlayerCosts.Where(fpc => fantasyDraft.DraftPickPlayers
                 .Where(fp => fp.FantasyPlayer != null)
                 .Select(fp => fp.FantasyPlayer!.DotaAccountId)
                 .Contains(fpc.Account.Id))
-                .Sum(fpc => fpc.EstimatedCost) > 600)
+                .Sum(fpc => fpc.Cost) > 600)
         {
             throw new ArgumentException("Draft exceeds 600g budget");
         }
