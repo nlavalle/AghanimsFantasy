@@ -70,7 +70,7 @@ import { localApiService } from '@/services/localApiService';
 
 const statsTab = ref('fantasy')
 const leagueStore = useFantasyLeagueStore();
-const draftFiltered = false;
+const draftFiltered = ref(false);
 
 const isMounted = ref(false);
 const loaded = ref(true);

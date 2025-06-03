@@ -132,7 +132,7 @@ const authStore = useAuthStore();
 const fantasyLeagueStore = useFantasyLeagueStore();
 const fantasyDraftStore = useFantasyDraftStore();
 const { fantasyDraftPicks, setFantasyDraftPicks, setFantasyPlayerPoints, clearFantasyDraftPicks } = fantasyDraftState();
-const draftFiltered = true;
+const draftFiltered = ref(true);
 
 const showSuccessModal = ref(false);
 const showErrorModal = ref(false);

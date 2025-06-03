@@ -22,7 +22,7 @@
             <v-row v-else @click="changeActiveDraftPlayer(index)">
                 <v-col>
                     <v-row v-if="display.mobile.value">
-                        <GoldSpan :gold-value="0" />
+                        <GoldSpan :gold-value="'0'" />
                     </v-row>
                     <v-row class="parallelogram" justify="center" align="center"
                         :style="{ 'max-width': !display.mobile.value ? '120px' : '60px', 'min-width': !display.mobile.value ? '120px' : '60px', 'min-height': !display.mobile.value ? '80px' : '40px', 'margin-left': !display.mobile.value ? '5px' : '' }"
