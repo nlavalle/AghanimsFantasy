@@ -107,7 +107,7 @@ public class FantasyDraftModule : InteractionModuleBase<SocketInteractionContext
 Fantasy League: {selectedFantasyLeague.League!.Name} {selectedFantasyLeague.Name}
 Choose a Fantasy Player for position {position}
 {(selectedFantasyPlayers.Count() > 0 ?
-    string.Join(", ", selectedFantasyPlayers.Select(fp => $"{fp.DotaAccount!.Name} - {Math.Round(fantasyPlayerCosts.Where(fpc => fpc.Account.Id == fp.DotaAccountId).Sum(fpc => fpc.EstimatedCost))}g")) :
+    string.Join(", ", selectedFantasyPlayers.Select(fp => $"{fp.DotaAccount!.Name} - {Math.Round(fantasyPlayerCosts.Where(fpc => fpc.Account.Id == fp.DotaAccountId).Sum(fpc => fpc.Cost))}g")) :
     "")}
 ";
                     msg.Components = fantasyPlayerBuilder.Build();
@@ -137,7 +137,7 @@ Choose a Fantasy Player for position {position}
             .WithButton("Confirm", customId: "confirm_draft", ButtonStyle.Success)
             .WithButton("Cancel", customId: "cancel_draft", ButtonStyle.Danger);
 
-        if (Math.Round(fantasyPlayerCosts.Where(fpc => selectedFantasyPlayers.Select(fp => fp.DotaAccountId).Contains(fpc.Account.Id)).Sum(fpc => fpc.EstimatedCost)) > 600)
+        if (Math.Round(fantasyPlayerCosts.Where(fpc => selectedFantasyPlayers.Select(fp => fp.DotaAccountId).Contains(fpc.Account.Id)).Sum(fpc => fpc.Cost)) > 600)
         {
             // User spent too much money on players, TODO: add a back functionality but if this is unpopular it's low ROI right now
             await ModifyOriginalResponseAsync(msg =>
@@ -151,8 +151,8 @@ Choose a Fantasy Player for position {position}
         await ModifyOriginalResponseAsync(msg =>
         {
             msg.Content = $@"
-Here's your picks: {string.Join(", ", selectedFantasyPlayers.Select(fp => $"{fp.DotaAccount!.Name} - {Math.Round(fantasyPlayerCosts.Where(fpc => fpc.Account.Id == fp.DotaAccountId).Sum(fpc => fpc.EstimatedCost))}g"))}
-Total Cost: {Math.Round(fantasyPlayerCosts.Where(fpc => selectedFantasyPlayers.Select(fp => fp.DotaAccountId).Contains(fpc.Account.Id)).Sum(fpc => fpc.EstimatedCost))}g";
+Here's your picks: {string.Join(", ", selectedFantasyPlayers.Select(fp => $"{fp.DotaAccount!.Name} - {Math.Round(fantasyPlayerCosts.Where(fpc => fpc.Account.Id == fp.DotaAccountId).Sum(fpc => fpc.Cost))}g"))}
+Total Cost: {Math.Round(fantasyPlayerCosts.Where(fpc => selectedFantasyPlayers.Select(fp => fp.DotaAccountId).Contains(fpc.Account.Id)).Sum(fpc => fpc.Cost))}g";
             msg.Components = draftConfirmBuilder.Build();
         });
 
@@ -223,7 +223,7 @@ Total Cost: {Math.Round(fantasyPlayerCosts.Where(fpc => selectedFantasyPlayers.S
         var options = new List<SelectMenuOptionBuilder>();
         foreach (FantasyPlayer fantasyPlayer in fantasyPlayers.Where(fp => fp.TeamPosition == teamPosition))
         {
-            var playerBudget = fantasyBudgets.Where(fb => fb.Account.Id == fantasyPlayer.DotaAccountId).Sum(fb => fb.EstimatedCost);
+            var playerBudget = fantasyBudgets.Where(fb => fb.Account.Id == fantasyPlayer.DotaAccountId).Sum(fb => fb.Cost);
             options.Add(new SelectMenuOptionBuilder(
                 label: $"{fantasyPlayer.DotaAccount!.Name} - {fantasyPlayer.Team!.Name} - {Math.Round(playerBudget)}g",
                 value: $"{fantasyPlayer.Id}"
@@ -364,7 +364,7 @@ Total Cost: {Math.Round(fantasyPlayerCosts.Where(fpc => selectedFantasyPlayers.S
                 .Where(dpp => dpp.FantasyPlayer != null)
                 .Select(dpp => dpp.FantasyPlayer!.DotaAccountId)
                 .Contains(fpc.Account.Id))
-                .Sum(fpc => fpc.EstimatedCost) > 600)
+                .Sum(fpc => fpc.Cost) > 600)
         {
             throw new ArgumentException("Draft exceeds 600g budget");
         }

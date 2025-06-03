@@ -152,7 +152,7 @@ export const useFantasyLeagueStore = defineStore({
             this.setSelectedFantasyLeague(fantasyLeagueLookup);
           }
         }
-      } else if (this.selectedFantasyLeague.id == 0) {
+      } else {
         this.setSelectedLeague(this.defaultLeague);
         this.setSelectedFantasyLeague(this.defaultFantasyLeague);
       }

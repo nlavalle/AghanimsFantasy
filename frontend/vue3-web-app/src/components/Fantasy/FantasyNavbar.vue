@@ -64,7 +64,7 @@ onBeforeMount(() => {
 watch(() => leagueStore.selectedLeague, () => {
   if (leagueStore.fantasyLeagues.length > 0) {
     // Don't fire this if fantasyLeagues hasn't been loaded yet
-    if (leagueStore.selectedFantasyLeague.leagueId != leagueStore.selectedLeague.league_id) {
+    if (!leagueStore.selectedFantasyLeague || leagueStore.selectedFantasyLeague.leagueId != leagueStore.selectedLeague.league_id) {
       // Want to respect router param selected Fantasy League if it's set and not override it
       leagueStore.selectedFantasyLeague = leagueStore.defaultFantasyLeague;
     }

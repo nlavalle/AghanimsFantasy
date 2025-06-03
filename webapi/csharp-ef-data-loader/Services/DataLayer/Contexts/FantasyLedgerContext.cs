@@ -50,7 +50,6 @@ internal class FantasyLedgerContext : DotaOperationContext
                         .ThenInclude(dpp => dpp.FantasyPlayer)
                     .Where(fd => fd.FantasyLeagueId == unpaidFantasyLeague.Id)
                     .Where(fd => fd.UserId != null)
-                    .Where(fd => _dbContext.DiscordUsers.Select(du => du.Id).Contains(fd.DiscordAccountId.GetValueOrDefault()))
                     .ToListAsync();
 
                 List<FantasyLedger> newFantasyLedgers = unpaidFantasyDrafts
@@ -60,7 +59,7 @@ internal class FantasyLedgerContext : DotaOperationContext
                         Amount = fd.DraftPickPlayers.Sum(dpp =>
                             {
                                 var winnings = 300 - GetQuintile(dpp.FantasyPlayer!, fantasyResults) * 60;
-                                var cost = fantasyBudgets.Where(fb => fb.Account.Id == dpp.FantasyPlayer!.DotaAccountId).Sum(fb => fb.EstimatedCost);
+                                var cost = fantasyBudgets.Where(fb => fb.Account.Id == dpp.FantasyPlayer!.DotaAccountId).Sum(fb => fb.Cost);
                                 return dpp.FantasyPlayer != null ? Math.Max(winnings - cost, 0) : 0; // 0 if no player drafted, never let it go negative
                             }),
                         SourceId = unpaidFantasyLeague.Id,
