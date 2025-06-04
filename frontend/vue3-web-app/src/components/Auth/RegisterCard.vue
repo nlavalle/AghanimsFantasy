@@ -11,21 +11,41 @@
             Register
         </v-btn>
     </v-form>
+    <v-dialog v-model="showInfoModal" class="info-dialog">
+        <template v-slot:default="{ isActive }">
+            <v-card>
+                <v-card-text>
+                    <span class="text-h6">Please confirm your Email</span>
+                </v-card-text>
+                <v-card-text>
+                    <p>Registration was successful. A confirmation email has been sent to {{ email }}. You must confirm
+                        it before you can log in.</p>
+                </v-card-text>
+                <v-card-actions align="right">
+                    <v-spacer></v-spacer>
+                    <v-btn @click="onOKClick(isActive)">OK</v-btn>
+                </v-card-actions>
+            </v-card>
+        </template>
+    </v-dialog>
     <ErrorDialog v-model="showErrorModal" :error="errorDetails!" />
 </template>
 
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth';
-import { ref } from 'vue';
+import { ref, type Ref } from 'vue';
 import { VForm, VTextField, VBtn } from 'vuetify/components'
 import ErrorDialog from '@/components/ErrorDialog.vue';
 import { passwordRules } from '@/utilities/PasswordRules';
 
 const authStore = useAuthStore()
+const tab = defineModel('tab')
 const email = defineModel<string>('email')
 
 const showErrorModal = ref(false);
 const errorDetails = ref<Error>();
+
+const showInfoModal = ref(false);
 
 const password = ref('');
 const confirmPassword = ref('');
@@ -52,9 +72,17 @@ const confirmPasswordRuleArray = [
 const register = (email: string | undefined, pass: string) => {
     if (!email || !pass) return;
     return authStore.register(email, pass)
+        ?.then(() => {
+            showInfoModal.value = true;
+        })
         ?.catch((error: Error) => {
             showError(error)
         })
+}
+
+const onOKClick = (isActive: Ref<boolean>) => {
+    isActive.value = false;
+    tab.value = "login"
 }
 
 const showError = (error: Error) => {
@@ -67,3 +95,10 @@ const showError = (error: Error) => {
     });
 }
 </script>
+
+<style scoped>
+.info-dialog {
+    z-index: 1000;
+    max-width: 500px;
+}
+</style>

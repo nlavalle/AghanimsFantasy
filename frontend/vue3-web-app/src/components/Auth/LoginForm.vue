@@ -9,7 +9,7 @@
                 <LoginCard v-model:tab="registerTab" v-model:email="email" />
             </v-tabs-window-item>
             <v-tabs-window-item value="register">
-                <RegisterCard v-model:email="email" />
+                <RegisterCard v-model:tab="registerTab" v-model:email="email" />
             </v-tabs-window-item>
             <v-tabs-window-item value="resetPassword">
                 <ResetPasswordCard v-model:email="email" />

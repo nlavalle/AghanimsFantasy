@@ -169,8 +169,7 @@ export const useAuthStore = defineStore('auth', {
         .then(async (response: Response) => {
           switch (response.status) {
             case 200:
-              this.login(email, password)
-              break;
+              return;
             case 400:
               let data = await response.json();
               if (data.errors) {
@@ -180,7 +179,7 @@ export const useAuthStore = defineStore('auth', {
                 throw new Error("Bad Request")
               }
             default:
-              throw new Error(`Unknown error.\n Http Status: ${response.status}\n Http Body: ${response.body ?? ''}`)
+              throw new Error(`Unexpected backend error, please contact support@aghanimsfantasy.com.\n Http Status: ${response.status}\n Http Body: ${response.body ?? ''}`)
           }
         })
     },

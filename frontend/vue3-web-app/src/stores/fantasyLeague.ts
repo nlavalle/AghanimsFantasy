@@ -221,9 +221,11 @@ export const useFantasyLeagueStore = defineStore({
       return this.fantasyLeagues ?? []
     },
     defaultLeague(): League {
-      return this.activeLeagues.reduce((max, current) => {
+      let fantasyLeagueIds = this.activeFantasyLeagues.map(fl => fl.leagueId);
+      let leaguesWithFantasy = this.activeLeagues.filter(l => fantasyLeagueIds.includes(l.league_id))
+      return leaguesWithFantasy.reduce((max, current) => {
         return current.start_timestamp > max.start_timestamp ? current : max
-      }, this.activeLeagues[0])
+      }, leaguesWithFantasy[0])
     },
     defaultFantasyLeague(): FantasyLeague {
       let filteredLeagues = this.activeFantasyLeagues

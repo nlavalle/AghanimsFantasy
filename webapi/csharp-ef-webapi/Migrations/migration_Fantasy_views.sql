@@ -437,6 +437,13 @@ from nadcl.dota_fantasy_players fp
         NTILE(5) over (partition by fantasy_league_id order by total_match_fantasy_points desc) as ntile,
         row_number() over (partition by fantasy_league_id, account_id order by match_id desc) row_num
     from match_data
+), all_combos as (
+    select distinct
+        fantasy_league_id,
+        account_id,
+        cn.column1 as ntile
+    from ntiles
+    cross join (values(1),(2),(3),(4),(5)) as cn
 ), ntile_counts as (
     select distinct
         fantasy_league_id,
@@ -447,21 +454,25 @@ from nadcl.dota_fantasy_players fp
     where row_num <= 1000 -- Only take latest 200 games don't want to let really old stuff weigh in
 ), cost_probs as (
 select
-    fantasy_league_id,
-    account_id,
-    ntile,
-    ntile_count,
-    sum(ntile_count) over (partition by fantasy_league_id, account_id) as total_games,
-    ntile_count / sum(ntile_count) over (partition by fantasy_league_id, account_id) as probability,
-    ntile_count / sum(ntile_count) over (partition by fantasy_league_id, account_id) * (300 - 60 * ntile) as cost_prob
-from ntile_counts
+    ac.fantasy_league_id,
+    ac.account_id,
+    ac.ntile,
+    (coalesce(ntile_count, 0) + 1) as ntile_count,
+    sum(coalesce(ntile_count, 0)) over (partition by ac.fantasy_league_id, ac.account_id) + 5 as total_games,
+    (coalesce(ntile_count, 0) + 1) / (sum(coalesce(ntile_count, 0)) over (partition by ac.fantasy_league_id, ac.account_id) + 5) as probability,
+    (coalesce(ntile_count, 0) + 1) / (sum(coalesce(ntile_count, 0)) over (partition by ac.fantasy_league_id, ac.account_id) + 5) * (300 - 60 * ac.ntile) as cost_prob
+from all_combos ac
+    left join ntile_counts n
+        on ac.fantasy_league_id = n.fantasy_league_id
+            and ac.account_id = n.account_id
+            and ac.ntile = n.ntile
 )
 select
-    cp.fantasy_league_id,
+    fantasy_league_id,
     account_id,
     sum(cost_prob) as cost
-from cost_probs cp
-group by cp.fantasy_league_id, account_id
+from cost_probs
+group by fantasy_league_id, account_id
 ;
 
 create or replace view nadcl.fantasy_account_top_heroes as
