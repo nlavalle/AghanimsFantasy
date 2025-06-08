@@ -422,12 +422,21 @@ select distinct
     fp.fantasy_league_id,
     fp.dota_account_id as account_id,
     fmp.match_id,
-    fpp.total_match_fantasy_points
+    fpp.total_match_fantasy_points +
+        case
+            WHEN l.total_prize_pool = 0 then 0
+            WHEN l.total_prize_pool > 0 AND l.total_prize_pool < 50000 then 5
+            WHEN l.total_prize_pool >= 50000 then 10
+        end as total_match_fantasy_points
 from nadcl.dota_fantasy_players fp
     join nadcl.fantasy_match_player fmp
         on fp.dota_account_id = fmp.account_id
     join nadcl.fantasy_player_points fpp
         on fpp.fantasy_match_player_id = fmp.id
+    join nadcl.dota_match_history mh
+        on fmp.match_id = mh.match_id
+    join nadcl.dota_leagues l
+        on mh.league_id = l.id
 ), ntiles as (
     select 
         fantasy_league_id,
@@ -437,13 +446,6 @@ from nadcl.dota_fantasy_players fp
         NTILE(5) over (partition by fantasy_league_id order by total_match_fantasy_points desc) as ntile,
         row_number() over (partition by fantasy_league_id, account_id order by match_id desc) row_num
     from match_data
-), all_combos as (
-    select distinct
-        fantasy_league_id,
-        account_id,
-        cn.column1 as ntile
-    from ntiles
-    cross join (values(1),(2),(3),(4),(5)) as cn
 ), ntile_counts as (
     select distinct
         fantasy_league_id,
@@ -451,21 +453,42 @@ from nadcl.dota_fantasy_players fp
         ntile,
         count(*) over (partition by fantasy_league_id, account_id, ntile)::decimal as ntile_count
     from ntiles
-    where row_num <= 1000 -- Only take latest 200 games don't want to let really old stuff weigh in
+    where row_num <= 1000 -- Only take latest 1000 games don't want to let really old stuff weigh in
 ), cost_probs as (
-select
-    ac.fantasy_league_id,
-    ac.account_id,
-    ac.ntile,
-    (coalesce(ntile_count, 0) + 1) as ntile_count,
-    sum(coalesce(ntile_count, 0)) over (partition by ac.fantasy_league_id, ac.account_id) + 5 as total_games,
-    (coalesce(ntile_count, 0) + 1) / (sum(coalesce(ntile_count, 0)) over (partition by ac.fantasy_league_id, ac.account_id) + 5) as probability,
-    (coalesce(ntile_count, 0) + 1) / (sum(coalesce(ntile_count, 0)) over (partition by ac.fantasy_league_id, ac.account_id) + 5) * (300 - 60 * ac.ntile) as cost_prob
-from all_combos ac
-    left join ntile_counts n
-        on ac.fantasy_league_id = n.fantasy_league_id
-            and ac.account_id = n.account_id
-            and ac.ntile = n.ntile
+select distinct
+    fantasy_league_id,
+    account_id,
+    cn.column1 as ntile,
+    sum(
+    case 
+        when cn.column1 = ntile then ntile_count
+        else 0
+    end
+    ) over (partition by fantasy_league_id, account_id, cn.column1) + 1 as ntile_count,
+    sum(
+    case 
+        when cn.column1 = ntile then ntile_count
+        else 0
+    end
+    ) over (partition by fantasy_league_id, account_id) + 5 as total_games,
+    (
+        sum(
+        case 
+            when cn.column1 = ntile then ntile_count
+            else 0
+        end
+        ) over (partition by fantasy_league_id, account_id, cn.column1) + 1
+    ) /
+    (
+        sum(
+        case 
+            when cn.column1 = ntile then ntile_count
+            else 0
+        end
+        ) over (partition by fantasy_league_id, account_id) + 5
+    ) * (300 - 60 * cn.column1) as cost_prob
+from ntile_counts
+    cross join (values(1),(2),(3),(4),(5)) as cn
 )
 select
     fantasy_league_id,

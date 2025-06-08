@@ -25,6 +25,9 @@
                             <v-col>
                                 <v-btn @click="addTeam()">Add</v-btn>
                             </v-col>
+                            <v-col>
+                                <v-btn @click="calculateFantasyPlayerCosts()">Recalc Costs</v-btn>
+                            </v-col>
                         </v-row>
                         <v-row>
                             <v-autocomplete v-model="selectedTeam" :items="teams" item-title="name" max-width="300"
@@ -43,19 +46,16 @@
                                     </v-col>
                                 </v-row>
                                 <v-row>
-                                    <v-col class="available-player ma-1"
-                                        v-for="(player, playerIndex) in fantasyPlayersByTeam(team.id)"
-                                        :key="playerIndex"
-                                        :style="{ 'min-width': !display.mobile.value ? '110px' : '60px', 'max-width': !display.mobile.value ? '110px' : '60px' }">
-                                        <v-row justify="center">
-                                            <img :src="player.dotaAccount!.steamProfilePicture"
-                                                :alt="player.dotaAccount!.name"
-                                                :style="{ width: !display.mobile.value ? '80px' : '40px', height: !display.mobile.value ? '80px' : '40px' }" />
-                                        </v-row>
-                                        <v-row class="available-player-caption">
-                                            <span style="width: 100%"
-                                                :style="{ 'font-size': !display.mobile.value ? '0.8em' : '0.5em' }">{{
-                                                    player.dotaAccount!.name }}</span>
+                                    <v-col class="ma-1" v-for="(player, playerIndex) in fantasyPlayersByTeam(team.id)"
+                                        :key="playerIndex">
+                                        <v-row>
+                                            <v-col class="available-player ma-1 pa-0"
+                                                :style="{ 'min-width': !display.mobile.value ? '110px' : '60px', 'max-width': !display.mobile.value ? '110px' : '60px' }">
+                                                <draft-pick-card size="small" :fantasyPlayer="player" :fantasyPoints="0"
+                                                    :fantasyLeagueActive="false"
+                                                    :fantasyPlayerCost="fantasyPlayerCost(player.id)"
+                                                    :fantasyPlayerBudget="600" />
+                                            </v-col>
                                         </v-row>
                                         <v-row>
                                             <font-awesome-icon :icon="faPencil" class="me-2"
@@ -103,7 +103,7 @@
         <v-dialog v-model="dialogDeleteFantasyPlayer" max-width="500px">
             <v-card>
                 <v-card-title class="text-h7">Confirm delete Player {{ deleteFantasyPlayerItem?.dotaAccount.name ?? ''
-                    }}?</v-card-title>
+                }}?</v-card-title>
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="blue-darken-1" variant="text" @click="closeDeleteFantasyPlayer">Cancel</v-btn>
@@ -116,7 +116,7 @@
             <v-card>
                 <v-card-title class="text-h7">Confirm delete Team {{
                     deleteFantasyTeamItem?.name ?? ''
-                }}?</v-card-title>
+                    }}?</v-card-title>
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="blue-darken-1" variant="text" @click="closeDeleteFantasyTeam">Cancel</v-btn>
@@ -129,7 +129,9 @@
             <v-card>
                 <v-card-title class="text-h7">Confirm edit player {{
                     editFantasyPlayerItem?.dotaAccount.name ?? ''
-                }}?</v-card-title>
+                    }} - {{
+                        editFantasyPlayerItem?.dotaAccount.id ?? ''
+                    }}?</v-card-title>
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-autocomplete v-model="editSelectedPlayer" :items="players" item-title="name" max-width="300"
@@ -154,6 +156,7 @@ import type { DotaAccount, DotaTeam } from '@/types/Dota';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faDeleteLeft, faPencil } from '@fortawesome/free-solid-svg-icons';
 import { useDisplay } from 'vuetify';
+import DraftPickCard from '../Fantasy/DraftPickCard.vue';
 
 const display = useDisplay()
 
@@ -229,9 +232,11 @@ onMounted(() => {
 
 watch(selectedFantasyLeague, () => {
     if (selectedFantasyLeague.value) {
+        leagueStore.setSelectedFantasyLeague(selectedFantasyLeague.value)
         localApiService.getFantasyPlayers(selectedFantasyLeague.value.id).then((result: any) => {
             fantasyPlayers.value = result;
             setFantasyTeams()
+            leagueStore.fetchFantasyPlayerViewModels()
         })
     }
 });
@@ -251,8 +256,20 @@ const getImageUrl = (teamLogoId: number) => {
     return `logos/teams_logo_${teamLogoId}.png`
 }
 
+const fantasyPlayerCost = (fantasyPlayerId: number) => {
+    return leagueStore.fantasyPlayersStats.find(fps => fps.fantasy_player.id == fantasyPlayerId)?.cost ?? 0
+}
+
 const addTeam = () => {
     dialogAddFantasyTeam.value = true;
+}
+
+const calculateFantasyPlayerCosts = () => {
+    if (selectedFantasyLeague.value) {
+        localApiAdminService.calculateFantasyPlayerCosts(selectedFantasyLeague.value.id)?.then(() => {
+            leagueStore.fetchFantasyPlayerViewModels()
+        });
+    }
 }
 
 const addFantasyTeamConfirm = () => {

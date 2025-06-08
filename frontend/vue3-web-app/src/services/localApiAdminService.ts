@@ -65,5 +65,26 @@ export const localApiAdminService = {
         console.error('Error fetching data:', error)
         throw error
       })
-  }
+  },
+  calculateFantasyPlayerCosts(fantasyLeagueId: number) {
+    if (!fantasyLeagueId) return;
+    return fetch(`${baseUrl}/fantasyleague/${fantasyLeagueId}/costs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then(
+      function (response: Response) {
+        if (!response.ok) {
+          throw response.status
+        } else {
+          return response.status
+        }
+      }.bind(this)
+    )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
 }

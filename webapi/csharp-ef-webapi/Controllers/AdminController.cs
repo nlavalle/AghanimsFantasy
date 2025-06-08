@@ -65,5 +65,21 @@ namespace csharp_ef_webapi.Controllers
                 return Unauthorized();
             }
         }
+
+        // POST: api/admin/fantasyleague/5/team/1
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost("fantasyleague/{fantasyLeagueId}/costs")]
+        public async Task<ActionResult> CalculateFantasyPlayerCosts(int fantasyLeagueId)
+        {
+            try
+            {
+                await _fantasyServiceAdmin.CalculateFantasyPlayerCosts(fantasyLeagueId);
+                return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+        }
     }
 }
