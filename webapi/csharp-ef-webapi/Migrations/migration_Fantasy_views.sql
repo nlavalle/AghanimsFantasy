@@ -90,13 +90,18 @@ from nadcl.dota_fantasy_leagues dfl
 	join nadcl.dota_fantasy_league_weights dflw 
 		on dfl.id = dflw.fantasy_league_id
 	join nadcl.dota_fantasy_players dfp
-		on dfl.id = dfp.fantasy_league_id
+		on dfl.id = dfp.fantasy_league_id and dfp.is_substitution = false
+	left join nadcl.dota_fantasy_players dfps
+		on dfp.fantasy_league_id = dfps.fantasy_league_id
+			and dfp.team_id = dfps.team_id
+			and dfp.team_position = dfps.team_position
+			and dfps.is_substitution = true
 	left join nadcl.fantasy_match fm
 		on dfl.league_id = fm.league_id
 			and dfl.league_start_time <= fm.start_time 
 			and dfl.league_end_time >= fm.start_time
 	left join nadcl.fantasy_match_player fmp 
-		on fmp.match_id = fm.match_id and fmp.account_id = dfp.dota_account_id
+		on fmp.match_id = fm.match_id and fmp.account_id = coalesce(dfps.dota_account_id, dfp.dota_account_id)
 ;
 
 create or replace view nadcl.match_highlights as
@@ -437,6 +442,7 @@ from nadcl.dota_fantasy_players fp
         on fmp.match_id = mh.match_id
     join nadcl.dota_leagues l
         on mh.league_id = l.id
+where fp.is_substitution = false
 ), ntiles as (
     select 
         fantasy_league_id,

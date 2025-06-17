@@ -32,4 +32,7 @@ public class FantasyPlayer
 
     [Column("team_position")]
     public int TeamPosition { get; set; }
+
+    [Column("is_substitution")]
+    public bool Substitution { get; set; }
 }

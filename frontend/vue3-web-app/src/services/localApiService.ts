@@ -903,6 +903,22 @@ export const localApiService = {
         throw error
       })
   },
+  getAllPrizes() {
+    return fetch(`${baseUrl}/prize`)
+      .then(
+        function (response: any) {
+          if (!response.ok) {
+            throw response.status
+          } else {
+            return response.json()
+          }
+        }
+      )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
   getHighlights(leagueId: number, numberOfHighlights: number) {
     return fetch(`${baseUrl}/fantasy/${leagueId}/highlights/${numberOfHighlights}`)
       .then(

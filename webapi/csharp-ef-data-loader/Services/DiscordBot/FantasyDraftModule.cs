@@ -221,7 +221,7 @@ Total Cost: {Math.Round(fantasyPlayerCosts.Where(fpc => selectedFantasyPlayers.S
     private SelectMenuBuilder BuildFantasyPlayerSelectMenu(IEnumerable<FantasyPlayer> fantasyPlayers, int teamPosition, IEnumerable<FantasyPlayerBudgetProbabilityTable> fantasyBudgets)
     {
         var options = new List<SelectMenuOptionBuilder>();
-        foreach (FantasyPlayer fantasyPlayer in fantasyPlayers.Where(fp => fp.TeamPosition == teamPosition))
+        foreach (FantasyPlayer fantasyPlayer in fantasyPlayers.Where(fp => fp.TeamPosition == teamPosition && fp.Substitution == false))
         {
             var playerBudget = fantasyBudgets.Where(fb => fb.Account.Id == fantasyPlayer.DotaAccountId).Sum(fb => fb.Cost);
             options.Add(new SelectMenuOptionBuilder(

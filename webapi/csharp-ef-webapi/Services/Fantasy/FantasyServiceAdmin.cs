@@ -258,7 +258,8 @@ public class FantasyServiceAdmin
                     FantasyLeagueId = newFantasyLeagueId,
                     TeamId = recentFantasyPlayer.TeamId,
                     DotaAccountId = recentFantasyPlayer.DotaAccountId,
-                    TeamPosition = recentFantasyPlayer.TeamPosition
+                    TeamPosition = recentFantasyPlayer.TeamPosition,
+                    Substitution = false
                 };
                 await AddFantasyPlayerAsync(newFantasyPlayer);
             }
@@ -289,7 +290,7 @@ public class FantasyServiceAdmin
         List<FantasyPlayer> fantasyPlayers = await _dbContext.FantasyPlayers
             .Include(fp => fp.FantasyLeague)
             .Include(fp => fp.DotaAccount)
-            .Where(fp => fp.FantasyLeagueId == fantasyLeagueId).ToListAsync();
+            .Where(fp => fp.FantasyLeagueId == fantasyLeagueId && fp.Substitution == false).ToListAsync();
 
         foreach (FantasyPlayer fantasyPlayer in fantasyPlayers)
         {

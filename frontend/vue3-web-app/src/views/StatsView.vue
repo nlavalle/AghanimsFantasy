@@ -4,7 +4,7 @@
   <v-container v-if="isMounted">
     <v-row>
       <v-col>
-        <v-row>
+        <v-row class="align-center">
           <v-tabs v-model="statsTab">
             <v-tab value="fantasy">Fantasy</v-tab>
             <v-tab value="league">League</v-tab>
