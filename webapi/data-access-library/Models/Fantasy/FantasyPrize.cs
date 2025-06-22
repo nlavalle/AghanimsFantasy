@@ -19,7 +19,7 @@ public class FantasyPrize
     public required string UserId { get; set; }
 
     [JsonIgnore]
-    public required AghanimsFantasyUser User { get; set; }
+    public AghanimsFantasyUser? User { get; set; }
 
     [Column("prize_type")]
     [JsonPropertyName("prize_type")]
@@ -35,5 +35,22 @@ public enum FantasyPrizeOption
     KILL_STREAK_FLAMES,
     STICKER,
     LEADERBOARD_BADGE,
+}
 
+public static class FantasyPrizeOptionExtensions
+{
+    public static int GetCost(this FantasyPrizeOption option)
+    {
+        switch (option)
+        {
+            case FantasyPrizeOption.KILL_STREAK_FLAMES:
+                return 1400;
+            case FantasyPrizeOption.STICKER:
+                return 600;
+            case FantasyPrizeOption.LEADERBOARD_BADGE:
+                return 1400;
+            default:
+                return 0;
+        }
+    }
 }

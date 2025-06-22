@@ -15,7 +15,7 @@
                     multiple clearable hide-details single-line />
             </v-col>
         </v-row>
-        <v-row v-if="!display.mobile.value" dense>
+        <v-row v-if="display.mobile.value" dense>
             <v-tabs v-model="fantasyTab" density="compact">
                 <v-tab value="kda" min-width="70px" width="70px">K/D/A</v-tab>
                 <v-tab value="farm" min-width="70px" width="70px">Farm</v-tab>

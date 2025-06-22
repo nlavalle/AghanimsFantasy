@@ -354,9 +354,9 @@ public class FantasyService
 
         List<FantasyDraftPointTotals> top10Players = fantasyPoints.OrderByDescending(fp => fp.DraftTotalFantasyPoints).Take(10).ToList();
 
-        AghanimsFantasyUser user = await GetUserFromContext(siteUser);
+        AghanimsFantasyUser? user = await _userManager.GetUserAsync(siteUser);
         // We want the user included even if they're not top 10
-        if (!top10Players.Any(tp => tp.FantasyDraft.UserId == user.Id))
+        if (user != null && !top10Players.Any(tp => tp.FantasyDraft.UserId == user.Id))
         {
             var currentPlayer = fantasyPoints.Where(fp => fp.FantasyDraft.UserId == user.Id).FirstOrDefault();
             if (currentPlayer != null)
@@ -435,6 +435,54 @@ public class FantasyService
     {
         AghanimsFantasyUser user = await GetUserFromContext(siteUser);
         return await _dbContext.FantasyLedger.Where(fl => fl.UserId == user.Id).SumAsync(fl => fl.Amount);
+    }
+
+    public async Task<IEnumerable<FantasyPrize>> GetUserPrizes(ClaimsPrincipal siteUser)
+    {
+        AghanimsFantasyUser user = await GetUserFromContext(siteUser);
+        return await _dbContext.FantasyPrizes.Where(fp => fp.UserId == user.Id).ToListAsync();
+    }
+
+    public async Task<FantasyPrize> PurchasePrize(ClaimsPrincipal siteUser, FantasyPrizeOption fantasyPrizeOption)
+    {
+        AghanimsFantasyUser user = await GetUserFromContext(siteUser);
+
+        // If user already has that prize return that
+        var lookupPrize = await _dbContext.FantasyPrizes.FirstOrDefaultAsync(fp => fp.UserId == user.Id && fp.FantasyPrizeOption == fantasyPrizeOption);
+        if (lookupPrize != null)
+        {
+            return lookupPrize;
+        }
+
+        // Otherwise check if user can afford it
+        var balance = await GetUserBalance(siteUser);
+        var prizeCost = fantasyPrizeOption.GetCost();
+        if (balance < prizeCost)
+        {
+            throw new ArgumentException("Unable to afford prize");
+        }
+
+        var newFantasyPrize = new FantasyPrize
+        {
+            UserId = user.Id,
+            User = user,
+            FantasyPrizeOption = fantasyPrizeOption,
+            PrizeTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+        };
+        await _dbContext.FantasyPrizes.AddAsync(newFantasyPrize);
+
+        // Charge user for that amount
+        await _dbContext.FantasyLedger.AddAsync(new FantasyLedger
+        {
+            UserId = user.Id,
+            Amount = prizeCost * -1,
+            DiscordId = 0,
+            LedgerRecordedTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+            SourceId = (int)fantasyPrizeOption,
+            SourceType = "FantasyPrize"
+        });
+        await _dbContext.SaveChangesAsync();
+        return newFantasyPrize;
     }
 
     private async Task<List<FantasyPlayer>> GetFantasyPlayerByFantasyLeagueAsync(FantasyLeague fantasyLeague)

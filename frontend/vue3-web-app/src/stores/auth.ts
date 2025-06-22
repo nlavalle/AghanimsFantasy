@@ -12,12 +12,20 @@ export interface User {
   isPrivateFantasyAdmin: boolean
   loginProviders: LoginProvider[]
   stashBalance: number | undefined
+  prizes: FantasyPrize[]
 }
 
 interface LoginProvider {
   loginProvider: string
   providerKey: string
   providerDisplayName: string
+}
+
+interface FantasyPrize {
+  id: number
+  user_id: string
+  prize_type: number
+  prize_timestamp: number
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -77,7 +85,8 @@ export const useAuthStore = defineStore('auth', {
             this.user.name = authData.displayName,
             this.user.discordName = authData.discordHandle,
             this.user.isAdmin = authData.roles.some((role: string) => role == "Admin"),
-            this.user.isPrivateFantasyAdmin = authData.roles.some((role: string) => role == "PrivateFantasyLeagueAdmin")
+            this.user.isPrivateFantasyAdmin = authData.roles.some((role: string) => role == "PrivateFantasyLeagueAdmin"),
+            this.user.prizes = authData.prizes
         })
     },
 

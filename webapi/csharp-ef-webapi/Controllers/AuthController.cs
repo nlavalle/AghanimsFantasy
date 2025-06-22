@@ -1,4 +1,5 @@
 using csharp_ef_webapi.Extensions;
+using csharp_ef_webapi.Services;
 using csharp_ef_webapi.ViewModels;
 using DataAccessLibrary.Data.Facades;
 using DataAccessLibrary.Data.Identity;
@@ -20,18 +21,21 @@ namespace csharp_ef_webapi.Controllers
         private readonly UserManager<AghanimsFantasyUser> _userManager;
         private readonly FantasyDraftFacade _fantasyDraftFacade;
         private readonly DiscordFacade _discordFacade;
+        private readonly FantasyService _fantasyService;
         public AuthController(
             ILogger<AuthController> logger,
             SignInManager<AghanimsFantasyUser> signInManager,
             UserManager<AghanimsFantasyUser> userManager,
             FantasyDraftFacade fantasyDraftFacade,
-            DiscordFacade discordFacade)
+            DiscordFacade discordFacade,
+            FantasyService fantasyService)
         {
             _logger = logger;
             _signInManager = signInManager;
             _userManager = userManager;
             _fantasyDraftFacade = fantasyDraftFacade;
             _discordFacade = discordFacade;
+            _fantasyService = fantasyService;
         }
 
         [HttpGet("login-provider")]
@@ -228,12 +232,15 @@ namespace csharp_ef_webapi.Controllers
 
             var userRoles = await _userManager.GetRolesAsync(currentUser);
 
+            var userPrizes = await _fantasyService.GetUserPrizes(HttpContext.User);
+
             var responseObject = new
             {
                 currentUser.Id,
                 currentUser.DisplayName,
                 currentUser.DiscordHandle,
-                roles = userRoles.ToList()
+                roles = userRoles.ToList(),
+                prizes = userPrizes.ToList(),
             };
 
             return Ok(responseObject);

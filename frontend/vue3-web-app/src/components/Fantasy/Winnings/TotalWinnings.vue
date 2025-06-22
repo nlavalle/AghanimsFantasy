@@ -37,9 +37,11 @@ const playerFantasyStatsIndexed = computed(() => {
 
 const totalWinnings = computed(() => {
     return Math.max(
-        playerFantasyStatsIndexed.value.reduce(function (total, current) {
-            return total + getWinnings(current.position, current.fantasyPlayer);
-        }, 0),
+        playerFantasyStatsIndexed.value
+            .filter(player => player.totalMatches > 0)
+            .reduce(function (total, current) {
+                return total + getWinnings(current.position, current.fantasyPlayer);
+            }, 0),
         0 // Don't let winnings fall below 0
     );
 })

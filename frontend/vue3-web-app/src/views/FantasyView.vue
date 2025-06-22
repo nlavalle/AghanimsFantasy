@@ -208,6 +208,8 @@ onBeforeMount(async () => {
     await fantasyLeagueStore.fetchFantasyPlayerPoints()
     if (fantasyLeagueStore.selectedFantasyDraftPoints && (fantasyLeagueStore.selectedFantasyDraftPoints?.fantasyDraft.draftPickPlayers.length ?? 0 > 0)) {
       setFantasyDraftPicks(fantasyLeagueStore.selectedFantasyDraftPoints.fantasyDraft.draftPickPlayers);
+    } else {
+      fantasyTab.value = 'draft';
     }
     isMounted.value = true;
   } else if (!authStore.authenticated && fantasyLeagueStore.selectedFantasyLeague) {

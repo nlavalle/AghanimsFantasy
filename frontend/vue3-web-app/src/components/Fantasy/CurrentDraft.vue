@@ -8,7 +8,8 @@
                 <v-row class="mt-1" justify="center">
                     <draft-pick-card-hover v-if="fantasyDraftPoints.fantasyPlayer" class="draft-pick-card"
                         :fantasyPlayer="fantasyDraftPoints.fantasyPlayer"
-                        :fantasyPoints="fantasyDraftPoints.fantasyPoints" />
+                        :fantasyPoints="fantasyDraftPoints.fantasyPoints"
+                        :killStreakEffect="fantasyDraftPoints.onWinStreak" />
                 </v-row>
             </v-col>
         </v-row>
@@ -25,6 +26,7 @@ import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import DraftPickCardHover from '@/components/Fantasy/DraftPickCardHover.vue';
 import PlayerWinnings from '@/components/Fantasy/Winnings/PlayerWinnings.vue';
 import TotalWinnings from '@/components/Fantasy/Winnings/TotalWinnings.vue';
+import { useAuthStore } from '@/stores/auth';
 
 const props = defineProps({
     FantasyPoints: {
@@ -33,29 +35,40 @@ const props = defineProps({
     }
 })
 
+const authStore = useAuthStore()
+
 const fantasyLeagueStore = useFantasyLeagueStore();
+
+const HasKillStreakEffect = computed(() => {
+    return authStore.user.prizes?.some(p => p.prize_type == 0) ?? false
+})
 
 const CombinedFantasyDraftPoints = computed(() => {
     return [
         {
             fantasyPlayer: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 1)[0]?.fantasyPlayer,
             fantasyPoints: props.FantasyPoints?.draftPickOnePoints ?? 0,
+            onWinStreak: HasKillStreakEffect.value && (props.FantasyPoints?.fantasyPlayerPoints.filter((fpp: any) => fpp.fantasyPlayer.teamPosition == 1)[0]?.onWinStreak ?? false)
         },
         {
             fantasyPlayer: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 2)[0]?.fantasyPlayer,
             fantasyPoints: props.FantasyPoints?.draftPickTwoPoints ?? 0,
+            onWinStreak: HasKillStreakEffect.value && (props.FantasyPoints?.fantasyPlayerPoints.filter((fpp: any) => fpp.fantasyPlayer.teamPosition == 2)[0]?.onWinStreak ?? false)
         },
         {
             fantasyPlayer: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 3)[0]?.fantasyPlayer,
             fantasyPoints: props.FantasyPoints?.draftPickThreePoints ?? 0,
+            onWinStreak: HasKillStreakEffect.value && (props.FantasyPoints?.fantasyPlayerPoints.filter((fpp: any) => fpp.fantasyPlayer.teamPosition == 3)[0]?.onWinStreak ?? false)
         },
         {
             fantasyPlayer: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 4)[0]?.fantasyPlayer,
             fantasyPoints: props.FantasyPoints?.draftPickFourPoints ?? 0,
+            onWinStreak: HasKillStreakEffect.value && (props.FantasyPoints?.fantasyPlayerPoints.filter((fpp: any) => fpp.fantasyPlayer.teamPosition == 4)[0]?.onWinStreak ?? false)
         },
         {
             fantasyPlayer: props.FantasyPoints?.fantasyDraft.draftPickPlayers.filter((dpp: any) => dpp.draftOrder == 5)[0]?.fantasyPlayer,
             fantasyPoints: props.FantasyPoints?.draftPickFivePoints ?? 0,
+            onWinStreak: HasKillStreakEffect.value && (props.FantasyPoints?.fantasyPlayerPoints.filter((fpp: any) => fpp.fantasyPlayer.teamPosition == 5)[0]?.onWinStreak ?? false)
         },
     ];
 })

@@ -919,6 +919,26 @@ export const localApiService = {
         throw error
       })
   },
+  buyPrize(prize_name: string) {
+    return fetch(`${baseUrl}/prize?Prize=${prize_name}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then(
+      function (response: Response) {
+        if (!response.ok) {
+          throw response.status
+        } else {
+          return response.json()
+        }
+      }.bind(this)
+    )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
   getHighlights(leagueId: number, numberOfHighlights: number) {
     return fetch(`${baseUrl}/fantasy/${leagueId}/highlights/${numberOfHighlights}`)
       .then(

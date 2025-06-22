@@ -118,7 +118,6 @@ namespace csharp_ef_webapi.Controllers
         }
 
         // GET: api/fantasyleague/5/drafters/top10
-        [Authorize]
         [HttpGet("{fantasyLeagueId}/drafters/top10")]
         public async Task<IActionResult> GetTop10FantasyPoints(int? fantasyLeagueId)
         {
