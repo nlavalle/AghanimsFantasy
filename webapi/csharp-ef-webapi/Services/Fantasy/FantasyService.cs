@@ -434,7 +434,7 @@ public class FantasyService
     public async Task<decimal> GetUserBalance(ClaimsPrincipal siteUser)
     {
         AghanimsFantasyUser user = await GetUserFromContext(siteUser);
-        return await _dbContext.FantasyLedger.Where(fl => fl.UserId == user.Id).SumAsync(fl => fl.Amount);
+        return (decimal)await _dbContext.FantasyLedger.Where(fl => fl.UserId == user.Id).SumAsync(fl => (double)fl.Amount);
     }
 
     public async Task<IEnumerable<FantasyPrize>> GetUserPrizes(ClaimsPrincipal siteUser)

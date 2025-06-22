@@ -179,3 +179,6 @@ app.UseSession();
 app.MapControllers();
 
 app.Run();
+
+// Needed for integration tests to make a factory
+public partial class Program { }
