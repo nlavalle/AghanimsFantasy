@@ -928,16 +928,14 @@ export const localApiService = {
     }).then(
       function (response: Response) {
         if (!response.ok) {
-          throw response.status
+          return response.text().then((response: any) => { throw new Error(response) })
         } else {
           return response.json()
         }
       }.bind(this)
-    )
-      .catch((error) => {
-        console.error('Error fetching data:', error)
-        throw error
-      })
+    ).catch((error) => {
+      throw error
+    })
   },
   getHighlights(leagueId: number, numberOfHighlights: number) {
     return fetch(`${baseUrl}/fantasy/${leagueId}/highlights/${numberOfHighlights}`)

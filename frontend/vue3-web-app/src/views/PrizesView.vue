@@ -33,6 +33,7 @@
     <ConfirmDialog v-model="showConfirmDialog" title="Purchase Card Effect?"
         body="Are you sure you want to purchase the Killstreak Card Effect for 1400 shards?"
         @ok="purchaseKillstreak()" />
+    <ErrorDialog v-model="showErrorModal" :error="errorDetails!" />
 </template>
 
 <script setup lang="ts">
@@ -45,19 +46,22 @@ import UserBalance from '@/components/Fantasy/UserBalance.vue';
 import ShardSpan from '@/components/Dom/ShardSpan.vue';
 import { useAuthStore } from '@/stores/auth';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
+import ErrorDialog from '@/components/ErrorDialog.vue';
 
 const authStore = useAuthStore()
 
 const availablePrizes = ref()
 
 const showConfirmDialog = ref(false)
+const showErrorModal = ref(false);
+const errorDetails = ref<Error>();
 
 const isKillStreakDisabled = computed(() => {
     return authStore.user.prizes?.some(p => p.prize_type == 0) ?? false
 })
 
 const canAffordKillstreak = computed(() => {
-    return (authStore.currentUser.stashBalance ?? 0) >= 1000
+    return (authStore.currentUser.stashBalance ?? 0) >= 1400
 });
 
 const exampleFantasyPlayer = ref<FantasyPlayer>({
@@ -92,7 +96,19 @@ const purchaseKillstreak = () => {
     localApiService.buyPrize('KILL_STREAK_FLAMES').then((result: any) => {
         availablePrizes.value = result
         authStore.loadUser()
+    })?.catch((error: Error) => {
+        showError(error)
     })
+}
+
+const showError = (error: Error) => {
+    errorDetails.value = error;
+    showErrorModal.value = true;
+    window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'smooth'
+    });
 }
 </script>
 

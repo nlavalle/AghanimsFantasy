@@ -101,7 +101,7 @@ from nadcl.dota_fantasy_leagues dfl
 			and dfl.league_start_time <= fm.start_time 
 			and dfl.league_end_time >= fm.start_time
 	left join nadcl.fantasy_match_player fmp 
-		on fmp.match_id = fm.match_id and fmp.account_id = coalesce(dfps.dota_account_id, dfp.dota_account_id)
+		on fmp.match_id = fm.match_id and fmp.account_id in (dfps.dota_account_id, dfp.dota_account_id)
 ;
 
 create or replace view nadcl.match_highlights as
