@@ -78,7 +78,8 @@ const exampleFantasyPlayer = ref<FantasyPlayer>({
         tag: "BT"
     },
     teamId: 0,
-    teamPosition: 1
+    teamPosition: 1,
+    substitution: false
 })
 
 onMounted(() => {
