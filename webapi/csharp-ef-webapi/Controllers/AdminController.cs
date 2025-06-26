@@ -1,4 +1,5 @@
 using csharp_ef_webapi.Services;
+using DataAccessLibrary.Data.Identity;
 using DataAccessLibrary.Models.Fantasy;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -34,6 +35,20 @@ namespace csharp_ef_webapi.Controllers
             }
         }
 
+        // GET: api/Admin/Users
+        [HttpGet("users")]
+        public async Task<ActionResult<IEnumerable<AghanimsFantasyUser>>> GetAdminUsers()
+        {
+            try
+            {
+                return Ok(await _fantasyServiceAdmin.GetUsers());
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
 
         // POST: api/admin/fantasyleague/5/team/1
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -44,6 +59,22 @@ namespace csharp_ef_webapi.Controllers
             {
                 await _fantasyServiceAdmin.AddFantasyPlayersByTeam(teamId, fantasyLeagueId);
                 return Created();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+        }
+
+        // POST: api/admin/fantasyleague/5/team/1
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost("fantasyleague/{fantasyLeagueId}/costs")]
+        public async Task<ActionResult> CalculateFantasyPlayerCosts(int fantasyLeagueId)
+        {
+            try
+            {
+                await _fantasyServiceAdmin.CalculateFantasyPlayerCosts(fantasyLeagueId);
+                return Ok();
             }
             catch (UnauthorizedAccessException)
             {

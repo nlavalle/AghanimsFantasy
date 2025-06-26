@@ -11,6 +11,9 @@
             <v-tab value="leaderboard">Leaderboard</v-tab>
             <v-tab value="match">Fantasy Matches</v-tab>
           </v-tabs>
+          <v-btn icon="fa-refresh" @click="refreshFantasy" :loading="!loaded" :disabled="!loaded" size="small"
+            variant="outlined">
+          </v-btn>
           <v-spacer />
           <UserBalance />
         </v-row>
@@ -110,8 +113,8 @@
 
 <script setup lang="ts">
 import { computed, onBeforeMount, ref, watch } from 'vue';
-import { VCard, VCardTitle, VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem, VSpacer, VProgressCircular } from 'vuetify/components';
-import { useAuthStore, type User } from '@/stores/auth';
+import { VCard, VCardTitle, VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem, VSpacer, VProgressCircular, VBtn } from 'vuetify/components';
+import { useAuthStore } from '@/stores/auth';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import CurrentDraft from '@/components/Fantasy/CurrentDraft.vue';
 import CreateDraft from '@/components/Fantasy/CreateDraft/CreateDraft.vue';
@@ -129,7 +132,7 @@ const authStore = useAuthStore();
 const fantasyLeagueStore = useFantasyLeagueStore();
 const fantasyDraftStore = useFantasyDraftStore();
 const { fantasyDraftPicks, setFantasyDraftPicks, setFantasyPlayerPoints, clearFantasyDraftPicks } = fantasyDraftState();
-const draftFiltered = true;
+const draftFiltered = ref(true);
 
 const showSuccessModal = ref(false);
 const showErrorModal = ref(false);
@@ -139,6 +142,7 @@ const fantasyTab = ref('current')
 const updateDraftVisibility = ref(false);
 
 const isMounted = ref(false);
+const loaded = ref(true);
 
 const updateDisabled = computed(() => {
   var currentDate = new Date();
@@ -182,6 +186,21 @@ const scrollAfterAlertDialog = () => {
   }, 200);
 }
 
+const refreshFantasy = () => {
+  loaded.value = false
+  Promise.all([
+    fantasyLeagueStore.fetchFantasyPlayerViewModels(),
+    fantasyLeagueStore.fetchFantasyPlayerPoints(),
+    fantasyDraftStore.fetchLeaderboard()
+  ])
+    ?.then(() => {
+      loaded.value = true
+    })
+    .catch(() => {
+      loaded.value = true
+    })
+}
+
 onBeforeMount(async () => {
   if (authStore.authenticated && fantasyLeagueStore.selectedFantasyLeague) {
     await fantasyDraftStore.fetchLeaderboard()
@@ -189,14 +208,14 @@ onBeforeMount(async () => {
     await fantasyLeagueStore.fetchFantasyPlayerPoints()
     if (fantasyLeagueStore.selectedFantasyDraftPoints && (fantasyLeagueStore.selectedFantasyDraftPoints?.fantasyDraft.draftPickPlayers.length ?? 0 > 0)) {
       setFantasyDraftPicks(fantasyLeagueStore.selectedFantasyDraftPoints.fantasyDraft.draftPickPlayers);
+    } else {
+      fantasyTab.value = 'draft';
     }
     isMounted.value = true;
   } else if (!authStore.authenticated && fantasyLeagueStore.selectedFantasyLeague) {
     fantasyTab.value = 'draft';
     isMounted.value = true;
   }
-  fantasyDraftStore.startFantasyDraftPolling();
-  fantasyLeagueStore.startFantasyViewPolling();
 });
 
 watch(() => fantasyLeagueStore.selectedFantasyLeague, () => {

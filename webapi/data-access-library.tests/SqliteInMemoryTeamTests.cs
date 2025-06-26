@@ -1,10 +1,8 @@
 namespace DataAccessLibrary.IntegrationTests.Data;
 
-using Moq;
 using System.Data.Common;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using DataAccessLibrary.Models.ProMetadata;
 
 public class SqliteInMemoryTeamTests : IDisposable

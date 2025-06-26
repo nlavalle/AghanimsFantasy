@@ -140,9 +140,34 @@ public class SqliteInMemoryFantasyDraftFacadeTests : IDisposable
             ;
 
             create view fantasy_player_point_totals as
+            WITH recent_wins AS (
+                select
+                    fp.id as fantasy_player_id,
+                    case
+                        when fm.radiant_win = true and fmp.dota_team_side = false then 1
+                        when fm.radiant_win = false and fmp.dota_team_side = true then 1
+                        else 0
+                    end as wins,
+                    row_number() over (partition by fp.fantasy_league_id, fp.dota_account_id order by fm.start_time desc) as row_num
+                from fantasy_match fm
+                    join fantasy_match_player fmp
+                        on fm.match_id = fmp.match_id
+                    join dota_fantasy_leagues fl
+                        on fm.league_id = fl.league_id
+                            and fm.start_time >= fl.league_start_time
+                            and fm.start_time <= fl.league_end_time
+                    join dota_fantasy_players fp
+                        on fmp.account_id = fp.dota_account_id
+                            and fl.id = fp.fantasy_league_id
+            ), grouped_wins as (
+                select fantasy_player_id, sum(wins) = 3 as on_win_streak
+                from recent_wins
+                where row_num <= 3
+                group by fantasy_player_id
+            )            
             SELECT 
-                fantasy_league_id, 
-                fantasy_player_id, 
+                fpp.fantasy_league_id, 
+                fpp.fantasy_player_id, 
                 count(distinct fantasy_match_player_id) as matches,
                 coalesce(sum(kills),0) as kills,
                 coalesce(sum(kills_points),0) as kills_points,
@@ -198,9 +223,12 @@ public class SqliteInMemoryFantasyDraftFacadeTests : IDisposable
                 coalesce(sum(wards_dewarded_points),0) as wards_dewarded_points,
                 coalesce(sum(stun_duration),0) as stun_duration,
                 coalesce(sum(stun_duration_points),0) as stun_duration_points,
-                coalesce(sum(total_match_fantasy_points),0) as total_match_fantasy_points
-            FROM fantasy_player_points
-            group by fantasy_league_id, fantasy_player_id
+                coalesce(sum(total_match_fantasy_points),0) as total_match_fantasy_points,
+	            coalesce(gw.on_win_streak, false) as on_win_streak
+            FROM fantasy_player_points fpp
+                LEFT JOIN grouped_wins gw
+                    on fpp.fantasy_player_id = gw.fantasy_player_id
+            group by fantasy_league_id, fpp.fantasy_player_id, gw.on_win_streak
             order by total_match_fantasy_points desc
             ;
             ";

@@ -2,8 +2,8 @@
   <div class="parent" @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave" @mousemove="handleMouseMove">
     <div v-if="cardBoundingRef" class="hover-filter">
     </div>
-    <draft-pick-card class="draft-pick-card-hover" :fantasyPlayer="props.fantasyPlayer"
-      :fantasyPoints="props.fantasyPoints" />
+    <draft-pick-card class="draft-pick-card-hover" :killStreakEffect="props.killStreakEffect"
+      :fantasyPlayer="props.fantasyPlayer" :fantasyPoints="props.fantasyPoints" />
   </div>
 </template>
 
@@ -21,6 +21,11 @@ const props = defineProps({
     type: Number,
     required: false
   },
+  killStreakEffect: {
+    type: Boolean,
+    required: false,
+    default: false
+  }
 })
 
 const cardBoundingRef = ref<DOMRect | null>(null);

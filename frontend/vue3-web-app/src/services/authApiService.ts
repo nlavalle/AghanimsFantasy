@@ -154,6 +154,48 @@ export const authApiService = {
         }
       })
   },
+  forgotPassword(email: string) {
+    return fetch(`${identityBaseUrl}/forgotPassword`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: email
+      })
+    }).then((response: any) => {
+      if (!response.ok) {
+        return response.text().then((errorBody: any) => {
+          throw new Error(errorBody);
+        });
+      } else {
+        return response
+      }
+    })
+  },
+  resetPassword(email: string, confirmationCode: string, newPassword: string) {
+    return fetch(`${identityBaseUrl}/resetPassword`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: email,
+        resetCode: confirmationCode,
+        newPassword: newPassword
+      })
+    }).then((response: any) => {
+      if (!response.ok) {
+        return response.text().then((errorBody: any) => {
+          throw new Error(errorBody);
+        });
+      } else {
+        return response
+      }
+    })
+  },
   downloadPersonalData() {
     return fetch(`${apiBaseUrl}/auth/download-data`, {
       method: 'POST',

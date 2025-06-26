@@ -12,12 +12,20 @@ export interface User {
   isPrivateFantasyAdmin: boolean
   loginProviders: LoginProvider[]
   stashBalance: number | undefined
+  prizes: FantasyPrize[]
 }
 
 interface LoginProvider {
   loginProvider: string
   providerKey: string
   providerDisplayName: string
+}
+
+interface FantasyPrize {
+  id: number
+  user_id: string
+  prize_type: number
+  prize_timestamp: number
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -77,7 +85,8 @@ export const useAuthStore = defineStore('auth', {
             this.user.name = authData.displayName,
             this.user.discordName = authData.discordHandle,
             this.user.isAdmin = authData.roles.some((role: string) => role == "Admin"),
-            this.user.isPrivateFantasyAdmin = authData.roles.some((role: string) => role == "PrivateFantasyLeagueAdmin")
+            this.user.isPrivateFantasyAdmin = authData.roles.some((role: string) => role == "PrivateFantasyLeagueAdmin"),
+            this.user.prizes = authData.prizes
         })
     },
 
@@ -129,6 +138,27 @@ export const useAuthStore = defineStore('auth', {
       })
     },
 
+    forgotPassword(email: string) {
+      if (!email) return;
+      return authApiService.forgotPassword(email)
+        .then((responseStatusCode: number) => {
+          switch (responseStatusCode) {
+            case 401:
+              throw new Error("Invalid Email")
+            default:
+              this.checkAuthenticatedAsync()
+          }
+        })
+    },
+
+    resetPassword(email: string, confirmationCode: string, newPassword: string) {
+      return authApiService.resetPassword(email, confirmationCode, newPassword)
+        .then((response: Response) => {
+          if (response.ok)
+            this.login(email, newPassword)
+        })
+    },
+
     login(email: string, password: string) {
       if (!email || !password) return;
       return authApiService.login(email, password)
@@ -148,8 +178,7 @@ export const useAuthStore = defineStore('auth', {
         .then(async (response: Response) => {
           switch (response.status) {
             case 200:
-              this.login(email, password)
-              break;
+              return;
             case 400:
               let data = await response.json();
               if (data.errors) {
@@ -159,7 +188,7 @@ export const useAuthStore = defineStore('auth', {
                 throw new Error("Bad Request")
               }
             default:
-              throw new Error(`Unknown error.\n Http Status: ${response.status}\n Http Body: ${response.body ?? ''}`)
+              throw new Error(`Unexpected backend error, please contact support@aghanimsfantasy.com.\n Http Status: ${response.status}\n Http Body: ${response.body ?? ''}`)
           }
         })
     },

@@ -182,4 +182,8 @@ public class FantasyPlayerPointTotals
 
     [Column("total_match_fantasy_points")]
     public decimal TotalMatchFantasyPoints { get; set; }
+
+    // Effect flags
+    [Column("on_win_streak")]
+    public bool OnWinStreak { get; set; }
 }

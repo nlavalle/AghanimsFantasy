@@ -34,7 +34,6 @@ public class DataLayerService : BackgroundService
         var commonCooldown = TimeSpan.FromMinutes(1);
 
         CreateLauncher<FantasyNormalizedAveragesContext>(commonCooldown);
-        CreateLauncher<FantasyPlayerBudgetProbabilityContext>(commonCooldown);
         CreateLauncher<FantasyMatchContext>(commonCooldown);
         CreateLauncher<FantasyLedgerContext>(commonCooldown);
         CreateLauncher<MissingAccountsContext>(commonCooldown);
@@ -46,7 +45,6 @@ public class DataLayerService : BackgroundService
         Task[] tasks =
         [
             LoopOperation<FantasyNormalizedAveragesContext>(TimeSpan.FromHours(1), stoppingToken),
-            LoopOperation<FantasyPlayerBudgetProbabilityContext>(TimeSpan.FromDays(1), stoppingToken),
             LoopOperation<FantasyMatchContext>(TimeSpan.FromMinutes(1), stoppingToken),
             LoopOperation<FantasyLedgerContext>(TimeSpan.FromHours(1), stoppingToken),
             LoopOperation<MissingAccountsContext>(TimeSpan.FromMinutes(5), stoppingToken),

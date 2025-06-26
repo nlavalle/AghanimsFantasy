@@ -15,29 +15,5 @@ public class FantasyPlayerBudgetProbabilityTable
     public required FantasyLeague FantasyLeague { get; set; }
 
     public required Account Account { get; set; }
-
-    [Column("quintile")]
-    public int Quintile { get; set; }
-
-    [Column("probability")]
-    public decimal Probability { get; set; }
-
-    [Column("cumulative_probability")]
-    public decimal CumulativeProbability { get; set; }
-
-    public decimal Winnings
-    {
-        get
-        {
-            return 300 - Quintile * 60;
-        }
-    }
-
-    public decimal EstimatedCost
-    {
-        get
-        {
-            return Winnings * Probability;
-        }
-    }
+    public decimal Cost { get; set; }
 }

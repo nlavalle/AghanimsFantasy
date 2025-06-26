@@ -903,6 +903,40 @@ export const localApiService = {
         throw error
       })
   },
+  getAllPrizes() {
+    return fetch(`${baseUrl}/prize`)
+      .then(
+        function (response: any) {
+          if (!response.ok) {
+            throw response.status
+          } else {
+            return response.json()
+          }
+        }
+      )
+      .catch((error) => {
+        console.error('Error fetching data:', error)
+        throw error
+      })
+  },
+  buyPrize(prize_name: string) {
+    return fetch(`${baseUrl}/prize?Prize=${prize_name}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then(
+      function (response: Response) {
+        if (!response.ok) {
+          return response.text().then((response: any) => { throw new Error(response) })
+        } else {
+          return response.json()
+        }
+      }.bind(this)
+    ).catch((error) => {
+      throw error
+    })
+  },
   getHighlights(leagueId: number, numberOfHighlights: number) {
     return fetch(`${baseUrl}/fantasy/${leagueId}/highlights/${numberOfHighlights}`)
       .then(

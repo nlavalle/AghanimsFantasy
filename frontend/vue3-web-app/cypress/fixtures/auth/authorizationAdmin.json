@@ -1,0 +1,8 @@
+{
+    "id": "example-uuid-admin",
+    "displayName": "Test Admin",
+    "discordHandle": "test.admin.discord",
+    "roles": [
+        "Admin"
+    ]
+}

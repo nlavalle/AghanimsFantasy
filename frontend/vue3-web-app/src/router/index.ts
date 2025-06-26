@@ -33,6 +33,12 @@ const router = createRouter({
       name: 'profile',
       component: () => import('../views/ProfileView.vue')
     },
+    {
+      path: '/prizes',
+      name: 'prizes',
+      component: () => import('../views/PrizesView.vue'),
+      meta: { requiresLogin: true }
+    },
 
     {
       path: '/admin',
@@ -58,6 +64,8 @@ router.beforeEach((to, from, next) => {
   if (to.meta.requiresAdmin && !authStore.user?.isAdmin) {
     next('/');
   } else if (to.meta.requiresPrivateFantasyAdmin && !authStore.user?.isPrivateFantasyAdmin) {
+    next('/');
+  } else if (to.meta.requiresLogin && !authStore.isAuthenticated) {
     next('/');
   } else {
     next();

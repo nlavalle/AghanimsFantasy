@@ -4,8 +4,11 @@
         <v-text-field v-model="password" name="password" placeholder="Password" required
             :append-icon="passShow ? 'eye' : 'eye-slash'" :rules="passwordRuleArray"
             :type="passShow ? 'text' : 'password'" @click:append="passShow = !passShow" />
-        <v-btn variant="outlined" @click="login(email, password)">
+        <v-btn class="mb-2 mr-10" variant="outlined" @click="login(email, password)">
             Login
+        </v-btn>
+        <v-btn class="mb-2" variant="outlined" @click="forgotPassword(email)">
+            Forgot Password?
         </v-btn>
     </v-form>
     <ErrorDialog v-model="showErrorModal" :error="errorDetails!" />
@@ -18,12 +21,14 @@ import { VForm, VTextField, VBtn } from 'vuetify/components'
 import ErrorDialog from '@/components/ErrorDialog.vue';
 import { passwordRules } from '@/utilities/PasswordRules';
 
+const tab = defineModel('tab')
+const email = defineModel<string>('email')
+
 const authStore = useAuthStore()
 
 const showErrorModal = ref(false);
 const errorDetails = ref<Error>();
 
-const email = ref('');
 const password = ref('');
 
 const passShow = ref(false)
@@ -37,9 +42,20 @@ const passwordRuleArray = [
     passwordRules.min
 ]
 
-const login = (email: string, pass: string) => {
+const login = (email: string | undefined, pass: string) => {
     if (!email || !pass) return;
     return authStore.login(email, pass)
+        ?.catch((error: Error) => {
+            showError(error)
+        })
+}
+
+const forgotPassword = (email: string | undefined) => {
+    if (!email) return;
+    return authStore.forgotPassword(email)
+        ?.then(() => {
+            tab.value = "resetPassword"
+        })
         ?.catch((error: Error) => {
             showError(error)
         })

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Headers;
@@ -64,9 +65,12 @@ builder.Services.AddDbContext<AghanimsFantasyContext>(
     }
 );
 
-builder.Services.AddIdentity<AghanimsFantasyUser, IdentityRole>()
+builder.Services.AddIdentity<AghanimsFantasyUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<AghanimsFantasyContext>()
     .AddApiEndpoints();
+
+// Register email to be used for confirm email/forgot password
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(@"/webapi-data"));
@@ -175,3 +179,6 @@ app.UseSession();
 app.MapControllers();
 
 app.Run();
+
+// Needed for integration tests to make a factory
+public partial class Program { }

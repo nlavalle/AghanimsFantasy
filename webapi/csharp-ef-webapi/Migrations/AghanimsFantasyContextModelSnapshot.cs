@@ -894,6 +894,10 @@ namespace csharp_ef_webapi.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("fantasy_league_id");
 
+                    b.Property<bool>("Substitution")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_substitution");
+
                     b.Property<long>("TeamId")
                         .HasColumnType("bigint")
                         .HasColumnName("team_id");
@@ -955,6 +959,39 @@ namespace csharp_ef_webapi.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("dota_fantasy_private_league_players", "nadcl");
+                });
+
+            modelBuilder.Entity("DataAccessLibrary.Models.Fantasy.FantasyPrize", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id")
+                        .HasAnnotation("Relational:JsonPropertyName", "id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("FantasyPrizeOption")
+                        .HasColumnType("integer")
+                        .HasColumnName("prize_type")
+                        .HasAnnotation("Relational:JsonPropertyName", "prize_type");
+
+                    b.Property<long>("PrizeTimestamp")
+                        .HasColumnType("bigint")
+                        .HasColumnName("prize_timestamp")
+                        .HasAnnotation("Relational:JsonPropertyName", "prize_timestamp");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("user_id")
+                        .HasAnnotation("Relational:JsonPropertyName", "user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("fantasy_prizes", "nadcl");
                 });
 
             modelBuilder.Entity("DataAccessLibrary.Models.FantasyNormalizedAverages", b =>
@@ -1092,21 +1129,13 @@ namespace csharp_ef_webapi.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("account_id");
 
-                    b.Property<decimal>("CumulativeProbability")
+                    b.Property<decimal>("Cost")
                         .HasColumnType("numeric")
-                        .HasColumnName("cumulative_probability");
+                        .HasColumnName("cost");
 
                     b.Property<int>("FantasyLeagueId")
                         .HasColumnType("integer")
                         .HasColumnName("fantasy_league_id");
-
-                    b.Property<decimal>("Probability")
-                        .HasColumnType("numeric")
-                        .HasColumnName("probability");
-
-                    b.Property<int>("Quintile")
-                        .HasColumnType("integer")
-                        .HasColumnName("quintile");
 
                     b.HasIndex("AccountId");
 
@@ -1126,17 +1155,8 @@ namespace csharp_ef_webapi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<decimal>("CumulativeProbability")
-                        .HasColumnType("numeric")
-                        .HasColumnName("cumulative_probability");
-
-                    b.Property<decimal>("Probability")
-                        .HasColumnType("numeric")
-                        .HasColumnName("probability");
-
-                    b.Property<int>("Quintile")
-                        .HasColumnType("integer")
-                        .HasColumnName("quintile");
+                    b.Property<decimal>("Cost")
+                        .HasColumnType("numeric");
 
                     b.Property<long>("account_id")
                         .HasColumnType("bigint");
@@ -3021,12 +3041,12 @@ namespace csharp_ef_webapi.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "700e0119-2040-46f5-8700-e54dce42d3c9",
+                            Id = "7ae66c2d-e22f-4bd4-9e67-7af779d28fd6",
                             Name = "Admin"
                         },
                         new
                         {
-                            Id = "d34d6f89-8a8b-434b-8e7a-1e0e3d685ad8",
+                            Id = "b792d7a7-84b2-4995-a163-497521944993",
                             Name = "PrivateFantasyLeagueAdmin"
                         });
                 });
@@ -3438,6 +3458,17 @@ namespace csharp_ef_webapi.Migrations
                         .IsRequired();
 
                     b.Navigation("FantasyLeague");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DataAccessLibrary.Models.Fantasy.FantasyPrize", b =>
+                {
+                    b.HasOne("DataAccessLibrary.Data.Identity.AghanimsFantasyUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });

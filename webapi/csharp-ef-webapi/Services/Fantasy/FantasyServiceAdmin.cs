@@ -1,11 +1,13 @@
 using DataAccessLibrary.Data;
 using DataAccessLibrary.Data.Facades;
-using DataAccessLibrary.Models.Discord;
+using DataAccessLibrary.Data.Identity;
+using DataAccessLibrary.Models;
 using DataAccessLibrary.Models.Fantasy;
 using DataAccessLibrary.Models.ProMetadata;
 using Microsoft.EntityFrameworkCore;
 
 namespace csharp_ef_webapi.Services;
+
 public class FantasyServiceAdmin
 {
     private readonly ILogger<FantasyService> _logger;
@@ -58,6 +60,12 @@ public class FantasyServiceAdmin
     {
         return await _dbContext.FantasyLeagues.ToListAsync();
     }
+
+    public async Task<List<AghanimsFantasyUser>> GetUsers()
+    {
+        return await _dbContext.Users.ToListAsync();
+    }
+
 
     public async Task AddFantasyLeagueAsync(FantasyLeague addFantasyLeague)
     {
@@ -152,9 +160,8 @@ public class FantasyServiceAdmin
         foreach (FantasyPlayer updateFantasyPlayer in updateFantasyPlayers)
         {
             _dbContext.Entry(updateFantasyPlayer).State = EntityState.Modified;
+            await _dbContext.SaveChangesAsync();
         }
-
-        await _dbContext.SaveChangesAsync();
     }
 
     public async Task DeleteFantasyPlayerAsync(long deleteFantasyPlayerId)
@@ -251,11 +258,63 @@ public class FantasyServiceAdmin
                     FantasyLeagueId = newFantasyLeagueId,
                     TeamId = recentFantasyPlayer.TeamId,
                     DotaAccountId = recentFantasyPlayer.DotaAccountId,
-                    TeamPosition = recentFantasyPlayer.TeamPosition
+                    TeamPosition = recentFantasyPlayer.TeamPosition,
+                    Substitution = false
                 };
-                await _dbContext.FantasyPlayers.AddAsync(newFantasyPlayer);
+                await AddFantasyPlayerAsync(newFantasyPlayer);
             }
             await _dbContext.SaveChangesAsync();
         }
+    }
+
+    public async Task CalculateFantasyPlayerCosts(int fantasyLeagueId)
+    {
+        // Delete any cost rows for this player if they already existed
+        await _dbContext.FantasyPlayerBudgetProbability
+            .Include(fpbp => fpbp.Account)
+            .Include(fpbp => fpbp.FantasyLeague)
+            .Where(fpbp =>
+                fpbp.FantasyLeague.Id == fantasyLeagueId
+            )
+            .ExecuteDeleteAsync();
+        await _dbContext.SaveChangesAsync();
+
+        // Insert all the cost rows back into the table
+        // Add cost for fantasy player at this time so there's never a period where it's 0
+        List<FantasyPlayerBudgetProbability> fantasyPlayerBudgetProbabilities = await _dbContext.FantasyPlayerBudgetProbabilityView
+            .Include(fpbp => fpbp.Account)
+            .Include(fpbp => fpbp.FantasyLeague)
+            .Where(fpbp => fpbp.FantasyLeagueId == fantasyLeagueId)
+            .ToListAsync();
+
+        List<FantasyPlayer> fantasyPlayers = await _dbContext.FantasyPlayers
+            .Include(fp => fp.FantasyLeague)
+            .Include(fp => fp.DotaAccount)
+            .Where(fp => fp.FantasyLeagueId == fantasyLeagueId && fp.Substitution == false).ToListAsync();
+
+        foreach (FantasyPlayer fantasyPlayer in fantasyPlayers)
+        {
+            var budgetLookup = fantasyPlayerBudgetProbabilities.FirstOrDefault(fpbp => fpbp.AccountId == fantasyPlayer.DotaAccountId);
+            if (budgetLookup != null)
+            {
+                await _dbContext.FantasyPlayerBudgetProbability.AddAsync(new FantasyPlayerBudgetProbabilityTable
+                {
+                    FantasyLeague = fantasyPlayer.FantasyLeague!,
+                    Account = fantasyPlayer.DotaAccount!,
+                    Cost = budgetLookup.Cost
+                });
+            }
+            else
+            {
+                await _dbContext.FantasyPlayerBudgetProbability.AddAsync(new FantasyPlayerBudgetProbabilityTable
+                {
+                    FantasyLeague = fantasyPlayer.FantasyLeague!,
+                    Account = fantasyPlayer.DotaAccount!,
+                    Cost = 120 // Default cost
+                });
+            }
+        }
+
+        await _dbContext.SaveChangesAsync();
     }
 }

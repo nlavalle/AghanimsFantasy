@@ -1,14 +1,19 @@
 <template>
-  <v-container>
+  <v-progress-circular style="position:fixed;top:50%;left:50%;" v-if="!isMounted" color="primary"
+    indeterminate></v-progress-circular>
+  <v-container v-if="isMounted">
     <v-row>
       <v-col>
-        <v-row>
+        <v-row class="align-center">
           <v-tabs v-model="statsTab">
             <v-tab value="fantasy">Fantasy</v-tab>
             <v-tab value="league">League</v-tab>
             <v-tab value="match">Matches</v-tab>
             <!-- <v-tab value="topeight">Top 8</v-tab> -->
           </v-tabs>
+          <v-btn icon="fa-refresh" @click="refreshStats" :loading="!loaded" :disabled="!loaded" size="small"
+            variant="outlined">
+          </v-btn>
         </v-row>
       </v-col>
     </v-row>
@@ -55,7 +60,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem } from 'vuetify/components';
+import { VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem, VProgressCircular, VBtn } from 'vuetify/components';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import FantasyDataTable from '@/components/Stats/FantasyDataTable.vue';
 import LeagueDataTable from '@/components/Stats/LeagueDataTable.vue';
@@ -64,13 +69,33 @@ import MatchDataTable from '@/components/Stats/MatchDataTable.vue';
 
 const statsTab = ref('fantasy')
 const leagueStore = useFantasyLeagueStore();
-const draftFiltered = false;
+const draftFiltered = ref(false);
+
+const isMounted = ref(false);
+const loaded = ref(true);
 
 onMounted(() => {
   if (leagueStore.selectedFantasyLeague.id == 0) {
-    leagueStore.fetchFantasyLeagues()
+    leagueStore.fetchFantasyLeagues().then(() => isMounted.value = true)
+  } else {
+    isMounted.value = true
   }
 })
+
+const refreshStats = () => {
+  loaded.value = false
+  Promise.all([
+    leagueStore.fetchFantasyPlayerPoints(),
+    leagueStore.fetchFantasyLeagueMetadataStats(),
+    leagueStore.fetchPlayerFantasyMatchStats(),
+  ])
+    ?.then(() => {
+      loaded.value = true
+    })
+    .catch(() => {
+      loaded.value = true
+    })
+}
 
 </script>
 

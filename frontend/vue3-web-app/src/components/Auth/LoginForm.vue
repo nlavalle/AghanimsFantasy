@@ -6,10 +6,13 @@
         </v-tabs>
         <v-tabs-window v-model="registerTab">
             <v-tabs-window-item value="login">
-                <LoginCard />
+                <LoginCard v-model:tab="registerTab" v-model:email="email" />
             </v-tabs-window-item>
             <v-tabs-window-item value="register">
-                <RegisterCard />
+                <RegisterCard v-model:tab="registerTab" v-model:email="email" />
+            </v-tabs-window-item>
+            <v-tabs-window-item value="resetPassword">
+                <ResetPasswordCard v-model:email="email" />
             </v-tabs-window-item>
         </v-tabs-window>
     </div>
@@ -20,7 +23,9 @@ import { ref } from 'vue';
 import { VTabs, VTab, VTabsWindow, VTabsWindowItem } from 'vuetify/components';
 import RegisterCard from './RegisterCard.vue';
 import LoginCard from './LoginCard.vue';
+import ResetPasswordCard from './ResetPasswordCard.vue';
 
 const registerTab = ref('login');
+const email = ref('');
 
 </script>

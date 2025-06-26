@@ -44,7 +44,8 @@ public static class DbSeeder
             Id = Convert.ToInt32(string.Format("{0}{1}", FantasyLeagueId, accountId)),
             TeamId = teamId,
             DotaAccountId = accountId,
-            FantasyLeagueId = FantasyLeagueId
+            FantasyLeagueId = FantasyLeagueId,
+            Substitution = false
         };
     }
 
@@ -227,7 +228,8 @@ public static class DbSeeder
             Account player = NewAccount(i);
             players.Add(player);
             fantasyPlayers.Add(NewFantasyPlayer(leagueId, 1, i));
-        };
+        }
+        ;
 
         League league = new League
         {

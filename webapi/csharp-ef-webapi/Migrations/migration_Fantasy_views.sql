@@ -90,13 +90,18 @@ from nadcl.dota_fantasy_leagues dfl
 	join nadcl.dota_fantasy_league_weights dflw 
 		on dfl.id = dflw.fantasy_league_id
 	join nadcl.dota_fantasy_players dfp
-		on dfl.id = dfp.fantasy_league_id
+		on dfl.id = dfp.fantasy_league_id and dfp.is_substitution = false
+	left join nadcl.dota_fantasy_players dfps
+		on dfp.fantasy_league_id = dfps.fantasy_league_id
+			and dfp.team_id = dfps.team_id
+			and dfp.team_position = dfps.team_position
+			and dfps.is_substitution = true
 	left join nadcl.fantasy_match fm
 		on dfl.league_id = fm.league_id
 			and dfl.league_start_time <= fm.start_time 
 			and dfl.league_end_time >= fm.start_time
 	left join nadcl.fantasy_match_player fmp 
-		on fmp.match_id = fm.match_id and fmp.account_id = dfp.dota_account_id
+		on fmp.match_id = fm.match_id and fmp.account_id in (dfps.dota_account_id, dfp.dota_account_id)
 ;
 
 create or replace view nadcl.match_highlights as
@@ -157,9 +162,34 @@ order by stats.start_time desc
 ;
 
 create or replace view nadcl.fantasy_player_point_totals as
+WITH recent_wins AS (
+	select
+		fp.id as fantasy_player_id,
+		case
+			when fm.radiant_win = true and fmp.dota_team_side = false then 1
+			when fm.radiant_win = false and fmp.dota_team_side = true then 1
+			else 0
+		end as wins,
+		row_number() over (partition by fp.fantasy_league_id, fp.dota_account_id order by fm.start_time desc) as row_num
+	from nadcl.fantasy_match fm
+		join nadcl.fantasy_match_player fmp
+			on fm.match_id = fmp.match_id
+		join nadcl.dota_fantasy_leagues fl
+			on fm.league_id = fl.league_id
+				and fm.start_time >= fl.league_start_time
+				and fm.start_time <= fl.league_end_time
+		join nadcl.dota_fantasy_players fp
+			on fmp.account_id = fp.dota_account_id
+				and fl.id = fp.fantasy_league_id
+), grouped_wins as (
+    select fantasy_player_id, sum(wins) = 3 as on_win_streak
+    from recent_wins
+    where row_num <= 3
+    group by fantasy_player_id
+)
 SELECT 
-	fantasy_league_id, 
-	fantasy_player_id, 
+	fpp.fantasy_league_id, 
+	fpp.fantasy_player_id, 
 	count(distinct fantasy_match_player_id) as matches,
 	coalesce(sum(kills),0) as kills,
 	coalesce(sum(kills_points),0) as kills_points,
@@ -215,9 +245,12 @@ SELECT
 	coalesce(sum(wards_dewarded_points),0) as wards_dewarded_points,
 	coalesce(sum(stun_duration),0) as stun_duration,
 	coalesce(sum(stun_duration_points),0) as stun_duration_points,
-	coalesce(sum(total_match_fantasy_points),0) as total_match_fantasy_points
-FROM nadcl.fantasy_player_points
-group by fantasy_league_id, fantasy_player_id
+	coalesce(sum(total_match_fantasy_points),0) as total_match_fantasy_points,
+	coalesce(gw.on_win_streak, false) as on_win_streak
+FROM nadcl.fantasy_player_points fpp
+	LEFT JOIN grouped_wins gw
+		on fpp.fantasy_player_id = gw.fantasy_player_id
+group by fantasy_league_id, fpp.fantasy_player_id, gw.on_win_streak
 order by total_match_fantasy_points desc
 ;
 
@@ -417,83 +450,86 @@ group by fl.id, fp.id
 ;
 
 create or replace view nadcl.fantasy_player_probabilities as
-with quintiles as (
-    select
-        allfl.id as fantasy_league_id,
-        a.id as account_id,
-        fl.id as past_fantasy_league_id,
-        fl.league_end_time,
-        fppt.matches,
-        fppt.total_match_fantasy_points,
-		fppt.total_match_fantasy_points / fppt.matches as avg,
-        NTILE(5) over (partition by fl.id order by fppt.total_match_fantasy_points desc) as quintile,
-        fl.league_start_time,
-        row_number() over (partition by allfl.id, a.id order by fl.league_start_time desc) row_num
-    from nadcl.dota_fantasy_leagues allfl
-        left join nadcl.dota_fantasy_leagues fl
-            on allfl.league_start_time > fl.league_end_time
-        join nadcl.fantasy_player_point_totals fppt
-            on fppt.fantasy_league_id = fl.id
-        join nadcl.dota_fantasy_players fp
-            on fppt.fantasy_player_id = fp.id
-        join nadcl.dota_accounts a
-            on fp.dota_account_id = a.id
-        -- Filter this to only fantasy players
-        join nadcl.dota_fantasy_players fpfilter
-            on allfl.id = fpfilter.fantasy_league_id
-                and fp.dota_account_id = fpfilter.dota_account_id
-    where fl.is_private = false
-        and fppt.matches > 0
-), recent_fantasies as (
+with match_data as (
+select distinct
+    fp.fantasy_league_id,
+    fp.dota_account_id as account_id,
+    fmp.match_id,
+    fpp.total_match_fantasy_points +
+        case
+            WHEN l.total_prize_pool = 0 then 0
+            WHEN l.total_prize_pool > 0 AND l.total_prize_pool < 50000 then 5
+            WHEN l.total_prize_pool >= 50000 then 10
+        end as total_match_fantasy_points
+from nadcl.dota_fantasy_players fp
+    join nadcl.fantasy_match_player fmp
+        on fp.dota_account_id = fmp.account_id
+    join nadcl.fantasy_player_points fpp
+        on fpp.fantasy_match_player_id = fmp.id
+    join nadcl.dota_match_history mh
+        on fmp.match_id = mh.match_id
+    join nadcl.dota_leagues l
+        on mh.league_id = l.id
+where fp.is_substitution = false
+), ntiles as (
     select 
         fantasy_league_id,
         account_id,
-        quintile
-    from quintiles
-    where row_num <= 20
-), quintile_counts as (
-    select
+        match_id,
+        total_match_fantasy_points,
+        NTILE(5) over (partition by fantasy_league_id order by total_match_fantasy_points desc) as ntile,
+        row_number() over (partition by fantasy_league_id, account_id order by match_id desc) row_num
+    from match_data
+), ntile_counts as (
+    select distinct
         fantasy_league_id,
         account_id,
-        quintile,
-        count(*) as count_per_quintile
-    from recent_fantasies
-    group by fantasy_league_id, account_id, quintile
-), total_games as (
-    select
-        all_players.fantasy_league_id,
-        all_players.account_id,
-        cross_quintile as quintile,
-        coalesce(sum(count_per_quintile),0) as total_games
-    from (
-        select 
-            fantasy_league_id, 
-            dota_account_id as account_id,
-            cross_quintile
-        from nadcl.dota_fantasy_players fp
-        cross join (
-            select column1 as cross_quintile
-            from (values(1),(2),(3),(4),(5))
-        )
-    ) as all_players
-    left join quintile_counts qc
-        on all_players.fantasy_league_id = qc.fantasy_league_id
-            and all_players.account_id = qc.account_id
-    group by 1, 2, 3
-)
+        ntile,
+        count(*) over (partition by fantasy_league_id, account_id, ntile)::decimal as ntile_count
+    from ntiles
+    where row_num <= 1000 -- Only take latest 1000 games don't want to let really old stuff weigh in
+), cost_probs as (
 select distinct
-    a.fantasy_league_id,
-    a.account_id,
-    a.quintile,
-	-- Doing a dirichlet prior of [1, 1, 1, 1, 1] to help even out players with v few games
-    round((coalesce(p.count_per_quintile, 0) + 1) / (a.total_games + 5), 4) as probability,
-    round(sum((coalesce(p.count_per_quintile, 0) + 1) / (a.total_games + 5)) over (partition by a.fantasy_league_id, a.account_id order by a.quintile),4) as cumulative_probability
-from total_games a
-    left join quintile_counts p
-        on a.account_id = p.account_id 
-            and a.quintile = p.quintile
-            and a.fantasy_league_id = p.fantasy_league_id
-order by fantasy_league_id desc, account_id, quintile
+    fantasy_league_id,
+    account_id,
+    cn.column1 as ntile,
+    sum(
+    case 
+        when cn.column1 = ntile then ntile_count
+        else 0
+    end
+    ) over (partition by fantasy_league_id, account_id, cn.column1) + 1 as ntile_count,
+    sum(
+    case 
+        when cn.column1 = ntile then ntile_count
+        else 0
+    end
+    ) over (partition by fantasy_league_id, account_id) + 5 as total_games,
+    (
+        sum(
+        case 
+            when cn.column1 = ntile then ntile_count
+            else 0
+        end
+        ) over (partition by fantasy_league_id, account_id, cn.column1) + 1
+    ) /
+    (
+        sum(
+        case 
+            when cn.column1 = ntile then ntile_count
+            else 0
+        end
+        ) over (partition by fantasy_league_id, account_id) + 5
+    ) * (300 - 60 * cn.column1) as cost_prob
+from ntile_counts
+    cross join (values(1),(2),(3),(4),(5)) as cn
+)
+select
+    fantasy_league_id,
+    account_id,
+    sum(cost_prob) as cost
+from cost_probs
+group by fantasy_league_id, account_id
 ;
 
 create or replace view nadcl.fantasy_account_top_heroes as

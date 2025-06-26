@@ -63,7 +63,7 @@
 <script setup lang="ts">
 import { computed, ref, type PropType } from 'vue';
 import coinStatic from '@/assets/fantasy/coin/golden-coin.png'
-import { VRow, VCol, VBtn, VCheckbox, VTooltip } from 'vuetify/components';
+import { VRow, VBtn, VCheckbox, VTooltip } from 'vuetify/components';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import type { FantasyDraftPoints, FantasyPlayer, FantasyPlayerPoints } from '../fantasyDraft';
 import WinningsBreakdown from '@/components/Fantasy/Winnings/WinningsBreakdown.vue';
@@ -90,6 +90,7 @@ const rankTitles = [
 
 const playerFantasyStatsIndexed = computed(() => {
     return fantasyLeagueStore.fantasyPlayerPoints
+        .filter(player => player.totalMatches > 0)
         .map((player: FantasyPlayerPoints, index) => ({
             ...player,
             position: index + 1
