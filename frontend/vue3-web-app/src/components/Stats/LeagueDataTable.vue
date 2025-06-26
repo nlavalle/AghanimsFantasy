@@ -98,13 +98,15 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue';
 import { VRow, VCol, VDataTable, VPagination, VTabs, VTab, VTextField, VSelect } from 'vuetify/components';
-import { localApiService } from '@/services/localApiService';
 import type { LeagueMetadata } from '@/types/LeagueMetadata';
 import { useDebouncedRef } from '@/services/debounce'
 import type { FantasyLeague } from '@/types/FantasyLeague';
 import { useDisplay } from 'vuetify';
+import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 
 const display = useDisplay()
+
+const fantasyLeagueStore = useFantasyLeagueStore()
 
 const leagueFilter = useDebouncedRef('');
 const roleFilter = ref([]);
@@ -135,7 +137,7 @@ const roleList = [
 
 const teamsList = computed(() => {
     // We want the distinct teams
-    var teams = leagueMetadataStats.value.map(item => item.fantasyPlayer.team)
+    var teams = fantasyLeagueStore.leagueMetadataStats.map(item => item.fantasyPlayer.team)
     return [...new Map(teams.map(item => [item['id'], item])).values()]
 })
 
@@ -162,7 +164,17 @@ const leagueTab = ref('kda');
 // const selectedLeaguePlayer = ref([]);
 // const compareLeaguePlayers = ref([]);
 
-const leagueMetadataStats = ref<LeagueMetadata[]>([]);
+onMounted(() => {
+    if (selectedFantasyLeague.value) {
+        fantasyLeagueStore.fetchFantasyLeagueMetadataStats();
+    }
+});
+
+watch(selectedFantasyLeague, () => {
+    if (selectedFantasyLeague.value) {
+        fantasyLeagueStore.fetchFantasyLeagueMetadataStats();
+    }
+});
 
 const commonLeagueColumns = [
     {
@@ -358,7 +370,7 @@ const stringifyNested = (obj: Object | string | null): any => {
 // }
 
 const leagueMetadataStatsIndexed = computed(() => {
-    return leagueMetadataStats.value
+    return fantasyLeagueStore.leagueMetadataStats
         .map((player: LeagueMetadata, index) => ({
             ...player,
             position: index + 1
@@ -395,19 +407,6 @@ const leagueMetadataStatsIndexed = computed(() => {
         ;
 });
 
-onMounted(() => {
-    if (selectedFantasyLeague.value) {
-        localApiService.getFantasyLeagueMetadataStats(selectedFantasyLeague.value.id)
-            .then(result => leagueMetadataStats.value = result);
-    }
-});
-
-watch(selectedFantasyLeague, () => {
-    if (selectedFantasyLeague.value) {
-        localApiService.getFantasyLeagueMetadataStats(selectedFantasyLeague.value.id)
-            .then(result => leagueMetadataStats.value = result);
-    }
-});
 
 const displayedLeagueColumns = computed<any>(() => {
     if (!display.mobile.value) {

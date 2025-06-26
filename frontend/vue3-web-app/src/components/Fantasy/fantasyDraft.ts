@@ -156,7 +156,8 @@ export interface FantasyPlayer {
     team: DotaTeam,
     dotaAccountId: number,
     dotaAccount: DotaAccount,
-    teamPosition: number
+    teamPosition: number,
+    substitution: boolean
 }
 
 export interface FantasyPlayerTopHeroes {

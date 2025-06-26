@@ -24,16 +24,28 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
-//
-// declare global {
-//   namespace Cypress {
-//     interface Chainable {
-//       login(email: string, password: string): Chainable<void>
-//       drag(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       dismiss(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       visit(originalFn: CommandOriginalFn, url: string, options: Partial<VisitOptions>): Chainable<Element>
-//     }
-//   }
-// }
 
-export {}
+Cypress.Commands.add('mockAuthenticated', (isAuthenticated = false) => {
+    let authenticationFixture;
+
+    if (isAuthenticated) {
+        authenticationFixture = 'auth/authenticatedTrue.json';
+        cy.fixture(authenticationFixture);
+    } else {
+        authenticationFixture = 'auth/authenticatedFalse.json';
+        cy.fixture(authenticationFixture);
+    }
+
+    // Intercept the authenticated GET request
+    cy.intercept('GET', '/api/auth/authenticated', { fixture: authenticationFixture }).as('authenticatedApiCall');
+});
+
+declare global {
+    namespace Cypress {
+        interface Chainable {
+            mockAuthenticated(isAuthenticated: true | false): Chainable<void>
+        }
+    }
+}
+
+export { }

@@ -65,7 +65,6 @@ import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import FantasyDataTable from '@/components/Stats/FantasyDataTable.vue';
 import LeagueDataTable from '@/components/Stats/LeagueDataTable.vue';
 import MatchDataTable from '@/components/Stats/MatchDataTable.vue';
-import { localApiService } from '@/services/localApiService';
 // import Top8DataTable from '@/components/Stats/Top8DataTable.vue'; // NADCL special
 
 const statsTab = ref('fantasy')
@@ -86,9 +85,9 @@ onMounted(() => {
 const refreshStats = () => {
   loaded.value = false
   Promise.all([
-    localApiService.getPlayerFantasyStats(leagueStore.selectedFantasyLeague.id),
-    localApiService.getFantasyLeagueMetadataStats(leagueStore.selectedFantasyLeague.id),
-    localApiService.getPlayerFantasyMatchStats(leagueStore.selectedFantasyLeague.id),
+    leagueStore.fetchFantasyPlayerPoints(),
+    leagueStore.fetchFantasyLeagueMetadataStats(),
+    leagueStore.fetchPlayerFantasyMatchStats(),
   ])
     ?.then(() => {
       loaded.value = true

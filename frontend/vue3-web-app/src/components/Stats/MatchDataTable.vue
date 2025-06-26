@@ -165,13 +165,15 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue';
 import { VRow, VCol, VDataTable, VTabs, VTab, VTextField, VSelect } from 'vuetify/components';
-import { localApiService } from '@/services/localApiService';
 import type { FantasyLeague } from '@/types/FantasyLeague';
 import type { FantasyPlayerMatchPoints } from '../Fantasy/fantasyDraft';
 import { useDebouncedRef } from '@/services/debounce'
 import { useDisplay } from 'vuetify';
+import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 
 const display = useDisplay()
+
+const fantasyLeagueStore = useFantasyLeagueStore()
 
 const matchFilter = useDebouncedRef('');
 const roleFilter = ref([]);
@@ -209,37 +211,35 @@ const roleList = [
     },
 ]
 
+const fantasyMatchStats = computed(() => {
+    return draftFiltered.value ? fantasyLeagueStore.draftFantasyMatchStats : fantasyLeagueStore.playerFantasyMatchStats
+})
+
 const teamsList = computed(() => {
     // We want the distinct teams
-    var teams = playerFantasyMatchStats.value.map(item => item.fantasyPlayer.team)
+    var teams = fantasyMatchStats.value.map(item => item.fantasyPlayer.team)
     return [...new Map(teams.map(item => [item.id, item])).values()]
 })
 
 onMounted(() => {
     if (selectedFantasyLeague.value && !draftFiltered.value) {
-        localApiService.getPlayerFantasyMatchStats(selectedFantasyLeague.value.id)
-            .then(result => playerFantasyMatchStats.value = result);
+        fantasyLeagueStore.fetchPlayerFantasyMatchStats();
     } else if (selectedFantasyLeague.value && draftFiltered.value) {
-        localApiService.getDraftPlayerFantasyMatchStats(selectedFantasyLeague.value.id)
-            .then(result => playerFantasyMatchStats.value = result);
+        fantasyLeagueStore.fetchDraftFantasyMatchStats();
     }
 });
 
 watch(selectedFantasyLeague, () => {
     if (selectedFantasyLeague.value && !draftFiltered.value) {
-        localApiService.getPlayerFantasyMatchStats(selectedFantasyLeague.value.id)
-            .then(result => playerFantasyMatchStats.value = result);
+        fantasyLeagueStore.fetchPlayerFantasyMatchStats();
     } else if (selectedFantasyLeague.value && draftFiltered.value) {
-        localApiService.getDraftPlayerFantasyMatchStats(selectedFantasyLeague.value.id)
-            .then(result => playerFantasyMatchStats.value = result);
+        fantasyLeagueStore.fetchDraftFantasyMatchStats();
     }
 });
 
 const fantasyTab = ref('kda');
 
 // const showFantasyFilters = ref(false);
-
-const playerFantasyMatchStats = ref<FantasyPlayerMatchPoints[]>([]);
 
 const commonFantasyColumns = [
     {
@@ -491,8 +491,8 @@ const stringifyNested = (obj: Object | string | null): any => {
 };
 
 const getMatchTeams = (matchId: number): string => {
-    var radiantTeam = playerFantasyMatchStats.value.filter(match => match.fantasyMatchPlayer.fantasyMatchId == matchId && match.fantasyMatchPlayer.dotaTeamSide == false)[0]?.fantasyMatchPlayer.teamFormatted ?? '';
-    var direTeam = playerFantasyMatchStats.value.filter(match => match.fantasyMatchPlayer.fantasyMatchId == matchId && match.fantasyMatchPlayer.dotaTeamSide == true)[0]?.fantasyMatchPlayer.teamFormatted ?? '';
+    var radiantTeam = fantasyMatchStats.value.filter(match => match.fantasyMatchPlayer.fantasyMatchId == matchId && match.fantasyMatchPlayer.dotaTeamSide == false)[0]?.fantasyMatchPlayer.teamFormatted ?? '';
+    var direTeam = fantasyMatchStats.value.filter(match => match.fantasyMatchPlayer.fantasyMatchId == matchId && match.fantasyMatchPlayer.dotaTeamSide == true)[0]?.fantasyMatchPlayer.teamFormatted ?? '';
     return `${radiantTeam} (Radiant) vs ${direTeam} (Dire)`
 }
 
@@ -524,7 +524,7 @@ const getMatchTeams = (matchId: number): string => {
 // }
 
 const playerFantasyMatchStatsIndexed = computed(() => {
-    return playerFantasyMatchStats.value
+    return fantasyMatchStats.value
         .map((player: FantasyPlayerMatchPoints, index) => ({
             ...player,
             position: index + 1

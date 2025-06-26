@@ -2,8 +2,9 @@ import { defineStore } from 'pinia'
 import type { FantasyLeague } from '@/types/FantasyLeague'
 import type { League } from '@/types/League'
 import { localApiService } from '@/services/localApiService'
-import type { FantasyDraftPoints, FantasyPlayerPoints } from '@/components/Fantasy/fantasyDraft'
+import type { FantasyDraftPoints, FantasyPlayerMatchPoints, FantasyPlayerPoints } from '@/components/Fantasy/fantasyDraft'
 import type { FantasyPlayerStats } from '@/types/FantasyPlayerStats'
+import type { LeagueMetadata } from '@/types/LeagueMetadata'
 
 export const useFantasyLeagueStore = defineStore({
   id: 'league',
@@ -30,7 +31,10 @@ export const useFantasyLeagueStore = defineStore({
     } as FantasyLeague,
     fantasyPlayersStats: [] as FantasyPlayerStats[],
     fantasyDraftPoints: [] as FantasyDraftPoints[],
-    fantasyPlayerPoints: [] as FantasyPlayerPoints[]
+    fantasyPlayerPoints: [] as FantasyPlayerPoints[],
+    leagueMetadataStats: [] as LeagueMetadata[],
+    playerFantasyMatchStats: [] as FantasyPlayerMatchPoints[],
+    draftFantasyMatchStats: [] as FantasyPlayerMatchPoints[]
   }),
 
   actions: {
@@ -114,6 +118,36 @@ export const useFantasyLeagueStore = defineStore({
         return localApiService.getPlayerFantasyStats(this.selectedFantasyLeague.id)
           .then((result: any) => {
             this.fantasyPlayerPoints = result;
+          });
+      }
+    },
+
+    fetchFantasyLeagueMetadataStats() {
+      if (!this.selectedFantasyLeague) return
+      if (this.selectedFantasyLeague.id) {
+        return localApiService.getFantasyLeagueMetadataStats(this.selectedFantasyLeague.id)
+          .then((result: any) => {
+            this.leagueMetadataStats = result;
+          });
+      }
+    },
+
+    fetchPlayerFantasyMatchStats() {
+      if (!this.selectedFantasyLeague) return
+      if (this.selectedFantasyLeague.id) {
+        return localApiService.getPlayerFantasyMatchStats(this.selectedFantasyLeague.id)
+          .then((result: any) => {
+            this.playerFantasyMatchStats = result;
+          });
+      }
+    },
+
+    fetchDraftFantasyMatchStats() {
+      if (!this.selectedFantasyLeague) return
+      if (this.selectedFantasyLeague.id) {
+        return localApiService.getDraftPlayerFantasyMatchStats(this.selectedFantasyLeague.id)
+          .then((result: any) => {
+            this.draftFantasyMatchStats = result;
           });
       }
     },

@@ -158,13 +158,15 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue';
 import { VRow, VCol, VDataTable, VPagination, VTabs, VTab, VTextField, VSelect } from 'vuetify/components';
-import { localApiService } from '@/services/localApiService';
 import type { FantasyPlayerPoints } from '../Fantasy/fantasyDraft';
 import { useDebouncedRef } from '@/services/debounce'
 import type { FantasyLeague } from '@/types/FantasyLeague';
 import { useDisplay } from 'vuetify';
+import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 
 const display = useDisplay()
+
+const fantasyLeagueStore = useFantasyLeagueStore()
 
 const fantasyFilter = useDebouncedRef('');
 const roleFilter = ref([]);
@@ -203,29 +205,26 @@ const roleList = [
 
 const teamsList = computed(() => {
     // We want the distinct teams
-    var teams = playerFantasyStats.value.map(item => item.fantasyPlayer.team)
+    var teams = fantasyLeagueStore.fantasyPlayerPoints.map(item => item.fantasyPlayer.team)
     return [...new Map(teams.map(item => [item.id, item])).values()]
 })
 
 onMounted(() => {
     if (selectedFantasyLeague.value && selectedFantasyLeague.value.id != 0) {
-        localApiService.getPlayerFantasyStats(selectedFantasyLeague.value.id)
-            .then(result => playerFantasyStats.value = result);
+        if (!fantasyLeagueStore.fantasyPlayerPoints)
+            fantasyLeagueStore.fetchFantasyPlayerPoints()
     }
 });
 
 watch(selectedFantasyLeague, () => {
     if (selectedFantasyLeague.value && selectedFantasyLeague.value.id != 0) {
-        localApiService.getPlayerFantasyStats(selectedFantasyLeague.value.id)
-            .then(result => playerFantasyStats.value = result);
+        fantasyLeagueStore.fetchFantasyPlayerPoints()
     }
 });
 
 const fantasyTab = ref('kda');
 
 // const showFantasyFilters = ref(false);
-
-const playerFantasyStats = ref<FantasyPlayerPoints[]>([]);
 
 const commonFantasyColumns = [
     {
@@ -521,7 +520,7 @@ const stringifyNested = (obj: Object | string | null): any => {
 // }
 
 const playerFantasyStatsIndexed = computed(() => {
-    return playerFantasyStats.value
+    return fantasyLeagueStore.fantasyPlayerPoints
         .map((player: FantasyPlayerPoints, index) => ({
             ...player,
             position: index + 1

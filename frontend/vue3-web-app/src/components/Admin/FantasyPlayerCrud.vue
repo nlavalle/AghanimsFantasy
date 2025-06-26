@@ -34,8 +34,7 @@
                                 return-object />
                         </v-row>
                         <v-row class="available-team ma-2 pa-2" v-for="(team, teamIndex) in fantasyTeams"
-                            :key="teamIndex"
-                            :style="{ 'min-width': !display.mobile.value ? '800px' : '400px', 'max-width': !display.mobile.value ? '800px' : '400px' }">
+                            :key="teamIndex" :style="{ 'min-width': !display.mobile.value ? '800px' : '400px' }">
                             <v-col><v-row class="available-team-title">
                                     <v-col>
                                         <img :src="getImageUrl(team.id)" />
@@ -45,7 +44,7 @@
                                         <v-btn @click="deleteFantasyTeam(team)">Delete Team</v-btn>
                                     </v-col>
                                 </v-row>
-                                <v-row>
+                                <v-row :style="{ 'flex-wrap': 'nowrap' }">
                                     <v-col class="ma-1" v-for="(player, playerIndex) in fantasyPlayersByTeam(team.id)"
                                         :key="playerIndex">
                                         <v-row>
@@ -58,17 +57,25 @@
                                             </v-col>
                                         </v-row>
                                         <v-row>
+                                            <span>Pos: {{ player.teamPosition }}</span>
+                                        </v-row>
+                                        <v-row>
+                                            <span>Sub: {{ player.substitution }}</span>
+                                        </v-row>
+                                        <v-row>
                                             <font-awesome-icon :icon="faPencil" class="me-2"
                                                 @click="editFantasyPlayer(player)" />
                                             <font-awesome-icon :icon="faDeleteLeft" class="me-2"
                                                 @click="deleteFantasyPlayer(player)" />
                                         </v-row>
                                     </v-col>
-                                    <v-col v-if="fantasyPlayersByTeam(team.id).length < 5">
+                                    <v-col>
                                         <v-autocomplete v-model="selectedPlayer" :items="players" item-title="name"
                                             max-width="300" return-object />
+                                        <v-text-field v-model="selectedPlayerPosition" label="Position"></v-text-field>
+                                        <v-checkbox v-model="selectedPlayerSub" label="Sub?"></v-checkbox>
                                         <v-btn
-                                            @click="addFantasyPlayer(team.id, selectedPlayer?.id!, fantasyPlayersByTeam(team.id).length + 1)">Add
+                                            @click="addFantasyPlayer(team.id, selectedPlayer?.id!, selectedPlayerPosition, selectedPlayerSub)">Add
                                             Fantasy Player</v-btn>
                                     </v-col>
                                 </v-row>
@@ -103,7 +110,7 @@
         <v-dialog v-model="dialogDeleteFantasyPlayer" max-width="500px">
             <v-card>
                 <v-card-title class="text-h7">Confirm delete Player {{ deleteFantasyPlayerItem?.dotaAccount.name ?? ''
-                }}?</v-card-title>
+                    }}?</v-card-title>
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="blue-darken-1" variant="text" @click="closeDeleteFantasyPlayer">Cancel</v-btn>
@@ -116,7 +123,7 @@
             <v-card>
                 <v-card-title class="text-h7">Confirm delete Team {{
                     deleteFantasyTeamItem?.name ?? ''
-                    }}?</v-card-title>
+                }}?</v-card-title>
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="blue-darken-1" variant="text" @click="closeDeleteFantasyTeam">Cancel</v-btn>
@@ -129,7 +136,7 @@
             <v-card>
                 <v-card-title class="text-h7">Confirm edit player {{
                     editFantasyPlayerItem?.dotaAccount.name ?? ''
-                    }} - {{
+                }} - {{
                         editFantasyPlayerItem?.dotaAccount.id ?? ''
                     }}?</v-card-title>
                 <v-card-actions>
@@ -168,12 +175,15 @@ const teams = ref<DotaTeam[]>([]);
 const selectedTeam = ref<DotaTeam>();
 const players = ref<DotaAccount[]>([]);
 const selectedPlayer = ref<DotaAccount>();
+const selectedPlayerPosition = ref<number>();
+const selectedPlayerSub = ref<boolean>();
 
 //AddPlayer
 const dialogAddFantasyPlayer = ref(false);
 const addFantasyPlayerTeamId = ref();
 const addFantasyPlayerAccountId = ref();
 const addFantasyPlayerTeamPositionId = ref();
+const addFantasyPlayerSubstitute = ref(false);
 
 //DeletePlayer
 const dialogDeleteFantasyPlayer = ref(false);
@@ -199,6 +209,8 @@ const fantasyPlayersByTeam = (teamId: number) => {
     return fantasyPlayers.value.filter(player => player.teamId == teamId).sort((playerA: FantasyPlayer, playerB: FantasyPlayer) => {
         if (playerA.teamPosition < playerB.teamPosition) return -1;
         if (playerA.teamPosition > playerB.teamPosition) return 1;
+        if (!playerA.substitution && playerB.substitution) return -1;
+        if (playerA.substitution && !playerB.substitution) return 1;
         return 0;
     })
 }
@@ -288,11 +300,13 @@ const addFantasyTeamConfirm = () => {
     closeAddFantasyTeam();
 }
 
-const addFantasyPlayer = (teamId: number, accountId: number, teamPosition: number) => {
+const addFantasyPlayer = (teamId: number, accountId: number, teamPosition: number | undefined, isSub: boolean | undefined) => {
+    if(!teamPosition) return
     dialogAddFantasyPlayer.value = true;
     addFantasyPlayerTeamId.value = teamId;
     addFantasyPlayerAccountId.value = accountId;
     addFantasyPlayerTeamPositionId.value = teamPosition;
+    addFantasyPlayerSubstitute.value = isSub ?? false;
 }
 
 const addFantasyPlayerConfirm = () => {
@@ -301,10 +315,11 @@ const addFantasyPlayerConfirm = () => {
             fantasyLeagueId: selectedFantasyLeague.value!.id,
             teamId: addFantasyPlayerTeamId.value,
             dotaAccountId: addFantasyPlayerAccountId.value,
-            teamPosition: addFantasyPlayerTeamPositionId.value
+            teamPosition: addFantasyPlayerTeamPositionId.value,
+            substitution: addFantasyPlayerSubstitute.value
         }
 
-        localApiService.postFantasyPlayer(addFantasyPlayer).then((result: any) => {
+        localApiService.postFantasyPlayer(addFantasyPlayer).then(() => {
             localApiService.getFantasyPlayers(selectedFantasyLeague.value!.id).then((result: any) => {
                 fantasyPlayers.value = result;
                 setFantasyTeams()
@@ -395,6 +410,10 @@ const closeDeleteFantasyTeam = () => {
 </script>
 
 <style scoped>
+.available-team {
+    flex-wrap: nowrap;
+}
+
 .available-team-title {
     margin-right: 5px;
     margin-top: 5px;
