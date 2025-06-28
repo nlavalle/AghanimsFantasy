@@ -11,6 +11,9 @@
             Forgot Password?
         </v-btn>
     </v-form>
+    <v-snackbar v-model="forgotPasswordWarn" timeout="5000" location="top right" color="warning" elevation="4">
+        Please enter your email for the forgot password
+    </v-snackbar>
     <ErrorDialog v-model="showErrorModal" :error="errorDetails!" />
 </template>
 
@@ -30,8 +33,8 @@ const showErrorModal = ref(false);
 const errorDetails = ref<Error>();
 
 const password = ref('');
-
 const passShow = ref(false)
+const forgotPasswordWarn = ref(false)
 
 const passwordRuleArray = [
     passwordRules.required,
@@ -51,7 +54,10 @@ const login = (email: string | undefined, pass: string) => {
 }
 
 const forgotPassword = (email: string | undefined) => {
-    if (!email) return;
+    if (!email) {
+        forgotPasswordWarn.value = true;
+        return;
+    };
     return authStore.forgotPassword(email)
         ?.then(() => {
             tab.value = "resetPassword"

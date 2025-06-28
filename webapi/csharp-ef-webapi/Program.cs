@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Json;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,7 +66,7 @@ builder.Services.AddDbContext<AghanimsFantasyContext>(
     }
 );
 
-builder.Services.AddIdentity<AghanimsFantasyUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddIdentity<AghanimsFantasyUser, IdentityRole>()
     .AddEntityFrameworkStores<AghanimsFantasyContext>()
     .AddApiEndpoints();
 
@@ -140,6 +141,56 @@ builder.Services
         };
     });
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+    {
+        var path = context.Request.Path.Value?.ToLower();
+        if (path != null && path.Contains("resendconfirmationemail"))
+        {
+            return RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey: context.User?.Identity?.IsAuthenticated == true
+                    ? $"confirmation-email-{context.User.Identity.Name!}"
+                    : $"confirmation-email-{context.Connection.RemoteIpAddress?.ToString() ?? "anonymous"}",
+
+                factory: key => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 1,
+                    Window = TimeSpan.FromMinutes(1),
+                    QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                    QueueLimit = 0
+                });
+        }
+
+        if (path != null && path.Contains("forgotpassword"))
+        {
+            return RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey: context.User?.Identity?.IsAuthenticated == true
+                    ? $"forgot-password-{context.User.Identity.Name!}"
+                    : $"forgot-password-{context.Connection.RemoteIpAddress?.ToString() ?? "anonymous"}",
+
+                factory: key => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 1,
+                    Window = TimeSpan.FromMinutes(1),
+                    QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                    QueueLimit = 0
+                });
+        }
+
+        return RateLimitPartition.GetFixedWindowLimiter(
+            context.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
+            key => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 100,
+                Window = TimeSpan.FromMinutes(1)
+            });
+    });
+
+
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+});
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -167,6 +218,8 @@ if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName.Equals("L
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRateLimiter();
 app.UseCors(vueFrontEndOrigins);
 app.UseOutputCache();
 

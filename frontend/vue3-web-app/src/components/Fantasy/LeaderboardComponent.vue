@@ -13,9 +13,9 @@
         <ol>
             <li class="leaderboard-item" v-for="item in props.boardData" :key="item.id">
                 <div class="d-flex justify-around">
-                    <span v-if="item.userName" class="player-descriptors"
+                    <span class="player-descriptors"
                         :style="{ fontWeight: item.userName == props.authenticatedUser?.name ? 'bold' : 'normal' }">
-                        {{ item.userName }}
+                        {{ item.userName ? item.userName : '\< blank \>' }}
                     </span>
                     <span v-if="item.value" class="player-data"
                         :style="{ fontWeight: item.userName == props.authenticatedUser?.name ? 'bold' : 'normal' }">

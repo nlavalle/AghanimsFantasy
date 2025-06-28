@@ -39,7 +39,7 @@ namespace csharp_ef_webapi.Controllers
         }
 
         [HttpGet("login-provider")]
-        public async Task<IActionResult> LoginProvider(string provider)
+        public async Task<IActionResult> LoginProvider(string provider, string returnUrl = "/")
         {
             if (string.IsNullOrWhiteSpace(provider))
             {
@@ -51,7 +51,7 @@ namespace csharp_ef_webapi.Controllers
                 return BadRequest("Provider not supported.");
             }
 
-            var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Auth", new { returnUrl = "/" });
+            var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Auth", new { returnUrl });
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return Challenge(properties, provider);
         }
@@ -85,17 +85,35 @@ namespace csharp_ef_webapi.Controllers
                     await _userManager.UpdateAsync(existingUser);
                 }
                 await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme); // clean up identity external cookie now that they have aspnet cookie
-                return Ok("Login attached, you can close this window if it doesn't automatically close.");
+                return Redirect($"/oauth-callback.html?success=true&origin={Uri.EscapeDataString(returnUrl)}");
             }
 
-            // Try to login the user into identity with the external login
-            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: true);
+            var externalLoginLookup = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
 
-            if (result.Succeeded)
+            if (externalLoginLookup != null)
             {
-                // User signed in with external login
-                await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme); // clean up identity external cookie now that they have aspnet cookie
-                return Ok("Login successful, you can close this window if it doesn't automatically close.");
+                var isEmailConfirmed = await _userManager.IsEmailConfirmedAsync(externalLoginLookup);
+
+                // Try to login the user into identity with the external login
+                var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: true);
+                if (result.Succeeded)
+                {
+                    // User signed in with external login
+                    await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme); // clean up identity external cookie now that they have aspnet cookie
+                    if (!isEmailConfirmed)
+                    {
+                        // We can log them on but display the email confirmation pending
+                        return Redirect($"/oauth-callback.html?success=true&error=EmailNotConfirmed&email={externalLoginLookup.NormalizedEmail}&origin={Uri.EscapeDataString(returnUrl)}");
+                    }
+                    else
+                    {
+                        return Redirect($"/oauth-callback.html?success=true&origin={Uri.EscapeDataString(returnUrl)}");
+                    }
+                }
+                else if (result.IsNotAllowed)
+                {
+                    return Redirect($"/oauth-callback.html?success=false&error=SignInNotAllowed&origin={Uri.EscapeDataString(returnUrl)}");
+                }
             }
 
             // User doesn't exist with that external login, create a new user
@@ -128,7 +146,7 @@ namespace csharp_ef_webapi.Controllers
                 {
                     await _signInManager.SignInAsync(user, isPersistent: true);
                     await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-                    return Ok("Login successful, you can close this window if it doesn't automatically close.");
+                    return Redirect($"/oauth-callback.html?success=true&origin={Uri.EscapeDataString(returnUrl)}");
                 }
             }
 

@@ -60,13 +60,13 @@
               </v-col>
             </v-tabs-window-item>
             <v-tabs-window-item value="leaderboard">
-              <v-col v-if="authStore.isAuthenticated">
+              <v-col>
                 <v-row class="mt-1">
                   <leaderboard-component class="leaderboardComponent" leaderboardTitle="Fantasy Leaderboard"
                     headerName="Draft Player" headerValue="Points" :authenticatedUser="authStore.currentUser"
                     :boardData="fantasyDraftStore.fantasyLeaderboardData" />
                 </v-row>
-                <v-row class="ma-1" style="max-width: 600px">
+                <v-row class="ma-1" style="max-width: 600px" v-if="authStore.isAuthenticated">
                   <v-col>
                     <p>Total Drafts: {{ fantasyDraftStore.fantasyLeaderboardStats?.totalDrafts ?? 0 }}</p>
                   </v-col>
@@ -76,20 +76,6 @@
                     </p>
                   </v-col>
                 </v-row>
-              </v-col>
-              <v-col v-else>
-                <v-card class="ma-5">
-                  <v-card-title style="text-wrap:wrap">
-                    <v-row>
-                      <v-col>
-                        <span class="not-authenticated">Please login to view the leaderboard</span>
-                      </v-col>
-                      <v-col cols="4" class="mr-1" align-self="center">
-                        <LoginModal class="login-modal" />
-                      </v-col>
-                    </v-row>
-                  </v-card-title>
-                </v-card>
               </v-col>
             </v-tabs-window-item>
             <v-tabs-window-item value="match">
@@ -213,6 +199,7 @@ onBeforeMount(async () => {
     }
     isMounted.value = true;
   } else if (!authStore.authenticated && fantasyLeagueStore.selectedFantasyLeague) {
+    await fantasyDraftStore.fetchLeaderboard()
     fantasyTab.value = 'draft';
     isMounted.value = true;
   }
@@ -221,7 +208,7 @@ onBeforeMount(async () => {
 watch(() => fantasyLeagueStore.selectedFantasyLeague, () => {
   fantasyLeagueStore.fetchFantasyPlayerPoints()?.then(() => setFantasyPlayerPoints(fantasyLeagueStore.fantasyPlayerPoints))
     .then(() => {
-      if (authStore.authenticated) fantasyDraftStore.fetchLeaderboard()
+      fantasyDraftStore.fetchLeaderboard()
       fantasyLeagueStore.fetchFantasyPlayerViewModels();
     })
 })
