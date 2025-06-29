@@ -143,10 +143,11 @@ builder.Services
 
 builder.Services.AddRateLimiter(options =>
 {
-    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+    options.AddPolicy("EmailPolicy", context =>
     {
-        var path = context.Request.Path.Value?.ToLower();
-        if (path != null && path.Contains("resendconfirmationemail"))
+        string path = context.Request.Path.Value?.ToLower() ?? string.Empty;
+
+        if (path.Contains("resendconfirmationemail"))
         {
             return RateLimitPartition.GetFixedWindowLimiter(
                 partitionKey: context.User?.Identity?.IsAuthenticated == true
@@ -156,13 +157,11 @@ builder.Services.AddRateLimiter(options =>
                 factory: key => new FixedWindowRateLimiterOptions
                 {
                     PermitLimit = 1,
-                    Window = TimeSpan.FromMinutes(1),
-                    QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-                    QueueLimit = 0
+                    Window = TimeSpan.FromMinutes(1)
                 });
         }
 
-        if (path != null && path.Contains("forgotpassword"))
+        if (path.Contains("forgotpassword"))
         {
             return RateLimitPartition.GetFixedWindowLimiter(
                 partitionKey: context.User?.Identity?.IsAuthenticated == true
@@ -172,9 +171,7 @@ builder.Services.AddRateLimiter(options =>
                 factory: key => new FixedWindowRateLimiterOptions
                 {
                     PermitLimit = 1,
-                    Window = TimeSpan.FromMinutes(1),
-                    QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-                    QueueLimit = 0
+                    Window = TimeSpan.FromMinutes(1)
                 });
         }
 
@@ -186,7 +183,6 @@ builder.Services.AddRateLimiter(options =>
                 Window = TimeSpan.FromMinutes(1)
             });
     });
-
 
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
@@ -225,7 +221,7 @@ app.UseOutputCache();
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapGroup("/identity").MapIdentityApi<AghanimsFantasyUser>();
+app.MapGroup("/identity").MapIdentityApi<AghanimsFantasyUser>().RequireRateLimiting("EmailPolicy");
 
 app.UseSession();
 

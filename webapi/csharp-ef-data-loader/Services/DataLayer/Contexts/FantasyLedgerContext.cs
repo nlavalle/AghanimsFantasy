@@ -56,12 +56,12 @@ internal class FantasyLedgerContext : DotaOperationContext
                     .Select(fd => new FantasyLedger()
                     {
                         UserId = fd.UserId!,
-                        Amount = fd.DraftPickPlayers.Sum(dpp =>
+                        Amount = Math.Max(fd.DraftPickPlayers.Sum(dpp =>
                             {
                                 var winnings = 300 - GetQuintile(dpp.FantasyPlayer!, fantasyResults) * 60;
                                 var cost = fantasyBudgets.Where(fb => fb.Account.Id == dpp.FantasyPlayer!.DotaAccountId).Sum(fb => fb.Cost);
-                                return dpp.FantasyPlayer != null ? Math.Max(winnings - cost, 0) : 0; // 0 if no player drafted, never let it go negative
-                            }),
+                                return dpp.FantasyPlayer != null ? winnings - cost : 0;
+                            }), 0),  // 0 if no player drafted, never let total go negative
                         SourceId = unpaidFantasyLeague.Id,
                         SourceType = "FantasyLeague"
                     })
