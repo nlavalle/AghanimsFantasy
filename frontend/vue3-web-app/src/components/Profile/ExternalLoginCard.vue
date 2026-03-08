@@ -31,6 +31,9 @@
         <v-snackbar v-model="showSuccess" timeout="5000" location="top right" color="success" elevation="4">
             Successfully added login
         </v-snackbar>
+        <v-snackbar v-model="showSuccess" timeout="20000" location="top right" color="success" elevation="4">
+            Successfully added email. An email has been sent to that address with a confirmation link.
+        </v-snackbar>
         <v-snackbar v-model="showError" timeout="5000" location="top right" color="error" elevation="4">
             {{ showErrorMessage }}
         </v-snackbar>

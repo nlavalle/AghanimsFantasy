@@ -39,7 +39,7 @@ namespace csharp_ef_webapi.Controllers
         }
 
         [HttpGet("login-provider")]
-        public async Task<IActionResult> LoginProvider(string provider)
+        public async Task<IActionResult> LoginProvider(string provider, string returnUrl = "/")
         {
             if (string.IsNullOrWhiteSpace(provider))
             {
@@ -51,7 +51,7 @@ namespace csharp_ef_webapi.Controllers
                 return BadRequest("Provider not supported.");
             }
 
-            var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Auth", new { returnUrl = "/" });
+            var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Auth", new { returnUrl });
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return Challenge(properties, provider);
         }
@@ -59,8 +59,8 @@ namespace csharp_ef_webapi.Controllers
         [HttpGet("callback-provider")]
         public async Task<IActionResult> ExternalLoginCallback(string returnUrl = "/")
         {
-            var info = await _signInManager.GetExternalLoginInfoAsync();
-            if (info == null)
+            var externalLoginInfo = await _signInManager.GetExternalLoginInfoAsync();
+            if (externalLoginInfo == null)
             {
                 return Redirect(Url.Action(nameof(FailedOAuthAccessDenied)) ?? returnUrl);
             }
@@ -69,70 +69,18 @@ namespace csharp_ef_webapi.Controllers
             var existingUser = await _userManager.GetUserAsync(HttpContext.User);
             if (existingUser != null)
             {
-                var addLoginResult = await _userManager.AddLoginAsync(existingUser, info);
-                if (!addLoginResult.Succeeded)
-                {
-                    return BadRequest("Error: " + string.Join(',', addLoginResult.Errors.Select(err => err.Description).ToList()));
-                }
-                if (info.LoginProvider == "Discord")
-                {
-                    if (long.TryParse(info.Principal.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty, out long discordId))
-                    {
-                        existingUser.DiscordId = discordId;
-                    }
-                    existingUser.DiscordHandle = info.Principal.FindFirstValue(ClaimTypes.Name) ?? string.Empty;
-                    await MapOldDiscordToNewUser(existingUser, info);
-                    await _userManager.UpdateAsync(existingUser);
-                }
-                await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme); // clean up identity external cookie now that they have aspnet cookie
-                return Ok("Login attached, you can close this window if it doesn't automatically close.");
+                return await AddExternalLoginToUserAsync(existingUser, externalLoginInfo, returnUrl);
             }
 
-            // Try to login the user into identity with the external login
-            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: true);
-
-            if (result.Succeeded)
+            // Check if a user already exists for this external login info
+            var externalLoginLookup = await _userManager.FindByLoginAsync(externalLoginInfo.LoginProvider, externalLoginInfo.ProviderKey);
+            if (externalLoginLookup != null)
             {
-                // User signed in with external login
-                await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme); // clean up identity external cookie now that they have aspnet cookie
-                return Ok("Login successful, you can close this window if it doesn't automatically close.");
+                return await LoginExternalUserAsync(externalLoginLookup, externalLoginInfo, returnUrl);
             }
 
             // User doesn't exist with that external login, create a new user
-            var user = new AghanimsFantasyUser();
-
-            switch (info.LoginProvider)
-            {
-                case "Google":
-                    user.UserName = info.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
-                    user.Email = info.Principal.FindFirstValue(ClaimTypes.Email);
-                    break;
-                case "Discord":
-                    user.UserName = info.Principal.FindFirstValue(ClaimTypes.Name);
-                    if (long.TryParse(info.Principal.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty, out long discordId))
-                    {
-                        user.DiscordId = discordId;
-                    }
-                    user.DiscordHandle = info.Principal.FindFirstValue(ClaimTypes.Name) ?? string.Empty;
-                    user.Email = "";
-                    // We don't get email from discord privileges
-                    break;
-            }
-
-            var createResult = await _userManager.CreateAsync(user);
-            if (createResult.Succeeded)
-            {
-                createResult = await _userManager.AddLoginAsync(user, info);
-                if (info.LoginProvider == "Discord") await MapOldDiscordToNewUser(user, info);
-                if (createResult.Succeeded)
-                {
-                    await _signInManager.SignInAsync(user, isPersistent: true);
-                    await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-                    return Ok("Login successful, you can close this window if it doesn't automatically close.");
-                }
-            }
-
-            return Redirect(Url.Action(nameof(FailedOAuthAccessDenied)) ?? returnUrl);
+            return await CreateUserFromExternalLoginAsync(externalLoginInfo, returnUrl);
         }
 
         // POST: api/auth/change-display-name
@@ -336,6 +284,101 @@ namespace csharp_ef_webapi.Controllers
             _logger.LogInformation($"User '{user.Id} {user.UserName}' deleted themselves.");
 
             return Redirect("~/");
+        }
+
+        private async Task<IActionResult> CreateUserFromExternalLoginAsync(ExternalLoginInfo externalLoginInfo, string returnUrl)
+        {
+            var user = new AghanimsFantasyUser();
+
+            switch (externalLoginInfo.LoginProvider)
+            {
+                case "Google":
+                    user.UserName = externalLoginInfo.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
+                    user.Email = externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Email);
+                    break;
+                case "Discord":
+                    user.UserName = externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Name);
+                    if (long.TryParse(externalLoginInfo.Principal.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty, out long discordId))
+                    {
+                        user.DiscordId = discordId;
+                    }
+                    user.DiscordHandle = externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Name) ?? string.Empty;
+                    user.Email = "";
+                    // We don't get email from discord privileges
+                    break;
+            }
+
+            var createResult = await _userManager.CreateAsync(user);
+            if (createResult.Succeeded)
+            {
+                createResult = await _userManager.AddLoginAsync(user, externalLoginInfo);
+                if (externalLoginInfo.LoginProvider == "Discord") await MapOldDiscordToNewUser(user, externalLoginInfo);
+                if (createResult.Succeeded)
+                {
+                    await _signInManager.SignInAsync(user, isPersistent: true);
+                    await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+                    return Redirect($"/oauth-callback.html?success=true&origin={Uri.EscapeDataString(returnUrl)}");
+                }
+            }
+            else
+            {
+                _logger.LogError($"Unexpected error during UserManager.CreateAsync: {string.Join(',', createResult.Errors.Select(err => err.Description).ToList())}");
+                return Redirect($"/oauth-callback.html?success=false&origin={Uri.EscapeDataString(returnUrl)}");
+            }
+
+            return Redirect($"/oauth-callback.html?success=false&origin={Uri.EscapeDataString(returnUrl)}");
+        }
+
+        private async Task<IActionResult> AddExternalLoginToUserAsync(AghanimsFantasyUser externalLoginUser, ExternalLoginInfo externalLoginInfo, string returnUrl)
+        {
+            var addLoginResult = await _userManager.AddLoginAsync(externalLoginUser, externalLoginInfo);
+            if (!addLoginResult.Succeeded)
+            {
+                _logger.LogError("Unexpected error during AddLoginAsync: " + string.Join(',', addLoginResult.Errors.Select(err => err.Description).ToList()));
+                return BadRequest("Error: " + string.Join(',', addLoginResult.Errors.Select(err => err.Description).ToList()));
+            }
+            if (externalLoginInfo.LoginProvider == "Discord")
+            {
+                if (long.TryParse(externalLoginInfo.Principal.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty, out long discordId))
+                {
+                    externalLoginUser.DiscordId = discordId;
+                }
+                externalLoginUser.DiscordHandle = externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Name) ?? string.Empty;
+                await MapOldDiscordToNewUser(externalLoginUser, externalLoginInfo);
+                await _userManager.UpdateAsync(externalLoginUser);
+            }
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme); // clean up identity external cookie now that they have aspnet cookie
+            return Redirect($"/oauth-callback.html?success=true&origin={Uri.EscapeDataString(returnUrl)}");
+        }
+
+        private async Task<RedirectResult> LoginExternalUserAsync(AghanimsFantasyUser externalLoginUser, ExternalLoginInfo externalLoginInfo, string returnUrl)
+        {
+            var isEmailConfirmed = await _userManager.IsEmailConfirmedAsync(externalLoginUser);
+
+            // Try to login the user into identity with the external login
+            var result = await _signInManager.ExternalLoginSignInAsync(externalLoginInfo.LoginProvider, externalLoginInfo.ProviderKey, isPersistent: true);
+            if (result.Succeeded)
+            {
+                // User signed in with external login
+                await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme); // clean up identity external cookie now that they have aspnet cookie
+                if (!isEmailConfirmed)
+                {
+                    // We can log them on but display the email confirmation pending
+                    return Redirect($"/oauth-callback.html?success=true&error=EmailNotConfirmed&email={externalLoginUser.NormalizedEmail}&origin={Uri.EscapeDataString(returnUrl)}");
+                }
+                else
+                {
+                    return Redirect($"/oauth-callback.html?success=true&origin={Uri.EscapeDataString(returnUrl)}");
+                }
+            }
+            else if (result.IsNotAllowed)
+            {
+                return Redirect($"/oauth-callback.html?success=false&error=SignInNotAllowed&origin={Uri.EscapeDataString(returnUrl)}");
+            }
+            else
+            {
+                return Redirect($"/oauth-callback.html?success=false&origin={Uri.EscapeDataString(returnUrl)}");
+            }
         }
 
         private async Task MapOldDiscordToNewUser(AghanimsFantasyUser user, ExternalLoginInfo loginInfo)

@@ -71,6 +71,24 @@
           </v-card>
         </template>
       </v-dialog>
+      <v-dialog v-model="showResendConfirmationEmail" class="info-dialog">
+        <template v-slot:default="{ isActive }">
+          <v-card>
+            <v-card-text>
+              <span class="text-h6">Please confirm your Email</span>
+            </v-card-text>
+            <v-card-text>
+              <p>{{ showResendNotification }}</p>
+              <a href="#" @click.prevent="resendConfirmationEmail()">Resend Confirmation Email</a>
+            </v-card-text>
+            <v-card-actions align="right">
+              <v-spacer></v-spacer>
+              <v-btn @click="onOKClick()">OK</v-btn>
+            </v-card-actions>
+          </v-card>
+        </template>
+      </v-dialog>
+      <ErrorDialog v-model="showErrorModal" :error="errorDetails!" />
     </div>
   </div>
 </template>
@@ -86,6 +104,8 @@ import { useRouter } from 'vue-router';
 import { useDisplay } from 'vuetify';
 import { faDiscord } from '@fortawesome/free-brands-svg-icons';
 import GoogleSignIn from '@/assets/icons/google-sign-in.png'
+import { authApiService } from '@/services/authApiService';
+import ErrorDialog from '../ErrorDialog.vue';
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -93,6 +113,12 @@ const display = useDisplay()
 
 const updateDisplayNameDialog = ref(false)
 const displayName = ref('')
+
+const showResendConfirmationEmail = ref(false)
+const showResendNotification = ref('')
+const confirmationEmail = ref()
+const showErrorModal = ref(false)
+const errorDetails = ref()
 
 watch(() => authStore.user.id, () => {
   updateDisplayNameDialog.value = authStore.isAuthenticated && authStore.currentUser.name == ''
@@ -104,22 +130,36 @@ onBeforeMount(async () => {
 
 async function login(provider: String) {
   // Open a new window or popup for OAuth login
-  const loginWindow = window.open(`/api/auth/login-provider?provider=${provider}`, 'Login', 'width=600,height=800')
+  const loginWindow = window.open(`/api/auth/login-provider?provider=${provider}&returnUrl=${encodeURIComponent(window.location.href)}`, 'Login', 'width=600,height=800')
 
-  if (loginWindow) {
-    const checkLoginStatus = setInterval(() => {
-      if (authStore.isAuthenticated || loginWindow.closed) {
-        loginWindow.close()
-        clearInterval(checkLoginStatus)
-      }
+  window.addEventListener('message', (event) => {
+    const { success, error, email, message } = event.data;
+
+    if (success) {
+      loginWindow?.close()
       authStore.checkAuthenticatedAsync()
-    }, 1000)
-  }
+    } else if (error === "EmailNotConfirmed") {
+      confirmationEmail.value = email;
+      showResendNotification.value = message;
+      showResendConfirmationEmail.value = true;
+    } else {
+      errorDetails.value = new Error(message || "OAuth login failed");
+      showErrorModal.value = true;
+    }
+  })
 }
 
 const isCurrentNameBlank = computed(() => {
   return !authStore.currentUser.name || authStore.currentUser.name == ''
 })
+
+const resendConfirmationEmail = () => {
+  if (!confirmationEmail.value) return;
+  authApiService.resendConfirmationEmail(confirmationEmail.value).then(() => {
+    showResendConfirmationEmail.value = !showResendConfirmationEmail.value
+    authStore.checkAuthenticatedAsync()
+  });
+}
 
 const updateDisplayName = () => {
   if (!displayName.value || displayName.value == '') return
@@ -132,6 +172,11 @@ const logout = () => {
   authStore.logout().then(() => {
     router.push({ path: '/' })
   })
+}
+
+const onOKClick = () => {
+  showResendConfirmationEmail.value = !showResendConfirmationEmail.value
+  authStore.checkAuthenticatedAsync()
 }
 
 </script>

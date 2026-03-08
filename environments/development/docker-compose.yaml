@@ -50,7 +50,7 @@ services:
     links:
       - webapi:webapi
     volumes:
-      - ./ssl_certs:/etc/letsencrypt/live/aghanimsfantasy.com
+      - ./ssl_certs:/etc/nginx/certs
     depends_on:
       - postgres
       - webapi

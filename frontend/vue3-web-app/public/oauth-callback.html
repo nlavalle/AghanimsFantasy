@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head><title>OAuth Callback</title></head>
+<body>
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const success = urlParams.get('success') === 'true';
+    const error = urlParams.get('error') || null;
+    const email = urlParams.get('email') || null;
+    const origin = urlParams.get('origin') || null;
+
+    window.opener.postMessage({ success, error, email, message: mapErrorMessage(error) }, origin);
+
+    window.close();
+
+    function mapErrorMessage(error) {
+        if (error === 'EmailNotConfirmed') return 'The email for this user is not confirmed. It may have been marked as spam.';
+        if (error === 'NoLoginInfo') return 'Login failed: no login info returned.';
+        if (error === 'SignInNotAllowed') return 'Sign-in not allowed. Please contact support.';
+        return 'Unknown error during login.';
+    }
+</script>
+</body>
+</html>

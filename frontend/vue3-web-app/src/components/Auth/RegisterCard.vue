@@ -18,8 +18,7 @@
                     <span class="text-h6">Please confirm your Email</span>
                 </v-card-text>
                 <v-card-text>
-                    <p>Registration was successful. A confirmation email has been sent to {{ email }}. You must confirm
-                        it before you can log in.</p>
+                    <p>Registration was successful. A confirmation email has been sent to {{ email }}.</p>
                 </v-card-text>
                 <v-card-actions align="right">
                     <v-spacer></v-spacer>

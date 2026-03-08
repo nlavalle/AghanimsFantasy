@@ -11,7 +11,7 @@
                 <h1>Draft Winnings</h1>
             </v-col>
             <v-col class="v-col-3">
-                <GoldSpan :animated="true" :bold="true" :font-size="1.5" :gold-value="totalWinnings.toFixed(0)" />
+                <ShardSpan :animated="true" :bold="true" :font-size="1.5" :gold-value="totalWinnings.toFixed(0)" />
             </v-col>
         </v-row>
     </div>
@@ -22,7 +22,7 @@ import { computed } from 'vue';
 import { VRow, VCol } from 'vuetify/components';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import type { FantasyPlayer, FantasyPlayerPoints } from '../fantasyDraft';
-import GoldSpan from '@/components/Dom/GoldSpan.vue';
+import ShardSpan from '@/components/Dom/ShardSpan.vue';
 
 const fantasyLeagueStore = useFantasyLeagueStore();
 

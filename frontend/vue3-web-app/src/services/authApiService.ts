@@ -196,6 +196,26 @@ export const authApiService = {
       }
     })
   },
+  resendConfirmationEmail(email: string) {
+    return fetch(`${identityBaseUrl}/resendConfirmationEmail`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: email
+      })
+    }).then((response: any) => {
+      if (!response.ok) {
+        return response.text().then((errorBody: any) => {
+          throw new Error(errorBody);
+        });
+      } else {
+        return response
+      }
+    })
+  },
   downloadPersonalData() {
     return fetch(`${apiBaseUrl}/auth/download-data`, {
       method: 'POST',
