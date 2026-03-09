@@ -92,7 +92,7 @@ watch(() => leagueStore.selectedFantasyLeague, () => {
 
 .league-selector-label {
   text-transform: uppercase;
-  font-family: "Roboto", sans-serif;
+  font-family: var(--font-body);
   font-size: 0.8rem;
 }
 

@@ -53,10 +53,10 @@
         <v-data-table class="scoring-table" :items="statistics" :items-per-page="15" :headers="statsHeaders"
           hide-default-footer density="compact">
           <template v-slot:item.value="{ item }">
-            <span :style="getPointsPer(item)">{{ item.value }}</span>
+            <span :class="getPointsPerClass(item)">{{ item.value }}</span>
           </template>
           <template v-slot:item.available="{ item }">
-            <span :style="getAvailability(item)">{{ item.available }}</span>
+            <span :class="getAvailabilityClass(item)">{{ item.available }}</span>
           </template>
         </v-data-table>
       </div>
@@ -219,16 +219,16 @@ const statistics = [
   }
 ]
 
-const getPointsPer = (field: { available: string; name: string }) => {
+const getPointsPerClass = (field: { available: string; name: string }) => {
   return field.available == 'Yes'
     ? field.name == 'Death'
-      ? 'color: red'
-      : 'color: white'
-    : 'color: grey'
+      ? 'text-error'
+      : 'text-on-surface'
+    : 'text-medium-emphasis'
 }
 
-const getAvailability = (field: { available: string }) => {
-  return field.available == 'Yes' ? 'color: white' : 'color: grey'
+const getAvailabilityClass = (field: { available: string }) => {
+  return field.available == 'Yes' ? 'text-on-surface' : 'text-medium-emphasis'
 }
 </script>
 

@@ -589,7 +589,6 @@ const getPositionIcon = (positionInt: number) => {
 }
 
 .fantasy-table {
-    font-family: Avenir, Helvetica, Arial, sans-serif;
 }
 
 .v-data-table ::v-deep(th) {

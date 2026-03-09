@@ -11,8 +11,8 @@
                             :src="getHeroIcon(hero.hero.name)" />
                     </v-row>
                     <v-row justify="center">
-                        <span>{{ hero.count }} (<span style="color: green">{{ hero.wins }}W</span> - <span
-                                style="color: red">{{
+                        <span>{{ hero.count }} (<span class="text-success">{{ hero.wins }}W</span> - <span
+                                class="text-error">{{
                                     hero.losses }}L</span>)</span>
                     </v-row>
                 </v-col>

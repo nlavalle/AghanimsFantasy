@@ -44,6 +44,14 @@ library.add(
 );
 
 const vuetify = createVuetify({
+  defaults: {
+    VCardTitle: { style: 'font-family: var(--font-heading)' },
+    VToolbarTitle: { style: 'font-family: var(--font-heading)' },
+    VAppBarTitle: { style: 'font-family: var(--font-heading)' },
+    VTab: { style: 'font-family: var(--font-body); text-transform: none;' },
+    VBtn: { style: 'font-family: var(--font-body); text-transform: none;' },
+    VDataTable: { style: 'font-family: var(--font-body)' },
+  },
   theme: {
     defaultTheme: 'AghanimsFantasyDarkTheme',
     themes: {

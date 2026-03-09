@@ -156,7 +156,7 @@ const getTeamLogo = () => {
 
 .card-title-small {
   background-color: var(--aghanims-fantasy-main-2);
-  font-family: 'Roboto', sans-serif;
+  font-family: var(--font-body);
 }
 
 .card-images {
@@ -184,7 +184,7 @@ const getTeamLogo = () => {
   border-top: 3px solid var(--aghanims-fantasy-main-2);
   height: 50%;
   text-align: start;
-  font-family: 'Roboto', sans-serif;
+  font-family: var(--font-body);
 }
 
 .draft-body-main {

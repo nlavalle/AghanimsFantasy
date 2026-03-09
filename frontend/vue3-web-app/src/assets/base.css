@@ -1,5 +1,32 @@
-/* Aghanims Fantasy Color Palette */
+/* Montserrat - Local Fonts */
+@font-face { font-family: 'Montserrat'; font-weight: 400; font-style: normal; font-display: swap; src: url('./fonts/Montserrat-Regular.ttf') format('truetype'); }
+@font-face { font-family: 'Montserrat'; font-weight: 500; font-style: normal; font-display: swap; src: url('./fonts/Montserrat-Medium.ttf') format('truetype'); }
+@font-face { font-family: 'Montserrat'; font-weight: 600; font-style: normal; font-display: swap; src: url('./fonts/Montserrat-SemiBold.ttf') format('truetype'); }
+@font-face { font-family: 'Montserrat'; font-weight: 700; font-style: normal; font-display: swap; src: url('./fonts/Montserrat-Bold.ttf') format('truetype'); }
+
+/* Poppins - Local Fonts */
+@font-face { font-family: 'Poppins'; font-weight: 300; font-style: normal; font-display: swap; src: url('./fonts/Poppins-Light.ttf') format('truetype'); }
+@font-face { font-family: 'Poppins'; font-weight: 400; font-style: normal; font-display: swap; src: url('./fonts/Poppins-Regular.ttf') format('truetype'); }
+@font-face { font-family: 'Poppins'; font-weight: 500; font-style: normal; font-display: swap; src: url('./fonts/Poppins-Medium.ttf') format('truetype'); }
+@font-face { font-family: 'Poppins'; font-weight: 600; font-style: normal; font-display: swap; src: url('./fonts/Poppins-SemiBold.ttf') format('truetype'); }
+
+/* Aghanims Fantasy Design Tokens */
 :root {
+  /* Typography */
+  --font-heading: 'Montserrat', sans-serif;
+  --font-body: 'Poppins', sans-serif;
+  --font-mono: 'Roboto Mono', monospace;
+
+  /* Spacing scale (4px base) */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+
+  /* Color Palette */
   --aghanims-fantasy-accent: #e63946;
   --aghanims-fantasy-accent-dark: #9f0722;
   --aghanims-fantasy-white: #e0e1dd;
@@ -9,11 +36,11 @@
   --aghanims-fantasy-main-4: #0d1b2a;
   --aghanims-fantasy-blue-1: #192038;
 
-  --gradient-quintile-1: #AAAAAA;
-  --gradient-quintile-2: #AAAAAA;
-  --gradient-quintile-3: #AAAAAA;
-  --gradient-quintile-4: #AAAAAA;
-  --gradient-quintile-5: #AAAAAA;
+  --gradient-quintile-1: #A9D6E5;
+  --gradient-quintile-2: #61A5C2;
+  --gradient-quintile-3: #2C7DA0;
+  --gradient-quintile-4: #014F86;
+  --gradient-quintile-5: #012A4A;
 
   --gradient-blue-1:  #A9D6E5;
   --gradient-blue-2:  #89C2D9;

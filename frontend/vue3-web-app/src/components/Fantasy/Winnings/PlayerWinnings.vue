@@ -167,7 +167,7 @@ div ::v-deep(.player-descriptors) {
 }
 
 div ::v-deep(.player-data) {
-    font-family: system-ui;
+    font-family: var(--font-body);
     font-style: normal;
     font-size: 18px;
     text-align: end;
@@ -310,7 +310,7 @@ div ::v-deep(.player-data) {
 .player-winnings ol li {
     position: relative;
     font-size: 16px;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: var(--font-body);
     padding: 12px 12px 12px 50px;
     backface-visibility: hidden;
     background-repeat: no-repeat;
@@ -353,7 +353,7 @@ div ::v-deep(.player-data) {
     z-index: 2;
     height: 100%;
     text-align: right;
-    font-family: system-ui;
+    font-family: var(--font-body);
     font-style: normal;
     font-size: 18px;
     flex: 0.5 1 100px;

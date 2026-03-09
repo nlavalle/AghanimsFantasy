@@ -600,7 +600,6 @@ const getHeroIcon = (heroIconString: string) => {
 }
 
 .match-table {
-    font-family: Avenir, Helvetica, Arial, sans-serif;
 }
 
 .v-data-table ::v-deep(th) {
