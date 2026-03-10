@@ -1,6 +1,7 @@
 <template>
-  <v-progress-circular style="position:fixed;top:50%;left:50%;" v-if="!isMounted" color="primary"
-    indeterminate></v-progress-circular>
+  <div v-if="!isMounted" class="d-flex justify-center align-center" style="min-height: 200px;">
+    <v-progress-circular color="primary" indeterminate />
+  </div>
   <v-container v-if="isMounted">
     <v-row>
       <v-col>
@@ -17,7 +18,7 @@
         </v-row>
       </v-col>
     </v-row>
-    <v-row>
+    <v-row class="section-gap">
       <v-tabs-window v-model="statsTab" style="width:100%">
         <v-tabs-window-item value="fantasy">
           <v-col>

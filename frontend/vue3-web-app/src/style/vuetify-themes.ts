@@ -3,9 +3,9 @@ import { type ThemeDefinition } from 'vuetify'
 export const AghanimsFantasyDarkTheme: ThemeDefinition = {
   dark: true,
   colors: {
-    background: '#0d1b2a',
-    surface: '#1b263b',
-    'surface-variant': '#192038',
+    background: '#121212',
+    surface: '#1e1e1e',
+    'surface-variant': '#2a2a2a',
     primary: '#415A77',
     secondary: '#1B263B',
     'on-primary': '#e0e1dd',

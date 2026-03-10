@@ -26,6 +26,26 @@
   --space-2xl: 48px;
   --space-3xl: 64px;
 
+  /* Color Usage Rules:
+   * - Primary blue (#415a77) = interactive elements: buttons, links, inputs, selected tabs
+   * - Secondary (#1b263b) = contextual backgrounds for sub-navigation, grouped panels
+   * - Accent red (#e63946) = high-emphasis alerts, errors, important badges, CTA buttons
+   * - Neutral grays = structural borders, dividers, disabled states, card outlines
+   * - Success green (#4caf50) = wins, positive stats, confirmations
+   * - Error red (#e63946) = losses, negative stats, destructive actions
+   * - Do NOT use primary blue for decorative borders or backgrounds on non-interactive elements
+   * - Use rgba(255,255,255,0.08-0.12) for subtle structural borders on dark surfaces
+   */
+
+  /* Typography Scale */
+  --text-xs: 0.7rem;    /* disclaimers, fine print */
+  --text-sm: 0.8rem;    /* captions, secondary labels */
+  --text-base: 0.9rem;  /* body text, table cells */
+  --text-md: 1rem;      /* emphasized body, card content */
+  --text-lg: 1.25rem;   /* section titles, card headers */
+  --text-xl: 1.5rem;    /* page titles */
+  --text-2xl: 2rem;     /* hero headings */
+
   /* Color Palette */
   --aghanims-fantasy-accent: #e63946;
   --aghanims-fantasy-accent-dark: #9f0722;

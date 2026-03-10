@@ -16,6 +16,21 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: normal;
 } */
 
+/* Section spacing: consistent gaps between content zones */
+.section-gap {
+  margin-bottom: var(--space-xl);
+}
+
+.section-gap-lg {
+  margin-bottom: var(--space-2xl);
+}
+
+/* Page-level container padding */
+.v-container {
+  padding-top: var(--space-lg);
+  padding-bottom: var(--space-lg);
+}
+
 .debug {
   border: 1px solid red;
 }

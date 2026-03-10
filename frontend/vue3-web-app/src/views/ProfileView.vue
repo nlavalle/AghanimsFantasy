@@ -1,7 +1,7 @@
 <template>
     <div class="profile">
         <v-container>
-            <v-row>
+            <v-row style="gap: var(--space-lg);">
                 <v-col :sm="8" :md="4" :lg="3">
                     <v-tabs v-model="profileTab" direction="vertical">
                         <v-tab value="profile">Profile</v-tab>

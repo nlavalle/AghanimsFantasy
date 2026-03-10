@@ -1,14 +1,11 @@
 <template>
   <v-app>
-    <header class="bg-surface">
-      <Navbar />
-    </header>
+    <Navbar />
     <v-main>
+      <FantasyNavbar />
       <RouterView />
     </v-main>
-    <footer>
-      <Footer />
-    </footer>
+    <Footer />
   </v-app>
 </template>
 
@@ -16,6 +13,7 @@
 import router from '@/router';
 import { RouterView, useRoute } from 'vue-router'
 import Navbar from '@/components/TheNavbar.vue'
+import FantasyNavbar from '@/components/Fantasy/FantasyNavbar.vue'
 import Footer from '@/components/TheFooter.vue'
 import { VApp, VMain } from 'vuetify/components'
 import { onBeforeMount, watch } from 'vue'

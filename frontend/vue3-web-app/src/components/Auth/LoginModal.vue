@@ -183,11 +183,11 @@ const onOKClick = () => {
 
 <style scoped>
 .login-modal {
-  margin-right: 10px;
+  margin-right: var(--space-sm);
   font-size: 0.8rem;
   max-height: 48px;
   display: flex;
-  align-items: center
+  align-items: center;
 }
 
 .login-form {

@@ -86,9 +86,9 @@ watch(() => leagueStore.selectedFantasyLeague, () => {
 </script>
 
 <style scoped>
-/* .league-select {
-  height: 2.5rem;
-} */
+.league-select {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
 
 .league-selector-label {
   text-transform: uppercase;
@@ -102,5 +102,6 @@ watch(() => leagueStore.selectedFantasyLeague, () => {
 
 .selected-tab {
   backdrop-filter: brightness(150%);
+  transition: backdrop-filter 0.2s ease;
 }
 </style>

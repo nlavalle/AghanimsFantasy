@@ -1,6 +1,7 @@
 <template>
-  <v-progress-circular style="position:fixed;top:50%;left:50%;" v-if="!isMounted" color="primary"
-    indeterminate></v-progress-circular>
+  <div v-if="!isMounted" class="d-flex justify-center align-center" style="min-height: 200px;">
+    <v-progress-circular color="primary" indeterminate />
+  </div>
   <v-container v-if="isMounted">
     <v-row style="width:100%">
       <v-col>
@@ -29,8 +30,8 @@
             </v-tabs-window-item>
             <v-tabs-window-item value="draft" style="overflow: visible !important">
               <v-col>
-                <v-row v-if="!authStore.isAuthenticated">
-                  <v-card class="ma-5">
+                <v-row v-if="!authStore.isAuthenticated" class="section-gap">
+                  <v-card class="pa-4">
                     <v-card-title style="text-wrap:wrap">
                       <v-row>
                         <v-col>
@@ -43,8 +44,8 @@
                     </v-card-title>
                   </v-card>
                 </v-row>
-                <v-row v-if="updateDraftVisibility || updateDisabled">
-                  <v-card class="ma-5" disabled>
+                <v-row v-if="updateDraftVisibility || updateDisabled" class="section-gap">
+                  <v-card class="pa-4" disabled>
                     <v-card-title style="text-wrap:wrap">
                       {{ `Drafting for Fantasy League: ${fantasyLeagueStore.selectedLeague!.name} is locked` }}
                     </v-card-title>
@@ -66,7 +67,7 @@
                     headerName="Draft Player" headerValue="Points" :authenticatedUser="authStore.currentUser"
                     :boardData="fantasyDraftStore.fantasyLeaderboardData" />
                 </v-row>
-                <v-row class="ma-1" style="max-width: 600px" v-if="authStore.isAuthenticated">
+                <v-row class="section-gap leaderboard-stats" v-if="authStore.isAuthenticated">
                   <v-col>
                     <p>Total Drafts: {{ fantasyDraftStore.fantasyLeaderboardStats?.totalDrafts ?? 0 }}</p>
                   </v-col>
@@ -234,6 +235,10 @@ watch(() => fantasyLeagueStore.selectedFantasyDraftPoints, () => {
 }
 
 .leaderboardComponent {
+  max-width: 600px;
+}
+
+.leaderboard-stats {
   max-width: 600px;
 }
 </style>

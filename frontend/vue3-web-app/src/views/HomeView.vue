@@ -4,14 +4,14 @@
       <h1><i>Welcome to Aghanim's Dota 2 Fantasy League!</i></h1>
     </v-row>
     <v-row>
-      <v-card class="ma-2 pa-1" variant="elevated" color="primary" to="/fantasy">
+      <v-card class="pa-4" variant="elevated" color="primary" to="/fantasy">
         <v-card-title>
           <h2>Start Drafting!</h2>
         </v-card-title>
       </v-card>
     </v-row>
     <v-row>
-      <v-data-table class="schedule-table mt-5" :items="leagueSchedules" :items-per-page="10" :headers="scheduleHeaders"
+      <v-data-table class="schedule-table section-gap-lg" :items="leagueSchedules" :items-per-page="10" :headers="scheduleHeaders"
         hide-default-footer density="compact">
         <template v-slot:top>
           <v-toolbar flat density="compact">
