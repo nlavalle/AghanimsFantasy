@@ -239,17 +239,17 @@ const getAvailabilityClass = (field: { available: string }) => {
 }
 
 .scoring-table {
-  margin-top: 20px;
+  margin-top: var(--space-lg);
   max-width: 375px;
-  border: 2px solid var(--aghanims-fantasy-main-2);
+  border: 2px solid rgba(255, 255, 255, 0.08);
   border-radius: 5px;
 }
 
 .v-data-table ::v-deep(thead) {
-  background-color: var(--aghanims-fantasy-main-2);
+  background-color: var(--aghanims-fantasy-main-3);
 }
 
 .v-data-table ::v-deep(td) {
-  border-right: 1px solid var(--aghanims-fantasy-main-2);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 </style>

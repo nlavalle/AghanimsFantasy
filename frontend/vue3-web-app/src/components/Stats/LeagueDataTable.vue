@@ -434,21 +434,5 @@ const getPositionIcon = (positionInt: number) => {
 </script>
 
 <style scoped>
-.search-input {
-    padding: 1rem;
-    padding-top: 0;
-}
-
-.league-table {
-}
-
-.v-data-table ::v-deep(th) {
-    padding: 0 4px 0 0 !important;
-    /* border-right: 1px solid #383838; */
-}
-
-.v-data-table ::v-deep(td) {
-    padding: 0 4px 0 0 !important;
-    /* border-right: 1px solid #383838; */
-}
+@import '@/assets/data-tables.css';
 </style>
