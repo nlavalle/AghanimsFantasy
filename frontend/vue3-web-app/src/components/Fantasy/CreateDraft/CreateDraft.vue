@@ -8,11 +8,11 @@
                         <GoldSpan :font-size="1.0" :gold-value="'600'" />
                     </span>
                     <span :class="{ 'sticky-child': true, 'd-flex': true, 'gold': true, 'invalid': totalGold > 600 }"
-                        style="top: 25px;">Cost:
+                        style="top: 73px;">Cost:
                         <GoldSpan :font-size="1.0" :validation="totalGold > 600" :gold-value="totalGold.toFixed(0)" />
                     </span>
                     <span :class="{ 'sticky-child': true, 'd-flex': true, 'gold': true, 'invalid': totalGold > 600 }"
-                        style="top: 45px;">Remaining:
+                        style="top: 93px;">Remaining:
                         <GoldSpan :font-size="1.0" :validation="totalGold > 600"
                             :gold-value="(600 - totalGold).toFixed(0)" />
                     </span>
@@ -37,35 +37,35 @@
                         </span>
                         <span
                             :class="{ 'sticky-child': true, 'd-flex': true, 'gold': true, 'invalid': totalGold > 600 }"
-                            style="top: 25px;font-size:0.8rem">Cost:
+                            style="top: 73px;font-size:0.8rem">Cost:
                             <GoldSpan :font-size="0.8" :validation="totalGold > 600"
                                 :gold-value="totalGold.toFixed(0)" />
                         </span>
                         <span
                             :class="{ 'sticky-child': true, 'd-flex': true, 'gold': true, 'invalid': totalGold > 600 }"
-                            style="top: 45px;font-size:0.8rem">Remaining:
+                            style="top: 93px;font-size:0.8rem">Remaining:
                             <GoldSpan :font-size="0.8" :validation="totalGold > 600"
                                 :gold-value="(600 - totalGold).toFixed(0)" />
                         </span>
                     </div>
-                    <v-btn class="btn-fantasy sticky-child" style="top:10px;font-size:0.7rem"
+                    <v-btn class="btn-fantasy sticky-child" style="top:58px;font-size:0.7rem"
                         @click="clearDraft()">Clear
                         Draft</v-btn>
                     <v-btn
                         v-if="authenticated && leagueStore.selectedFantasyLeague && leagueStore.isDraftOpen(leagueStore.selectedFantasyLeague!) && totalGold <= 600"
-                        class="btn-fantasy sticky-child" style="top:10px;font-size:0.7rem" @click="saveDraft()">Save
+                        class="btn-fantasy sticky-child" style="top:58px;font-size:0.7rem" @click="saveDraft()">Save
                         Draft</v-btn>
                     <v-btn v-else class="btn-fantasy sticky-child"
-                        style="top:20px;font-size:0.7rem; pointer-events: none;" disabled @click="saveDraft()">Save
+                        style="top:68px;font-size:0.7rem; pointer-events: none;" disabled @click="saveDraft()">Save
                         Draft</v-btn>
                 </div>
-                <CreateDraftPicks class="mt-0 sticky-child" style="top:70px;z-index:10" @click="toggleDrawer" />
+                <CreateDraftPicks class="mt-0 sticky-child" style="top:118px;z-index:10" @click="toggleDrawer" />
             </div>
         </div>
         <!-- Set up collapsible (on mobile) player stats sidebar -->
         <div v-if="!display.mobile.value">
             <div class="sticky-parent right-0" style="width:450px; margin-top:100px;">
-                <PlayerStats class="sticky-child" style="height:600px;top:70px" />
+                <PlayerStats class="sticky-child" style="height:600px;top:118px" />
             </div>
         </div>
         <div v-else>
@@ -160,7 +160,7 @@ const totalGold = computed(() => {
 .sticky-child {
     position: sticky;
     overflow: visible !important;
-    top: 5px;
+    top: 53px;
     pointer-events: auto;
 }
 

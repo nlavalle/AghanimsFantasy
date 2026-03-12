@@ -46,6 +46,7 @@ library.add(
 
 const vuetify = createVuetify({
   defaults: {
+    VCard: { variant: 'outlined' },
     VCardTitle: { style: 'font-family: var(--font-heading)' },
     VToolbarTitle: { style: 'font-family: var(--font-heading)' },
     VAppBarTitle: { style: 'font-family: var(--font-heading)' },

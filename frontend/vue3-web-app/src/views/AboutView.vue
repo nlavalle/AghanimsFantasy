@@ -27,6 +27,7 @@
           </li>
         </ol>
       </div>
+      <v-divider class="my-5" />
       <div class="mt-5">
         <h2 id="introduction">About Aghanim's Fantasy</h2>
         <p class="text-white" style="max-width: 800px;">
@@ -42,6 +43,7 @@
           talent entering the Dota scene.
         </p>
       </div>
+      <v-divider class="my-5" />
       <div class="mt-5">
         <h2 id="scoring">Scoring</h2>
         <p class="text-white" style="max-width: 800px;">
@@ -60,6 +62,7 @@
           </template>
         </v-data-table>
       </div>
+      <v-divider class="my-5" />
       <div class="mt-5">
         <h2 id="how-to-play">How to Play</h2>
         <p class="text-white" style="max-width: 800px;">
@@ -91,6 +94,7 @@
           matches that include your Fantasy draft, with a breakdown of the stats they earned their Fantasy Points from.
         </p>
       </div>
+      <v-divider class="my-5" />
       <div class="mt-5">
         <h2 id="discord-authentication">Discord Authentication</h2>
         <p class="text-white" style="max-width: 800px;">
@@ -116,7 +120,7 @@
 </template>
 
 <script setup lang="ts">
-import { VContainer, VDataTable } from 'vuetify/components'
+import { VContainer, VDataTable, VDivider } from 'vuetify/components'
 
 const statsHeaders = [
   {

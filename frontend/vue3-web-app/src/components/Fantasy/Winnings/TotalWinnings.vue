@@ -1,25 +1,17 @@
 <template>
-    <div class="total-winnings">
-        <v-row v-if="fantasyLeagueStore.isDraftOpen(fantasyLeagueStore.selectedFantasyLeague)"
-            class="d-flex justify-left align-center pr-2">
-            <v-col class="v-col-9">
-                <h2>Games haven't started</h2>
-            </v-col>
-        </v-row>
-        <v-row v-else class="d-flex justify-left align-center pr-2">
-            <v-col class="v-col-9">
-                <h1>Draft Winnings</h1>
-            </v-col>
-            <v-col class="v-col-3">
-                <ShardSpan :animated="true" :bold="true" :font-size="1.5" :gold-value="totalWinnings.toFixed(0)" />
-            </v-col>
-        </v-row>
+    <div class="total-winnings af-panel">
+        <div v-if="fantasyLeagueStore.isDraftOpen(fantasyLeagueStore.selectedFantasyLeague)" class="winnings-row">
+            <h2>Games haven't started</h2>
+        </div>
+        <div v-else class="winnings-row">
+            <h2>Draft Winnings</h2>
+            <ShardSpan :animated="true" :bold="true" :font-size="1.5" :gold-value="totalWinnings.toFixed(0)" />
+        </div>
     </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { VRow, VCol } from 'vuetify/components';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import type { FantasyPlayer, FantasyPlayerPoints } from '../fantasyDraft';
 import ShardSpan from '@/components/Dom/ShardSpan.vue';
@@ -60,27 +52,26 @@ const getWinnings = (position: number, fantasyPlayer: FantasyPlayer) => {
 <style scoped>
 /*-------------------- Player Winnings --------------------*/
 .total-winnings {
-    background-color: var(--aghanims-fantasy-main-4);
-    border: 5px solid var(--aghanims-fantasy-main-2);
-    border-radius: 15px;
-    box-shadow: 0 7px 30px rgba(62, 9, 11, 0.3);
-    margin-bottom: 10px;
-    margin-left: 5px;
+    margin-bottom: var(--space-sm);
+    margin-left: var(--space-xs);
     height: max-content;
     flex: 1 0 300px;
 }
 
-.total-winnings h1 {
-    font-size: 24px;
-    color: var(--aghanims-fantasy-white);
-    padding: 0px 13px 0px;
-    line-height: 3rem;
+.winnings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-md);
+    gap: var(--space-md);
+}
+
+.winnings-row h2 {
+    white-space: nowrap;
 }
 
 .total-winnings h2 {
-    font-size: 16px;
+    font-size: var(--text-lg);
     color: var(--aghanims-fantasy-white);
-    padding: 0px 10px;
-    line-height: 3rem;
 }
 </style>

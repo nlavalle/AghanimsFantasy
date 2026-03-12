@@ -62,6 +62,7 @@ const handleMouseMove = (event: MouseEvent) => {
   position: relative;
   perspective: 800px;
   aspect-ratio: 0.7;
+  will-change: transform;
 }
 
 .draft-pick-card-hover {

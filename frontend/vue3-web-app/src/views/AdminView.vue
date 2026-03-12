@@ -1,55 +1,57 @@
 <template>
-  <div class="admin">
-    <h3>This is an admin page</h3>
+  <div>
+    <div class="admin">
+      <h3>This is an admin page</h3>
+    </div>
+    <v-container>
+      <v-row>
+        <v-col>
+          <v-row>
+            <v-tabs v-model="statsTab">
+              <v-tab value="league">League</v-tab>
+              <v-tab value="fantasyLeague">Fantasy League</v-tab>
+              <v-tab value="fantasyLeagueWeight">Fantasy League Weight</v-tab>
+              <v-tab value="fantasyPlayer">Fantasy Players</v-tab>
+              <v-tab value="account">Accounts</v-tab>
+              <v-tab value="team">Teams</v-tab>
+              <v-tab value="user">Users</v-tab>
+            </v-tabs>
+          </v-row>
+        </v-col>
+      </v-row>
+      <v-row v-if="isMounted">
+        <v-tabs-window v-model="statsTab" style="width:100%">
+          <v-tabs-window-item value="league">
+            <CrudTable :table-columns="columns" :table-items="items" :default-item-specified="defaultItem"
+              :itemsPerPage="25" @save="saveItem" @edit="editItem" @delete="deleteItem" />
+          </v-tabs-window-item>
+          <v-tabs-window-item value="fantasyLeague">
+            <CrudTable :table-columns="columns" :table-items="items" :default-item-specified="defaultItem"
+              @save="saveItem" @edit="editItem" @delete="deleteItem" />
+          </v-tabs-window-item>
+          <v-tabs-window-item value="fantasyLeagueWeight">
+            <CrudTable :table-columns="columns" :table-items="items" :default-item-specified="defaultItem"
+              @save="saveItem" @edit="editItem" @delete="deleteItem" />
+          </v-tabs-window-item>
+          <v-tabs-window-item value="fantasyPlayer">
+            <FantasyPlayerCrud />
+          </v-tabs-window-item>
+          <v-tabs-window-item value="account">
+            <CrudTable :table-columns="columns" :table-items="items" :default-item-specified="defaultItem"
+              @save="saveItem" @edit="editItem" @delete="deleteItem" />
+          </v-tabs-window-item>
+          <v-tabs-window-item value="team">
+            <CrudTable :table-columns="columns" :table-items="items" :default-item-specified="defaultItem"
+              @save="saveItem" @edit="editItem" @delete="deleteItem" />
+          </v-tabs-window-item>
+          <v-tabs-window-item value="user">
+            <CrudTable :table-columns="columns" :table-items="items" :default-item-specified="defaultItem"
+              @save="saveItem" @edit="editItem" @delete="deleteItem" />
+          </v-tabs-window-item>
+        </v-tabs-window>
+      </v-row>
+    </v-container>
   </div>
-  <v-container>
-    <v-row>
-      <v-col>
-        <v-row>
-          <v-tabs v-model="statsTab">
-            <v-tab value="league">League</v-tab>
-            <v-tab value="fantasyLeague">Fantasy League</v-tab>
-            <v-tab value="fantasyLeagueWeight">Fantasy League Weight</v-tab>
-            <v-tab value="fantasyPlayer">Fantasy Players</v-tab>
-            <v-tab value="account">Accounts</v-tab>
-            <v-tab value="team">Teams</v-tab>
-            <v-tab value="user">Users</v-tab>
-          </v-tabs>
-        </v-row>
-      </v-col>
-    </v-row>
-    <v-row v-if="isMounted">
-      <v-tabs-window v-model="statsTab" style="width:100%">
-        <v-tabs-window-item value="league">
-          <CrudTable :table-columns="columns" :table-items="items" :default-item-specified="defaultItem"
-            :itemsPerPage="25" @save="saveItem" @edit="editItem" @delete="deleteItem" />
-        </v-tabs-window-item>
-        <v-tabs-window-item value="fantasyLeague">
-          <CrudTable :table-columns="columns" :table-items="items" :default-item-specified="defaultItem"
-            @save="saveItem" @edit="editItem" @delete="deleteItem" />
-        </v-tabs-window-item>
-        <v-tabs-window-item value="fantasyLeagueWeight">
-          <CrudTable :table-columns="columns" :table-items="items" :default-item-specified="defaultItem"
-            @save="saveItem" @edit="editItem" @delete="deleteItem" />
-        </v-tabs-window-item>
-        <v-tabs-window-item value="fantasyPlayer">
-          <FantasyPlayerCrud />
-        </v-tabs-window-item>
-        <v-tabs-window-item value="account">
-          <CrudTable :table-columns="columns" :table-items="items" :default-item-specified="defaultItem"
-            @save="saveItem" @edit="editItem" @delete="deleteItem" />
-        </v-tabs-window-item>
-        <v-tabs-window-item value="team">
-          <CrudTable :table-columns="columns" :table-items="items" :default-item-specified="defaultItem"
-            @save="saveItem" @edit="editItem" @delete="deleteItem" />
-        </v-tabs-window-item>
-        <v-tabs-window-item value="user">
-          <CrudTable :table-columns="columns" :table-items="items" :default-item-specified="defaultItem"
-            @save="saveItem" @edit="editItem" @delete="deleteItem" />
-        </v-tabs-window-item>
-      </v-tabs-window>
-    </v-row>
-  </v-container>
 </template>
 
 <script setup lang="ts">

@@ -55,7 +55,7 @@
                     {{ regions[league.region] }}
                   </v-chip>
                   <v-chip v-if="isFantasyOpen(league.league_id) === 1" size="small" color="success" variant="tonal"
-                    prepend-icon="fa-solid fa-lock-open">
+                    prepend-icon="fa-solid fa-lock-open" class="status-pulse">
                     Open
                   </v-chip>
                   <v-chip v-else-if="isFantasyOpen(league.league_id) === 2" size="small" variant="tonal"

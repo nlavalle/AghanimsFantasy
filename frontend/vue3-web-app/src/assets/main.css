@@ -31,6 +31,35 @@ h1, h2, h3, h4, h5, h6 {
   padding-bottom: var(--space-lg);
 }
 
+/* Route transitions */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* Micro-interactions */
+.v-btn,
+.v-card,
+.v-tab,
+.v-chip {
+  transition: all 0.2s ease;
+}
+
+/* Pulse animation for status indicators */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.status-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
 .debug {
   border: 1px solid red;
 }

@@ -1,5 +1,5 @@
 <template>
-    <div class="player-winnings">
+    <div class="player-winnings af-panel">
         <v-row class="d-flex justify-center align-center">
             <h1>All Player Winnings</h1>
         </v-row>
@@ -17,7 +17,7 @@
             <v-checkbox class="pr-8 ma-0" density="compact" v-model="showAllPlayerWinnings"
                 label="Filter Draft"></v-checkbox>
         </v-row>
-        <li class="player-winnings-header">
+        <li class="player-winnings-header af-panel-header">
             <div class="d-flex justify-evenly">
                 <span class="player-header-name">Player</span>
                 <span class="player-header-value">Net Gold</span>
@@ -259,21 +259,16 @@ div ::v-deep(.player-data) {
 
 /*-------------------- Player Winnings --------------------*/
 .player-winnings {
-    background-color: var(--aghanims-fantasy-main-4);
-    border: 5px solid var(--aghanims-fantasy-main-2);
-    border-radius: 15px;
-    box-shadow: 0 7px 30px rgba(62, 9, 11, 0.3);
-    margin-bottom: 10px;
-    margin-left: 5px;
-    margin-right: 5px;
-    margin-top: 10px;
+    margin-bottom: var(--space-sm);
+    margin-left: var(--space-xs);
+    margin-right: var(--space-xs);
+    margin-top: var(--space-sm);
     height: max-content;
     flex: 1 0 300px;
 }
 
 .player-winnings-header {
-    background-color: var(--aghanims-fantasy-main-2);
-    padding-bottom: 5px;
+    padding-bottom: var(--space-xs);
     list-style: none;
 }
 

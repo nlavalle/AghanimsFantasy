@@ -84,3 +84,23 @@
   --gradient-purple-9: #35007a;
   --gradient-purple-10: #16007a;
 }
+
+/* Shared panel container for leaderboards, winnings, and similar card-like sections */
+.af-panel {
+  background-color: var(--aghanims-fantasy-main-4);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.af-panel-header {
+  background-color: var(--aghanims-fantasy-main-3);
+  padding-bottom: var(--space-xs);
+  list-style: none;
+}
+
+/* Accessibility: keyboard focus indicator */
+:focus-visible {
+  outline: 2px solid var(--aghanims-fantasy-main-2);
+  outline-offset: 2px;
+}

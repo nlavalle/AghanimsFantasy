@@ -73,7 +73,7 @@ const statistics = [
 <style scoped>
 .winnings-breakdown-table {
     width: 300px;
-    border: 2px solid var(--aghanims-fantasy-main-2);
+    border: 2px solid rgba(255, 255, 255, 0.08);
     border-radius: 5px;
 }
 
@@ -82,14 +82,14 @@ h3 {
 }
 
 .v-data-table ::v-deep(header) {
-    background-color: var(--aghanims-fantasy-main-2);
+    background-color: var(--aghanims-fantasy-main-3);
 }
 
 .v-data-table ::v-deep(thead) {
-    background-color: var(--aghanims-fantasy-main-2);
+    background-color: var(--aghanims-fantasy-main-3);
 }
 
 .v-data-table ::v-deep(td) {
-    border-right: 1px solid var(--aghanims-fantasy-main-2);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 </style>

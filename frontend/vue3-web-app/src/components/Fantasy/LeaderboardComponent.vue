@@ -1,9 +1,9 @@
 <template>
-    <div class="leaderboard">
+    <div class="leaderboard af-panel">
         <v-row class="d-flex justify-center">
             <h1><trophy-svg /> {{ props.leaderboardTitle }}</h1>
         </v-row>
-        <li class="leaderboard-header">
+        <li class="leaderboard-header af-panel-header">
             <div class="d-flex justify-evenly">
                 <span v-if="headerName" class="player-header-name">{{ props.headerName }}</span>
                 <span v-if="headerValue" class="player-header-value">{{ props.headerValue }}</span>
@@ -11,7 +11,8 @@
         </li>
 
         <ol>
-            <li class="leaderboard-item" v-for="item in props.boardData" :key="item.id">
+            <li :class="['leaderboard-item', { 'current-user': item.userName == props.authenticatedUser?.name }]"
+                v-for="item in props.boardData" :key="item.id">
                 <div class="d-flex justify-around">
                     <span class="player-descriptors"
                         :style="{ fontWeight: item.userName == props.authenticatedUser?.name ? 'bold' : 'normal' }">
@@ -21,14 +22,19 @@
                         :style="{ fontWeight: item.userName == props.authenticatedUser?.name ? 'bold' : 'normal' }">
                         {{ item.value.toFixed(2).toLocaleString() }}</span>
                 </div>
-                <div class="leaderboard-details bg-surface"
-                    v-if="!fantasyLeagueStore.isDraftOpen(fantasyLeagueStore.selectedFantasyLeague)">
-                    <p v-for="pick in item.fantasyDraft.draftPickPlayers.sort((a, b) => a.draftOrder - b.draftOrder)"
-                        style="text-align:right">
-                        {{ pick.fantasyPlayer.dotaAccount.name }}: {{ item.playerPoints[pick.draftOrder - 1].toFixed(2)
-                            ?? 0 }}
-                    </p>
-                </div>
+                <v-tooltip v-if="!fantasyLeagueStore.isDraftOpen(fantasyLeagueStore.selectedFantasyLeague)"
+                    location="start" :open-on-hover="true">
+                    <template v-slot:activator="{ props: tooltipProps }">
+                        <div class="leaderboard-hover-zone" v-bind="tooltipProps"></div>
+                    </template>
+                    <div class="leaderboard-tooltip">
+                        <p v-for="pick in item.fantasyDraft.draftPickPlayers.sort((a, b) => a.draftOrder - b.draftOrder)"
+                            :key="pick.draftOrder">
+                            {{ pick.fantasyPlayer.dotaAccount.name }}: {{ item.playerPoints[pick.draftOrder - 1].toFixed(2)
+                                ?? 0 }}
+                        </p>
+                    </div>
+                </v-tooltip>
             </li>
         </ol>
     </div>
@@ -39,7 +45,7 @@ import type { PropType } from 'vue';
 import type { User } from '@/stores/auth';
 import type { LeaderboardItem } from '@/types/LeaderboardItem';
 import TrophySvg from '@/components/icons/TrophySvg.vue'
-import { VRow } from 'vuetify/components';
+import { VRow, VTooltip } from 'vuetify/components';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 
 const props = defineProps({
@@ -116,20 +122,15 @@ div ::v-deep(.player-data) {
 
 /*-------------------- Leaderboard --------------------*/
 .leaderboard {
-    background-color: var(--aghanims-fantasy-main-4);
-    border: 5px solid var(--aghanims-fantasy-main-2);
-    border-radius: 15px;
-    box-shadow: 0 7px 30px rgba(62, 9, 11, 0.3);
-    margin-bottom: 10px;
-    margin-left: 5px;
-    margin-right: 5px;
+    margin-bottom: var(--space-sm);
+    margin-left: var(--space-xs);
+    margin-right: var(--space-xs);
     height: max-content;
     flex: 1 0 300px;
 }
 
 .leaderboard-header {
-    background-color: var(--aghanims-fantasy-main-2);
-    padding-bottom: 5px;
+    padding-bottom: var(--space-xs);
     list-style: none;
 }
 
@@ -327,19 +328,36 @@ div ::v-deep(.player-data) {
     border-bottom: 8px solid var(--gradient-blue-8);
 }
 
-.leaderboard-details {
-    display: none;
-    position: absolute;
-    top: 20px;
-    right: 140px;
-    background-color: white;
-    z-index: 10;
-    padding: 10px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    pointer-events: none;
+.current-user {
+    border-left: 3px solid var(--aghanims-fantasy-accent);
 }
 
-li:hover .leaderboard-details {
-    display: block;
+.leaderboard ol li:nth-child(1)::before {
+    background: #FFD700;
+    color: #333;
+}
+
+.leaderboard ol li:nth-child(2)::before {
+    background: #C0C0C0;
+    color: #333;
+}
+
+.leaderboard ol li:nth-child(3)::before {
+    background: #CD7F32;
+    color: #fff;
+}
+
+.leaderboard-hover-zone {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 3;
+}
+
+.leaderboard-tooltip p {
+    text-align: right;
+    margin: 0;
 }
 </style>

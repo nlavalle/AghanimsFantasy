@@ -1,101 +1,105 @@
 <template>
-  <div v-if="!isMounted" class="d-flex justify-center align-center" style="min-height: 200px;">
-    <v-progress-circular color="primary" indeterminate />
-  </div>
-  <v-container v-if="isMounted">
-    <v-row style="width:100%">
-      <v-col>
-        <v-row class="align-center">
-          <v-tabs v-model="fantasyTab" center-active show-arrows>
-            <v-tab value="current">Current Draft</v-tab>
-            <v-tab value="draft">Draft Players</v-tab>
-            <v-tab value="leaderboard">Leaderboard</v-tab>
-            <v-tab value="match">Fantasy Matches</v-tab>
-          </v-tabs>
-          <v-btn icon="fa-refresh" @click="refreshFantasy" :loading="!loaded" :disabled="!loaded" size="small"
-            variant="outlined">
-          </v-btn>
-          <v-spacer />
-          <UserBalance />
-        </v-row>
-        <v-row v-if="fantasyLeagueStore.selectedFantasyLeague && !updateDisabled">
-          <fantasy-lock-timer class="ma-3" :target-time="fantasyLeagueStore.selectedFantasyLeague.fantasyDraftLocked" />
-        </v-row>
-        <v-row>
-          <v-tabs-window v-model="fantasyTab" style="width:100%;overflow: visible">
-            <v-tabs-window-item value="current">
-              <div v-if="fantasyLeagueStore.selectedFantasyDraftPoints">
-                <CurrentDraft :FantasyPoints="fantasyLeagueStore.selectedFantasyDraftPoints" />
-              </div>
-            </v-tabs-window-item>
-            <v-tabs-window-item value="draft" style="overflow: visible !important">
-              <v-col>
-                <v-row v-if="!authStore.isAuthenticated" class="section-gap">
-                  <v-card class="pa-4">
-                    <v-card-title style="text-wrap:wrap">
-                      <v-row>
-                        <v-col>
-                          <span class="not-authenticated">Please login to save your draft</span>
-                        </v-col>
-                        <v-col cols="4" class="mr-1" align-self="center">
-                          <LoginModal class="login-modal" />
-                        </v-col>
+  <div>
+    <div v-if="!isMounted" class="d-flex justify-center align-center" style="min-height: 200px;">
+      <v-progress-circular color="primary" indeterminate />
+    </div>
+    <v-container v-if="isMounted">
+      <v-row style="width:100%">
+        <v-col>
+          <v-row class="align-center">
+            <v-tabs v-model="fantasyTab" center-active show-arrows>
+              <v-tab value="current">Current Draft</v-tab>
+              <v-tab value="draft">Draft Players</v-tab>
+              <v-tab value="leaderboard">Leaderboard</v-tab>
+              <v-tab value="match">Fantasy Matches</v-tab>
+            </v-tabs>
+            <v-btn icon="fa-refresh" @click="refreshFantasy" :loading="!loaded" :disabled="!loaded" size="small"
+              variant="outlined" aria-label="Refresh fantasy data">
+            </v-btn>
+            <v-spacer />
+            <UserBalance />
+          </v-row>
+          <v-row v-if="fantasyLeagueStore.selectedFantasyLeague && !updateDisabled">
+            <fantasy-lock-timer class="ma-3"
+              :target-time="fantasyLeagueStore.selectedFantasyLeague.fantasyDraftLocked" />
+          </v-row>
+          <v-row>
+            <v-tabs-window v-model="fantasyTab" style="width:100%;overflow: visible" transition="fade-transition"
+              reverse-transition="fade-transition">
+              <v-tabs-window-item value="current">
+                <div v-if="fantasyLeagueStore.selectedFantasyDraftPoints">
+                  <CurrentDraft :FantasyPoints="fantasyLeagueStore.selectedFantasyDraftPoints" />
+                </div>
+              </v-tabs-window-item>
+              <v-tabs-window-item value="draft" style="overflow: visible !important">
+                <v-col>
+                  <v-row v-if="!authStore.isAuthenticated" class="section-gap">
+                    <v-card class="pa-4">
+                      <v-card-title style="text-wrap:wrap">
+                        <v-row>
+                          <v-col>
+                            <span class="not-authenticated">Please login to save your draft</span>
+                          </v-col>
+                          <v-col cols="4" class="mr-1" align-self="center">
+                            <LoginModal class="login-modal" />
+                          </v-col>
+                        </v-row>
+                      </v-card-title>
+                    </v-card>
+                  </v-row>
+                  <v-row v-if="updateDraftVisibility || updateDisabled" class="section-gap">
+                    <v-card class="pa-4" disabled>
+                      <v-card-title style="text-wrap:wrap">
+                        {{ `Drafting for Fantasy League: ${fantasyLeagueStore.selectedLeague!.name} is locked` }}
+                      </v-card-title>
+                    </v-card>
+                  </v-row>
+                  <v-row>
+                    <v-col>
+                      <v-row v-if="fantasyLeagueStore.selectedFantasyLeague">
+                        <CreateDraft @saveDraft="saveDraft" />
                       </v-row>
-                    </v-card-title>
-                  </v-card>
-                </v-row>
-                <v-row v-if="updateDraftVisibility || updateDisabled" class="section-gap">
-                  <v-card class="pa-4" disabled>
-                    <v-card-title style="text-wrap:wrap">
-                      {{ `Drafting for Fantasy League: ${fantasyLeagueStore.selectedLeague!.name} is locked` }}
-                    </v-card-title>
-                  </v-card>
-                </v-row>
-                <v-row>
-                  <v-col>
-                    <v-row v-if="fantasyLeagueStore.selectedFantasyLeague">
-                      <CreateDraft @saveDraft="saveDraft" />
-                    </v-row>
-                  </v-col>
-                </v-row>
-              </v-col>
-            </v-tabs-window-item>
-            <v-tabs-window-item value="leaderboard">
-              <v-col>
-                <v-row class="mt-1">
-                  <leaderboard-component class="leaderboardComponent" leaderboardTitle="Fantasy Leaderboard"
-                    headerName="Draft Player" headerValue="Points" :authenticatedUser="authStore.currentUser"
-                    :boardData="fantasyDraftStore.fantasyLeaderboardData" />
-                </v-row>
-                <v-row class="section-gap leaderboard-stats" v-if="authStore.isAuthenticated">
-                  <v-col>
-                    <p>Total Drafts: {{ fantasyDraftStore.fantasyLeaderboardStats?.totalDrafts ?? 0 }}</p>
-                  </v-col>
-                  <v-col>
-                    <p>You're in the {{ fantasyDraftStore.fantasyLeaderboardStats?.drafterPercentile?.toFixed(0) ?? 0
-                    }}th percentile
-                    </p>
-                  </v-col>
-                </v-row>
-              </v-col>
-            </v-tabs-window-item>
-            <v-tabs-window-item value="match">
-              <v-col>
-                <v-row v-if="fantasyLeagueStore.selectedFantasyDraftPoints && fantasyTab == 'match'">
-                  <MatchDataTable v-model:selectedFantasyLeague="fantasyLeagueStore.selectedFantasyLeague"
-                    v-model:draftFiltered="draftFiltered">
-                  </MatchDataTable>
-                </v-row>
-              </v-col>
-            </v-tabs-window-item>
-          </v-tabs-window>
-        </v-row>
-      </v-col>
-    </v-row>
-  </v-container>
+                    </v-col>
+                  </v-row>
+                </v-col>
+              </v-tabs-window-item>
+              <v-tabs-window-item value="leaderboard">
+                <v-col>
+                  <v-row class="mt-1">
+                    <leaderboard-component class="leaderboardComponent" leaderboardTitle="Fantasy Leaderboard"
+                      headerName="Draft Player" headerValue="Points" :authenticatedUser="authStore.currentUser"
+                      :boardData="fantasyDraftStore.fantasyLeaderboardData" />
+                  </v-row>
+                  <v-row class="section-gap leaderboard-stats" v-if="authStore.isAuthenticated">
+                    <v-col>
+                      <p>Total Drafts: {{ fantasyDraftStore.fantasyLeaderboardStats?.totalDrafts ?? 0 }}</p>
+                    </v-col>
+                    <v-col>
+                      <p>You're in the {{ fantasyDraftStore.fantasyLeaderboardStats?.drafterPercentile?.toFixed(0) ?? 0
+                      }}th percentile
+                      </p>
+                    </v-col>
+                  </v-row>
+                </v-col>
+              </v-tabs-window-item>
+              <v-tabs-window-item value="match">
+                <v-col>
+                  <v-row v-if="fantasyLeagueStore.selectedFantasyDraftPoints && fantasyTab == 'match'">
+                    <MatchDataTable v-model:selectedFantasyLeague="fantasyLeagueStore.selectedFantasyLeague"
+                      v-model:draftFiltered="draftFiltered">
+                    </MatchDataTable>
+                  </v-row>
+                </v-col>
+              </v-tabs-window-item>
+            </v-tabs-window>
+          </v-row>
+        </v-col>
+      </v-row>
+    </v-container>
 
-  <AlertDialog v-model="showSuccessModal" @ok="scrollAfterAlertDialog" />
-  <ErrorDialog v-model="showErrorModal" :error="errorDetails!" @ok="scrollAfterAlertDialog" />
+    <AlertDialog v-model="showSuccessModal" @ok="scrollAfterAlertDialog" />
+    <ErrorDialog v-model="showErrorModal" :error="errorDetails!" @ok="scrollAfterAlertDialog" />
+  </div>
 </template>
 
 <script setup lang="ts">

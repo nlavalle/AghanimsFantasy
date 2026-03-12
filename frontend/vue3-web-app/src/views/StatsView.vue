@@ -1,51 +1,53 @@
 <template>
-  <div v-if="!isMounted" class="d-flex justify-center align-center" style="min-height: 200px;">
-    <v-progress-circular color="primary" indeterminate />
-  </div>
-  <v-container v-if="isMounted">
-    <v-row>
-      <v-col>
-        <v-row class="align-center">
-          <v-tabs v-model="statsTab">
-            <v-tab value="fantasy">Fantasy</v-tab>
-            <v-tab value="league">League</v-tab>
-            <v-tab value="match">Matches</v-tab>
-            <!-- <v-tab value="topeight">Top 8</v-tab> -->
-          </v-tabs>
-          <v-btn icon="fa-refresh" @click="refreshStats" :loading="!loaded" :disabled="!loaded" size="small"
-            variant="outlined">
-          </v-btn>
-        </v-row>
-      </v-col>
-    </v-row>
-    <v-row class="section-gap">
-      <v-tabs-window v-model="statsTab" style="width:100%">
-        <v-tabs-window-item value="fantasy">
-          <v-col>
-            <v-row v-if="leagueStore.selectedFantasyLeague">
-              <FantasyDataTable v-model:selectedFantasyLeague="leagueStore.selectedFantasyLeague">
-              </FantasyDataTable>
-            </v-row>
-          </v-col>
-        </v-tabs-window-item>
-        <v-tabs-window-item value="league">
-          <v-col>
-            <v-row v-if="leagueStore.selectedFantasyLeague">
-              <LeagueDataTable v-model:selectedFantasyLeague="leagueStore.selectedFantasyLeague">
-              </LeagueDataTable>
-            </v-row>
-          </v-col>
-        </v-tabs-window-item>
-        <v-tabs-window-item value="match">
-          <v-col>
-            <v-row v-if="leagueStore.selectedFantasyLeague">
-              <MatchDataTable v-model:selectedFantasyLeague="leagueStore.selectedFantasyLeague"
-                v-model:draftFiltered="draftFiltered">
-              </MatchDataTable>
-            </v-row>
-          </v-col>
-        </v-tabs-window-item>
-        <!-- <v-tabs-window-item value="topeight">
+  <div>
+    <div v-if="!isMounted" class="d-flex justify-center align-center" style="min-height: 200px;">
+      <v-progress-circular color="primary" indeterminate />
+    </div>
+    <v-container v-if="isMounted">
+      <v-row>
+        <v-col>
+          <v-row class="align-center">
+            <v-tabs v-model="statsTab">
+              <v-tab value="fantasy">Fantasy</v-tab>
+              <v-tab value="league">League</v-tab>
+              <v-tab value="match">Matches</v-tab>
+              <!-- <v-tab value="topeight">Top 8</v-tab> -->
+            </v-tabs>
+            <v-btn icon="fa-refresh" @click="refreshStats" :loading="!loaded" :disabled="!loaded" size="small"
+              variant="outlined" aria-label="Refresh stats data">
+            </v-btn>
+          </v-row>
+        </v-col>
+      </v-row>
+      <v-row class="section-gap">
+        <v-tabs-window v-model="statsTab" style="width:100%" transition="fade-transition"
+          reverse-transition="fade-transition">
+          <v-tabs-window-item value="fantasy">
+            <v-col>
+              <v-row v-if="leagueStore.selectedFantasyLeague">
+                <FantasyDataTable v-model:selectedFantasyLeague="leagueStore.selectedFantasyLeague">
+                </FantasyDataTable>
+              </v-row>
+            </v-col>
+          </v-tabs-window-item>
+          <v-tabs-window-item value="league">
+            <v-col>
+              <v-row v-if="leagueStore.selectedFantasyLeague">
+                <LeagueDataTable v-model:selectedFantasyLeague="leagueStore.selectedFantasyLeague">
+                </LeagueDataTable>
+              </v-row>
+            </v-col>
+          </v-tabs-window-item>
+          <v-tabs-window-item value="match">
+            <v-col>
+              <v-row v-if="leagueStore.selectedFantasyLeague">
+                <MatchDataTable v-model:selectedFantasyLeague="leagueStore.selectedFantasyLeague"
+                  v-model:draftFiltered="draftFiltered">
+                </MatchDataTable>
+              </v-row>
+            </v-col>
+          </v-tabs-window-item>
+          <!-- <v-tabs-window-item value="topeight">
           <v-col>
             <v-row v-if="leagueStore.selectedFantasyLeague">
               <Top8DataTable v-model:selectedFantasyLeague="leagueStore.selectedFantasyLeague"
@@ -54,9 +56,10 @@
             </v-row>
           </v-col>
         </v-tabs-window-item> -->
-      </v-tabs-window>
-    </v-row>
-  </v-container>
+        </v-tabs-window>
+      </v-row>
+    </v-container>
+  </div>
 </template>
 
 <script setup lang="ts">
