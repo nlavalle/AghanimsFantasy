@@ -14,13 +14,16 @@ import { AghanimsFantasyDarkTheme } from './style/vuetify-themes'
 import { aliases, fa } from 'vuetify/iconsets/fa-svg'
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faSquare, faCircleUser } from '@fortawesome/free-regular-svg-icons';
+import {
+  faSquare, faCircleUser, faUser
+} from '@fortawesome/free-regular-svg-icons';
 import {
   faChevronLeft, faChevronRight, faChevronDown, faCaretDown, faArrowUp, faArrowDown,
   faStepForward, faStepBackward, faLock, faLockOpen,
   faMagnifyingGlass, faCheckSquare, faTimesCircle,
   faEye, faEyeSlash, faRefresh,
-  faTrophy
+  faTrophy, faCirclePlus, faCircleMinus, faCircleQuestion,
+  faClock
 } from '@fortawesome/free-solid-svg-icons';
 import { faDiscord, faGithub, faGoogle } from '@fortawesome/free-brands-svg-icons';
 // import { far } from '@fortawesome/free-regular-svg-icons';
@@ -34,12 +37,13 @@ configure({
 
 library.add(
   // Regular
-  faSquare, faCircleUser,
+  faSquare, faCircleUser, faUser, faCircleQuestion,
   // Solid
   faChevronLeft, faChevronRight, faChevronDown, faCaretDown, faArrowUp, faArrowDown,
   faStepForward, faStepBackward, faLock, faLockOpen,
   faMagnifyingGlass, faCheckSquare, faTimesCircle,
   faEye, faEyeSlash, faRefresh, faTrophy,
+  faCirclePlus, faCircleMinus, faCircleQuestion, faClock,
   // Brand
   faDiscord, faGithub, faGoogle
 );

@@ -10,15 +10,15 @@
             Aghanim's Fantasy
         </v-app-bar-title>
 
-        <v-tabs v-model="selectedTab">
+        <v-tabs v-model="selectedTab" slider-color="var(--rune-purple)">
             <v-tab to="/" class="d-none" />
             <v-tab to="/fantasy">Fantasy</v-tab>
             <v-tab to="/stats">Stats</v-tab>
             <v-tab to="/about">About</v-tab>
             <v-tab v-show="authStore.isAuthenticated" to="/prizes">Prizes</v-tab>
             <v-tab v-show="authStore.currentUser?.isAdmin ?? false" to="/admin">Admin</v-tab>
-            <v-tab v-show="authStore.currentUser?.isPrivateFantasyAdmin ?? false"
-                to="/privatefantasy">Private Admin</v-tab>
+            <v-tab v-show="authStore.currentUser?.isPrivateFantasyAdmin ?? false" to="/privatefantasy">Private
+                Admin</v-tab>
         </v-tabs>
 
         <v-spacer />

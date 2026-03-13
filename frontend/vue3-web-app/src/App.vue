@@ -2,7 +2,7 @@
   <v-app>
     <Navbar />
     <v-main>
-      <FantasyNavbar />
+      <!-- <FantasyNavbar /> -->
       <RouterView v-slot="{ Component }">
         <Transition name="fade" mode="out-in">
           <component :is="Component" />
@@ -17,7 +17,7 @@
 import router from '@/router';
 import { RouterView, useRoute } from 'vue-router'
 import Navbar from '@/components/TheNavbar.vue'
-import FantasyNavbar from '@/components/Fantasy/FantasyNavbar.vue'
+// import FantasyNavbar from '@/components/Fantasy/FantasyNavbar.vue'
 import Footer from '@/components/TheFooter.vue'
 import { VApp, VMain } from 'vuetify/components'
 import { onBeforeMount, watch } from 'vue'

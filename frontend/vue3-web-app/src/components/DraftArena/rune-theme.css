@@ -1,0 +1,38 @@
+.draft-arena {
+  /* Background tones */
+  --rune-bg-deep: #09090D;
+  --rune-bg-surface: #111118;
+  --rune-bg-card: #0C0A14;
+  --rune-bg-card-alt: #0E091A;
+  --rune-bg-panel: #0D0818;
+  --rune-bg-input: #0A0A0E;
+
+  /* Purple scale */
+  --rune-purple-deep: #5B21B6;
+  --rune-purple-dark: #7B2FBE;
+  --rune-purple: #9D4EDD;
+  --rune-purple-light: #C084FC;
+  --rune-purple-muted: #A78BFA;
+
+  /* Gold / cream text */
+  --rune-gold: #E8E0C8;
+  --rune-gold-light: #F0EBE0;
+  --rune-gold-lavender: #E8D0FF;
+  --rune-gold-dim: #C8C0B8;
+
+  /* Gray scale */
+  --rune-gray: #8A8A9E;
+  --rune-gray-mid: #6B7280;
+  --rune-gray-light: #9CA3AF;
+
+  /* Red (timer) */
+  --rune-red: #E53935;
+  --rune-red-light: #FF6B6B;
+  --rune-red-text: #FFD0CC;
+
+  /* Gold for rarity */
+  --rune-gold-rarity: #FFB800;
+
+  /* Stats font */
+  --font-stats: 'Space Grotesk', var(--font-mono, 'Roboto Mono', monospace);
+}

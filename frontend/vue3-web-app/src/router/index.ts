@@ -48,6 +48,12 @@ const router = createRouter({
     },
 
     {
+      path: '/draft-arena',
+      name: 'draft-arena',
+      component: () => import('../views/DraftArenaView.vue')
+    },
+
+    {
       path: '/privatefantasy',
       name: 'privatefantasyadmin',
       component: () => import('../views/PrivateFantasyAdminView.vue'),

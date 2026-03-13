@@ -10,6 +10,9 @@
 @font-face { font-family: 'Poppins'; font-weight: 500; font-style: normal; font-display: swap; src: url('./fonts/Poppins-Medium.ttf') format('truetype'); }
 @font-face { font-family: 'Poppins'; font-weight: 600; font-style: normal; font-display: swap; src: url('./fonts/Poppins-SemiBold.ttf') format('truetype'); }
 
+/* Space Grotesk - Google Fonts (used for stats/numbers in draft arena) */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
+
 /* Aghanims Fantasy Design Tokens */
 :root {
   /* Typography */
@@ -83,6 +86,14 @@
   --gradient-purple-8: #45007a;
   --gradient-purple-9: #35007a;
   --gradient-purple-10: #16007a;
+
+  /* Purple rune scale */
+  --rune-purple-deep: #5B21B6;
+  --rune-purple-dark: #7B2FBE;
+  --rune-purple: #9D4EDD;
+  --rune-purple-light: #C084FC;
+  --rune-purple-muted: #A78BFA;
+
 }
 
 /* Shared panel container for leaderboards, winnings, and similar card-like sections */

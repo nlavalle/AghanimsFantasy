@@ -1,9 +1,10 @@
 <template>
-  <div>
+  <div class="purple-rune">
     <div v-if="!isMounted" class="d-flex justify-center align-center" style="min-height: 200px;">
       <v-progress-circular color="primary" indeterminate />
     </div>
-    <v-container v-if="isMounted">
+    <CreateDraftPicks v-if="isMounted && fantasyTab === 'draft'" class="draft-pick-bar" />
+    <v-container v-if="isMounted" :style="fantasyTab === 'draft' ? 'padding-right: 396px' : ''" style="max-width: 100%">
       <v-row style="width:100%">
         <v-col>
           <v-row class="align-center">
@@ -47,13 +48,13 @@
                       </v-card-title>
                     </v-card>
                   </v-row>
-                  <v-row v-if="updateDraftVisibility || updateDisabled" class="section-gap">
+                  <!-- <v-row v-if="updateDraftVisibility || updateDisabled" class="section-gap">
                     <v-card class="pa-4" disabled>
                       <v-card-title style="text-wrap:wrap">
                         {{ `Drafting for Fantasy League: ${fantasyLeagueStore.selectedLeague!.name} is locked` }}
                       </v-card-title>
                     </v-card>
-                  </v-row>
+                  </v-row> -->
                   <v-row>
                     <v-col>
                       <v-row v-if="fantasyLeagueStore.selectedFantasyLeague">
@@ -97,6 +98,8 @@
       </v-row>
     </v-container>
 
+    <PlayerStats v-if="isMounted && fantasyTab === 'draft'" class="player-stats-fixed" />
+
     <AlertDialog v-model="showSuccessModal" @ok="scrollAfterAlertDialog" />
     <ErrorDialog v-model="showErrorModal" :error="errorDetails!" @ok="scrollAfterAlertDialog" />
   </div>
@@ -109,6 +112,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import CurrentDraft from '@/components/Fantasy/CurrentDraft.vue';
 import CreateDraft from '@/components/Fantasy/CreateDraft/CreateDraft.vue';
+import CreateDraftPicks from '@/components/Fantasy/CreateDraft/CreateDraftPicks.vue';
 import MatchDataTable from '@/components/Stats/MatchDataTable.vue';
 import { fantasyDraftState } from '@/components/Fantasy/fantasyDraft';
 import LoginModal from '@/components/Auth/LoginModal.vue';
@@ -118,6 +122,7 @@ import { useFantasyDraftStore } from '@/stores/fantasyDraft';
 import LeaderboardComponent from '@/components/Fantasy/LeaderboardComponent.vue'
 import FantasyLockTimer from '@/components/Fantasy/FantasyLockTimer.vue';
 import UserBalance from '@/components/Fantasy/UserBalance.vue';
+import PlayerStats from '@/components/Fantasy/CreateDraft/PlayerStats.vue';
 
 const authStore = useAuthStore();
 const fantasyLeagueStore = useFantasyLeagueStore();
@@ -228,8 +233,24 @@ watch(() => fantasyLeagueStore.selectedFantasyDraftPoints, () => {
 
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.draft-pick-bar {
+  position: sticky;
+  top: 48px;
+  z-index: 10;
+}
+
+.player-stats-fixed {
+  position: fixed;
+  top: 203px;
+  right: 0;
+  width: 380px;
+  height: calc(100vh - 48px);
+  z-index: 9;
+  overflow-y: auto;
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.7), -2px 0 8px rgba(0, 0, 0, 0.5);
+}
+
 .not-authenticated {
   font-size: 16px;
 }
