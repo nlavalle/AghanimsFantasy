@@ -53,16 +53,16 @@ onUnmounted(() => clearInterval(interval))
   gap: 4px;
   width: 150px;
   height: 64px;
-  background: #0C0C14;
-  border: 1px solid rgba(138, 138, 158, 0.25);
+  background: var(--ot-bg-deep);
+  border: 1px solid color-mix(in srgb, var(--ot-border) 25%, transparent);
   border-radius: 8px;
   transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
 }
 
 .timer-card--urgent {
-  background: #0A0300;
-  border: 2px solid #E53935;
-  box-shadow: 0 0 16px rgba(229, 57, 53, 0.4);
+  background: color-mix(in srgb, var(--aghanims-fantasy-accent) 3%, black);
+  border: 2px solid var(--aghanims-fantasy-accent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--aghanims-fantasy-accent) 40%, transparent);
 }
 
 .timer-row {
@@ -72,35 +72,35 @@ onUnmounted(() => clearInterval(interval))
 }
 
 .timer-icon {
-  font-size: 14px;
-  color: rgba(138, 138, 158, 0.5);
+  font-size: var(--text-sm);
+  color: color-mix(in srgb, var(--ot-border) 50%, transparent);
 }
 
 .timer-card--urgent .timer-icon {
-  color: #FF6B6B;
+  color: var(--accent-light);
 }
 
 .timer-value {
-  font-family: 'Space Grotesk', var(--font-heading);
-  font-size: 20px;
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
   font-weight: 800;
   line-height: 1;
-  color: rgba(232, 208, 255, 0.85);
+  color: color-mix(in srgb, var(--rune-lavender) 85%, transparent);
 }
 
 .timer-card--urgent .timer-value {
-  color: #FFD0CC;
+  color: var(--accent-text);
 }
 
 .timer-label {
   font-family: var(--font-body);
-  font-size: 8px;
+  font-size: var(--text-xs);
   font-weight: 700;
   letter-spacing: 2px;
-  color: rgba(138, 138, 158, 0.5);
+  color: color-mix(in srgb, var(--ot-border) 50%, transparent);
 }
 
 .timer-card--urgent .timer-label {
-  color: rgba(229, 57, 53, 0.7);
+  color: color-mix(in srgb, var(--aghanims-fantasy-accent) 70%, transparent);
 }
 </style>

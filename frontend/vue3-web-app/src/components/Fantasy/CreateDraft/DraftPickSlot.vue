@@ -10,7 +10,8 @@
         <!-- Portrait fills the slot, counter-skewed like CreateDraftPicks -->
         <img v-if="avatarUrl" :src="avatarUrl" :alt="displayName" class="slot-portrait" />
         <div v-else class="slot-portrait-placeholder">
-          <v-icon :size="36" :color="isSelected ? '#9D4EDDCC' : '#7B2FBE44'">mdi-account</v-icon>
+          <font-awesome-icon :icon="['far', 'user']" class="placeholder-icon"
+            :class="{ 'placeholder-icon--selected': isSelected }" />
         </div>
 
         <!-- Gold cost top-left -->
@@ -38,11 +39,11 @@ import { computed } from 'vue'
 import type { FantasyPlayer } from '@/components/Fantasy/fantasyDraft'
 import GoldSpan from '@/components/Dom/GoldSpan.vue'
 import StarField from '@/components/Dom/StarField.vue'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 const props = defineProps<{
   index: number
   isSelected: boolean
-  // Real data path
   fantasyPlayer?: FantasyPlayer
   cost?: number
   points?: number
@@ -86,23 +87,26 @@ const displayCost = computed(() =>
   height: 100%;
   overflow: hidden;
   transform: skew(20deg);
-  background: rgba(14, 9, 26, 0.45);
-  border: 1px solid rgba(138, 138, 158, 0.2);
+  background: color-mix(in srgb, var(--rune-purple-deep) 15%, var(--ot-bg-deep));
+  border: 1px solid color-mix(in srgb, var(--ot-border) 20%, transparent);
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .slot-parallelogram:hover {
-  border-color: rgba(123, 47, 190, 0.4);
+  border-color: color-mix(in srgb, var(--rune-purple-dark) 40%, transparent);
 }
 
 .slot-parallelogram.filled {
-  border-color: rgba(123, 47, 190, 0.53);
-  background: rgba(7, 5, 15, 0.5);
+  border-color: color-mix(in srgb, var(--rune-purple-dark) 53%, transparent);
+  background: color-mix(in srgb, var(--rune-purple-deep) 8%, var(--sg-bg-deep));
 }
 
 .slot-parallelogram.selected {
-  border-color: #C084FC;
-  box-shadow: 0 0 8px rgba(157, 78, 221, 0.7), 0 0 20px rgba(157, 78, 221, 0.5), 0 0 40px rgba(157, 78, 221, 0.25);
+  border-color: var(--rune-purple-light);
+  box-shadow:
+    0 0 8px color-mix(in srgb, var(--rune-purple) 70%, transparent),
+    0 0 20px color-mix(in srgb, var(--rune-purple) 50%, transparent),
+    0 0 40px color-mix(in srgb, var(--rune-purple) 25%, transparent);
 }
 
 /* Counter-skew the filled content layer */
@@ -116,7 +120,6 @@ const displayCost = computed(() =>
 .slot-portrait {
   position: absolute;
   left: 25%;
-  /* width: 100%; */
   height: 100%;
 }
 
@@ -126,6 +129,15 @@ const displayCost = computed(() =>
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.placeholder-icon {
+  font-size: 36px;
+  color: color-mix(in srgb, var(--rune-purple-dark) 27%, transparent);
+}
+
+.placeholder-icon--selected {
+  color: color-mix(in srgb, var(--rune-purple) 80%, transparent);
 }
 
 /* GoldSpan pinned top-left, counter-skewed to read upright */
@@ -142,7 +154,10 @@ const displayCost = computed(() =>
   left: 0;
   right: 0;
   padding: 4px 10px 6px;
-  background: linear-gradient(to top, rgba(5, 3, 12, 0.92) 0%, rgba(5, 3, 12, 0.6) 60%, transparent 100%);
+  background: linear-gradient(to top,
+    color-mix(in srgb, var(--sg-bg-deep) 92%, transparent) 0%,
+    color-mix(in srgb, var(--sg-bg-deep) 60%, transparent) 60%,
+    transparent 100%);
 }
 
 .slot-bottom-row {
@@ -171,7 +186,7 @@ const displayCost = computed(() =>
   font-family: var(--font-body);
   font-size: var(--text-sm);
   font-weight: 600;
-  color: rgba(192, 132, 252, 0.9);
+  color: color-mix(in srgb, var(--rune-purple-light) 90%, transparent);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
   white-space: nowrap;
 }

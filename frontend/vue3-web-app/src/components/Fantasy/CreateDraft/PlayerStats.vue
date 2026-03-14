@@ -3,7 +3,7 @@
 
     <!-- Header -->
     <div class="detail-header">
-      <v-icon size="16" color="rgba(232, 224, 200, 0.7)" icon="fa-regular fa-user" />
+      <font-awesome-icon :icon="['far', 'user']" class="header-icon" />
       <span class="detail-header-label">SELECTED PLAYER</span>
     </div>
 
@@ -48,11 +48,11 @@
       <div class="draft-btn-area">
         <button class="draft-btn" :disabled="disabledPlayer(selectedPlayer)"
           :class="{ 'draft-btn-disabled': disabledPlayer(selectedPlayer) }" @click="draftPlayer()">
-          <v-icon size="18" color="#E9D5FF" icon="fa-circle-plus" />
+          <font-awesome-icon :icon="['fas', 'circle-plus']" class="draft-btn-icon" />
           <span>Draft Player · {{ playerCost }} Gold</span>
         </button>
         <button class="random-btn" @click="randomPlayer()">
-          <font-awesome-icon :icon="faDice" />
+          <font-awesome-icon :icon="['fas', 'dice']" />
           <span>Random Pick</span>
         </button>
       </div>
@@ -61,7 +61,7 @@
 
     <!-- Empty state -->
     <div v-else class="detail-empty">
-      <v-icon size="48" color="rgba(138, 138, 158, 0.2)" icon="fa-circle-question" />
+      <font-awesome-icon :icon="['fas', 'circle-question']" class="empty-icon" />
       <span>Select a player to view details</span>
     </div>
 
@@ -70,14 +70,12 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { VIcon } from 'vuetify/components';
 import type { FantasyPlayerTopHeroes } from '../fantasyDraft';
 import { fantasyDraftState } from '../fantasyDraft';
 import PlayerStatsBio from '@/components/Fantasy/PlayerStats/PlayerStatsBio.vue'
 import FantasyBarChart from '@/components/Fantasy/PlayerStats/FantasyBarChart.vue'
 import PlayerTopHeroes from '@/components/Fantasy/PlayerStats/PlayerTopHeroes.vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faDice } from '@fortawesome/free-solid-svg-icons';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 
 const { selectedPlayer, fantasyPlayerPointsAvailable, setFantasyPlayer, disabledPlayer } = fantasyDraftState();
@@ -101,7 +99,7 @@ const kda = ref('—');
 
 watch(selectedPlayer, (newPlayer) => {
   if (!newPlayer) return;
-  const playerStats = leagueStore.fantasyPlayersStats.find(fps => fps.fantasy_player.id == newPlayer.id);
+  const playerStats = leagueStore.fantasyPlayersStats.find(fps => fps.fantasy_player.id === newPlayer.id);
   playerTopHeroes.value = playerStats?.top_heroes[0];
   playerCost.value = playerStats?.cost.toFixed(0) ?? 0;
 
@@ -154,8 +152,8 @@ const randomPlayer = () => {
 .detail-panel {
   display: flex;
   flex-direction: column;
-  background: #0D0D16;
-  border: 1px solid rgba(123, 47, 190, 0.2);
+  background: var(--ot-bg-deep);
+  border: 1px solid color-mix(in srgb, var(--rune-purple-dark) 20%, transparent);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -166,8 +164,8 @@ const randomPlayer = () => {
   gap: 10px;
   height: 56px;
   padding: 0 16px;
-  background: #0D0D16;
-  border-bottom: 1px solid rgba(232, 224, 200, 0.14);
+  background: var(--ot-bg-deep);
+  border-bottom: 1px solid color-mix(in srgb, var(--sg-border) 14%, transparent);
   flex-shrink: 0;
 }
 
@@ -176,7 +174,7 @@ const randomPlayer = () => {
   font-size: var(--text-sm);
   font-weight: 800;
   letter-spacing: 2px;
-  color: rgba(232, 224, 200, 0.85);
+  color: color-mix(in srgb, var(--sg-border) 85%, transparent);
 }
 
 .detail-scroll {
@@ -191,7 +189,7 @@ const randomPlayer = () => {
   flex-direction: column;
   gap: 12px;
   padding: 16px;
-  border-bottom: 1px solid rgba(123, 47, 190, 0.13);
+  border-bottom: 1px solid color-mix(in srgb, var(--rune-purple-dark) 13%, transparent);
 }
 
 .stat-row {
@@ -206,23 +204,23 @@ const randomPlayer = () => {
   flex: 1;
   padding: 8px 10px;
   border-radius: 6px;
-  background: #0A0810;
-  border: 1px solid rgba(123, 47, 190, 0.2);
+  background: var(--sg-bg-deep);
+  border: 1px solid color-mix(in srgb, var(--rune-purple-dark) 20%, transparent);
 }
 
 .stat-primary {
-  border-color: rgba(123, 47, 190, 0.5);
+  border-color: color-mix(in srgb, var(--rune-purple-dark) 50%, transparent);
 }
 
 .stat-value {
   font-family: var(--font-heading);
   font-size: var(--text-md);
   font-weight: 700;
-  color: #C084FC;
+  color: var(--rune-purple-light);
 }
 
 .stat-value.muted {
-  color: rgba(192, 132, 252, 0.6);
+  color: color-mix(in srgb, var(--rune-purple-light) 60%, transparent);
   font-size: var(--text-base);
 }
 
@@ -231,12 +229,12 @@ const randomPlayer = () => {
   font-size: var(--text-xs);
   font-weight: 600;
   letter-spacing: 1px;
-  color: rgba(232, 224, 200, 0.4);
+  color: color-mix(in srgb, var(--sg-border) 40%, transparent);
 }
 
 .section-divider {
   height: 1px;
-  background: rgba(123, 47, 190, 0.1);
+  background: color-mix(in srgb, var(--rune-purple-dark) 10%, transparent);
 }
 
 .section-label {
@@ -244,7 +242,7 @@ const randomPlayer = () => {
   font-size: var(--text-xs);
   font-weight: 700;
   letter-spacing: 1px;
-  color: rgba(232, 224, 200, 0.5);
+  color: color-mix(in srgb, var(--sg-border) 50%, transparent);
 }
 
 /* Breakdown */
@@ -253,13 +251,23 @@ const randomPlayer = () => {
   flex-direction: column;
   gap: 10px;
   padding: 16px;
-  background: #0A0810;
-  border-bottom: 1px solid rgba(123, 47, 190, 0.13);
+  background: var(--sg-bg-deep);
+  border-bottom: 1px solid color-mix(in srgb, var(--rune-purple-dark) 13%, transparent);
 }
 
-.radar-chart {
-  background: linear-gradient(to bottom, black, #0d1b2a);
-  padding: 4px;
+.header-icon {
+  font-size: 16px;
+  color: color-mix(in srgb, var(--sg-border) 70%, transparent);
+}
+
+.draft-btn-icon {
+  font-size: 18px;
+  color: var(--rune-purple-text);
+}
+
+.empty-icon {
+  font-size: 48px;
+  color: color-mix(in srgb, var(--ot-border) 20%, transparent);
 }
 
 /* Draft Button Area */
@@ -268,7 +276,7 @@ const randomPlayer = () => {
   flex-direction: column;
   gap: 8px;
   padding: 16px;
-  background: #0D0A18;
+  background: color-mix(in srgb, var(--rune-purple-deep) 8%, var(--ot-bg-deep));
 }
 
 .draft-btn {
@@ -279,20 +287,22 @@ const randomPlayer = () => {
   width: 100%;
   height: 52px;
   border-radius: 8px;
-  border: 2px solid #7B2FBE;
-  background: linear-gradient(135deg, #7B2FBE, #5B21B6);
-  box-shadow: 0 0 24px rgba(123, 47, 190, 0.5);
+  border: 2px solid var(--rune-purple-dark);
+  background: linear-gradient(135deg, var(--rune-purple-dark), var(--rune-purple-deep));
+  box-shadow: 0 0 24px color-mix(in srgb, var(--rune-purple-dark) 50%, transparent);
   cursor: pointer;
   font-family: var(--font-body);
   font-size: var(--text-base);
   font-weight: 800;
-  color: #E9D5FF;
+  color: var(--rune-purple-text);
   transition: all 0.2s;
 }
 
 .draft-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #8B3FCE, #6B31C6);
-  box-shadow: 0 0 36px rgba(123, 47, 190, 0.7);
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--rune-purple-dark) 100%, white 10%),
+    color-mix(in srgb, var(--rune-purple-deep) 100%, white 10%));
+  box-shadow: 0 0 36px color-mix(in srgb, var(--rune-purple-dark) 70%, transparent);
 }
 
 .draft-btn-disabled {
@@ -309,19 +319,19 @@ const randomPlayer = () => {
   width: 100%;
   height: 40px;
   border-radius: 8px;
-  border: 1px solid rgba(123, 47, 190, 0.4);
+  border: 1px solid color-mix(in srgb, var(--rune-purple-dark) 40%, transparent);
   background: transparent;
   cursor: pointer;
   font-family: var(--font-body);
   font-size: var(--text-sm);
   font-weight: 600;
-  color: rgba(192, 132, 252, 0.7);
+  color: color-mix(in srgb, var(--rune-purple-light) 70%, transparent);
   transition: all 0.2s;
 }
 
 .random-btn:hover {
-  border-color: rgba(123, 47, 190, 0.7);
-  color: #C084FC;
+  border-color: color-mix(in srgb, var(--rune-purple-dark) 70%, transparent);
+  color: var(--rune-purple-light);
 }
 
 /* Empty state */
@@ -332,7 +342,7 @@ const randomPlayer = () => {
   justify-content: center;
   gap: 12px;
   padding: 48px 16px;
-  color: rgba(138, 138, 158, 0.3);
+  color: color-mix(in srgb, var(--ot-border) 30%, transparent);
   font-family: var(--font-body);
   font-size: var(--text-sm);
 }

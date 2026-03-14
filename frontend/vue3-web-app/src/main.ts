@@ -23,7 +23,7 @@ import {
   faMagnifyingGlass, faCheckSquare, faTimesCircle,
   faEye, faEyeSlash, faRefresh,
   faTrophy, faCirclePlus, faCircleMinus, faCircleQuestion,
-  faClock
+  faClock, faCoins, faDice
 } from '@fortawesome/free-solid-svg-icons';
 import { faDiscord, faGithub, faGoogle } from '@fortawesome/free-brands-svg-icons';
 // import { far } from '@fortawesome/free-regular-svg-icons';
@@ -37,13 +37,13 @@ configure({
 
 library.add(
   // Regular
-  faSquare, faCircleUser, faUser, faCircleQuestion,
+  faSquare, faCircleUser, faUser,
   // Solid
   faChevronLeft, faChevronRight, faChevronDown, faCaretDown, faArrowUp, faArrowDown,
   faStepForward, faStepBackward, faLock, faLockOpen,
   faMagnifyingGlass, faCheckSquare, faTimesCircle,
   faEye, faEyeSlash, faRefresh, faTrophy,
-  faCirclePlus, faCircleMinus, faCircleQuestion, faClock,
+  faCirclePlus, faCircleMinus, faCircleQuestion, faClock, faCoins, faDice,
   // Brand
   faDiscord, faGithub, faGoogle
 );

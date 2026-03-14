@@ -186,6 +186,8 @@ const currentDraftSlotSelected = ref<number>(1);
 const fantasyDraftPicks = ref<FantasyPlayer[]>([]);
 const fantasyPlayerPointsAvailable = ref<FantasyPlayerPoints[]>([]);
 
+export const DRAFT_BUDGET = 600;
+
 export function serializeFantasyDraftToDraftPick(fantasyDraftPlayer: any) {
     return {
         id: fantasyDraftPlayer.fantasyPlayer?.id,

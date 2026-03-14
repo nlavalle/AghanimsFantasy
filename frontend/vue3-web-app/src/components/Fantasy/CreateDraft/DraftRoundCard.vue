@@ -21,30 +21,30 @@ defineProps<{
   gap: 4px;
   width: 90px;
   height: 64px;
-  background: #0C0C14;
-  border: 1px solid rgba(138, 138, 158, 0.25);
+  background: var(--ot-bg-deep);
+  border: 1px solid color-mix(in srgb, var(--ot-border) 25%, transparent);
   border-radius: 8px;
 }
 
 .round-label {
   font-family: var(--font-body);
-  font-size: 8px;
+  font-size: var(--text-sm);
   font-weight: 700;
   letter-spacing: 2px;
-  color: rgba(138, 138, 158, 0.5);
+  color: color-mix(in srgb, var(--rune-lavender) 85%, transparent);
 }
 
 .round-value {
-  font-family: 'Space Grotesk', var(--font-heading);
-  font-size: 22px;
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
   font-weight: 800;
   line-height: 1;
-  color: rgba(232, 208, 255, 0.85);
+  color: color-mix(in srgb, var(--rune-lavender) 85%, transparent);
 }
 
 .round-denom {
-  font-size: 14px;
+  font-size: var(--text-md);
   font-weight: 600;
-  color: rgba(138, 138, 158, 0.5);
+  color: color-mix(in srgb, var(--ot-border) 50%, transparent);
 }
 </style>

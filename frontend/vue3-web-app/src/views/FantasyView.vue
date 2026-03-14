@@ -3,8 +3,12 @@
     <div v-if="!isMounted" class="d-flex justify-center align-center" style="min-height: 200px;">
       <v-progress-circular color="primary" indeterminate />
     </div>
-    <CreateDraftPicks v-if="isMounted && fantasyTab === 'draft'" class="draft-pick-bar" />
-    <v-container v-if="isMounted" :style="fantasyTab === 'draft' ? 'padding-right: 396px' : ''" style="max-width: 100%">
+    <div v-else>
+      <CreateDraftPicks class="draft-pick-bar" :canSave="canSave" @clearDraft="clearFantasyDraftPicks"
+        @saveDraft="saveDraft" />
+      <CreateDraft @saveDraft="saveDraft" style="padding-right: 396px" />
+      <!-- <v-container v-if="isMounted" :style="fantasyTab === 'draft' ? 'padding-right: 396px' : ''"
+      style="max-width: 100%">
       <v-row style="width:100%">
         <v-col>
           <v-row class="align-center">
@@ -48,13 +52,13 @@
                       </v-card-title>
                     </v-card>
                   </v-row>
-                  <!-- <v-row v-if="updateDraftVisibility || updateDisabled" class="section-gap">
+                  <v-row v-if="updateDraftVisibility || updateDisabled" class="section-gap">
                     <v-card class="pa-4" disabled>
                       <v-card-title style="text-wrap:wrap">
                         {{ `Drafting for Fantasy League: ${fantasyLeagueStore.selectedLeague!.name} is locked` }}
                       </v-card-title>
                     </v-card>
-                  </v-row> -->
+                  </v-row>
                   <v-row>
                     <v-col>
                       <v-row v-if="fantasyLeagueStore.selectedFantasyLeague">
@@ -96,9 +100,10 @@
           </v-row>
         </v-col>
       </v-row>
-    </v-container>
+    </v-container> -->
 
-    <PlayerStats v-if="isMounted && fantasyTab === 'draft'" class="player-stats-fixed" />
+      <PlayerStats class="player-stats-fixed" />
+    </div>
 
     <AlertDialog v-model="showSuccessModal" @ok="scrollAfterAlertDialog" />
     <ErrorDialog v-model="showErrorModal" :error="errorDetails!" @ok="scrollAfterAlertDialog" />
@@ -114,7 +119,7 @@ import CurrentDraft from '@/components/Fantasy/CurrentDraft.vue';
 import CreateDraft from '@/components/Fantasy/CreateDraft/CreateDraft.vue';
 import CreateDraftPicks from '@/components/Fantasy/CreateDraft/CreateDraftPicks.vue';
 import MatchDataTable from '@/components/Stats/MatchDataTable.vue';
-import { fantasyDraftState } from '@/components/Fantasy/fantasyDraft';
+import { fantasyDraftState, DRAFT_BUDGET } from '@/components/Fantasy/fantasyDraft';
 import LoginModal from '@/components/Auth/LoginModal.vue';
 import AlertDialog from '@/components/AlertDialog.vue';
 import ErrorDialog from '@/components/ErrorDialog.vue';
@@ -127,7 +132,7 @@ import PlayerStats from '@/components/Fantasy/CreateDraft/PlayerStats.vue';
 const authStore = useAuthStore();
 const fantasyLeagueStore = useFantasyLeagueStore();
 const fantasyDraftStore = useFantasyDraftStore();
-const { fantasyDraftPicks, setFantasyDraftPicks, setFantasyPlayerPoints, clearFantasyDraftPicks } = fantasyDraftState();
+const { fantasyDraftPicks, setFantasyDraftPicks, setFantasyPlayerPoints, clearFantasyDraftPicks, totalDraftCost } = fantasyDraftState();
 const draftFiltered = ref(true);
 
 const showSuccessModal = ref(false);
@@ -146,6 +151,14 @@ const updateDisabled = computed(() => {
   var lockDate = new Date(draftLockEpoch * 1000);
   //return currentDate > lockDate && userDraftPoints.value != {}; // TODO: Rethink logic on people who draft late
   return currentDate > lockDate;
+});
+
+const canSave = computed(() => {
+  const totalGold = totalDraftCost(fantasyLeagueStore.fantasyPlayersStats);
+  return !!(authStore.authenticated
+    && fantasyLeagueStore.selectedFantasyLeague
+    && fantasyLeagueStore.isDraftOpen(fantasyLeagueStore.selectedFantasyLeague)
+    && totalGold <= DRAFT_BUDGET);
 });
 
 const saveDraft = async () => {
