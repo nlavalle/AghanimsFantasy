@@ -47,7 +47,8 @@
       <!-- Draft Button -->
       <div class="draft-btn-area">
         <button class="draft-btn" :disabled="disabledPlayer(selectedPlayer)"
-          :class="{ 'draft-btn-disabled': disabledPlayer(selectedPlayer) }" @click="draftPlayer()">
+          :class="{ 'draft-btn-disabled': disabledPlayer(selectedPlayer) }" :title="disabledReason(selectedPlayer)"
+          @click="draftPlayer()">
           <font-awesome-icon :icon="['fas', 'circle-plus']" class="draft-btn-icon" />
           <span>Draft Player · {{ playerCost }} Gold</span>
         </button>
@@ -78,7 +79,7 @@ import PlayerTopHeroes from '@/components/Fantasy/PlayerStats/PlayerTopHeroes.vu
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 
-const { selectedPlayer, fantasyPlayerPointsAvailable, setFantasyPlayer, disabledPlayer } = fantasyDraftState();
+const { selectedPlayer, fantasyPlayerPointsAvailable, setFantasyPlayer, disabledPlayer, disabledReason } = fantasyDraftState();
 const leagueStore = useFantasyLeagueStore();
 
 const emit = defineEmits(['savePlayer']);
@@ -292,7 +293,7 @@ const randomPlayer = () => {
   box-shadow: 0 0 24px color-mix(in srgb, var(--rune-purple-dark) 50%, transparent);
   cursor: pointer;
   font-family: var(--font-body);
-  font-size: var(--text-base);
+  font-size: var(--text-md);
   font-weight: 800;
   color: var(--rune-purple-text);
   transition: all 0.2s;
@@ -300,8 +301,8 @@ const randomPlayer = () => {
 
 .draft-btn:hover:not(:disabled) {
   background: linear-gradient(135deg,
-    color-mix(in srgb, var(--rune-purple-dark) 100%, white 10%),
-    color-mix(in srgb, var(--rune-purple-deep) 100%, white 10%));
+      color-mix(in srgb, var(--rune-purple-dark) 100%, white 10%),
+      color-mix(in srgb, var(--rune-purple-deep) 100%, white 10%));
   box-shadow: 0 0 36px color-mix(in srgb, var(--rune-purple-dark) 70%, transparent);
 }
 

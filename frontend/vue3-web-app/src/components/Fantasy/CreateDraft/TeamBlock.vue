@@ -1,11 +1,9 @@
 <template>
     <div class="team-block">
-        <div class="team-header">
+        <div class="team-header" :class="{ 'team-header--full': disabledTeam(team.teamId) }">
             <img v-if="team.teamId" :src="`logos/teams_logo_${team.teamId}.png`" class="team-logo" />
             <div v-else class="team-logo-placeholder" />
             <span class="team-name">{{ team.name }}</span>
-            <div class="team-divider" />
-            <span class="team-rule">MAX 2 PER TEAM</span>
         </div>
         <div class="team-players">
             <div class="available-player" v-for="(player, i) in players" :key="i"
@@ -15,21 +13,15 @@
                     :fantasyPlayerCost="fantasyPlayerCost(player.fantasyPlayerId)"
                     :fantasyPlayerBudget="DRAFT_BUDGET + draftSlotCost(player.fantasyPlayer) - draftCost"
                     :isSelected="selectedPlayerCheck(player.fantasyPlayer.id)"
-                    :isDisabled="disabledPlayer(player.fantasyPlayer)"
+                    :isDisabled="disabledPlayer(player.fantasyPlayer) || disabledTeam(team.teamId)"
                     :isDrafted="isDrafted(player.fantasyPlayer.id)" />
             </div>
         </div>
-        <!-- overlay without scroll-strategy bricks the page scrolling: https://github.com/vuetifyjs/vuetify/issues/15653 -->
-        <v-overlay :model-value="disabledTeam(team.teamId)" class="align-center justify-center disabled-team" contained
-            persistent no-click-animation scroll-strategy="none" z-index="2">
-            <span>Max 2 players per team</span>
-        </v-overlay>
     </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { VOverlay } from 'vuetify/components'
 import { fantasyDraftState, DRAFT_BUDGET, type FantasyPlayer, type FantasyPlayerPoints } from '../fantasyDraft'
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague'
 import PlayerPoolCard from './PlayerPoolCard.vue'
@@ -69,13 +61,19 @@ const selectedPlayerCheck = (fantasyPlayerId: number) => {
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 0;
+    padding-top: 40px;
+    /* header height (32px) + gap (8px) */
     padding-bottom: 12px;
     width: fit-content;
     border-bottom: 1px solid color-mix(in srgb, var(--sg-divider) 7%, transparent);
 }
 
 .team-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -83,6 +81,13 @@ const selectedPlayerCheck = (fantasyPlayerId: number) => {
     padding: 0 6px;
     background: color-mix(in srgb, var(--ot-border) 5%, transparent);
     border-left: 3px solid color-mix(in srgb, var(--ot-border) 60%, transparent);
+    transition: background 0.2s, border-color 0.2s;
+    overflow: hidden;
+}
+
+.team-header--full {
+    background: color-mix(in srgb, var(--rune-purple) 12%, transparent);
+    border-left-color: color-mix(in srgb, var(--rune-purple) 60%, transparent);
 }
 
 .team-logo {
@@ -105,21 +110,13 @@ const selectedPlayerCheck = (fantasyPlayerId: number) => {
     font-size: var(--text-sm);
     font-weight: 700;
     color: var(--sg-text);
-}
-
-.team-divider {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
     flex: 1;
-    height: 1px;
-    background: color-mix(in srgb, var(--sg-divider) 10%, transparent);
 }
 
-.team-rule {
-    font-family: var(--font-body);
-    font-size: var(--text-xs);
-    font-weight: 400;
-    letter-spacing: 1px;
-    color: color-mix(in srgb, var(--ot-text-dim) 33%, transparent);
-}
 
 /* Player row */
 .team-players {
@@ -153,15 +150,5 @@ const selectedPlayerCheck = (fantasyPlayerId: number) => {
 
 .available-player:hover+.available-player {
     transform: translateX(6px);
-}
-
-.disabled-team {
-    pointer-events: none;
-    border-radius: 8px;
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    font-weight: 600;
-    letter-spacing: 1px;
-    color: color-mix(in srgb, var(--ot-text-dim) 50%, transparent);
 }
 </style>

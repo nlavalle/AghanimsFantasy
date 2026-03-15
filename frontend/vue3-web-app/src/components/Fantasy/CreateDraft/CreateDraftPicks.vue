@@ -15,7 +15,7 @@
         </div>
         <div class="bar-actions">
           <button class="btn-save" :disabled="!canSave" :class="{ 'btn-save--disabled': !canSave }"
-            @click="$emit('saveDraft')">
+            :title="saveDisabledReason" @click="$emit('saveDraft')">
             <font-awesome-icon :icon="['fas', 'check-square']" />
             <span>Save Draft</span>
           </button>
@@ -38,7 +38,7 @@ import DraftTimerCard from '@/components/Fantasy/CreateDraft/DraftTimerCard.vue'
 import DraftBudgetCard from '@/components/Fantasy/CreateDraft/DraftBudgetCard.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
-defineProps<{ canSave: boolean }>()
+defineProps<{ canSave: boolean; saveDisabledReason?: string }>()
 defineEmits(['clearDraft', 'saveDraft'])
 
 const { selectedPlayer, currentDraftSlotSelected, fantasyDraftPicks, fantasyPlayerPointsAvailable } = fantasyDraftState();
@@ -106,14 +106,14 @@ const getPlayerPoints = (slotIndex: number) => {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 28px;
+  height: 52px;
   padding: 0 10px;
   border-radius: 6px;
   border: 1px solid color-mix(in srgb, var(--ot-border) 20%, transparent);
   background: transparent;
   cursor: pointer;
   font-family: var(--font-body);
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   font-weight: 600;
   color: color-mix(in srgb, var(--ot-text-dim) 50%, transparent);
   transition: border-color 0.2s, color 0.2s;

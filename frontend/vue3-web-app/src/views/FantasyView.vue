@@ -4,8 +4,8 @@
       <v-progress-circular color="primary" indeterminate />
     </div>
     <div v-else>
-      <CreateDraftPicks class="draft-pick-bar" :canSave="canSave" @clearDraft="clearFantasyDraftPicks"
-        @saveDraft="saveDraft" />
+      <CreateDraftPicks class="draft-pick-bar" :canSave="canSave" :saveDisabledReason="saveDisabledReason"
+        @clearDraft="clearFantasyDraftPicks" @saveDraft="saveDraft" />
       <CreateDraft @saveDraft="saveDraft" style="padding-right: 396px" />
       <!-- <v-container v-if="isMounted" :style="fantasyTab === 'draft' ? 'padding-right: 396px' : ''"
       style="max-width: 100%">
@@ -159,6 +159,14 @@ const canSave = computed(() => {
     && fantasyLeagueStore.selectedFantasyLeague
     && fantasyLeagueStore.isDraftOpen(fantasyLeagueStore.selectedFantasyLeague)
     && totalGold <= DRAFT_BUDGET);
+});
+
+const saveDisabledReason = computed((): string | undefined => {
+  if (!authStore.authenticated) return 'You must be logged in to save a draft'
+  if (!fantasyLeagueStore.selectedFantasyLeague) return 'No fantasy league selected'
+  if (!fantasyLeagueStore.isDraftOpen(fantasyLeagueStore.selectedFantasyLeague)) return 'Draft window is closed'
+  if (totalDraftCost(fantasyLeagueStore.fantasyPlayersStats) > DRAFT_BUDGET) return 'Draft is over budget'
+  return undefined
 });
 
 const saveDraft = async () => {

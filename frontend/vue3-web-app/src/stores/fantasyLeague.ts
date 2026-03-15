@@ -170,6 +170,7 @@ export const useFantasyLeagueStore = defineStore({
 
     setSelectedLeague(league: League) {
       this.selectedLeague = league
+      this.setSelectedFantasyLeague(this.defaultFantasyLeague)
     },
 
     setSelectedFantasyLeague(fantasyLeagues: FantasyLeague) {

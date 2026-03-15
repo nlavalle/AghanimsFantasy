@@ -1,6 +1,5 @@
 <template>
-  <div class="pool-card"
-    :class="{ 'pool-card--selected': isSelected, 'pool-card--disabled': isDisabled, 'pool-card--drafted': isDrafted }">
+  <div class="pool-card" :class="{ 'pool-card--selected': isSelected, 'pool-card--disabled': isDisabled }">
     <div class="card-avatar">
       <img v-if="fantasyPlayer?.dotaAccount?.steamProfilePicture" :src="fantasyPlayer.dotaAccount.steamProfilePicture"
         :alt="fantasyPlayer.dotaAccount.name" class="avatar-img" />
@@ -8,6 +7,9 @@
         <font-awesome-icon :icon="['far', 'user']" class="avatar-icon" />
       </div>
       <img v-if="fantasyPlayer?.teamId" :src="`logos/teams_logo_${fantasyPlayer.teamId}.png`" class="team-badge" />
+      <div v-if="isDrafted" class="drafted-overlay">
+        <font-awesome-icon :icon="['fas', 'check']" class="drafted-icon" />
+      </div>
     </div>
     <div class="card-info">
       <span class="card-name">{{ fantasyPlayer?.dotaAccount?.name ?? '' }}</span>
@@ -44,57 +46,51 @@ const overBudget = computed(() => (props.fantasyPlayerBudget ?? 0) - (props.fant
 
 <style scoped>
 .pool-card {
+  --bg: var(--ot-bg-deep);
+  --border: color-mix(in srgb, var(--rune-purple) 90%, transparent);
+  --text: var(--rune-purple-light);
+  --text-dim: var(--rune-purple-muted);
+  --info-bg: color-mix(in srgb, var(--rune-purple) 15%, transparent);
+  --info-border: color-mix(in srgb, var(--rune-purple) 45%, transparent);
+  --glow:
+    0 0 6px color-mix(in srgb, var(--rune-purple) 60%, transparent),
+    0 0 16px color-mix(in srgb, var(--rune-purple) 30%, transparent);
+
   display: flex;
   flex-direction: column;
   border-radius: 6px;
-  background: var(--ot-bg-deep);
-  border: 1px solid color-mix(in srgb, var(--ot-border) 25%, transparent);
+  background: var(--bg);
+  border: 1px solid var(--border);
   overflow: hidden;
   cursor: pointer;
   transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  box-shadow: var(--glow);
 }
 
-.pool-card:hover {
-  border-color: color-mix(in srgb, var(--ot-border) 50%, transparent);
-}
-
-.pool-card--selected {
-  background: var(--sg-bg-deep);
-  border-color: color-mix(in srgb, var(--sg-border) 60%, transparent);
-  box-shadow:
-    0 0 6px color-mix(in srgb, var(--sg-border) 25%, transparent),
-    0 0 16px color-mix(in srgb, var(--sg-border) 12%, transparent);
-}
-
-.pool-card--drafted {
-  border-color: color-mix(in srgb, var(--rune-purple) 90%, transparent);
-  box-shadow:
-    0 0 6px color-mix(in srgb, var(--rune-purple) 60%, transparent),
-    0 0 16px color-mix(in srgb, var(--rune-purple) 30%, transparent);
-}
-
-.pool-card--drafted .card-info {
-  background: color-mix(in srgb, var(--rune-purple) 15%, transparent);
-  border-top-color: color-mix(in srgb, var(--rune-purple) 45%, transparent);
-}
-
-.pool-card--drafted .card-name {
-  color: var(--rune-purple-light);
+.pool-card .card-name {
   text-shadow: 0 0 8px color-mix(in srgb, var(--rune-purple-light) 40%, transparent);
 }
 
-.pool-card--drafted .card-pts {
-  color: var(--rune-purple-muted);
+.pool-card--selected {
+  --bg: color-mix(in srgb, var(--sg-glow) 80%, var(--sg-bg-deep));
+  --border: color-mix(in srgb, var(--sg-border) 80%, transparent);
+  --text: var(--sg-text);
+  --text-dim: color-mix(in srgb, var(--sg-text-dim) 70%, transparent);
+  --info-bg: color-mix(in srgb, var(--sg-bg-mid) 90%, transparent);
+  --info-border: color-mix(in srgb, var(--sg-border) 40%, transparent);
+  --glow:
+    0 0 8px color-mix(in srgb, var(--sg-border) 60%, transparent),
+    0 0 18px color-mix(in srgb, var(--sg-border) 35%, transparent),
+    0 0 28px color-mix(in srgb, var(--sg-border) 18%, transparent);
+}
+
+.pool-card--selected .card-name {
+  text-shadow: 0 0 8px color-mix(in srgb, var(--sg-text) 50%, transparent);
 }
 
 .pool-card--disabled {
   opacity: 0.6;
-  /* cursor: not-allowed; */
   filter: grayscale(0.8);
-}
-
-.pool-card--drafted.pool-card--disabled {
-  filter: none;
 }
 
 /* Avatar area */
@@ -140,44 +136,47 @@ const overBudget = computed(() => (props.fantasyPlayerBudget ?? 0) - (props.fant
   object-fit: contain;
 }
 
+.drafted-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.drafted-icon {
+  width: 80px;
+  height: 80px;
+  color: var(--sg-text);
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--sg-border) 80%, transparent));
+}
+
 /* Info area */
 .card-info {
   display: flex;
   flex-direction: column;
   gap: 1px;
   padding: 4px 6px;
-  background: color-mix(in srgb, var(--ot-bg-mid) 80%, transparent);
-  border-top: 1px solid color-mix(in srgb, var(--ot-border) 15%, transparent);
-}
-
-.pool-card--selected .card-info {
-  background: color-mix(in srgb, var(--sg-bg-mid) 80%, transparent);
-  border-top-color: color-mix(in srgb, var(--sg-border) 25%, transparent);
+  background: var(--info-bg);
+  border-top: 1px solid var(--info-border);
 }
 
 .card-name {
   font-family: var(--font-heading);
   font-size: var(--text-xs);
   font-weight: 700;
-  color: color-mix(in srgb, var(--ot-text) 70%, transparent);
+  color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.pool-card--selected .card-name {
-  color: var(--sg-text);
 }
 
 .card-pts {
   font-family: var(--font-body);
   font-size: var(--text-xs);
   font-weight: 400;
-  color: color-mix(in srgb, var(--ot-text-dim) 50%, transparent);
-}
-
-.pool-card--selected .card-pts {
-  color: color-mix(in srgb, var(--sg-text-dim) 70%, transparent);
+  color: var(--text-dim);
 }
 
 .card-stats {

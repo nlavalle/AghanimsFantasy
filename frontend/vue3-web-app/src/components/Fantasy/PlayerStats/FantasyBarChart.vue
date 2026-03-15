@@ -2,7 +2,7 @@
   <div class="bar-row">
     <span class="bar-label">{{ label }}</span>
     <div class="bar-track">
-      <div class="bar-fill" :style="{ width: percentage + '%' }" />
+      <div class="bar-fill" :style="{ width: percentage + '%' }" :data-percentage="getPercentageRange(percentage)" />
     </div>
     <span class="bar-value">{{ value.toFixed(1) }}</span>
   </div>
@@ -18,6 +18,13 @@ const props = defineProps<{
 }>()
 
 const percentage = computed(() => Math.min(100, (props.value / 100) * 100))
+
+const getPercentageRange = (percentage: number) => {
+  if (percentage < 33) return "0-33";
+  if (percentage < 66) return "33-66";
+  return "66-100";
+};
+
 </script>
 
 <style scoped>
@@ -48,8 +55,27 @@ const percentage = computed(() => Math.min(100, (props.value / 100) * 100))
 .bar-fill {
   height: 100%;
   border-radius: 3px;
-  background: var(--rune-purple);
+  /* background: var(--rune-purple); */
   transition: width 0.4s ease;
+
+  /* Default to dark purple */
+  background-color: var(--rune-purple-dark);
+
+  /* Change color based on percentage */
+  &[data-percentage="0-33"] {
+    background-color: var(--rune-purple-dark);
+    /* Dark purple */
+  }
+
+  &[data-percentage="33-66"] {
+    background-color: var(--rune-purple);
+    /* Medium purple */
+  }
+
+  &[data-percentage="66-100"] {
+    background-color: var(--rune-purple-light);
+    /* Light purple */
+  }
 }
 
 .bar-value {

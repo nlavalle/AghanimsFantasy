@@ -247,6 +247,22 @@ export function fantasyDraftState() {
         return pickedPlayer || !correctDraftSlotRoleSelected || (maxTeamCheck && minTeamsCheck);
     }
 
+    const disabledReason = (fantasyPlayer: FantasyPlayer): string | undefined => {
+        if (fantasyDraftPicks.value.some(picks => picks.id == fantasyPlayer.id))
+            return 'Player already drafted'
+        if (fantasyPlayer.teamPosition !== currentDraftSlotSelected.value)
+            return 'Wrong position for selected draft slot'
+        const teamCounts = fantasyDraftPicks.value.reduce((acc: any, fp: FantasyPlayer) => {
+            acc[fp.teamId] = (acc[fp.teamId] || 0) + 1;
+            return acc;
+        }, {})
+        const maxTeamCheck = fantasyPlayerPointsAvailable.value.filter(player => player.fantasyPlayer.id == fantasyPlayer.id && (teamCounts[player.fantasyPlayer.teamId] ?? 0) < 2).length == 0;
+        const minTeamsCheck = new Set(fantasyPlayerPointsAvailable.value.flatMap(player => player.fantasyPlayer.teamId)).size > 2;
+        if (maxTeamCheck && minTeamsCheck)
+            return 'Max 2 players per team'
+        return undefined
+    }
+
     const disabledTeam = (teamId: any) => {
         const teamCounts = fantasyDraftPicks.value.reduce((acc: any, fp: FantasyPlayer) => {
             acc[fp.teamId] = (acc[fp.teamId] || 0) + 1;
@@ -278,6 +294,7 @@ export function fantasyDraftState() {
         setFantasyPlayer,
         clearFantasyDraftPicks,
         disabledPlayer,
+        disabledReason,
         disabledTeam,
         totalDraftCost,
         currentDraftSlotCost
