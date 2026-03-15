@@ -18,7 +18,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { fantasyDraftState, type FantasyPlayerPoints } from '../fantasyDraft'
+import { fantasyDraftState, type FantasyPlayerPoints } from '@/components/Fantasy/fantasyDraft'
 import TeamBlock from './TeamBlock.vue'
 
 const { fantasyPlayerPointsAvailable, currentDraftSlotSelected } = fantasyDraftState()

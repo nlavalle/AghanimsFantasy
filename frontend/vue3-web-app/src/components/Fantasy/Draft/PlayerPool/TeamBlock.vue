@@ -22,7 +22,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { fantasyDraftState, DRAFT_BUDGET, type FantasyPlayer, type FantasyPlayerPoints } from '../fantasyDraft'
+import { fantasyDraftState, DRAFT_BUDGET, type FantasyPlayer, type FantasyPlayerPoints } from '@/components/Fantasy/fantasyDraft'
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague'
 import PlayerPoolCard from './PlayerPoolCard.vue'
 

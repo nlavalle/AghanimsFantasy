@@ -11,7 +11,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { fantasyDraftState, DRAFT_BUDGET } from '../fantasyDraft'
+import { fantasyDraftState, DRAFT_BUDGET } from '@/components/Fantasy/fantasyDraft'
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague'
 
 const BUDGET = DRAFT_BUDGET

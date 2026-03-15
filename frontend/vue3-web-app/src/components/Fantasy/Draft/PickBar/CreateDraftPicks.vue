@@ -30,12 +30,12 @@
 </template>
 
 <script setup lang="ts">
-import { fantasyDraftState } from '../fantasyDraft';
+import { fantasyDraftState } from '@/components/Fantasy/fantasyDraft';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
-import DraftPickSlot from '@/components/Fantasy/CreateDraft/DraftPickSlot.vue';
-import DraftRoundCard from '@/components/Fantasy/CreateDraft/DraftRoundCard.vue';
-import DraftTimerCard from '@/components/Fantasy/CreateDraft/DraftTimerCard.vue';
-import DraftBudgetCard from '@/components/Fantasy/CreateDraft/DraftBudgetCard.vue';
+import DraftPickSlot from './DraftPickSlot.vue';
+import DraftRoundCard from './DraftRoundCard.vue';
+import DraftTimerCard from './DraftTimerCard.vue';
+import DraftBudgetCard from './DraftBudgetCard.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 defineProps<{ canSave: boolean; saveDisabledReason?: string }>()

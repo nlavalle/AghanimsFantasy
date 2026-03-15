@@ -116,18 +116,18 @@ import { VCard, VCardTitle, VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VT
 import { useAuthStore } from '@/stores/auth';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import CurrentDraft from '@/components/Fantasy/CurrentDraft.vue';
-import CreateDraft from '@/components/Fantasy/CreateDraft/CreateDraft.vue';
-import CreateDraftPicks from '@/components/Fantasy/CreateDraft/CreateDraftPicks.vue';
+import CreateDraft from '@/components/Fantasy/Draft/CreateDraft.vue';
+import CreateDraftPicks from '@/components/Fantasy/Draft/PickBar/CreateDraftPicks.vue';
 import MatchDataTable from '@/components/Stats/MatchDataTable.vue';
 import { fantasyDraftState, DRAFT_BUDGET } from '@/components/Fantasy/fantasyDraft';
 import LoginModal from '@/components/Auth/LoginModal.vue';
 import AlertDialog from '@/components/AlertDialog.vue';
 import ErrorDialog from '@/components/ErrorDialog.vue';
 import { useFantasyDraftStore } from '@/stores/fantasyDraft';
-import LeaderboardComponent from '@/components/Fantasy/LeaderboardComponent.vue'
+import LeaderboardComponent from '@/components/Fantasy/Leaderboard/LeaderboardComponent.vue'
 import FantasyLockTimer from '@/components/Fantasy/FantasyLockTimer.vue';
 import UserBalance from '@/components/Fantasy/UserBalance.vue';
-import PlayerStats from '@/components/Fantasy/CreateDraft/PlayerStats.vue';
+import PlayerStats from '@/components/Fantasy/Draft/PlayerPanel/PlayerStats.vue';
 
 const authStore = useAuthStore();
 const fantasyLeagueStore = useFantasyLeagueStore();

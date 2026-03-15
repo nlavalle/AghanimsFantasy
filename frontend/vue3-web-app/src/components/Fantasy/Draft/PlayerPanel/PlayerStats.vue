@@ -71,8 +71,8 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import type { FantasyPlayerTopHeroes } from '../fantasyDraft';
-import { fantasyDraftState } from '../fantasyDraft';
+import type { FantasyPlayerTopHeroes } from '@/components/Fantasy/fantasyDraft';
+import { fantasyDraftState } from '@/components/Fantasy/fantasyDraft';
 import PlayerStatsBio from '@/components/Fantasy/PlayerStats/PlayerStatsBio.vue'
 import FantasyBarChart from '@/components/Fantasy/PlayerStats/FantasyBarChart.vue'
 import PlayerTopHeroes from '@/components/Fantasy/PlayerStats/PlayerTopHeroes.vue'

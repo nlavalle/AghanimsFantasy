@@ -18,9 +18,9 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
 import { VNavigationDrawer } from 'vuetify/components';
-import PlayerPicksAvailable from './PlayerPicksAvailable.vue';
-import PlayerStats from './PlayerStats.vue';
-import { fantasyDraftState } from '../fantasyDraft';
+import PlayerPicksAvailable from './PlayerPool/PlayerPicksAvailable.vue';
+import PlayerStats from './PlayerPanel/PlayerStats.vue';
+import { fantasyDraftState } from '@/components/Fantasy/fantasyDraft';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import { useDisplay } from 'vuetify';
 

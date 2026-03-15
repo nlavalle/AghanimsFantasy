@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { FantasyPlayer } from '../fantasyDraft'
+import type { FantasyPlayer } from '@/components/Fantasy/fantasyDraft'
 import GoldSpan from '@/components/Dom/GoldSpan.vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
