@@ -1,6 +1,6 @@
 <template>
     <div class="total-winnings af-panel">
-        <div v-if="fantasyLeagueStore.isDraftOpen(fantasyLeagueStore.selectedFantasyLeague)" class="winnings-row">
+        <div v-if="fantasyLeagueStore.isDraftOpen(fantasyLeagueStore.currentFantasyLeague)" class="winnings-row">
             <h2>Games haven't started</h2>
         </div>
         <div v-else class="winnings-row">

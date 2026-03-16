@@ -35,7 +35,7 @@ onBeforeMount(() => {
         () => {
           fantasyLeagueStore.fetchLeagues()
             .then(() => fantasyLeagueStore.fetchFantasyLeagues())
-            .then(() => fantasyLeagueStore.setSelectedFantasyLeagueId(Number(route.query.fantasyLeagueId)))
+            .then(() => fantasyLeagueStore.setSelectedLeagueById(Number(route.query.leagueId)))
         }
       );
     })
@@ -47,7 +47,7 @@ watch(() => authStore.authenticated, () => {
 
     // Refresh fantasy leagues because user may have more/less access now
     fantasyLeagueStore.fetchFantasyLeagues()
-      .then(() => fantasyLeagueStore.setSelectedFantasyLeagueId(Number(route.query.fantasyLeagueId)));
+      .then(() => fantasyLeagueStore.setSelectedLeagueById(Number(route.query.leagueId)));
   }
 })
 

@@ -24,24 +24,24 @@
           reverse-transition="fade-transition">
           <v-tabs-window-item value="fantasy">
             <v-col>
-              <v-row v-if="leagueStore.selectedFantasyLeague">
-                <FantasyDataTable v-model:selectedFantasyLeague="leagueStore.selectedFantasyLeague">
+              <v-row v-if="leagueStore.currentFantasyLeague">
+                <FantasyDataTable :selectedFantasyLeague="leagueStore.currentFantasyLeague">
                 </FantasyDataTable>
               </v-row>
             </v-col>
           </v-tabs-window-item>
           <v-tabs-window-item value="league">
             <v-col>
-              <v-row v-if="leagueStore.selectedFantasyLeague">
-                <LeagueDataTable v-model:selectedFantasyLeague="leagueStore.selectedFantasyLeague">
+              <v-row v-if="leagueStore.currentFantasyLeague">
+                <LeagueDataTable :selectedFantasyLeague="leagueStore.currentFantasyLeague">
                 </LeagueDataTable>
               </v-row>
             </v-col>
           </v-tabs-window-item>
           <v-tabs-window-item value="match">
             <v-col>
-              <v-row v-if="leagueStore.selectedFantasyLeague">
-                <MatchDataTable v-model:selectedFantasyLeague="leagueStore.selectedFantasyLeague"
+              <v-row v-if="leagueStore.currentFantasyLeague">
+                <MatchDataTable :selectedFantasyLeague="leagueStore.currentFantasyLeague"
                   v-model:draftFiltered="draftFiltered">
                 </MatchDataTable>
               </v-row>
@@ -49,8 +49,8 @@
           </v-tabs-window-item>
           <!-- <v-tabs-window-item value="topeight">
           <v-col>
-            <v-row v-if="leagueStore.selectedFantasyLeague">
-              <Top8DataTable v-model:selectedFantasyLeague="leagueStore.selectedFantasyLeague"
+            <v-row v-if="leagueStore.currentFantasyLeague">
+              <Top8DataTable :selectedFantasyLeague="leagueStore.currentFantasyLeague"
                 v-model:draftFiltered="draftFiltered">
               </Top8DataTable>
             </v-row>
@@ -79,7 +79,7 @@ const isMounted = ref(false);
 const loaded = ref(true);
 
 onMounted(() => {
-  if (leagueStore.selectedFantasyLeague.id == 0) {
+  if (leagueStore.currentFantasyLeague.id == 0) {
     leagueStore.fetchFantasyLeagues().then(() => isMounted.value = true)
   } else {
     isMounted.value = true

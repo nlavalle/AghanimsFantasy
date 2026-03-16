@@ -9,7 +9,7 @@
         <v-app-bar-title class="app-title d-none d-md-block">
             <div class="title-row">
                 <span :style="{ color: activeColor }">Aghanim's Fantasy</span>
-                <LeagueSelectorMenu v-if="leagueStore.selectedLeague?.name" />
+                <LeagueSelectorMenu v-if="leagueStore.leagues.length > 1" />
             </div>
         </v-app-bar-title>
 

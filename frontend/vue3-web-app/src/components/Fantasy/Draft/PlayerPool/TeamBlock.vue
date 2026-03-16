@@ -9,7 +9,7 @@
             <div class="available-player" v-for="(player, i) in players" :key="i"
                 @click="selectPlayer(player.fantasyPlayer)">
                 <PlayerPoolCard :fantasyPlayer="player.fantasyPlayer" :fantasyPoints="player.totalMatchFantasyPoints"
-                    :showCost="leagueStore.isDraftOpen(leagueStore.selectedFantasyLeague)"
+                    :showCost="leagueStore.isDraftOpen(leagueStore.currentFantasyLeague)"
                     :fantasyPlayerCost="fantasyPlayerCost(player.fantasyPlayerId)"
                     :fantasyPlayerBudget="DRAFT_BUDGET + draftSlotCost(player.fantasyPlayer) - draftCost"
                     :isSelected="selectedPlayerCheck(player.fantasyPlayer.id)"

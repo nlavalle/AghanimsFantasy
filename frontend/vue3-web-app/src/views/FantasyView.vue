@@ -4,9 +4,12 @@
       <v-progress-circular color="primary" indeterminate />
     </div>
     <div v-else>
+      <FantasyAlertBanner />
       <CreateDraftPicks class="draft-pick-bar" :canSave="canSave" :saveDisabledReason="saveDisabledReason"
         @clearDraft="clearFantasyDraftPicks" @saveDraft="saveDraft" />
       <CreateDraft @saveDraft="saveDraft" style="padding-right: 396px" />
+      <PlayerStats class="player-stats-fixed" />
+
       <!-- <v-container v-if="isMounted" :style="fantasyTab === 'draft' ? 'padding-right: 396px' : ''"
       style="max-width: 100%">
       <v-row style="width:100%">
@@ -24,9 +27,9 @@
             <v-spacer />
             <UserBalance />
           </v-row>
-          <v-row v-if="fantasyLeagueStore.selectedFantasyLeague && !updateDisabled">
+          <v-row v-if="fantasyLeagueStore.currentFantasyLeague && !updateDisabled">
             <fantasy-lock-timer class="ma-3"
-              :target-time="fantasyLeagueStore.selectedFantasyLeague.fantasyDraftLocked" />
+              :target-time="fantasyLeagueStore.currentFantasyLeague.fantasyDraftLocked" />
           </v-row>
           <v-row>
             <v-tabs-window v-model="fantasyTab" style="width:100%;overflow: visible" transition="fade-transition"
@@ -61,7 +64,7 @@
                   </v-row>
                   <v-row>
                     <v-col>
-                      <v-row v-if="fantasyLeagueStore.selectedFantasyLeague">
+                      <v-row v-if="fantasyLeagueStore.currentFantasyLeague">
                         <CreateDraft @saveDraft="saveDraft" />
                       </v-row>
                     </v-col>
@@ -90,7 +93,7 @@
               <v-tabs-window-item value="match">
                 <v-col>
                   <v-row v-if="fantasyLeagueStore.selectedFantasyDraftPoints && fantasyTab == 'match'">
-                    <MatchDataTable v-model:selectedFantasyLeague="fantasyLeagueStore.selectedFantasyLeague"
+                    <MatchDataTable v-model:currentFantasyLeague="fantasyLeagueStore.currentFantasyLeague"
                       v-model:draftFiltered="draftFiltered">
                     </MatchDataTable>
                   </v-row>
@@ -102,7 +105,6 @@
       </v-row>
     </v-container> -->
 
-      <PlayerStats class="player-stats-fixed" />
     </div>
 
     <AlertDialog v-model="showSuccessModal" @ok="scrollAfterAlertDialog" />
@@ -112,7 +114,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeMount, ref, watch } from 'vue';
-import { VCard, VCardTitle, VContainer, VRow, VCol, VTabs, VTab, VTabsWindow, VTabsWindowItem, VSpacer, VProgressCircular, VBtn } from 'vuetify/components';
+import { VProgressCircular } from 'vuetify/components';
 import { useAuthStore } from '@/stores/auth';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import CurrentDraft from '@/components/Fantasy/CurrentDraft.vue';
@@ -128,6 +130,7 @@ import LeaderboardComponent from '@/components/Fantasy/Leaderboard/LeaderboardCo
 import FantasyLockTimer from '@/components/Fantasy/FantasyLockTimer.vue';
 import UserBalance from '@/components/Fantasy/UserBalance.vue';
 import PlayerStats from '@/components/Fantasy/Draft/PlayerPanel/PlayerStats.vue';
+import FantasyAlertBanner from '@/components/Fantasy/FantasyAlertBanner.vue';
 
 const authStore = useAuthStore();
 const fantasyLeagueStore = useFantasyLeagueStore();
@@ -145,9 +148,11 @@ const updateDraftVisibility = ref(false);
 const isMounted = ref(false);
 const loaded = ref(true);
 
+const viewMode = computed(() => fantasyLeagueStore.viewMode)
+
 const updateDisabled = computed(() => {
   var currentDate = new Date();
-  var draftLockEpoch: number = fantasyLeagueStore.selectedFantasyLeague ? fantasyLeagueStore.selectedFantasyLeague.fantasyDraftLocked : 0;
+  var draftLockEpoch: number = fantasyLeagueStore.currentFantasyLeague ? fantasyLeagueStore.currentFantasyLeague.fantasyDraftLocked : 0;
   var lockDate = new Date(draftLockEpoch * 1000);
   //return currentDate > lockDate && userDraftPoints.value != {}; // TODO: Rethink logic on people who draft late
   return currentDate > lockDate;
@@ -156,15 +161,15 @@ const updateDisabled = computed(() => {
 const canSave = computed(() => {
   const totalGold = totalDraftCost(fantasyLeagueStore.fantasyPlayersStats);
   return !!(authStore.authenticated
-    && fantasyLeagueStore.selectedFantasyLeague
-    && fantasyLeagueStore.isDraftOpen(fantasyLeagueStore.selectedFantasyLeague)
+    && fantasyLeagueStore.currentFantasyLeague
+    && fantasyLeagueStore.isDraftOpen(fantasyLeagueStore.currentFantasyLeague)
     && totalGold <= DRAFT_BUDGET);
 });
 
 const saveDisabledReason = computed((): string | undefined => {
   if (!authStore.authenticated) return 'You must be logged in to save a draft'
-  if (!fantasyLeagueStore.selectedFantasyLeague) return 'No fantasy league selected'
-  if (!fantasyLeagueStore.isDraftOpen(fantasyLeagueStore.selectedFantasyLeague)) return 'Draft window is closed'
+  if (!fantasyLeagueStore.currentFantasyLeague) return 'No fantasy league selected'
+  if (!fantasyLeagueStore.isDraftOpen(fantasyLeagueStore.currentFantasyLeague)) return 'Draft window is closed'
   if (totalDraftCost(fantasyLeagueStore.fantasyPlayersStats) > DRAFT_BUDGET) return 'Draft is over budget'
   return undefined
 });
@@ -219,7 +224,7 @@ const refreshFantasy = () => {
 }
 
 onBeforeMount(async () => {
-  if (authStore.authenticated && fantasyLeagueStore.selectedFantasyLeague) {
+  if (authStore.authenticated && fantasyLeagueStore.currentFantasyLeague) {
     await fantasyDraftStore.fetchLeaderboard()
     await fantasyLeagueStore.fetchFantasyPlayerViewModels()
     await fantasyLeagueStore.fetchFantasyPlayerPoints()
@@ -229,14 +234,14 @@ onBeforeMount(async () => {
       fantasyTab.value = 'draft';
     }
     isMounted.value = true;
-  } else if (!authStore.authenticated && fantasyLeagueStore.selectedFantasyLeague) {
+  } else if (!authStore.authenticated && fantasyLeagueStore.currentFantasyLeague) {
     await fantasyDraftStore.fetchLeaderboard()
     fantasyTab.value = 'draft';
     isMounted.value = true;
   }
 });
 
-watch(() => fantasyLeagueStore.selectedFantasyLeague, () => {
+watch(() => fantasyLeagueStore.currentFantasyLeague, () => {
   fantasyLeagueStore.fetchFantasyPlayerPoints()?.then(() => setFantasyPlayerPoints(fantasyLeagueStore.fantasyPlayerPoints))
     .then(() => {
       fantasyDraftStore.fetchLeaderboard()

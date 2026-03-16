@@ -5,6 +5,7 @@ import { localApiService } from '@/services/localApiService'
 import type { FantasyDraftPoints, FantasyPlayerMatchPoints, FantasyPlayerPoints } from '@/components/Fantasy/fantasyDraft'
 import type { FantasyPlayerStats } from '@/types/FantasyPlayerStats'
 import type { LeagueMetadata } from '@/types/LeagueMetadata'
+import { isDraftOpen, isDraftActive, isDraftFinished, isLeagueActive, isLeagueFinished } from '@/stores/fantasyLeagueUtils'
 
 export const useFantasyLeagueStore = defineStore({
   id: 'league',
@@ -20,15 +21,6 @@ export const useFantasyLeagueStore = defineStore({
       is_active: false,
       name: ''
     } as League,
-    selectedFantasyLeague: {
-      id: 0,
-      leagueId: 0,
-      isActive: false,
-      name: '',
-      fantasyDraftLocked: 0,
-      leagueStartTime: 0,
-      leagueEndTime: 0
-    } as FantasyLeague,
     fantasyPlayersStats: [] as FantasyPlayerStats[],
     fantasyDraftPoints: [] as FantasyDraftPoints[],
     fantasyPlayerPoints: [] as FantasyPlayerPoints[],
@@ -42,7 +34,7 @@ export const useFantasyLeagueStore = defineStore({
       this.fantasyLeaguePollInterval = setInterval(() =>
         this.fetchLeagues()
           .then(() => this.fetchFantasyLeagues())
-          .then(() => this.fantasyLeaguePollFailureCount = 0) // reset on success
+          .then(() => this.fantasyLeaguePollFailureCount = 0)
           .catch(() => {
             this.fantasyLeaguePollFailureCount++
             if (this.fantasyLeaguePollFailureCount > 3) {
@@ -50,7 +42,7 @@ export const useFantasyLeagueStore = defineStore({
               this.stopFantasyLeaguePolling()
             }
           }),
-        30000) // poll every 30sec
+        30000)
     },
 
     stopFantasyLeaguePolling() {
@@ -64,7 +56,7 @@ export const useFantasyLeagueStore = defineStore({
       this.fantasyViewPollInterval = setInterval(() =>
         this.fetchFantasyPlayerViewModels()
           ?.then(() => this.fetchFantasyPlayerPoints())
-          .then(() => this.fantasyViewPollFailureCount = 0) // reset on success
+          .then(() => this.fantasyViewPollFailureCount = 0)
           .catch(() => {
             this.fantasyViewPollFailureCount++
             if (this.fantasyViewPollFailureCount > 3) {
@@ -72,7 +64,7 @@ export const useFantasyLeagueStore = defineStore({
               this.stopFantasyViewPolling()
             }
           }),
-        30000) // poll every 30sec
+        30000)
     },
 
     stopFantasyViewPolling() {
@@ -104,8 +96,9 @@ export const useFantasyLeagueStore = defineStore({
     },
 
     fetchFantasyPlayerViewModels() {
-      if (this.selectedFantasyLeague.id) {
-        return localApiService.getFantasyPlayerViewModels(this.selectedFantasyLeague.id)
+      const fl = this.currentFantasyLeague
+      if (fl?.id) {
+        return localApiService.getFantasyPlayerViewModels(fl.id)
           .then((result: any) => {
             this.fantasyPlayersStats = result;
           })
@@ -113,9 +106,9 @@ export const useFantasyLeagueStore = defineStore({
     },
 
     fetchFantasyPlayerPoints() {
-      if (!this.selectedFantasyLeague) return
-      if (this.selectedFantasyLeague.id) {
-        return localApiService.getPlayerFantasyStats(this.selectedFantasyLeague.id)
+      const fl = this.currentFantasyLeague
+      if (fl?.id) {
+        return localApiService.getPlayerFantasyStats(fl.id)
           .then((result: any) => {
             this.fantasyPlayerPoints = result;
           });
@@ -123,9 +116,9 @@ export const useFantasyLeagueStore = defineStore({
     },
 
     fetchFantasyLeagueMetadataStats() {
-      if (!this.selectedFantasyLeague) return
-      if (this.selectedFantasyLeague.id) {
-        return localApiService.getFantasyLeagueMetadataStats(this.selectedFantasyLeague.id)
+      const fl = this.currentFantasyLeague
+      if (fl?.id) {
+        return localApiService.getFantasyLeagueMetadataStats(fl.id)
           .then((result: any) => {
             this.leagueMetadataStats = result;
           });
@@ -133,9 +126,9 @@ export const useFantasyLeagueStore = defineStore({
     },
 
     fetchPlayerFantasyMatchStats() {
-      if (!this.selectedFantasyLeague) return
-      if (this.selectedFantasyLeague.id) {
-        return localApiService.getPlayerFantasyMatchStats(this.selectedFantasyLeague.id)
+      const fl = this.currentFantasyLeague
+      if (fl?.id) {
+        return localApiService.getPlayerFantasyMatchStats(fl.id)
           .then((result: any) => {
             this.playerFantasyMatchStats = result;
           });
@@ -143,9 +136,9 @@ export const useFantasyLeagueStore = defineStore({
     },
 
     fetchDraftFantasyMatchStats() {
-      if (!this.selectedFantasyLeague) return
-      if (this.selectedFantasyLeague.id) {
-        return localApiService.getDraftPlayerFantasyMatchStats(this.selectedFantasyLeague.id)
+      const fl = this.currentFantasyLeague
+      if (fl?.id) {
+        return localApiService.getDraftPlayerFantasyMatchStats(fl.id)
           .then((result: any) => {
             this.draftFantasyMatchStats = result;
           });
@@ -170,26 +163,15 @@ export const useFantasyLeagueStore = defineStore({
 
     setSelectedLeague(league: League) {
       this.selectedLeague = league
-      this.setSelectedFantasyLeague(this.defaultFantasyLeague)
     },
 
-    setSelectedFantasyLeague(fantasyLeagues: FantasyLeague) {
-      this.selectedFantasyLeague = fantasyLeagues
-    },
-
-    setSelectedFantasyLeagueId(selectFantasyLeagueId: number) {
-      if (selectFantasyLeagueId) {
-        let fantasyLeagueLookup = this.fantasyLeagues.find(fl => fl.id == selectFantasyLeagueId)
-        if (fantasyLeagueLookup) {
-          let leagueLookup = this.leagues.find(l => l.league_id == fantasyLeagueLookup.leagueId)
-          if (leagueLookup) {
-            this.setSelectedLeague(leagueLookup);
-            this.setSelectedFantasyLeague(fantasyLeagueLookup);
-          }
-        }
+    setSelectedLeagueById(leagueId: number) {
+      if (leagueId) {
+        const league = this.leagues.find(l => l.league_id === leagueId)
+        if (league) this.setSelectedLeague(league)
       } else {
-        this.setSelectedLeague(this.defaultLeague);
-        this.setSelectedFantasyLeague(this.defaultFantasyLeague);
+        const defaultL = this.defaultSelectedLeague
+        if (defaultL) this.setSelectedLeague(defaultL)
       }
     },
 
@@ -205,40 +187,16 @@ export const useFantasyLeagueStore = defineStore({
       }
     },
 
-    clearSelectedFantasyLeague() {
-      this.selectedFantasyLeague = {
-        id: 0,
-        leagueId: 0,
-        isActive: false,
-        name: '',
-        fantasyDraftLocked: 0,
-        leagueStartTime: 0,
-        leagueEndTime: 0
-      }
-    },
-
-    // Validation methods
-    isDraftOpen(fantasyLeague: FantasyLeague) {
-      return new Date() < new Date(fantasyLeague.fantasyDraftLocked * 1000);
-    },
-    isDraftActive(fantasyLeague: FantasyLeague) {
-      return new Date() >= new Date(fantasyLeague.leagueStartTime * 1000) &&
-        new Date() <= new Date(fantasyLeague.leagueEndTime * 1000);
-    },
-    isDraftFinished(fantasyLeague: FantasyLeague) {
-      return new Date() > new Date(fantasyLeague.leagueEndTime * 1000);
-    },
-    isLeagueActive(league: League) {
-      return new Date() >= new Date(league.start_timestamp * 1000) &&
-        new Date() <= new Date(league.end_timestamp * 1000);
-    },
+    // Validation methods — pure functions delegated to fantasyLeagueUtils.ts
+    isDraftOpen,
+    isDraftActive,
+    isDraftFinished,
+    isLeagueActive,
+    isLeagueFinished,
     isLeagueOpen(league: League) {
       return this.activeFantasyLeagues
         .filter(fantasyLeague => fantasyLeague.leagueId == league.league_id)
-        .some(fantasyLeague => this.isDraftOpen(fantasyLeague));
-    },
-    isLeagueFinished(league: League) {
-      return new Date() > new Date(league.end_timestamp * 1000);
+        .some(fantasyLeague => isDraftOpen(fantasyLeague));
     }
   },
 
@@ -255,45 +213,92 @@ export const useFantasyLeagueStore = defineStore({
     allFantasyLeagues(): FantasyLeague[] {
       return this.fantasyLeagues ?? []
     },
-    defaultLeague(): League {
-      let fantasyLeagueIds = this.activeFantasyLeagues.map(fl => fl.leagueId);
-      let leaguesWithFantasy = this.activeLeagues.filter(l => fantasyLeagueIds.includes(l.league_id))
-      return leaguesWithFantasy.reduce((max, current) => {
-        return current.start_timestamp > max.start_timestamp ? current : max
-      }, leaguesWithFantasy[0])
+
+    // currentFantasyLeague: derived from selectedLeague, applies priority rules scoped to that league.
+    // This is the canonical active round — never stored state, always computed.
+    currentFantasyLeague(): FantasyLeague | undefined {
+      const fls = this.activeFantasyLeagues.filter(fl => fl.leagueId === this.selectedLeague?.league_id)
+
+      const openDrafts = fls.filter(fl => isDraftOpen(fl))
+      if (openDrafts.length > 0) {
+        return openDrafts.reduce((min, fl) => fl.fantasyDraftLocked < min.fantasyDraftLocked ? fl : min)
+      }
+
+      const liveRounds = fls.filter(fl => isDraftActive(fl))
+      if (liveRounds.length > 0) {
+        return liveRounds.reduce((latest, fl) => fl.leagueStartTime > latest.leagueStartTime ? fl : latest)
+      }
+
+      const finished = fls.filter(fl => isDraftFinished(fl))
+      if (finished.length > 0) {
+        return finished.reduce((latest, fl) => fl.leagueEndTime > latest.leagueEndTime ? fl : latest)
+      }
+
+      return fls[0]
     },
-    defaultFantasyLeague(): FantasyLeague {
-      let filteredLeagues = this.activeFantasyLeagues
-        .filter(fantasyLeague => fantasyLeague.leagueId == this.selectedLeague?.league_id);
-      return filteredLeagues
-        .reduce((max, current) => {
-          // Scenarios
-          if (
-            // if any are active take active fantasy league
-            new Date() >= new Date(current.leagueStartTime * 1000) &&
-            new Date() < new Date(current.leagueEndTime * 1000)
-          ) {
-            return current
-          } else if (
-            // if none are active but the fantasy hasn't started take the earliest
-            new Date() < new Date(current.leagueStartTime * 1000) &&
-            new Date() < new Date(max.leagueStartTime * 1000)
-          ) {
-            return current.fantasyDraftLocked < max.fantasyDraftLocked ? current : max
-          } else if (
-            // if none are active but the fantasy has finished take the latest
-            new Date() > new Date(current.leagueEndTime * 1000) &&
-            new Date() > new Date(max.leagueEndTime * 1000)
-          ) {
-            return current.fantasyDraftLocked > max.fantasyDraftLocked ? current : max
+
+    // defaultSelectedLeague: global priority rules across all tournaments to pick the initial league on load.
+    // Finds the most urgent FantasyLeague globally, then returns its parent League.
+    defaultSelectedLeague(): League | undefined {
+      const all = this.activeFantasyLeagues
+
+      let bestFL: FantasyLeague | undefined
+      const openDrafts = all.filter(fl => isDraftOpen(fl))
+      if (openDrafts.length > 0) {
+        bestFL = openDrafts.reduce((min, fl) => fl.fantasyDraftLocked < min.fantasyDraftLocked ? fl : min)
+      } else {
+        const liveRounds = all.filter(fl => isDraftActive(fl))
+        if (liveRounds.length > 0) {
+          bestFL = liveRounds.reduce((latest, fl) => fl.leagueStartTime > latest.leagueStartTime ? fl : latest)
+        } else {
+          const finished = all.filter(fl => isDraftFinished(fl))
+          if (finished.length > 0) {
+            bestFL = finished.reduce((latest, fl) => fl.leagueEndTime > latest.leagueEndTime ? fl : latest)
           } else {
-            // idk why this should trigger
-            return max
+            bestFL = all[0]
           }
-        }, filteredLeagues[0])
+        }
+      }
+
+      if (!bestFL) return this.activeLeagues[0]
+      return this.leagues.find(l => l.league_id === bestFL!.leagueId) ?? this.activeLeagues[0]
     },
+
+    // defaultFantasyLeague: kept for backwards compatibility during migration.
+    // Delegates to defaultSelectedLeague logic but returns the FL, not the League.
+    // TODO: remove once all callers have migrated to currentFantasyLeague.
+    defaultFantasyLeague(): FantasyLeague | undefined {
+      const league = this.defaultSelectedLeague
+      if (!league) return undefined
+      const fls = this.activeFantasyLeagues.filter(fl => fl.leagueId === league.league_id)
+      return fls[0]
+    },
+
+    viewMode(): 'draft' | 'live' | 'review' {
+      const fl = this.currentFantasyLeague
+      if (!fl?.id) return 'review'
+      if (isDraftOpen(fl)) return 'draft'
+      if (isDraftActive(fl)) return 'live'
+      return 'review'
+    },
+
+    // otherUrgentLeagues: leagues (tournaments) with a more urgent state than the currently selected one.
+    // Used by the alert banner to prompt the user to switch leagues.
+    otherUrgentLeagues(): League[] {
+      const urgencyScore = (league: League): number => {
+        const fls = this.activeFantasyLeagues.filter(fl => fl.leagueId === league.league_id)
+        if (fls.some(fl => isDraftOpen(fl))) return 2
+        if (fls.some(fl => isDraftActive(fl))) return 1
+        return 0
+      }
+      const currentScore = urgencyScore(this.selectedLeague)
+      return this.activeLeagues.filter(l =>
+        l.league_id !== this.selectedLeague?.league_id && urgencyScore(l) >= currentScore && urgencyScore(l) > 0
+      )
+    },
+
     selectedFantasyDraftPoints(): FantasyDraftPoints | undefined {
-      return this.fantasyDraftPoints.find(fdp => fdp.fantasyDraft.fantasyLeagueId == this.selectedFantasyLeague.id)
+      return this.fantasyDraftPoints.find(fdp => fdp.fantasyDraft.fantasyLeagueId == this.currentFantasyLeague?.id)
     }
   }
 })

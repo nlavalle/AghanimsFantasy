@@ -216,8 +216,8 @@ const fantasyPlayersByTeam = (teamId: number) => {
 }
 
 onMounted(() => {
-    if (leagueStore.selectedFantasyLeague) {
-        selectedFantasyLeague.value = leagueStore.selectedFantasyLeague;
+    if (leagueStore.currentFantasyLeague) {
+        selectedFantasyLeague.value = leagueStore.currentFantasyLeague;
     } else {
         localApiService.getLeagues().then((result: any) => {
             leagueStore.setLeagues(result);
@@ -244,7 +244,7 @@ onMounted(() => {
 
 watch(selectedFantasyLeague, () => {
     if (selectedFantasyLeague.value) {
-        leagueStore.setSelectedFantasyLeague(selectedFantasyLeague.value)
+        leagueStore.setSelectedLeague(leagueStore.leagues.find(l => l.league_id === selectedFantasyLeague.value?.leagueId) ?? leagueStore.selectedLeague)
         localApiService.getFantasyPlayers(selectedFantasyLeague.value.id).then((result: any) => {
             fantasyPlayers.value = result;
             setFantasyTeams()

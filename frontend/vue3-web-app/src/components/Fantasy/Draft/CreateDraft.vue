@@ -40,7 +40,7 @@ onMounted(() => {
   }
 })
 
-watch(() => leagueStore.selectedFantasyLeague, () => {
+watch(() => leagueStore.currentFantasyLeague, () => {
   selectedPlayer.value = undefined;
 })
 

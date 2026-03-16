@@ -57,7 +57,7 @@ const addDiscordId = ref('');
 const isMounted = ref(false);
 
 onMounted(() => {
-  localApiService.getPrivateFantasyPlayers(leagueStore.selectedFantasyLeague.id).then((result: any) => {
+  localApiService.getPrivateFantasyPlayers(leagueStore.currentFantasyLeague.id).then((result: any) => {
     privateFantasyDiscordUserData.value = result;
   })
   localApiService.getPrivateFantasyLeagueWeights().then((result: any) => {
@@ -69,12 +69,12 @@ onMounted(() => {
 const saveDiscordUser = (item: any) => {
   let fantasyPlayer: Partial<PrivateFantasyPlayer> = {
     discord_user_id: addDiscordId.value,
-    fantasy_league_id: leagueStore.selectedFantasyLeague.id,
+    fantasy_league_id: leagueStore.currentFantasyLeague.id,
     fantasy_league_join_date: Math.round(Date.now() / 1000),
     is_admin: false
   }
   localApiService.postPrivateFantasyPlayer(fantasyPlayer)?.then(() => {
-    localApiService.getPrivateFantasyPlayers(leagueStore.selectedFantasyLeague.id).then((result: any) => {
+    localApiService.getPrivateFantasyPlayers(leagueStore.currentFantasyLeague.id).then((result: any) => {
       privateFantasyDiscordUserData.value = result;
     })
   })
@@ -85,7 +85,7 @@ const editItem = (item: any) => {
   switch (statsTab.value) {
     case "privateFantasyDiscordUsers":
       localApiService.putPrivateFantasyPlayer(item)?.then(() => {
-        localApiService.getPrivateFantasyPlayers(leagueStore.selectedFantasyLeague.id).then((result: any) => {
+        localApiService.getPrivateFantasyPlayers(leagueStore.currentFantasyLeague.id).then((result: any) => {
           privateFantasyDiscordUserData.value = result;
         })
       })
@@ -104,7 +104,7 @@ const deleteItem = (item: any) => {
   switch (statsTab.value) {
     case "privateFantasyDiscordUsers":
       localApiService.deletePrivateFantasyPlayer(item)?.then(() => {
-        localApiService.getPrivateFantasyPlayers(leagueStore.selectedFantasyLeague.id).then((result: any) => {
+        localApiService.getPrivateFantasyPlayers(leagueStore.currentFantasyLeague.id).then((result: any) => {
           privateFantasyDiscordUserData.value = result;
         })
       });
@@ -154,7 +154,7 @@ const items = computed(() => {
 const defaultItem = computed(() => {
   switch (statsTab.value) {
     case "privateFantasyDiscordUsers":
-      privateFantasyDiscordUserDefaultItemSpecified.fantasyLeagueId = leagueStore.selectedFantasyLeague.id
+      privateFantasyDiscordUserDefaultItemSpecified.fantasyLeagueId = leagueStore.currentFantasyLeague.id
       return privateFantasyDiscordUserDefaultItemSpecified
     case "fantasyLeagueWeight":
       return fantasyLeagueWeightDefaultItemSpecified

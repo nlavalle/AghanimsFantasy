@@ -10,8 +10,8 @@
         <div class="bar-info-cards">
           <DraftBudgetCard />
           <DraftRoundCard :current="3" :total="5" />
-          <DraftTimerCard v-if="leagueStore.selectedFantasyLeague"
-            :target-time="leagueStore.selectedFantasyLeague.fantasyDraftLocked" />
+          <DraftTimerCard v-if="leagueStore.currentFantasyLeague"
+            :target-time="leagueStore.currentFantasyLeague.fantasyDraftLocked" />
         </div>
         <div class="bar-actions">
           <button class="btn-save" :disabled="!canSave" :class="{ 'btn-save--disabled': !canSave }"

@@ -22,7 +22,7 @@
                         :style="{ fontWeight: item.userName == props.authenticatedUser?.name ? 'bold' : 'normal' }">
                         {{ item.value.toFixed(2).toLocaleString() }}</span>
                 </div>
-                <v-tooltip v-if="!fantasyLeagueStore.isDraftOpen(fantasyLeagueStore.selectedFantasyLeague)"
+                <v-tooltip v-if="!fantasyLeagueStore.isDraftOpen(fantasyLeagueStore.currentFantasyLeague)"
                     location="start" :open-on-hover="true">
                     <template v-slot:activator="{ props: tooltipProps }">
                         <div class="leaderboard-hover-zone" v-bind="tooltipProps"></div>

@@ -10,7 +10,7 @@
     </v-tabs>
   </div>
   <div class="bg-secondary">
-    <v-tabs v-model="leagueStore.selectedFantasyLeague" selected-class="selected-tab">
+    <v-tabs v-model="leagueStore.currentFantasyLeague" selected-class="selected-tab">
       <v-tab v-for="fantasyLeague in fantasyLeagueOptions" :value="fantasyLeague"
         :variant="!leagueStore.isDraftFinished(fantasyLeague) ? 'text' : 'plain'">
         {{ fantasyLeague.name }} ({{leagueStore.fantasyDraftPoints.find((draft: FantasyDraftPoints) =>
@@ -64,9 +64,9 @@ onBeforeMount(() => {
 watch(() => leagueStore.selectedLeague, () => {
   if (leagueStore.fantasyLeagues.length > 0) {
     // Don't fire this if fantasyLeagues hasn't been loaded yet
-    if (!leagueStore.selectedFantasyLeague || leagueStore.selectedFantasyLeague.leagueId != leagueStore.selectedLeague.league_id) {
+    if (!leagueStore.currentFantasyLeague || leagueStore.currentFantasyLeague.leagueId != leagueStore.selectedLeague.league_id) {
       // Want to respect router param selected Fantasy League if it's set and not override it
-      leagueStore.selectedFantasyLeague = leagueStore.defaultFantasyLeague;
+      leagueStore.currentFantasyLeague = leagueStore.currentFantasyLeague;
     }
     if (authStore.authenticated) {
       leagueStore.fetchFantasyDraftPoints()
@@ -74,11 +74,11 @@ watch(() => leagueStore.selectedLeague, () => {
   }
 })
 
-watch(() => leagueStore.selectedFantasyLeague, () => {
-  if (leagueStore.selectedFantasyLeague) {
+watch(() => leagueStore.currentFantasyLeague, () => {
+  if (leagueStore.currentFantasyLeague) {
     router.push({
       path: route.path,
-      query: { fantasyLeagueId: leagueStore.selectedFantasyLeague.id }
+      query: { fantasyLeagueId: leagueStore.currentFantasyLeague.id }
     })
   }
 })

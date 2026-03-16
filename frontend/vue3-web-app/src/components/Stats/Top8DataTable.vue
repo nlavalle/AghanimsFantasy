@@ -244,15 +244,15 @@ const teamsList = computed(() => {
 })
 
 onMounted(() => {
-    if (fantasyLeagueStore.selectedFantasyLeague) {
-        localApiService.getFantasyPlayerTop8MatchStats(fantasyLeagueStore.selectedFantasyLeague.id)
+    if (fantasyLeagueStore.currentFantasyLeague) {
+        localApiService.getFantasyPlayerTop8MatchStats(fantasyLeagueStore.currentFantasyLeague.id)
             .then(result => playerFantasyMatchStats.value = result);
     }
 });
 
-watch(fantasyLeagueStore.selectedFantasyLeague, () => {
-    if (fantasyLeagueStore.selectedFantasyLeague) {
-        localApiService.getFantasyPlayerTop8MatchStats(fantasyLeagueStore.selectedFantasyLeague.id)
+watch(fantasyLeagueStore.currentFantasyLeague, () => {
+    if (fantasyLeagueStore.currentFantasyLeague) {
+        localApiService.getFantasyPlayerTop8MatchStats(fantasyLeagueStore.currentFantasyLeague.id)
             .then(result => playerFantasyMatchStats.value = result);
     }
 });

@@ -13,7 +13,7 @@
                 </v-row>
             </v-col>
         </v-row>
-        <v-row class="mt-10" v-if="!fantasyLeagueStore.isDraftOpen(fantasyLeagueStore.selectedFantasyLeague)">
+        <v-row class="mt-10" v-if="!fantasyLeagueStore.isDraftOpen(fantasyLeagueStore.currentFantasyLeague)">
             <player-winnings class="playerWinnings" :selectedDraft="fantasyLeagueStore.selectedFantasyDraftPoints" />
         </v-row>
     </v-container>

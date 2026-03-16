@@ -46,8 +46,9 @@ export const useFantasyDraftStore = defineStore({
     },
 
     fetchLeaderboard() {
-      if (this.leagueStore.selectedFantasyLeague.id) {
-        return localApiService.getTopTenDrafts(this.leagueStore.selectedFantasyLeague.id)
+      const fl = this.leagueStore.currentFantasyLeague
+      if (fl?.id) {
+        return localApiService.getTopTenDrafts(fl.id)
           .then((result) => (this.fantasyLeaderboard = result))
           .then(() => {
             this.fetchLeaderboardStats()
@@ -56,8 +57,9 @@ export const useFantasyDraftStore = defineStore({
     },
 
     fetchLeaderboardStats() {
-      if (this.leagueStore.selectedFantasyLeague.id) {
-        localApiService.getLeaderboardStats(this.leagueStore.selectedFantasyLeague.id)
+      const fl = this.leagueStore.currentFantasyLeague
+      if (fl?.id) {
+        localApiService.getLeaderboardStats(fl.id)
           .then((result: any) => {
             this.fantasyLeaderboardStats = result;
           })
@@ -65,9 +67,10 @@ export const useFantasyDraftStore = defineStore({
     },
 
     saveFantasyDraft(draftPicks: FantasyPlayer[]) {
+      const fl = this.leagueStore.currentFantasyLeague
       return new Promise((resolve) => {
         localApiService.saveFantasyDraft(
-          this.leagueStore.selectedFantasyLeague,
+          fl,
           draftPicks
         ).then((result: any) => {
           resolve(result)
