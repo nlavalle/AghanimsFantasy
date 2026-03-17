@@ -1,11 +1,11 @@
 <template>
   <div class="login-modal">
     <div v-if="authStore.isAuthenticated" style="display:flex">
-      <v-btn v-if="!display.mobile.value" class="text-none" density="compact" variant="flat" height="40px"
+      <v-btn v-if="!display.mobile.value" class="text-none" density="compact" height="40px"
         to="/profile">
         Welcome, {{ isCurrentNameBlank ? 'Unknown User' : authStore.currentUser.name }}
       </v-btn>
-      <v-btn v-else class="text-none mr-2" density="compact" variant="flat" height="40px" width="40px" to="/profile"
+      <v-btn v-else class="text-none mr-2" density="compact" height="40px" width="40px" to="/profile"
         icon="fa-regular fa-circle-user">
       </v-btn>
       <v-btn @click="logout" density="compact" variant="outlined" size="x-small" height="40px" style="text-align:left">

@@ -218,5 +218,30 @@ namespace csharp_ef_webapi.Controllers
 
             return Ok(paginatedMatches);
         }
+
+        // GET: api/League/5/Leaderboard
+        [HttpGet("{leagueId}/leaderboard")]
+        public async Task<ActionResult<LeagueLeaderboard>> GetLeagueLeaderboard(int? leagueId)
+        {
+            try
+            {
+                if (leagueId == null || !leagueId.HasValue)
+                {
+                    return BadRequest("Please provide a League ID to fetch a draft of");
+                }
+
+                var leagueLeaderboard = await _fantasyService.GetLeagueLeaderboardAsync(HttpContext.User, leagueId.Value);
+                if (leagueLeaderboard == null)
+                {
+                    return Ok(new { });
+                }
+
+                return Ok(leagueLeaderboard);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

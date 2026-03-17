@@ -1,7 +1,7 @@
 <template>
     <v-dialog class="error-dialog">
         <template v-slot:default="{ isActive }">
-            <v-card dark>
+            <v-card>
                 <v-card-text>
                     <span class="text-h6">Error</span>
                 </v-card-text>

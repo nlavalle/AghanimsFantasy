@@ -1,6 +1,9 @@
+import type { DraftPickPlayer } from '@/components/Fantasy/fantasyDraft'
+
 export interface Leaderboard {
     fantasyDraft: {
         id: number,
+        draftPickPlayers: DraftPickPlayer[]
     },
     isTeam: boolean,
     userName: string,

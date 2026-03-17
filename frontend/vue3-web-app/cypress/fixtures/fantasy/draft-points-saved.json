@@ -4,11 +4,11 @@
       "id": 999,
       "fantasyLeagueId": 1,
       "draftPickPlayers": [
-        { "draftOrder": 1, "fantasyPlayer": { "id": 101, "dotaAccountId": 1001, "teamPosition": 1 } },
-        { "draftOrder": 2, "fantasyPlayer": { "id": 102, "dotaAccountId": 1002, "teamPosition": 2 } },
-        { "draftOrder": 3, "fantasyPlayer": { "id": 103, "dotaAccountId": 1003, "teamPosition": 1 } },
-        { "draftOrder": 4, "fantasyPlayer": { "id": 104, "dotaAccountId": 1004, "teamPosition": 3 } },
-        { "draftOrder": 5, "fantasyPlayer": { "id": 105, "dotaAccountId": 1005, "teamPosition": 5 } }
+        { "draftOrder": 1, "fantasyPlayer": { "id": 101, "dotaAccountId": 1001, "teamPosition": 1, "teamId": 1, "dotaAccount": { "id": 1001, "name": "Player One", "steamProfilePicture": "" } } },
+        { "draftOrder": 2, "fantasyPlayer": { "id": 102, "dotaAccountId": 1002, "teamPosition": 2, "teamId": 1, "dotaAccount": { "id": 1002, "name": "Player Two", "steamProfilePicture": "" } } },
+        { "draftOrder": 3, "fantasyPlayer": { "id": 103, "dotaAccountId": 1003, "teamPosition": 3, "teamId": 1, "dotaAccount": { "id": 1003, "name": "Player Three", "steamProfilePicture": "" } } },
+        { "draftOrder": 4, "fantasyPlayer": { "id": 104, "dotaAccountId": 1004, "teamPosition": 1, "teamId": 2, "dotaAccount": { "id": 1004, "name": "Player Four", "steamProfilePicture": "" } } },
+        { "draftOrder": 5, "fantasyPlayer": { "id": 105, "dotaAccountId": 1005, "teamPosition": 2, "teamId": 2, "dotaAccount": { "id": 1005, "name": "Player Five", "steamProfilePicture": "" } } }
       ]
     },
     "fantasyPlayerPoints": [

@@ -19,6 +19,10 @@
                 <font-awesome-icon :icon="['fas', 'table-cells']" class="tab-icon" />
                 Draft
             </v-tab>
+            <v-tab to="/leaderboard">
+                <font-awesome-icon :icon="['fas', 'trophy']" class="tab-icon" />
+                Leaderboard
+            </v-tab>
             <v-tab to="/stats">
                 <font-awesome-icon :icon="['fas', 'chart-line']" class="tab-icon" />
                 Stats
@@ -27,10 +31,10 @@
                 <font-awesome-icon :icon="['fas', 'circle-info']" class="tab-icon" />
                 About
             </v-tab>
-            <v-tab v-show="authStore.isAuthenticated" to="/prizes">
+            <!-- <v-tab v-show="authStore.isAuthenticated" to="/prizes">
                 <font-awesome-icon :icon="['fas', 'trophy']" class="tab-icon" />
                 Prizes
-            </v-tab>
+            </v-tab> -->
             <v-tab v-show="authStore.currentUser?.isAdmin ?? false" to="/admin">
                 <font-awesome-icon :icon="['fas', 'gear']" class="tab-icon" />
                 Admin
@@ -68,6 +72,7 @@ const route = useRoute();
 
 const tabColors: Record<string, string> = {
     '/fantasy': 'var(--rune-purple)',
+    '/leaderboard': 'var(--rune-blue)',
     '/stats': 'var(--rune-gold)',
     '/about': 'var(--ot-blue)',
     '/prizes': 'var(--rune-gold-rarity)',

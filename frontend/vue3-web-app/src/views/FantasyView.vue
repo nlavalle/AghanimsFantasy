@@ -9,102 +9,6 @@
         @clearDraft="clearFantasyDraftPicks" @saveDraft="saveDraft" />
       <PlayerPicksAvailable style="padding-right: 396px" />
       <PlayerStats class="player-stats-fixed" />
-
-      <!-- <v-container v-if="isMounted" :style="fantasyTab === 'draft' ? 'padding-right: 396px' : ''"
-      style="max-width: 100%">
-      <v-row style="width:100%">
-        <v-col>
-          <v-row class="align-center">
-            <v-tabs v-model="fantasyTab" center-active show-arrows>
-              <v-tab value="current">Current Draft</v-tab>
-              <v-tab value="draft">Draft Players</v-tab>
-              <v-tab value="leaderboard">Leaderboard</v-tab>
-              <v-tab value="match">Fantasy Matches</v-tab>
-            </v-tabs>
-            <v-btn icon="fa-refresh" @click="refreshFantasy" :loading="!loaded" :disabled="!loaded" size="small"
-              variant="outlined" aria-label="Refresh fantasy data">
-            </v-btn>
-            <v-spacer />
-            <UserBalance />
-          </v-row>
-          <v-row v-if="fantasyLeagueStore.currentFantasyLeague && !updateDisabled">
-            <fantasy-lock-timer class="ma-3"
-              :target-time="fantasyLeagueStore.currentFantasyLeague.fantasyDraftLocked" />
-          </v-row>
-          <v-row>
-            <v-tabs-window v-model="fantasyTab" style="width:100%;overflow: visible" transition="fade-transition"
-              reverse-transition="fade-transition">
-              <v-tabs-window-item value="current">
-                <div v-if="fantasyLeagueStore.selectedFantasyDraftPoints">
-                  <CurrentDraft :FantasyPoints="fantasyLeagueStore.selectedFantasyDraftPoints" />
-                </div>
-              </v-tabs-window-item>
-              <v-tabs-window-item value="draft" style="overflow: visible !important">
-                <v-col>
-                  <v-row v-if="!authStore.isAuthenticated" class="section-gap">
-                    <v-card class="pa-4">
-                      <v-card-title style="text-wrap:wrap">
-                        <v-row>
-                          <v-col>
-                            <span class="not-authenticated">Please login to save your draft</span>
-                          </v-col>
-                          <v-col cols="4" class="mr-1" align-self="center">
-                            <LoginModal class="login-modal" />
-                          </v-col>
-                        </v-row>
-                      </v-card-title>
-                    </v-card>
-                  </v-row>
-                  <v-row v-if="updateDraftVisibility || updateDisabled" class="section-gap">
-                    <v-card class="pa-4" disabled>
-                      <v-card-title style="text-wrap:wrap">
-                        {{ `Drafting for Fantasy League: ${fantasyLeagueStore.selectedLeague!.name} is locked` }}
-                      </v-card-title>
-                    </v-card>
-                  </v-row>
-                  <v-row>
-                    <v-col>
-                      <v-row v-if="fantasyLeagueStore.currentFantasyLeague">
-                        <CreateDraft @saveDraft="saveDraft" />
-                      </v-row>
-                    </v-col>
-                  </v-row>
-                </v-col>
-              </v-tabs-window-item>
-              <v-tabs-window-item value="leaderboard">
-                <v-col>
-                  <v-row class="mt-1">
-                    <leaderboard-component class="leaderboardComponent" leaderboardTitle="Fantasy Leaderboard"
-                      headerName="Draft Player" headerValue="Points" :authenticatedUser="authStore.currentUser"
-                      :boardData="fantasyDraftStore.fantasyLeaderboardData" />
-                  </v-row>
-                  <v-row class="section-gap leaderboard-stats" v-if="authStore.isAuthenticated">
-                    <v-col>
-                      <p>Total Drafts: {{ fantasyDraftStore.fantasyLeaderboardStats?.totalDrafts ?? 0 }}</p>
-                    </v-col>
-                    <v-col>
-                      <p>You're in the {{ fantasyDraftStore.fantasyLeaderboardStats?.drafterPercentile?.toFixed(0) ?? 0
-                      }}th percentile
-                      </p>
-                    </v-col>
-                  </v-row>
-                </v-col>
-              </v-tabs-window-item>
-              <v-tabs-window-item value="match">
-                <v-col>
-                  <v-row v-if="fantasyLeagueStore.selectedFantasyDraftPoints && fantasyTab == 'match'">
-                    <MatchDataTable v-model:currentFantasyLeague="fantasyLeagueStore.currentFantasyLeague"
-                      v-model:draftFiltered="draftFiltered">
-                    </MatchDataTable>
-                  </v-row>
-                </v-col>
-              </v-tabs-window-item>
-            </v-tabs-window>
-          </v-row>
-        </v-col>
-      </v-row>
-    </v-container> -->
-
     </div>
 
     <AlertDialog v-model="showSuccessModal" @ok="scrollAfterAlertDialog" />
@@ -117,18 +21,12 @@ import { computed, ref, watch } from 'vue';
 import { VProgressCircular } from 'vuetify/components';
 import { useAuthStore } from '@/stores/auth';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
-// import CurrentDraft from '@/components/Fantasy/CurrentDraft.vue';
 import PlayerPicksAvailable from '@/components/Fantasy/Draft/PlayerPool/PlayerPicksAvailable.vue';
 import CreateDraftPicks from '@/components/Fantasy/Draft/PickBar/CreateDraftPicks.vue';
-// import MatchDataTable from '@/components/Stats/MatchDataTable.vue';
 import { fantasyDraftState, DRAFT_BUDGET } from '@/components/Fantasy/fantasyDraft';
-// import LoginModal from '@/components/Auth/LoginModal.vue';
 import AlertDialog from '@/components/AlertDialog.vue';
 import ErrorDialog from '@/components/ErrorDialog.vue';
 import { useFantasyDraftStore } from '@/stores/fantasyDraft';
-// import LeaderboardComponent from '@/components/Fantasy/Leaderboard/LeaderboardComponent.vue'
-// import FantasyLockTimer from '@/components/Fantasy/FantasyLockTimer.vue';
-// import UserBalance from '@/components/Fantasy/UserBalance.vue';
 import FantasyAlertBanner from '@/components/Fantasy/FantasyAlertBanner.vue';
 import PlayerStats from '@/components/Fantasy/Draft/PlayerPanel/PlayerStats.vue';
 
@@ -136,27 +34,12 @@ const authStore = useAuthStore();
 const fantasyLeagueStore = useFantasyLeagueStore();
 const fantasyDraftStore = useFantasyDraftStore();
 const { fantasyDraftPicks, setFantasyDraftPicks, setFantasyPlayerPoints, clearFantasyDraftPicks, totalDraftCost } = fantasyDraftState();
-// const draftFiltered = ref(true);
 
 const showSuccessModal = ref(false);
 const showErrorModal = ref(false);
 const errorDetails = ref<Error>();
 
-// const fantasyTab = ref('current')
-// const updateDraftVisibility = ref(false);
-
 const isMounted = ref(false);
-// const loaded = ref(true);
-
-// const viewMode = computed(() => fantasyLeagueStore.viewMode)
-
-// const updateDisabled = computed(() => {
-//   var currentDate = new Date();
-//   var draftLockEpoch: number = fantasyLeagueStore.currentFantasyLeague ? fantasyLeagueStore.currentFantasyLeague.fantasyDraftLocked : 0;
-//   var lockDate = new Date(draftLockEpoch * 1000);
-//   //return currentDate > lockDate && userDraftPoints.value != {}; // TODO: Rethink logic on people who draft late
-//   return currentDate > lockDate;
-// });
 
 const canSave = computed(() => {
   const totalGold = totalDraftCost(fantasyLeagueStore.fantasyPlayersStats);
@@ -184,7 +67,7 @@ const saveDraft = async () => {
         left: 0,
         behavior: 'smooth'
       });
-      fantasyLeagueStore.fetchFantasyDraftPoints()?.then(() => fantasyDraftStore.fetchLeaderboard());
+      fantasyLeagueStore.fetchFantasyDraftPoints();
       // fantasyTab.value = 'current';
     })
     .catch(error => {
@@ -228,31 +111,24 @@ const scrollAfterAlertDialog = () => {
 watch(() => fantasyLeagueStore.currentFantasyLeague, async (fl) => {
   if (!fl) return
 
-  if (!isMounted.value) {
-    // Initial load: fetch everything needed to render the page
+  await Promise.all([
+    fantasyLeagueStore.fetchFantasyPlayerViewModels(),
+    fantasyLeagueStore.fetchFantasyPlayerPoints(),
+    fantasyLeagueStore.fetchFantasyDraftPoints()
+  ]).then(() => {
+    setFantasyPlayerPoints(fantasyLeagueStore.fantasyPlayerPoints)
+
     if (authStore.authenticated) {
       // await fantasyDraftStore.fetchLeaderboard()
-      await fantasyLeagueStore.fetchFantasyPlayerViewModels()
-      await fantasyLeagueStore.fetchFantasyPlayerPoints()
-      setFantasyPlayerPoints(fantasyLeagueStore.fantasyPlayerPoints)
       if (fantasyLeagueStore.selectedFantasyDraftPoints && (fantasyLeagueStore.selectedFantasyDraftPoints?.fantasyDraft.draftPickPlayers.length ?? 0 > 0)) {
         setFantasyDraftPicks(fantasyLeagueStore.selectedFantasyDraftPoints.fantasyDraft.draftPickPlayers);
-      } else {
-        // fantasyTab.value = 'draft';
       }
-    } else {
-      // await fantasyDraftStore.fetchLeaderboard()
-      // fantasyTab.value = 'draft';
     }
-    isMounted.value = true;
-  } else {
-    // League switch: refresh player data for the newly selected league
-    fantasyLeagueStore.fetchFantasyPlayerPoints()?.then(() => setFantasyPlayerPoints(fantasyLeagueStore.fantasyPlayerPoints))
-      .then(() => {
-        // fantasyDraftStore.fetchLeaderboard()
-        fantasyLeagueStore.fetchFantasyPlayerViewModels();
-      })
-  }
+
+    if (!isMounted.value) {
+      isMounted.value = true;
+    }
+  })
 }, { immediate: true })
 
 watch(() => fantasyLeagueStore.selectedFantasyDraftPoints, () => {

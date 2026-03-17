@@ -1,3 +1,6 @@
+/* Space Grotesk - Google Fonts (used for stats/numbers in draft arena) */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
+
 /* Montserrat - Local Fonts */
 @font-face { font-family: 'Montserrat'; font-weight: 400; font-style: normal; font-display: swap; src: url('./fonts/Montserrat-Regular.ttf') format('truetype'); }
 @font-face { font-family: 'Montserrat'; font-weight: 500; font-style: normal; font-display: swap; src: url('./fonts/Montserrat-Medium.ttf') format('truetype'); }
@@ -9,9 +12,6 @@
 @font-face { font-family: 'Poppins'; font-weight: 400; font-style: normal; font-display: swap; src: url('./fonts/Poppins-Regular.ttf') format('truetype'); }
 @font-face { font-family: 'Poppins'; font-weight: 500; font-style: normal; font-display: swap; src: url('./fonts/Poppins-Medium.ttf') format('truetype'); }
 @font-face { font-family: 'Poppins'; font-weight: 600; font-style: normal; font-display: swap; src: url('./fonts/Poppins-SemiBold.ttf') format('truetype'); }
-
-/* Space Grotesk - Google Fonts (used for stats/numbers in draft arena) */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
 
 /* Aghanims Fantasy Design Tokens */
 :root {
@@ -102,6 +102,14 @@
   --rune-purple-muted: #A78BFA;
   --rune-purple-text: #E9D5FF;
   --rune-lavender: #E8D0FF;
+
+  /* Blue rune scale */
+  --rune-blue-deep: #001D4A;
+  --rune-blue-dark: #003580;
+  --rune-blue: #1565C0;
+  --rune-blue-mid: #1E88E5;
+  --rune-blue-light: #42A5F5;
+  --rune-blue-muted: #80C4FF;
 
   /* Rune gold/cream text */
   --rune-gold: #E8E0C8;

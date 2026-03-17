@@ -122,7 +122,7 @@ public class FantasyService
 
             // Get Private Fantasy Leagues user is a part of and append it to the list
             var privateLeagues = await _dbContext.FantasyPrivateLeaguePlayers
-                .Where(pfp => pfp.UserId == user.Id && pfp.FantasyLeague != null)
+                .Where(pfp => pfp.UserId == user.Id && pfp.FantasyLeague != null && pfp.FantasyLeague.IsPrivate)
                 .Select(pfp => pfp.FantasyLeague)
                 .Distinct()
                 .ToListAsync();
@@ -336,6 +336,35 @@ public class FantasyService
         return matchSummary = matchSummary.OrderBy(m => m.FantasyPlayer?.DotaAccount!.Name).ToList();
     }
 
+    public async Task<LeagueLeaderboard> GetLeagueLeaderboardAsync(ClaimsPrincipal siteUser, int leagueId)
+    {
+        var relevantFantasyLeagues = await _dbContext.FantasyLeagues.Where(fl => fl.LeagueId == leagueId && !fl.IsPrivate && fl.IsActive).ToListAsync();
+        if (relevantFantasyLeagues.Count == 0)
+        {
+            throw new ArgumentException("No fantasy leagues found for this league ID");
+        }
+
+        LeagueLeaderboard leagueLeaderboard = new LeagueLeaderboard
+        {
+            LeagueId = leagueId
+        };
+
+        // If user is null just skip the leaderboard stats and get the rounds
+        AghanimsFantasyUser? user = await _userManager.GetUserAsync(siteUser);
+
+        foreach (var relevantFantasyLeague in relevantFantasyLeagues)
+        {
+            leagueLeaderboard.Rounds.Add(new LeagueLeaderboardRound
+            {
+                FantasyLeagueId = relevantFantasyLeague.Id,
+                AllRoundsStats = user != null ? await GetLeaderboardStatsAsync(siteUser, relevantFantasyLeague.Id) : null,
+                FantasyDrafts = (await GetTop10FantasyDraftsAsync(siteUser, relevantFantasyLeague.Id))?.ToList() ?? []
+            });
+        }
+
+        return leagueLeaderboard;
+    }
+
     public async Task<IEnumerable<FantasyDraftPointTotals>?> GetTop10FantasyDraftsAsync(ClaimsPrincipal siteUser, int fantasyLeagueId)
     {
         FantasyLeague? fantasyLeague = await GetAccessibleFantasyLeagueAsync(siteUser, fantasyLeagueId);
@@ -358,7 +387,7 @@ public class FantasyService
         // We want the user included even if they're not top 10
         if (user != null && !top10Players.Any(tp => tp.FantasyDraft.UserId == user.Id))
         {
-            var currentPlayer = fantasyPoints.Where(fp => fp.FantasyDraft.UserId == user.Id).FirstOrDefault();
+            var currentPlayer = fantasyPoints.FirstOrDefault(fp => fp.FantasyDraft.UserId == user.Id);
             if (currentPlayer != null)
             {
                 top10Players.Add(currentPlayer);
@@ -406,8 +435,10 @@ public class FantasyService
             };
         }
 
-        LeaderboardStats leaderboardStats = new LeaderboardStats();
-        leaderboardStats.TotalDrafts = fantasyPoints.Count();
+        LeaderboardStats leaderboardStats = new LeaderboardStats
+        {
+            TotalDrafts = fantasyPoints.Count()
+        };
 
         AghanimsFantasyUser user = await GetUserFromContext(siteUser);
         // Percentile = (Number of Values Below “x” / Total Number of Values) × 100

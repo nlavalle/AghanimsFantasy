@@ -13,12 +13,10 @@ public class FantasyDraftPointTotals
         get
         {
             return FantasyPlayerPoints
-                .Where(fpp =>
+                .FirstOrDefault(fpp =>
                     fpp.FantasyPlayer.Id == FantasyDraft.DraftPickPlayers
-                        .Where(fdp => fdp.DraftOrder == 1)
-                        .FirstOrDefault()?.FantasyPlayer!.Id
-                )
-                .FirstOrDefault()?.TotalMatchFantasyPoints ?? 0;
+                        .FirstOrDefault(fdp => fdp.DraftOrder == 1)?.FantasyPlayer!.Id
+                )?.TotalMatchFantasyPoints ?? 0;
         }
     }
     public decimal DraftPickTwoPoints
@@ -26,12 +24,10 @@ public class FantasyDraftPointTotals
         get
         {
             return FantasyPlayerPoints
-                .Where(fpp =>
+                .FirstOrDefault(fpp =>
                     fpp.FantasyPlayer.Id == FantasyDraft.DraftPickPlayers
-                        .Where(fdp => fdp.DraftOrder == 2)
-                        .FirstOrDefault()?.FantasyPlayer!.Id
-                )
-                .FirstOrDefault()?.TotalMatchFantasyPoints ?? 0;
+                        .FirstOrDefault(fdp => fdp.DraftOrder == 2)?.FantasyPlayer!.Id
+                )?.TotalMatchFantasyPoints ?? 0;
         }
     }
     public decimal DraftPickThreePoints
@@ -39,12 +35,10 @@ public class FantasyDraftPointTotals
         get
         {
             return FantasyPlayerPoints
-                .Where(fpp =>
+                .FirstOrDefault(fpp =>
                     fpp.FantasyPlayer.Id == FantasyDraft.DraftPickPlayers
-                        .Where(fdp => fdp.DraftOrder == 3)
-                        .FirstOrDefault()?.FantasyPlayer!.Id
-                )
-                .FirstOrDefault()?.TotalMatchFantasyPoints ?? 0;
+                        .FirstOrDefault(fdp => fdp.DraftOrder == 3)?.FantasyPlayer!.Id
+                )?.TotalMatchFantasyPoints ?? 0;
         }
     }
     public decimal DraftPickFourPoints
@@ -52,12 +46,10 @@ public class FantasyDraftPointTotals
         get
         {
             return FantasyPlayerPoints
-                .Where(fpp =>
+                .FirstOrDefault(fpp =>
                     fpp.FantasyPlayer.Id == FantasyDraft.DraftPickPlayers
-                        .Where(fdp => fdp.DraftOrder == 4)
-                        .FirstOrDefault()?.FantasyPlayer!.Id
-                )
-                .FirstOrDefault()?.TotalMatchFantasyPoints ?? 0;
+                        .FirstOrDefault(fdp => fdp.DraftOrder == 4)?.FantasyPlayer!.Id
+                )?.TotalMatchFantasyPoints ?? 0;
         }
     }
     public decimal DraftPickFivePoints
@@ -65,12 +57,10 @@ public class FantasyDraftPointTotals
         get
         {
             return FantasyPlayerPoints
-                .Where(fpp =>
+                .FirstOrDefault(fpp =>
                     fpp.FantasyPlayer.Id == FantasyDraft.DraftPickPlayers
-                        .Where(fdp => fdp.DraftOrder == 5)
-                        .FirstOrDefault()?.FantasyPlayer!.Id
-                )
-                .FirstOrDefault()?.TotalMatchFantasyPoints ?? 0;
+                        .FirstOrDefault(fdp => fdp.DraftOrder == 5)?.FantasyPlayer!.Id
+                )?.TotalMatchFantasyPoints ?? 0;
         }
     }
     public decimal DraftTotalFantasyPoints

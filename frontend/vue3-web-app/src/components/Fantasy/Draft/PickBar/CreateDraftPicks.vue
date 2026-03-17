@@ -9,7 +9,7 @@
       <div class="bar-right">
         <div class="bar-info-cards">
           <DraftBudgetCard />
-          <DraftRoundCard :current="3" :total="5" />
+          <DraftRoundCard :current="currentRound" :total="totalRounds" />
           <DraftTimerCard v-if="leagueStore.currentFantasyLeague"
             :target-time="leagueStore.currentFantasyLeague.fantasyDraftLocked" />
         </div>
@@ -30,6 +30,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import { fantasyDraftState } from '@/components/Fantasy/fantasyDraft';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
 import DraftPickSlot from './DraftPickSlot.vue';
@@ -43,6 +44,19 @@ defineEmits(['clearDraft', 'saveDraft'])
 
 const { selectedPlayer, currentDraftSlotSelected, fantasyDraftPicks, fantasyPlayerPointsAvailable } = fantasyDraftState();
 const leagueStore = useFantasyLeagueStore();
+
+const leagueRounds = computed(() =>
+  [...leagueStore.fantasyLeagues]
+    .filter(fl => fl.leagueId === leagueStore.selectedLeague?.league_id)
+    .sort((a, b) => a.leagueStartTime - b.leagueStartTime)
+)
+
+const currentRound = computed(() => {
+  const idx = leagueRounds.value.findIndex(fl => fl.id === leagueStore.currentFantasyLeague?.id)
+  return idx === -1 ? 1 : idx + 1
+})
+
+const totalRounds = computed(() => leagueRounds.value.length || 1)
 
 const changeActiveDraftPlayer = (activeDraftPlayerSlot: number) => {
   currentDraftSlotSelected.value = activeDraftPlayerSlot;

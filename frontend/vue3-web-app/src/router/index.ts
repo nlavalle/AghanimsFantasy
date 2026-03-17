@@ -29,6 +29,11 @@ const router = createRouter({
       component: () => import('../views/FantasyView.vue')
     },
     {
+      path: '/leaderboard',
+      name: 'leaderboard',
+      component: () => import('../views/LeaderboardView.vue')
+    },
+    {
       path: '/profile',
       name: 'profile',
       component: () => import('../views/ProfileView.vue')

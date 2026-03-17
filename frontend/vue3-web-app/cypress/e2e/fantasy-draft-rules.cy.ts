@@ -91,6 +91,7 @@ describe('Fantasy draft — mechanic rules', () => {
   })
 
   it('after hitting the team cap, remaining players from that team are disabled', () => {
+
     // Team Secret has 3 players. Draft pos-1 from a different team first so slot advances.
     // Advance to pos-2 by picking Player Four (OG, pos 1)
     draftPlayer('Player Four')
@@ -102,5 +103,34 @@ describe('Fantasy draft — mechanic rules', () => {
     // Player One is pos-1 which won't be in active slot, but it should also carry pool-card--disabled
     // due to team cap regardless of position filter.
     cy.contains('.pool-card', 'Player One').should('have.class', 'pool-card--disabled')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Saved draft pre-population
+// ---------------------------------------------------------------------------
+describe('Fantasy draft — saved draft pre-population', () => {
+  beforeEach(() => {
+    cy.clock(FROZEN_NOW_MS, ['Date'])
+    cy.mockAuthenticated(true)
+    cy.mockFantasyScenarioWithSavedDraft('pre-draft', FROZEN_NOW)
+    cy.visit('/fantasy')
+  })
+
+  it('loads a previously saved draft into the pick bar on page load', () => {
+    // Saved draft has Player One through Player Five in slots 1-5
+    cy.get('.new-pick-bar').should('contain', 'Player One')
+    cy.get('.new-pick-bar').should('contain', 'Player Two')
+    cy.get('.new-pick-bar').should('contain', 'Player Three')
+    cy.get('.new-pick-bar').should('contain', 'Player Four')
+    cy.get('.new-pick-bar').should('contain', 'Player Five')
+  })
+
+  it('all five pick slots are filled when a saved draft is loaded', () => {
+    cy.get('.new-pick-bar .pick-slot.filled').should('have.length', 5)
+  })
+
+  it('no pick slot is selected (active) when all slots are pre-filled', () => {
+    cy.get('.new-pick-bar .pick-slot.selected').should('have.length', 0)
   })
 })

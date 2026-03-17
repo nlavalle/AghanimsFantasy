@@ -6,6 +6,7 @@ import { localApiService } from '@/services/localApiService'
 import type { FantasyDraftPoints, FantasyPlayer } from '@/components/Fantasy/fantasyDraft'
 import type { Leaderboard, LeaderboardStats } from '@/types/Leaderboard';
 import type { LeaderboardItem } from '@/types/LeaderboardItem';
+import type { LeagueLeaderboard, LeagueLeaderboardRound } from '@/types/LeagueLeaderboard';
 import { useAuthStore } from './auth';
 
 export const useFantasyDraftStore = defineStore({
@@ -17,7 +18,9 @@ export const useFantasyDraftStore = defineStore({
     leagueStore: useFantasyLeagueStore(),
     fantasyPlayers: [] as FantasyPlayer[],
     fantasyLeaderboardStats: {} as LeaderboardStats,
-    fantasyLeaderboard: []
+    fantasyLeaderboard: [],
+    leagueLeaderboard: null as LeagueLeaderboard | null,
+    selectedRound: null as number | null
   }),
 
   actions: {
@@ -66,6 +69,16 @@ export const useFantasyDraftStore = defineStore({
       }
     },
 
+    fetchLeagueLeaderboard() {
+      const league = this.leagueStore.selectedLeague
+      if (!league?.league_id) return
+      return localApiService.getLeagueLeaderboard(league.league_id)
+        .then((result: LeagueLeaderboard) => {
+          this.leagueLeaderboard = result
+          this.selectedRound = null
+        })
+    },
+
     saveFantasyDraft(draftPicks: FantasyPlayer[]) {
       const fl = this.leagueStore.currentFantasyLeague
       return new Promise((resolve) => {
@@ -80,6 +93,15 @@ export const useFantasyDraftStore = defineStore({
   },
 
   getters: {
+    activeLeaderboardRound(): LeagueLeaderboardRound | null {
+      const rounds = this.leagueLeaderboard?.rounds
+      if (!rounds?.length) return null
+      if (this.selectedRound !== null) {
+        return rounds[this.selectedRound] ?? null
+      }
+      return rounds[rounds.length - 1]
+    },
+
     fantasyLeaderboardData(): LeaderboardItem[] {
       if (!this.fantasyLeaderboard || Object.keys(this.fantasyLeaderboard).length === 0) {
         return []
