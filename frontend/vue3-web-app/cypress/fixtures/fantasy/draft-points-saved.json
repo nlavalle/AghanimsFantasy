@@ -1,0 +1,27 @@
+[
+  {
+    "fantasyDraft": {
+      "id": 999,
+      "fantasyLeagueId": 1,
+      "draftPickPlayers": [
+        { "draftOrder": 1, "fantasyPlayer": { "id": 101, "dotaAccountId": 1001, "teamPosition": 1 } },
+        { "draftOrder": 2, "fantasyPlayer": { "id": 102, "dotaAccountId": 1002, "teamPosition": 2 } },
+        { "draftOrder": 3, "fantasyPlayer": { "id": 103, "dotaAccountId": 1003, "teamPosition": 1 } },
+        { "draftOrder": 4, "fantasyPlayer": { "id": 104, "dotaAccountId": 1004, "teamPosition": 3 } },
+        { "draftOrder": 5, "fantasyPlayer": { "id": 105, "dotaAccountId": 1005, "teamPosition": 5 } }
+      ]
+    },
+    "fantasyPlayerPoints": [
+      { "fantasyPlayer": { "id": 101, "teamPosition": 1 }, "totalMatchFantasyPoints": 42.5, "onWinStreak": false },
+      { "fantasyPlayer": { "id": 102, "teamPosition": 2 }, "totalMatchFantasyPoints": 38.0, "onWinStreak": false },
+      { "fantasyPlayer": { "id": 103, "teamPosition": 1 }, "totalMatchFantasyPoints": 55.1, "onWinStreak": true },
+      { "fantasyPlayer": { "id": 104, "teamPosition": 3 }, "totalMatchFantasyPoints": 29.3, "onWinStreak": false },
+      { "fantasyPlayer": { "id": 105, "teamPosition": 5 }, "totalMatchFantasyPoints": 18.7, "onWinStreak": false }
+    ],
+    "draftPickOnePoints": 42.5,
+    "draftPickTwoPoints": 38.0,
+    "draftPickThreePoints": 55.1,
+    "draftPickFourPoints": 29.3,
+    "draftPickFivePoints": 18.7
+  }
+]

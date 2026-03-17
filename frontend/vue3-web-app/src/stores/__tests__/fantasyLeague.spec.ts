@@ -138,10 +138,10 @@ describe('fantasyLeague store', () => {
   })
 
   // ---------------------------------------------------------------------------
-  // 2. defaultFantasyLeague — single tournament scenarios
+  // 2. currentFantasyLeague — scoped to selectedLeague, applies priority rules within it
   // ---------------------------------------------------------------------------
 
-  describe('defaultFantasyLeague — single tournament', () => {
+  describe('currentFantasyLeague — single tournament', () => {
     it('Row 1: pre-tournament, 1 open draft — returns that round', () => {
       const store = useFantasyLeagueStore()
       const league = makeLeague(10, { start_timestamp: SOON, end_timestamp: FUTURE })
@@ -149,7 +149,7 @@ describe('fantasyLeague store', () => {
       store.leagues = [league as any]
       store.fantasyLeagues = [r1 as any]
       store.selectedLeague = league as any
-      expect(store.defaultFantasyLeague?.id).toBe(1)
+      expect(store.currentFantasyLeague?.id).toBe(1)
     })
 
     it('Row 1b: pre-tournament, 3 open rounds — returns the one closing soonest', () => {
@@ -161,7 +161,7 @@ describe('fantasyLeague store', () => {
       store.leagues = [league as any]
       store.fantasyLeagues = [r1, r2, r3] as any
       store.selectedLeague = league as any
-      expect(store.defaultFantasyLeague?.id).toBe(1)
+      expect(store.currentFantasyLeague?.id).toBe(1)
     })
 
     it('Row 3: draft closed, round live — returns that live round', () => {
@@ -171,11 +171,10 @@ describe('fantasyLeague store', () => {
       store.leagues = [league as any]
       store.fantasyLeagues = [r1 as any]
       store.selectedLeague = league as any
-      expect(store.defaultFantasyLeague?.id).toBe(1)
+      expect(store.currentFantasyLeague?.id).toBe(1)
     })
 
-    // TODO: fails — current logic returns R1 (live) instead of R2 (open draft)
-    it('Row 5: R1 live + R2 draft open — should return R2 (open draft takes priority)', () => {
+    it('Row 5: R1 live + R2 draft open — returns R2 (open draft takes priority)', () => {
       const store = useFantasyLeagueStore()
       const league = makeLeague(10)
       const r1 = makeFL(1, 10, { fantasyDraftLocked: PAST, leagueStartTime: PAST, leagueEndTime: FUTURE })
@@ -183,7 +182,7 @@ describe('fantasyLeague store', () => {
       store.leagues = [league as any]
       store.fantasyLeagues = [r1, r2] as any
       store.selectedLeague = league as any
-      expect(store.defaultFantasyLeague?.id).toBe(2)
+      expect(store.currentFantasyLeague?.id).toBe(2)
     })
 
     it('Row 7: single finished round — returns it', () => {
@@ -193,7 +192,7 @@ describe('fantasyLeague store', () => {
       store.leagues = [league as any]
       store.fantasyLeagues = [r1 as any]
       store.selectedLeague = league as any
-      expect(store.defaultFantasyLeague?.id).toBe(1)
+      expect(store.currentFantasyLeague?.id).toBe(1)
     })
 
     it('Row 10: 3 finished rounds — returns most recently concluded (highest leagueEndTime)', () => {
@@ -205,30 +204,10 @@ describe('fantasyLeague store', () => {
       store.leagues = [league as any]
       store.fantasyLeagues = [r1, r2, r3] as any
       store.selectedLeague = league as any
-      expect(store.defaultFantasyLeague?.id).toBe(3)
-    })
-  })
-
-  // ---------------------------------------------------------------------------
-  // 3. defaultFantasyLeague — multi-tournament scenarios
-  // ---------------------------------------------------------------------------
-
-  describe('defaultFantasyLeague — multi-tournament', () => {
-    // TODO: fails — current logic filters by selectedLeague.league_id, ignoring TournB
-    it('Row 11: 2 open drafts from different tournaments — returns the one closing soonest', () => {
-      const store = useFantasyLeagueStore()
-      const leagueA = makeLeague(10)
-      const leagueB = makeLeague(20)
-      const flA = makeFL(1, 10, { fantasyDraftLocked: SOON, leagueStartTime: FUTURE, leagueEndTime: FUTURE })
-      const flB = makeFL(2, 20, { fantasyDraftLocked: FUTURE, leagueStartTime: FUTURE, leagueEndTime: FUTURE })
-      store.leagues = [leagueA, leagueB] as any
-      store.fantasyLeagues = [flA, flB] as any
-      store.selectedLeague = leagueA as any
-      expect(store.defaultFantasyLeague?.id).toBe(1)
+      expect(store.currentFantasyLeague?.id).toBe(3)
     })
 
-    // TODO: fails — current logic only sees TournA (selectedLeague), misses TournB open draft
-    it('Row 12: TournB draft open + TournA live — should return TournB (open draft priority)', () => {
+    it('Row 14: switching to TournB scopes currentFantasyLeague to TournB rounds only', () => {
       const store = useFantasyLeagueStore()
       const leagueA = makeLeague(10)
       const leagueB = makeLeague(20)
@@ -237,21 +216,278 @@ describe('fantasyLeague store', () => {
       store.leagues = [leagueA, leagueB] as any
       store.fantasyLeagues = [flA, flB] as any
       store.selectedLeague = leagueA as any
-      expect(store.defaultFantasyLeague?.id).toBe(2)
+      expect(store.currentFantasyLeague?.id).toBe(1)
+      store.setSelectedLeague(leagueB as any)
+      expect(store.currentFantasyLeague?.id).toBe(2)
     })
+  })
 
-    // TODO: fails — current logic only sees TournA, can't compare across tournaments
-    it('Row 13: 2 concurrent live rounds — returns most recently started', () => {
+  // ---------------------------------------------------------------------------
+  // 3. defaultSelectedLeague — global on-load league selection
+  //    Returns the League whose rounds are globally most urgent.
+  // ---------------------------------------------------------------------------
+
+  describe('defaultSelectedLeague — on-load league selection', () => {
+    it('Row 11: 2 open drafts in different tournaments — returns league whose draft closes soonest', () => {
       const store = useFantasyLeagueStore()
       const leagueA = makeLeague(10)
       const leagueB = makeLeague(20)
-      // TournA-R3 started yesterday, TournB-R1 started today (more recent)
+      const flA = makeFL(1, 10, { fantasyDraftLocked: SOON, leagueStartTime: FUTURE, leagueEndTime: FUTURE })
+      const flB = makeFL(2, 20, { fantasyDraftLocked: FUTURE, leagueStartTime: FUTURE, leagueEndTime: FUTURE })
+      store.leagues = [leagueA, leagueB] as any
+      store.fantasyLeagues = [flA, flB] as any
+      expect(store.defaultSelectedLeague?.league_id).toBe(10)
+    })
+
+    it('Row 12: TournB has open draft, TournA is live — returns TournB (open draft priority)', () => {
+      const store = useFantasyLeagueStore()
+      const leagueA = makeLeague(10)
+      const leagueB = makeLeague(20)
+      const flA = makeFL(1, 10, { fantasyDraftLocked: PAST, leagueStartTime: PAST, leagueEndTime: FUTURE })
+      const flB = makeFL(2, 20, { fantasyDraftLocked: FUTURE, leagueStartTime: FUTURE, leagueEndTime: FUTURE })
+      store.leagues = [leagueA, leagueB] as any
+      store.fantasyLeagues = [flA, flB] as any
+      expect(store.defaultSelectedLeague?.league_id).toBe(20)
+    })
+
+    it('Row 13: 2 live rounds — returns league whose round started most recently', () => {
+      const store = useFantasyLeagueStore()
+      const leagueA = makeLeague(10)
+      const leagueB = makeLeague(20)
       const flA = makeFL(1, 10, { fantasyDraftLocked: PAST, leagueStartTime: RECENT, leagueEndTime: FUTURE })
       const flB = makeFL(2, 20, { fantasyDraftLocked: PAST, leagueStartTime: NOW - 3600, leagueEndTime: FUTURE })
       store.leagues = [leagueA, leagueB] as any
       store.fantasyLeagues = [flA, flB] as any
+      expect(store.defaultSelectedLeague?.league_id).toBe(20)
+    })
+
+    it('single tournament, all rounds finished — returns that tournament', () => {
+      const store = useFantasyLeagueStore()
+      const league = makeLeague(10)
+      const r1 = makeFL(1, 10, { fantasyDraftLocked: PAST, leagueStartTime: PAST, leagueEndTime: PAST })
+      store.leagues = [league as any]
+      store.fantasyLeagues = [r1 as any]
+      expect(store.defaultSelectedLeague?.league_id).toBe(10)
+    })
+
+    it('no active fantasy leagues — returns first active league or undefined', () => {
+      const store = useFantasyLeagueStore()
+      const league = makeLeague(10)
+      store.leagues = [league as any]
+      store.fantasyLeagues = []
+      expect(store.defaultSelectedLeague?.league_id).toBe(10)
+    })
+  })
+
+  // ---------------------------------------------------------------------------
+  // 4. currentFantasyLeague — new getter, scoped to selectedLeague
+  //    These mirror Rows 1-10 + Row 14. All TODO until store refactor is done.
+  // ---------------------------------------------------------------------------
+
+  describe('currentFantasyLeague', () => {
+    it('Row 1: pre-tournament, 1 open draft in selected league — returns that round', () => {
+      const store = useFantasyLeagueStore()
+      const league = makeLeague(10, { start_timestamp: SOON, end_timestamp: FUTURE })
+      const r1 = makeFL(1, 10, { fantasyDraftLocked: SOON, leagueStartTime: SOON, leagueEndTime: FUTURE })
+      store.leagues = [league as any]
+      store.fantasyLeagues = [r1 as any]
+      store.selectedLeague = league as any
+      expect(store.currentFantasyLeague?.id).toBe(1)
+    })
+
+    it('Row 1b: pre-tournament, 3 open rounds in selected league — returns the one closing soonest', () => {
+      const store = useFantasyLeagueStore()
+      const league = makeLeague(10)
+      const r1 = makeFL(1, 10, { fantasyDraftLocked: SOON, leagueStartTime: FUTURE, leagueEndTime: FUTURE })
+      const r2 = makeFL(2, 10, { fantasyDraftLocked: SOON + 3600, leagueStartTime: FUTURE, leagueEndTime: FUTURE })
+      const r3 = makeFL(3, 10, { fantasyDraftLocked: FUTURE, leagueStartTime: FUTURE, leagueEndTime: FUTURE })
+      store.leagues = [league as any]
+      store.fantasyLeagues = [r1, r2, r3] as any
+      store.selectedLeague = league as any
+      expect(store.currentFantasyLeague?.id).toBe(1)
+    })
+
+    it('Row 3: draft closed, round live in selected league — returns that live round', () => {
+      const store = useFantasyLeagueStore()
+      const league = makeLeague(10)
+      const r1 = makeFL(1, 10, { fantasyDraftLocked: PAST, leagueStartTime: PAST, leagueEndTime: FUTURE })
+      store.leagues = [league as any]
+      store.fantasyLeagues = [r1 as any]
+      store.selectedLeague = league as any
+      expect(store.currentFantasyLeague?.id).toBe(1)
+    })
+
+    it('Row 5: R1 live + R2 draft open in selected league — returns R2 (open draft priority)', () => {
+      const store = useFantasyLeagueStore()
+      const league = makeLeague(10)
+      const r1 = makeFL(1, 10, { fantasyDraftLocked: PAST, leagueStartTime: PAST, leagueEndTime: FUTURE })
+      const r2 = makeFL(2, 10, { fantasyDraftLocked: FUTURE, leagueStartTime: FUTURE, leagueEndTime: FUTURE })
+      store.leagues = [league as any]
+      store.fantasyLeagues = [r1, r2] as any
+      store.selectedLeague = league as any
+      expect(store.currentFantasyLeague?.id).toBe(2)
+    })
+
+    it('Row 7: single finished round in selected league — returns it', () => {
+      const store = useFantasyLeagueStore()
+      const league = makeLeague(10)
+      const r1 = makeFL(1, 10, { fantasyDraftLocked: PAST, leagueStartTime: PAST, leagueEndTime: PAST })
+      store.leagues = [league as any]
+      store.fantasyLeagues = [r1 as any]
+      store.selectedLeague = league as any
+      expect(store.currentFantasyLeague?.id).toBe(1)
+    })
+
+    it('Row 10: 3 finished rounds in selected league — returns most recently concluded', () => {
+      const store = useFantasyLeagueStore()
+      const league = makeLeague(10)
+      const r1 = makeFL(1, 10, { fantasyDraftLocked: PAST - 10, leagueStartTime: PAST - 20, leagueEndTime: PAST - 5 })
+      const r2 = makeFL(2, 10, { fantasyDraftLocked: RECENT - 10, leagueStartTime: RECENT - 20, leagueEndTime: RECENT - 5 })
+      const r3 = makeFL(3, 10, { fantasyDraftLocked: RECENT, leagueStartTime: RECENT - 10, leagueEndTime: RECENT })
+      store.leagues = [league as any]
+      store.fantasyLeagues = [r1, r2, r3] as any
+      store.selectedLeague = league as any
+      expect(store.currentFantasyLeague?.id).toBe(3)
+    })
+
+    it('Row 14: user switches to TournB — currentFantasyLeague scopes to TournB rounds only, ignores TournA', () => {
+      const store = useFantasyLeagueStore()
+      const leagueA = makeLeague(10)
+      const leagueB = makeLeague(20)
+      const flA = makeFL(1, 10, { fantasyDraftLocked: PAST, leagueStartTime: PAST, leagueEndTime: FUTURE })
+      const flB = makeFL(2, 20, { fantasyDraftLocked: FUTURE, leagueStartTime: FUTURE, leagueEndTime: FUTURE })
+      store.leagues = [leagueA, leagueB] as any
+      store.fantasyLeagues = [flA, flB] as any
       store.selectedLeague = leagueA as any
-      expect(store.defaultFantasyLeague?.id).toBe(2)
+      expect(store.currentFantasyLeague?.id).toBe(1)
+      store.setSelectedLeague(leagueB as any)
+      expect(store.currentFantasyLeague?.id).toBe(2)
+    })
+  })
+
+  // ---------------------------------------------------------------------------
+  // 5. defaultSelectedLeague — on-load league auto-selection (global priority)
+  //    Returns the League whose rounds are globally most urgent.
+  // ---------------------------------------------------------------------------
+
+  describe('defaultSelectedLeague', () => {
+    it('Row 11: 2 open drafts in different tournaments — returns league whose draft closes soonest', () => {
+      const store = useFantasyLeagueStore()
+      const leagueA = makeLeague(10)
+      const leagueB = makeLeague(20)
+      const flA = makeFL(1, 10, { fantasyDraftLocked: SOON, leagueStartTime: FUTURE, leagueEndTime: FUTURE })
+      const flB = makeFL(2, 20, { fantasyDraftLocked: FUTURE, leagueStartTime: FUTURE, leagueEndTime: FUTURE })
+      store.leagues = [leagueA, leagueB] as any
+      store.fantasyLeagues = [flA, flB] as any
+      expect(store.defaultSelectedLeague?.league_id).toBe(10)
+    })
+
+    it('Row 12: TournB has open draft, TournA is live — returns TournB (open draft priority)', () => {
+      const store = useFantasyLeagueStore()
+      const leagueA = makeLeague(10)
+      const leagueB = makeLeague(20)
+      const flA = makeFL(1, 10, { fantasyDraftLocked: PAST, leagueStartTime: PAST, leagueEndTime: FUTURE })
+      const flB = makeFL(2, 20, { fantasyDraftLocked: FUTURE, leagueStartTime: FUTURE, leagueEndTime: FUTURE })
+      store.leagues = [leagueA, leagueB] as any
+      store.fantasyLeagues = [flA, flB] as any
+      expect(store.defaultSelectedLeague?.league_id).toBe(20)
+    })
+
+    it('Row 13: 2 live rounds — returns league whose round started most recently', () => {
+      const store = useFantasyLeagueStore()
+      const leagueA = makeLeague(10)
+      const leagueB = makeLeague(20)
+      const flA = makeFL(1, 10, { fantasyDraftLocked: PAST, leagueStartTime: RECENT, leagueEndTime: FUTURE })
+      const flB = makeFL(2, 20, { fantasyDraftLocked: PAST, leagueStartTime: NOW - 3600, leagueEndTime: FUTURE })
+      store.leagues = [leagueA, leagueB] as any
+      store.fantasyLeagues = [flA, flB] as any
+      expect(store.defaultSelectedLeague?.league_id).toBe(20)
+    })
+
+    it('single tournament, all rounds finished — returns that tournament', () => {
+      const store = useFantasyLeagueStore()
+      const league = makeLeague(10)
+      const r1 = makeFL(1, 10, { fantasyDraftLocked: PAST, leagueStartTime: PAST, leagueEndTime: PAST })
+      store.leagues = [league as any]
+      store.fantasyLeagues = [r1 as any]
+      expect(store.defaultSelectedLeague?.league_id).toBe(10)
+    })
+
+    it('no active fantasy leagues — returns first active league or undefined', () => {
+      const store = useFantasyLeagueStore()
+      const league = makeLeague(10)
+      store.leagues = [league as any]
+      store.fantasyLeagues = []
+      expect(store.defaultSelectedLeague?.league_id).toBe(10)
+    })
+  })
+
+  // ---------------------------------------------------------------------------
+  // 6. otherUrgentLeagues — cross-tournament alert banner data
+  //    Returns leagues (not FLs) that have a more urgent state than the
+  //    currently selected league, so the banner can prompt the user to switch.
+  // ---------------------------------------------------------------------------
+
+  describe('otherUrgentLeagues', () => {
+    it('TournB has open draft, user is on TournA (live) — TournB appears in otherUrgentLeagues', () => {
+      const store = useFantasyLeagueStore()
+      const leagueA = makeLeague(10)
+      const leagueB = makeLeague(20)
+      const flA = makeFL(1, 10, { fantasyDraftLocked: PAST, leagueStartTime: PAST, leagueEndTime: FUTURE })
+      const flB = makeFL(2, 20, { fantasyDraftLocked: FUTURE, leagueStartTime: FUTURE, leagueEndTime: FUTURE })
+      store.leagues = [leagueA, leagueB] as any
+      store.fantasyLeagues = [flA, flB] as any
+      store.selectedLeague = leagueA as any
+      const result = store.otherUrgentLeagues
+      expect(result.map(l => l.league_id)).toContain(20)
+      expect(result.map(l => l.league_id)).not.toContain(10)
+    })
+
+    it('TournB is live, user is on TournA (live too) — TournB appears in otherUrgentLeagues', () => {
+      const store = useFantasyLeagueStore()
+      const leagueA = makeLeague(10)
+      const leagueB = makeLeague(20)
+      const flA = makeFL(1, 10, { fantasyDraftLocked: PAST, leagueStartTime: PAST, leagueEndTime: FUTURE })
+      const flB = makeFL(2, 20, { fantasyDraftLocked: PAST, leagueStartTime: PAST, leagueEndTime: FUTURE })
+      store.leagues = [leagueA, leagueB] as any
+      store.fantasyLeagues = [flA, flB] as any
+      store.selectedLeague = leagueA as any
+      const result = store.otherUrgentLeagues
+      expect(result.map(l => l.league_id)).toContain(20)
+    })
+
+    it('TournB is finished, user is on TournA (also finished) — otherUrgentLeagues is empty', () => {
+      const store = useFantasyLeagueStore()
+      const leagueA = makeLeague(10)
+      const leagueB = makeLeague(20)
+      const flA = makeFL(1, 10, { fantasyDraftLocked: PAST, leagueStartTime: PAST, leagueEndTime: PAST })
+      const flB = makeFL(2, 20, { fantasyDraftLocked: PAST, leagueStartTime: PAST, leagueEndTime: PAST })
+      store.leagues = [leagueA, leagueB] as any
+      store.fantasyLeagues = [flA, flB] as any
+      store.selectedLeague = leagueA as any
+      expect(store.otherUrgentLeagues).toHaveLength(0)
+    })
+
+    it('user is already on the most urgent tournament — otherUrgentLeagues is empty', () => {
+      const store = useFantasyLeagueStore()
+      const leagueA = makeLeague(10)
+      const leagueB = makeLeague(20)
+      const flA = makeFL(1, 10, { fantasyDraftLocked: FUTURE, leagueStartTime: FUTURE, leagueEndTime: FUTURE })
+      const flB = makeFL(2, 20, { fantasyDraftLocked: PAST, leagueStartTime: PAST, leagueEndTime: FUTURE })
+      store.leagues = [leagueA, leagueB] as any
+      store.fantasyLeagues = [flA, flB] as any
+      store.selectedLeague = leagueA as any
+      expect(store.otherUrgentLeagues).toHaveLength(0)
+    })
+
+    it('only one tournament exists — otherUrgentLeagues is always empty', () => {
+      const store = useFantasyLeagueStore()
+      const league = makeLeague(10)
+      const r1 = makeFL(1, 10, { fantasyDraftLocked: FUTURE, leagueStartTime: FUTURE, leagueEndTime: FUTURE })
+      store.leagues = [league as any]
+      store.fantasyLeagues = [r1 as any]
+      store.selectedLeague = league as any
+      expect(store.otherUrgentLeagues).toHaveLength(0)
     })
   })
 })

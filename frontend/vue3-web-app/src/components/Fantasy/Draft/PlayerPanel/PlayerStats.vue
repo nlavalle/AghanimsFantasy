@@ -101,7 +101,7 @@ const kda = ref('—');
 watch(selectedPlayer, (newPlayer) => {
   if (!newPlayer) return;
   const playerStats = leagueStore.fantasyPlayersStats.find(fps => fps.fantasy_player.id === newPlayer.id);
-  playerTopHeroes.value = playerStats?.top_heroes[0];
+  playerTopHeroes.value = playerStats?.top_heroes?.[0];
   playerCost.value = playerStats?.cost.toFixed(0) ?? 0;
 
   const pp = fantasyPlayerPointsAvailable.value.find(p => p.fantasyPlayer.id === newPlayer.id);

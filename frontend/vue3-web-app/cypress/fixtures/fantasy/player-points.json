@@ -1,0 +1,140 @@
+[
+  {
+    "fantasyLeagueId": 1, "fantasyPlayerId": 101,
+    "fantasyPlayer": {
+      "id": 101, "fantasyLeagueId": 1,
+      "teamId": 1, "team": { "id": 1, "name": "Team Secret", "tag": "Secret", "abbreviation": "SEC", "logo": "", "logoSponsor": "" },
+      "dotaAccountId": 1001, "dotaAccount": { "id": 1001, "name": "Player One", "steamProfilePicture": "" },
+      "teamPosition": 1, "substitution": false
+    },
+    "totalMatches": 5, "totalKills": 20, "totalKillsPoints": 10.0, "totalDeaths": 8, "totalDeathsPoints": -4.0,
+    "totalAssists": 30, "totalAssistsPoints": 6.0, "totalLastHits": 500, "totalLastHitsPoints": 5.0,
+    "avgGoldPerMin": 600, "totalGoldPerMinPoints": 6.0, "avgXpPerMin": 700, "totalXpPerMinPoints": 7.0,
+    "totalNetworth": 0, "totalNetworthPoints": 0, "totalHeroDamage": 0, "totalHeroDamagePoints": 0,
+    "totalTowerDamage": 0, "totalTowerDamagePoints": 0, "totalHeroHealing": 0, "totalHeroHealingPoints": 0,
+    "totalGold": 0, "totalGoldPoints": 0, "totalFightScore": 0, "totalFightScorePoints": 0,
+    "totalFarmScore": 0, "totalFarmScorePoints": 0, "totalSupportScore": 0, "totalSupportScorePoints": 0,
+    "totalPushScore": 0, "totalPushScorePoints": 0, "totalHeroXp": 0, "totalHeroXpPoints": 0,
+    "totalCampsStacked": 0, "totalCampsStackedPoints": 0, "totalRampages": 0, "totalRampagesPoints": 0,
+    "totalTripleKills": 0, "totalTripleKillsPoints": 0, "totalAegisSnatched": 0, "totalAegisSnatchedPoints": 0,
+    "totalRapiersPurchased": 0, "totalRapiersPurchasedPoints": 0, "totalCouriersKilled": 0, "totalCouriersKilledPoints": 0,
+    "totalSupportGoldSpent": 0, "totalSupportGoldSpentPoints": 0, "totalObserverWardsPlaced": 0, "totalObserverWardsPlacedPoints": 0,
+    "totalSentryWardsPlaced": 0, "totalSentryWardsPlacedPoints": 0, "totalWardsDewarded": 0, "totalWardsDewardedPoints": 0,
+    "totalStunDuration": 0, "totalStunDurationPoints": 0, "totalMatchFantasyPoints": 30.0
+  },
+  {
+    "fantasyLeagueId": 1, "fantasyPlayerId": 102,
+    "fantasyPlayer": {
+      "id": 102, "fantasyLeagueId": 1,
+      "teamId": 1, "team": { "id": 1, "name": "Team Secret", "tag": "Secret", "abbreviation": "SEC", "logo": "", "logoSponsor": "" },
+      "dotaAccountId": 1002, "dotaAccount": { "id": 1002, "name": "Player Two", "steamProfilePicture": "" },
+      "teamPosition": 2, "substitution": false
+    },
+    "totalMatches": 5, "totalKills": 5, "totalKillsPoints": 2.5, "totalDeaths": 10, "totalDeathsPoints": -5.0,
+    "totalAssists": 50, "totalAssistsPoints": 10.0, "totalLastHits": 100, "totalLastHitsPoints": 1.0,
+    "avgGoldPerMin": 400, "totalGoldPerMinPoints": 4.0, "avgXpPerMin": 500, "totalXpPerMinPoints": 5.0,
+    "totalNetworth": 0, "totalNetworthPoints": 0, "totalHeroDamage": 0, "totalHeroDamagePoints": 0,
+    "totalTowerDamage": 0, "totalTowerDamagePoints": 0, "totalHeroHealing": 0, "totalHeroHealingPoints": 0,
+    "totalGold": 0, "totalGoldPoints": 0, "totalFightScore": 0, "totalFightScorePoints": 0,
+    "totalFarmScore": 0, "totalFarmScorePoints": 0, "totalSupportScore": 0, "totalSupportScorePoints": 0,
+    "totalPushScore": 0, "totalPushScorePoints": 0, "totalHeroXp": 0, "totalHeroXpPoints": 0,
+    "totalCampsStacked": 0, "totalCampsStackedPoints": 0, "totalRampages": 0, "totalRampagesPoints": 0,
+    "totalTripleKills": 0, "totalTripleKillsPoints": 0, "totalAegisSnatched": 0, "totalAegisSnatchedPoints": 0,
+    "totalRapiersPurchased": 0, "totalRapiersPurchasedPoints": 0, "totalCouriersKilled": 0, "totalCouriersKilledPoints": 0,
+    "totalSupportGoldSpent": 0, "totalSupportGoldSpentPoints": 0, "totalObserverWardsPlaced": 0, "totalObserverWardsPlacedPoints": 0,
+    "totalSentryWardsPlaced": 0, "totalSentryWardsPlacedPoints": 0, "totalWardsDewarded": 0, "totalWardsDewardedPoints": 0,
+    "totalStunDuration": 0, "totalStunDurationPoints": 0, "totalMatchFantasyPoints": 17.5
+  },
+  {
+    "fantasyLeagueId": 1, "fantasyPlayerId": 103,
+    "fantasyPlayer": {
+      "id": 103, "fantasyLeagueId": 1,
+      "teamId": 1, "team": { "id": 1, "name": "Team Secret", "tag": "Secret", "abbreviation": "SEC", "logo": "", "logoSponsor": "" },
+      "dotaAccountId": 1003, "dotaAccount": { "id": 1003, "name": "Player Three", "steamProfilePicture": "" },
+      "teamPosition": 3, "substitution": false
+    },
+    "totalMatches": 5, "totalKills": 10, "totalKillsPoints": 5.0, "totalDeaths": 6, "totalDeathsPoints": -3.0,
+    "totalAssists": 20, "totalAssistsPoints": 4.0, "totalLastHits": 600, "totalLastHitsPoints": 6.0,
+    "avgGoldPerMin": 650, "totalGoldPerMinPoints": 6.5, "avgXpPerMin": 700, "totalXpPerMinPoints": 7.0,
+    "totalNetworth": 0, "totalNetworthPoints": 0, "totalHeroDamage": 0, "totalHeroDamagePoints": 0,
+    "totalTowerDamage": 0, "totalTowerDamagePoints": 0, "totalHeroHealing": 0, "totalHeroHealingPoints": 0,
+    "totalGold": 0, "totalGoldPoints": 0, "totalFightScore": 0, "totalFightScorePoints": 0,
+    "totalFarmScore": 0, "totalFarmScorePoints": 0, "totalSupportScore": 0, "totalSupportScorePoints": 0,
+    "totalPushScore": 0, "totalPushScorePoints": 0, "totalHeroXp": 0, "totalHeroXpPoints": 0,
+    "totalCampsStacked": 0, "totalCampsStackedPoints": 0, "totalRampages": 0, "totalRampagesPoints": 0,
+    "totalTripleKills": 0, "totalTripleKillsPoints": 0, "totalAegisSnatched": 0, "totalAegisSnatchedPoints": 0,
+    "totalRapiersPurchased": 0, "totalRapiersPurchasedPoints": 0, "totalCouriersKilled": 0, "totalCouriersKilledPoints": 0,
+    "totalSupportGoldSpent": 0, "totalSupportGoldSpentPoints": 0, "totalObserverWardsPlaced": 0, "totalObserverWardsPlacedPoints": 0,
+    "totalSentryWardsPlaced": 0, "totalSentryWardsPlacedPoints": 0, "totalWardsDewarded": 0, "totalWardsDewardedPoints": 0,
+    "totalStunDuration": 0, "totalStunDurationPoints": 0, "totalMatchFantasyPoints": 25.5
+  },
+  {
+    "fantasyLeagueId": 1, "fantasyPlayerId": 104,
+    "fantasyPlayer": {
+      "id": 104, "fantasyLeagueId": 1,
+      "teamId": 2, "team": { "id": 2, "name": "OG", "tag": "OG", "abbreviation": "OG", "logo": "", "logoSponsor": "" },
+      "dotaAccountId": 1004, "dotaAccount": { "id": 1004, "name": "Player Four", "steamProfilePicture": "" },
+      "teamPosition": 1, "substitution": false
+    },
+    "totalMatches": 5, "totalKills": 25, "totalKillsPoints": 12.5, "totalDeaths": 5, "totalDeathsPoints": -2.5,
+    "totalAssists": 15, "totalAssistsPoints": 3.0, "totalLastHits": 800, "totalLastHitsPoints": 8.0,
+    "avgGoldPerMin": 750, "totalGoldPerMinPoints": 7.5, "avgXpPerMin": 800, "totalXpPerMinPoints": 8.0,
+    "totalNetworth": 0, "totalNetworthPoints": 0, "totalHeroDamage": 0, "totalHeroDamagePoints": 0,
+    "totalTowerDamage": 0, "totalTowerDamagePoints": 0, "totalHeroHealing": 0, "totalHeroHealingPoints": 0,
+    "totalGold": 0, "totalGoldPoints": 0, "totalFightScore": 0, "totalFightScorePoints": 0,
+    "totalFarmScore": 0, "totalFarmScorePoints": 0, "totalSupportScore": 0, "totalSupportScorePoints": 0,
+    "totalPushScore": 0, "totalPushScorePoints": 0, "totalHeroXp": 0, "totalHeroXpPoints": 0,
+    "totalCampsStacked": 0, "totalCampsStackedPoints": 0, "totalRampages": 0, "totalRampagesPoints": 0,
+    "totalTripleKills": 0, "totalTripleKillsPoints": 0, "totalAegisSnatched": 0, "totalAegisSnatchedPoints": 0,
+    "totalRapiersPurchased": 0, "totalRapiersPurchasedPoints": 0, "totalCouriersKilled": 0, "totalCouriersKilledPoints": 0,
+    "totalSupportGoldSpent": 0, "totalSupportGoldSpentPoints": 0, "totalObserverWardsPlaced": 0, "totalObserverWardsPlacedPoints": 0,
+    "totalSentryWardsPlaced": 0, "totalSentryWardsPlacedPoints": 0, "totalWardsDewarded": 0, "totalWardsDewardedPoints": 0,
+    "totalStunDuration": 0, "totalStunDurationPoints": 0, "totalMatchFantasyPoints": 36.5
+  },
+  {
+    "fantasyLeagueId": 1, "fantasyPlayerId": 105,
+    "fantasyPlayer": {
+      "id": 105, "fantasyLeagueId": 1,
+      "teamId": 2, "team": { "id": 2, "name": "OG", "tag": "OG", "abbreviation": "OG", "logo": "", "logoSponsor": "" },
+      "dotaAccountId": 1005, "dotaAccount": { "id": 1005, "name": "Player Five", "steamProfilePicture": "" },
+      "teamPosition": 2, "substitution": false
+    },
+    "totalMatches": 5, "totalKills": 3, "totalKillsPoints": 1.5, "totalDeaths": 12, "totalDeathsPoints": -6.0,
+    "totalAssists": 60, "totalAssistsPoints": 12.0, "totalLastHits": 80, "totalLastHitsPoints": 0.8,
+    "avgGoldPerMin": 350, "totalGoldPerMinPoints": 3.5, "avgXpPerMin": 420, "totalXpPerMinPoints": 4.2,
+    "totalNetworth": 0, "totalNetworthPoints": 0, "totalHeroDamage": 0, "totalHeroDamagePoints": 0,
+    "totalTowerDamage": 0, "totalTowerDamagePoints": 0, "totalHeroHealing": 0, "totalHeroHealingPoints": 0,
+    "totalGold": 0, "totalGoldPoints": 0, "totalFightScore": 0, "totalFightScorePoints": 0,
+    "totalFarmScore": 0, "totalFarmScorePoints": 0, "totalSupportScore": 0, "totalSupportScorePoints": 0,
+    "totalPushScore": 0, "totalPushScorePoints": 0, "totalHeroXp": 0, "totalHeroXpPoints": 0,
+    "totalCampsStacked": 0, "totalCampsStackedPoints": 0, "totalRampages": 0, "totalRampagesPoints": 0,
+    "totalTripleKills": 0, "totalTripleKillsPoints": 0, "totalAegisSnatched": 0, "totalAegisSnatchedPoints": 0,
+    "totalRapiersPurchased": 0, "totalRapiersPurchasedPoints": 0, "totalCouriersKilled": 0, "totalCouriersKilledPoints": 0,
+    "totalSupportGoldSpent": 0, "totalSupportGoldSpentPoints": 0, "totalObserverWardsPlaced": 0, "totalObserverWardsPlacedPoints": 0,
+    "totalSentryWardsPlaced": 0, "totalSentryWardsPlacedPoints": 0, "totalWardsDewarded": 0, "totalWardsDewardedPoints": 0,
+    "totalStunDuration": 0, "totalStunDurationPoints": 0, "totalMatchFantasyPoints": 16.0
+  },
+  {
+    "fantasyLeagueId": 1, "fantasyPlayerId": 106,
+    "fantasyPlayer": {
+      "id": 106, "fantasyLeagueId": 1,
+      "teamId": 3, "team": { "id": 3, "name": "EG", "tag": "EG", "abbreviation": "EG", "logo": "", "logoSponsor": "" },
+      "dotaAccountId": 1006, "dotaAccount": { "id": 1006, "name": "Player Six", "steamProfilePicture": "" },
+      "teamPosition": 1, "substitution": false
+    },
+    "totalMatches": 5, "totalKills": 18, "totalKillsPoints": 9.0, "totalDeaths": 7, "totalDeathsPoints": -3.5,
+    "totalAssists": 22, "totalAssistsPoints": 4.4, "totalLastHits": 720, "totalLastHitsPoints": 7.2,
+    "avgGoldPerMin": 690, "totalGoldPerMinPoints": 6.9, "avgXpPerMin": 740, "totalXpPerMinPoints": 7.4,
+    "totalNetworth": 0, "totalNetworthPoints": 0, "totalHeroDamage": 0, "totalHeroDamagePoints": 0,
+    "totalTowerDamage": 0, "totalTowerDamagePoints": 0, "totalHeroHealing": 0, "totalHeroHealingPoints": 0,
+    "totalGold": 0, "totalGoldPoints": 0, "totalFightScore": 0, "totalFightScorePoints": 0,
+    "totalFarmScore": 0, "totalFarmScorePoints": 0, "totalSupportScore": 0, "totalSupportScorePoints": 0,
+    "totalPushScore": 0, "totalPushScorePoints": 0, "totalHeroXp": 0, "totalHeroXpPoints": 0,
+    "totalCampsStacked": 0, "totalCampsStackedPoints": 0, "totalRampages": 0, "totalRampagesPoints": 0,
+    "totalTripleKills": 0, "totalTripleKillsPoints": 0, "totalAegisSnatched": 0, "totalAegisSnatchedPoints": 0,
+    "totalRapiersPurchased": 0, "totalRapiersPurchasedPoints": 0, "totalCouriersKilled": 0, "totalCouriersKilledPoints": 0,
+    "totalSupportGoldSpent": 0, "totalSupportGoldSpentPoints": 0, "totalObserverWardsPlaced": 0, "totalObserverWardsPlacedPoints": 0,
+    "totalSentryWardsPlaced": 0, "totalSentryWardsPlacedPoints": 0, "totalWardsDewarded": 0, "totalWardsDewardedPoints": 0,
+    "totalStunDuration": 0, "totalStunDurationPoints": 0, "totalMatchFantasyPoints": 31.4
+  }
+]

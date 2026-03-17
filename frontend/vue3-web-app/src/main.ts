@@ -24,7 +24,7 @@ import {
   faEye, faEyeSlash, faRefresh,
   faTrophy, faCirclePlus, faCircleMinus, faCircleQuestion,
   faClock, faCoins, faDice, faCheck,
-  faTableCells, faChartLine, faCircleInfo, faGear
+  faTableCells, faChartLine, faCircleInfo, faGear, faGamepad
 } from '@fortawesome/free-solid-svg-icons';
 import { faDiscord, faGithub, faGoogle } from '@fortawesome/free-brands-svg-icons';
 // import { far } from '@fortawesome/free-regular-svg-icons';
@@ -45,7 +45,7 @@ library.add(
   faMagnifyingGlass, faCheckSquare, faTimesCircle,
   faEye, faEyeSlash, faRefresh, faTrophy,
   faCirclePlus, faCircleMinus, faCircleQuestion, faClock, faCoins, faDice, faCheck,
-  faTableCells, faChartLine, faCircleInfo, faGear,
+  faTableCells, faChartLine, faCircleInfo, faGear, faGamepad,
   // Brand
   faDiscord, faGithub, faGoogle
 );

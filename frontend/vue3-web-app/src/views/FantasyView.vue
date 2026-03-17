@@ -7,7 +7,7 @@
       <FantasyAlertBanner />
       <CreateDraftPicks class="draft-pick-bar" :canSave="canSave" :saveDisabledReason="saveDisabledReason"
         @clearDraft="clearFantasyDraftPicks" @saveDraft="saveDraft" />
-      <CreateDraft @saveDraft="saveDraft" style="padding-right: 396px" />
+      <PlayerPicksAvailable style="padding-right: 396px" />
       <PlayerStats class="player-stats-fixed" />
 
       <!-- <v-container v-if="isMounted" :style="fantasyTab === 'draft' ? 'padding-right: 396px' : ''"
@@ -113,50 +113,50 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeMount, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { VProgressCircular } from 'vuetify/components';
 import { useAuthStore } from '@/stores/auth';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
-import CurrentDraft from '@/components/Fantasy/CurrentDraft.vue';
-import CreateDraft from '@/components/Fantasy/Draft/CreateDraft.vue';
+// import CurrentDraft from '@/components/Fantasy/CurrentDraft.vue';
+import PlayerPicksAvailable from '@/components/Fantasy/Draft/PlayerPool/PlayerPicksAvailable.vue';
 import CreateDraftPicks from '@/components/Fantasy/Draft/PickBar/CreateDraftPicks.vue';
-import MatchDataTable from '@/components/Stats/MatchDataTable.vue';
+// import MatchDataTable from '@/components/Stats/MatchDataTable.vue';
 import { fantasyDraftState, DRAFT_BUDGET } from '@/components/Fantasy/fantasyDraft';
-import LoginModal from '@/components/Auth/LoginModal.vue';
+// import LoginModal from '@/components/Auth/LoginModal.vue';
 import AlertDialog from '@/components/AlertDialog.vue';
 import ErrorDialog from '@/components/ErrorDialog.vue';
 import { useFantasyDraftStore } from '@/stores/fantasyDraft';
-import LeaderboardComponent from '@/components/Fantasy/Leaderboard/LeaderboardComponent.vue'
-import FantasyLockTimer from '@/components/Fantasy/FantasyLockTimer.vue';
-import UserBalance from '@/components/Fantasy/UserBalance.vue';
-import PlayerStats from '@/components/Fantasy/Draft/PlayerPanel/PlayerStats.vue';
+// import LeaderboardComponent from '@/components/Fantasy/Leaderboard/LeaderboardComponent.vue'
+// import FantasyLockTimer from '@/components/Fantasy/FantasyLockTimer.vue';
+// import UserBalance from '@/components/Fantasy/UserBalance.vue';
 import FantasyAlertBanner from '@/components/Fantasy/FantasyAlertBanner.vue';
+import PlayerStats from '@/components/Fantasy/Draft/PlayerPanel/PlayerStats.vue';
 
 const authStore = useAuthStore();
 const fantasyLeagueStore = useFantasyLeagueStore();
 const fantasyDraftStore = useFantasyDraftStore();
 const { fantasyDraftPicks, setFantasyDraftPicks, setFantasyPlayerPoints, clearFantasyDraftPicks, totalDraftCost } = fantasyDraftState();
-const draftFiltered = ref(true);
+// const draftFiltered = ref(true);
 
 const showSuccessModal = ref(false);
 const showErrorModal = ref(false);
 const errorDetails = ref<Error>();
 
-const fantasyTab = ref('current')
-const updateDraftVisibility = ref(false);
+// const fantasyTab = ref('current')
+// const updateDraftVisibility = ref(false);
 
 const isMounted = ref(false);
-const loaded = ref(true);
+// const loaded = ref(true);
 
-const viewMode = computed(() => fantasyLeagueStore.viewMode)
+// const viewMode = computed(() => fantasyLeagueStore.viewMode)
 
-const updateDisabled = computed(() => {
-  var currentDate = new Date();
-  var draftLockEpoch: number = fantasyLeagueStore.currentFantasyLeague ? fantasyLeagueStore.currentFantasyLeague.fantasyDraftLocked : 0;
-  var lockDate = new Date(draftLockEpoch * 1000);
-  //return currentDate > lockDate && userDraftPoints.value != {}; // TODO: Rethink logic on people who draft late
-  return currentDate > lockDate;
-});
+// const updateDisabled = computed(() => {
+//   var currentDate = new Date();
+//   var draftLockEpoch: number = fantasyLeagueStore.currentFantasyLeague ? fantasyLeagueStore.currentFantasyLeague.fantasyDraftLocked : 0;
+//   var lockDate = new Date(draftLockEpoch * 1000);
+//   //return currentDate > lockDate && userDraftPoints.value != {}; // TODO: Rethink logic on people who draft late
+//   return currentDate > lockDate;
+// });
 
 const canSave = computed(() => {
   const totalGold = totalDraftCost(fantasyLeagueStore.fantasyPlayersStats);
@@ -185,7 +185,7 @@ const saveDraft = async () => {
         behavior: 'smooth'
       });
       fantasyLeagueStore.fetchFantasyDraftPoints()?.then(() => fantasyDraftStore.fetchLeaderboard());
-      fantasyTab.value = 'current';
+      // fantasyTab.value = 'current';
     })
     .catch(error => {
       errorDetails.value = error;
@@ -208,46 +208,52 @@ const scrollAfterAlertDialog = () => {
   }, 200);
 }
 
-const refreshFantasy = () => {
-  loaded.value = false
-  Promise.all([
-    fantasyLeagueStore.fetchFantasyPlayerViewModels(),
-    fantasyLeagueStore.fetchFantasyPlayerPoints(),
-    fantasyDraftStore.fetchLeaderboard()
-  ])
-    ?.then(() => {
-      loaded.value = true
-    })
-    .catch(() => {
-      loaded.value = true
-    })
-}
+// const refreshFantasy = () => {
+//   loaded.value = false
+//   Promise.all([
+//     fantasyLeagueStore.fetchFantasyPlayerViewModels(),
+//     fantasyLeagueStore.fetchFantasyPlayerPoints(),
+//     fantasyDraftStore.fetchLeaderboard()
+//   ])
+//     ?.then(() => {
+//       loaded.value = true
+//     })
+//     .catch(() => {
+//       loaded.value = true
+//     })
+// }
 
-onBeforeMount(async () => {
-  if (authStore.authenticated && fantasyLeagueStore.currentFantasyLeague) {
-    await fantasyDraftStore.fetchLeaderboard()
-    await fantasyLeagueStore.fetchFantasyPlayerViewModels()
-    await fantasyLeagueStore.fetchFantasyPlayerPoints()
-    if (fantasyLeagueStore.selectedFantasyDraftPoints && (fantasyLeagueStore.selectedFantasyDraftPoints?.fantasyDraft.draftPickPlayers.length ?? 0 > 0)) {
-      setFantasyDraftPicks(fantasyLeagueStore.selectedFantasyDraftPoints.fantasyDraft.draftPickPlayers);
+// Runs immediately on mount and re-runs if currentFantasyLeague becomes
+// available after mount (cold load where leagues are fetched asynchronously).
+watch(() => fantasyLeagueStore.currentFantasyLeague, async (fl) => {
+  if (!fl) return
+
+  if (!isMounted.value) {
+    // Initial load: fetch everything needed to render the page
+    if (authStore.authenticated) {
+      // await fantasyDraftStore.fetchLeaderboard()
+      await fantasyLeagueStore.fetchFantasyPlayerViewModels()
+      await fantasyLeagueStore.fetchFantasyPlayerPoints()
+      setFantasyPlayerPoints(fantasyLeagueStore.fantasyPlayerPoints)
+      if (fantasyLeagueStore.selectedFantasyDraftPoints && (fantasyLeagueStore.selectedFantasyDraftPoints?.fantasyDraft.draftPickPlayers.length ?? 0 > 0)) {
+        setFantasyDraftPicks(fantasyLeagueStore.selectedFantasyDraftPoints.fantasyDraft.draftPickPlayers);
+      } else {
+        // fantasyTab.value = 'draft';
+      }
     } else {
-      fantasyTab.value = 'draft';
+      // await fantasyDraftStore.fetchLeaderboard()
+      // fantasyTab.value = 'draft';
     }
     isMounted.value = true;
-  } else if (!authStore.authenticated && fantasyLeagueStore.currentFantasyLeague) {
-    await fantasyDraftStore.fetchLeaderboard()
-    fantasyTab.value = 'draft';
-    isMounted.value = true;
+  } else {
+    // League switch: refresh player data for the newly selected league
+    fantasyLeagueStore.fetchFantasyPlayerPoints()?.then(() => setFantasyPlayerPoints(fantasyLeagueStore.fantasyPlayerPoints))
+      .then(() => {
+        // fantasyDraftStore.fetchLeaderboard()
+        fantasyLeagueStore.fetchFantasyPlayerViewModels();
+      })
   }
-});
-
-watch(() => fantasyLeagueStore.currentFantasyLeague, () => {
-  fantasyLeagueStore.fetchFantasyPlayerPoints()?.then(() => setFantasyPlayerPoints(fantasyLeagueStore.fantasyPlayerPoints))
-    .then(() => {
-      fantasyDraftStore.fetchLeaderboard()
-      fantasyLeagueStore.fetchFantasyPlayerViewModels();
-    })
-})
+}, { immediate: true })
 
 watch(() => fantasyLeagueStore.selectedFantasyDraftPoints, () => {
   if (authStore.authenticated && fantasyLeagueStore.selectedFantasyDraftPoints?.fantasyDraft && fantasyLeagueStore.selectedFantasyDraftPoints.fantasyDraft.draftPickPlayers.length > 0) {
