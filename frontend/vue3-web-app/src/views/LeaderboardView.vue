@@ -8,7 +8,7 @@
       @select-all-rounds="selectAllRounds"
       @select-round="selectRound"
     />
-    <LeaderboardTable :drafters="sortedDrafters" :show-all-rounds="showAllRounds" :is-loading="isLoading" />
+    <LeaderboardTable :drafters="sortedDrafters" :show-all-rounds="showAllRounds" :is-loading="isLoading" :tooltip-enabled="tooltipEnabled" />
     <LeaderboardStatsBar />
   </div>
 </template>
@@ -17,6 +17,7 @@
 import { ref, computed, watch } from 'vue';
 import { useFantasyDraftStore } from '@/stores/fantasyDraft';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
+import { isDraftOpen } from '@/stores/fantasyLeagueUtils';
 import type { Leaderboard } from '@/types/Leaderboard';
 import LeaderboardPageHeader from '@/components/Leaderboard/LeaderboardPageHeader.vue';
 import LeaderboardControlBar from '@/components/Leaderboard/LeaderboardControlBar.vue';
@@ -68,6 +69,17 @@ const allRoundsDrafters = computed<Leaderboard[]>(() => {
 })
 
 const sortedDrafters = computed(() => showAllRounds.value ? allRoundsDrafters.value : roundDrafters.value)
+
+// Tooltip is only shown when the relevant draft window(s) are locked.
+// For a single round: the active round's FL must be locked.
+// For All Rounds: every round must be locked (any open round would leak picks).
+const tooltipEnabled = computed(() => {
+  if (showAllRounds.value) {
+    return rounds.value.every(fl => !isDraftOpen(fl))
+  }
+  const activeFL = rounds.value[activeRoundIndex.value]
+  return activeFL ? !isDraftOpen(activeFL) : false
+})
 
 function selectAllRounds() {
   showAllRounds.value = true

@@ -7,6 +7,7 @@
     <div class="header-right" v-if="authStore.isAuthenticated">
       <span class="shard-label">Shards</span>
       <span class="shard-balance">{{ fantasyDraftStore.fantasyLeaderboardStats?.totalDrafts ?? 0 }}</span>
+      <img :src="shardAnimated" class="shard-img" />
     </div>
   </div>
 </template>
@@ -14,6 +15,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth';
 import { useFantasyDraftStore } from '@/stores/fantasyDraft';
+import shardAnimated from '@/assets/fantasy/shard/multiple-shard.gif';
 
 const authStore = useAuthStore();
 const fantasyDraftStore = useFantasyDraftStore();
@@ -41,7 +43,7 @@ const fantasyDraftStore = useFantasyDraftStore();
   font-family: var(--font-heading);
   font-size: var(--text-xl);
   font-weight: 700;
-  color: var(--rune-gold);
+  color: var(--rune-blue-light);
   margin: 0;
 }
 
@@ -62,5 +64,11 @@ const fantasyDraftStore = useFantasyDraftStore();
   font-weight: 600;
   color: var(--rune-blue-light);
   font-family: var(--font-stats);
+}
+
+.shard-img {
+  height: 30px;
+  width: 30px;
+  vertical-align: middle;
 }
 </style>

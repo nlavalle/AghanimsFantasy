@@ -1,0 +1,78 @@
+{
+  "leagueId": 10,
+  "allRoundsStats": { "totalDrafts": 3, "drafterPercentile": 0 },
+  "rounds": [
+    {
+      "fantasyLeagueId": 1,
+      "allRoundsStats": null,
+      "fantasyDrafts": [
+        {
+          "fantasyDraft": { "id": 101, "draftPickPlayers": [
+            { "draftOrder": 1, "fantasyPlayer": { "id": 1, "dotaAccountId": 1001, "teamPosition": 1, "teamId": 1, "dotaAccount": { "id": 1001, "name": "Pro Alpha", "steamProfilePicture": "" } } },
+            { "draftOrder": 2, "fantasyPlayer": { "id": 2, "dotaAccountId": 1002, "teamPosition": 2, "teamId": 1, "dotaAccount": { "id": 1002, "name": "Pro Beta",  "steamProfilePicture": "" } } }
+          ]},
+          "isTeam": false,
+          "userName": "UserA",
+          "teamId": 0,
+          "draftTotalFantasyPoints": 80.0,
+          "draftPickOnePoints": 50.0,
+          "draftPickTwoPoints": 30.0,
+          "draftPickThreePoints": 0.0,
+          "draftPickFourPoints": 0.0,
+          "draftPickFivePoints": 0.0
+        },
+        {
+          "fantasyDraft": { "id": 102, "draftPickPlayers": [
+            { "draftOrder": 1, "fantasyPlayer": { "id": 1, "dotaAccountId": 1001, "teamPosition": 1, "teamId": 1, "dotaAccount": { "id": 1001, "name": "Pro Alpha", "steamProfilePicture": "" } } },
+            { "draftOrder": 2, "fantasyPlayer": { "id": 2, "dotaAccountId": 1002, "teamPosition": 2, "teamId": 1, "dotaAccount": { "id": 1002, "name": "Pro Beta",  "steamProfilePicture": "" } } }
+          ]},
+          "isTeam": false,
+          "userName": "UserB",
+          "teamId": 0,
+          "draftTotalFantasyPoints": 60.0,
+          "draftPickOnePoints": 40.0,
+          "draftPickTwoPoints": 20.0,
+          "draftPickThreePoints": 0.0,
+          "draftPickFourPoints": 0.0,
+          "draftPickFivePoints": 0.0
+        }
+      ]
+    },
+    {
+      "fantasyLeagueId": 2,
+      "allRoundsStats": null,
+      "fantasyDrafts": [
+        {
+          "fantasyDraft": { "id": 201, "draftPickPlayers": [
+            { "draftOrder": 1, "fantasyPlayer": { "id": 3, "dotaAccountId": 1003, "teamPosition": 1, "teamId": 2, "dotaAccount": { "id": 1003, "name": "Pro Gamma", "steamProfilePicture": "" } } },
+            { "draftOrder": 2, "fantasyPlayer": { "id": 4, "dotaAccountId": 1004, "teamPosition": 2, "teamId": 2, "dotaAccount": { "id": 1004, "name": "Pro Delta", "steamProfilePicture": "" } } }
+          ]},
+          "isTeam": false,
+          "userName": "UserA",
+          "teamId": 0,
+          "draftTotalFantasyPoints": 45.0,
+          "draftPickOnePoints": 25.0,
+          "draftPickTwoPoints": 20.0,
+          "draftPickThreePoints": 0.0,
+          "draftPickFourPoints": 0.0,
+          "draftPickFivePoints": 0.0
+        },
+        {
+          "fantasyDraft": { "id": 202, "draftPickPlayers": [
+            { "draftOrder": 1, "fantasyPlayer": { "id": 3, "dotaAccountId": 1003, "teamPosition": 1, "teamId": 2, "dotaAccount": { "id": 1003, "name": "Pro Gamma", "steamProfilePicture": "" } } },
+            { "draftOrder": 2, "fantasyPlayer": { "id": 4, "dotaAccountId": 1004, "teamPosition": 2, "teamId": 2, "dotaAccount": { "id": 1004, "name": "Pro Delta", "steamProfilePicture": "" } } }
+          ]},
+          "isTeam": false,
+          "userName": "UserB",
+          "teamId": 0,
+          "draftTotalFantasyPoints": 70.0,
+          "draftPickOnePoints": 35.0,
+          "draftPickTwoPoints": 35.0,
+          "draftPickThreePoints": 0.0,
+          "draftPickFourPoints": 0.0,
+          "draftPickFivePoints": 0.0
+        }
+      ]
+    }
+  ]
+}

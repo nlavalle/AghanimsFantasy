@@ -9,7 +9,8 @@
       <div class="bar-right">
         <div class="bar-info-cards">
           <DraftBudgetCard />
-          <DraftRoundCard :current="currentRound" :total="totalRounds" />
+          <DraftRoundCard :current="currentRound" :total="totalRounds" :rounds="leagueRounds"
+            @select-round="leagueStore.setSelectedDraftFantasyLeague($event)" />
           <DraftTimerCard v-if="leagueStore.currentFantasyLeague"
             :target-time="leagueStore.currentFantasyLeague.fantasyDraftLocked" />
         </div>

@@ -19,7 +19,7 @@
             :key="showAllRounds ? drafter.userName : drafter.fantasyDraft.id"
             :class="{ 'current-user': drafter.userName === authStore.currentUser?.discordName }"
             class="drafter-row"
-            @mouseenter="(e) => onRowEnter(e, idx)"
+            @mouseenter="(e) => { if (props.tooltipEnabled) onRowEnter(e, idx) }"
             @mouseleave="hoveredIdx = null"
           >
             <td class="col-rank">
@@ -80,6 +80,7 @@ const props = defineProps<{
   drafters: Leaderboard[]
   showAllRounds: boolean
   isLoading: boolean
+  tooltipEnabled: boolean
 }>()
 
 const authStore = useAuthStore();
@@ -145,7 +146,8 @@ function allRoundsTotal(drafter: Leaderboard): number {
 }
 
 .leaderboard-table thead tr {
-  background: var(--aghanims-fantasy-main-3);
+  background: var(--rune-blue-deep);
+  border-bottom: 2px solid var(--rune-blue-dark);
 }
 
 .leaderboard-table th {
@@ -153,7 +155,7 @@ function allRoundsTotal(drafter: Leaderboard): number {
   font-family: var(--font-body);
   font-size: var(--text-xs);
   font-weight: 600;
-  color: var(--rune-gray);
+  color: var(--rune-blue-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   text-align: left;
@@ -163,7 +165,7 @@ function allRoundsTotal(drafter: Leaderboard): number {
   padding: var(--space-sm) var(--space-md);
   font-family: var(--font-body);
   font-size: var(--text-base);
-  color: var(--rune-gold-light);
+  color: var(--ot-text);
   border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 

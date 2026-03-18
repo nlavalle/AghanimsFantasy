@@ -112,10 +112,15 @@
   --rune-blue-muted: #80C4FF;
 
   /* Rune gold/cream text */
-  --rune-gold: #E8E0C8;
-  --rune-gold-light: #F0EBE0;
   --rune-gold-dim: #C8C0B8;
   --rune-gold-rarity: #FFB800;
+
+  /* Rune gold amber palette (from style guide auRow) */
+  --rune-gold-deep:  #78350f;
+  --rune-gold-dark:  #d4a017;
+  --rune-gold:  #f0c040;
+  --rune-gold-light:  #fde68a;
+  --rune-gold-muted: #d4aa70;
 
   /* Rune gray scale */
   --rune-gray: #8A8A9E;

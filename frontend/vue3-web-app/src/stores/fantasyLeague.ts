@@ -16,6 +16,7 @@ export const useFantasyLeagueStore = defineStore({
     fantasyViewPollFailureCount: 0,
     leagues: [] as League[],
     fantasyLeagues: [] as FantasyLeague[],
+    selectedDraftFantasyLeagueId: null as number | null,
     selectedLeague: {
       league_id: 0,
       is_active: false,
@@ -163,6 +164,11 @@ export const useFantasyLeagueStore = defineStore({
 
     setSelectedLeague(league: League) {
       this.selectedLeague = league
+      this.selectedDraftFantasyLeagueId = null
+    },
+
+    setSelectedDraftFantasyLeague(id: number | null) {
+      this.selectedDraftFantasyLeagueId = id
     },
 
     setSelectedLeagueById(leagueId: number) {
@@ -215,8 +221,12 @@ export const useFantasyLeagueStore = defineStore({
     },
 
     // currentFantasyLeague: derived from selectedLeague, applies priority rules scoped to that league.
-    // This is the canonical active round — never stored state, always computed.
+    // If selectedDraftFantasyLeagueId is set (user manually picked a round), that round wins.
     currentFantasyLeague(): FantasyLeague | undefined {
+      if (this.selectedDraftFantasyLeagueId !== null) {
+        return this.fantasyLeagues.find(fl => fl.id === this.selectedDraftFantasyLeagueId)
+      }
+
       const fls = this.activeFantasyLeagues.filter(fl => fl.leagueId === this.selectedLeague?.league_id)
 
       const openDrafts = fls.filter(fl => isDraftOpen(fl))

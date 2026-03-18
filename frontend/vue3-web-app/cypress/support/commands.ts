@@ -163,6 +163,41 @@ Cypress.Commands.add('mockConcurrentLeagues', ({ leagueAScenario, leagueBScenari
     cy.intercept('GET', '/api/fantasyleague/*/drafters/stats', { body: {} }).as('getLeaderboardStats')
 });
 
+// ---------------------------------------------------------------------------
+// mockMultiRoundScenario
+//
+// Sets up a single league with two fantasy-league rounds:
+//   Round 1 — locked/concluded (draft window closed)
+//   Round 2 — pre-draft (draft window open)
+// The app should auto-select Round 2 (open draft wins priority).
+// ---------------------------------------------------------------------------
+Cypress.Commands.add('mockMultiRoundScenario', (now: number) => {
+    const PAST = now - 7 * 86400
+    const RECENT = now - 86400
+    const FUTURE = now + 7 * 86400
+
+    const league = {
+        league_id: 10,
+        name: 'TI 2025',
+        is_active: true,
+        tier: 1,
+        region: 1,
+        start_timestamp: PAST,
+        end_timestamp: FUTURE
+    }
+
+    const round1 = { id: 1, leagueId: 10, name: 'Round 1', isActive: true, fantasyDraftLocked: PAST, leagueStartTime: PAST, leagueEndTime: RECENT }
+    const round2 = { id: 2, leagueId: 10, name: 'Round 2', isActive: true, fantasyDraftLocked: FUTURE, leagueStartTime: FUTURE, leagueEndTime: FUTURE + 86400 }
+
+    cy.intercept('GET', '/api/league*', { body: [league] }).as('getLeagues')
+    cy.intercept('GET', '/api/FantasyLeague', { body: [round1, round2] }).as('getFantasyLeagues')
+    cy.intercept('GET', '/api/fantasyplayer/fantasyleague/**', { fixture: 'fantasy/players.json' }).as('getPlayers')
+    cy.intercept('GET', '/api/fantasydraft/**/drafts/points', { fixture: 'fantasy/draft-points-empty.json' }).as('getDraftPoints')
+    cy.intercept('GET', '/api/fantasyleague/*/players/points', { fixture: 'fantasy/player-points.json' }).as('getPlayerStats')
+    cy.intercept('GET', '/api/fantasyleague/*/drafters/top10', { body: [] }).as('getLeaderboard')
+    cy.intercept('GET', '/api/fantasyleague/*/drafters/stats', { body: {} }).as('getLeaderboardStats')
+})
+
 declare global {
     namespace Cypress {
         interface Chainable {
@@ -170,6 +205,7 @@ declare global {
             mockFantasyScenario(scenario: FantasyScenario, now: number): Chainable<void>
             mockFantasyScenarioWithSavedDraft(scenario: FantasyScenario, now: number): Chainable<void>
             mockConcurrentLeagues(setup: ConcurrentSetup, now: number): Chainable<void>
+            mockMultiRoundScenario(now: number): Chainable<void>
         }
     }
 }
