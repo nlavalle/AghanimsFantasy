@@ -63,11 +63,6 @@ onBeforeMount(() => {
 
 watch(() => leagueStore.selectedLeague, () => {
   if (leagueStore.fantasyLeagues.length > 0) {
-    // Don't fire this if fantasyLeagues hasn't been loaded yet
-    if (!leagueStore.currentFantasyLeague || leagueStore.currentFantasyLeague.leagueId != leagueStore.selectedLeague.league_id) {
-      // Want to respect router param selected Fantasy League if it's set and not override it
-      leagueStore.currentFantasyLeague = leagueStore.currentFantasyLeague;
-    }
     if (authStore.authenticated) {
       leagueStore.fetchFantasyDraftPoints()
     }

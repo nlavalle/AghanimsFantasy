@@ -222,9 +222,11 @@ export const useFantasyLeagueStore = defineStore({
 
     // currentFantasyLeague: derived from selectedLeague, applies priority rules scoped to that league.
     // If selectedDraftFantasyLeagueId is set (user manually picked a round), that round wins.
-    currentFantasyLeague(): FantasyLeague | undefined {
+    currentFantasyLeague(): FantasyLeague {
+      const empty: FantasyLeague = { id: 0, leagueId: 0, name: '', isActive: false, fantasyDraftLocked: 0, leagueStartTime: 0, leagueEndTime: 0 }
+
       if (this.selectedDraftFantasyLeagueId !== null) {
-        return this.fantasyLeagues.find(fl => fl.id === this.selectedDraftFantasyLeagueId)
+        return this.fantasyLeagues.find(fl => fl.id === this.selectedDraftFantasyLeagueId) ?? empty
       }
 
       const fls = this.activeFantasyLeagues.filter(fl => fl.leagueId === this.selectedLeague?.league_id)
@@ -244,7 +246,7 @@ export const useFantasyLeagueStore = defineStore({
         return finished.reduce((latest, fl) => fl.leagueEndTime > latest.leagueEndTime ? fl : latest)
       }
 
-      return fls[0]
+      return fls[0] ?? empty
     },
 
     // defaultSelectedLeague: global priority rules across all tournaments to pick the initial league on load.

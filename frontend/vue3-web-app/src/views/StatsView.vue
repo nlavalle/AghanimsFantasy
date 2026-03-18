@@ -79,7 +79,7 @@ const isMounted = ref(false);
 const loaded = ref(true);
 
 onMounted(() => {
-  if (leagueStore.currentFantasyLeague.id == 0) {
+  if (leagueStore.currentFantasyLeague?.id == 0) {
     leagueStore.fetchFantasyLeagues().then(() => isMounted.value = true)
   } else {
     isMounted.value = true

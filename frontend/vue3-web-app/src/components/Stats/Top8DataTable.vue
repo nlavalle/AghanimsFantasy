@@ -250,7 +250,7 @@ onMounted(() => {
     }
 });
 
-watch(fantasyLeagueStore.currentFantasyLeague, () => {
+watch(() => fantasyLeagueStore.currentFantasyLeague, () => {
     if (fantasyLeagueStore.currentFantasyLeague) {
         localApiService.getFantasyPlayerTop8MatchStats(fantasyLeagueStore.currentFantasyLeague.id)
             .then(result => playerFantasyMatchStats.value = result);
