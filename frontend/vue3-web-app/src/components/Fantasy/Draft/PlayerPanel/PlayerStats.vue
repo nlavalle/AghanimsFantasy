@@ -16,13 +16,13 @@
       <div class="stats-section">
         <div class="stat-row">
           <div class="stat-box stat-primary">
-            <span class="stat-value">{{ totalPoints.toFixed(1) }}</span>
-            <span class="stat-label">TOTAL PTS</span>
+            <span class="stat-value">{{ avgPoints.toFixed(1) }}</span>
+            <span class="stat-label">AVG PTS</span>
           </div>
-          <div class="stat-box">
+          <!-- <div class="stat-box">
             <span class="stat-value muted">{{ kda }}</span>
             <span class="stat-label">KDA</span>
-          </div>
+          </div> -->
           <div class="stat-box">
             <span class="stat-value muted">{{ totalMatches }}</span>
             <span class="stat-label">MATCHES</span>
@@ -94,7 +94,8 @@ const EMPTY_BARS: BarItem[] = [
 const fantasyBars = ref<BarItem[]>(EMPTY_BARS.map(b => ({ ...b })));
 const playerTopHeroes = ref<FantasyPlayerTopHeroes>();
 const playerCost = ref<string | number>(0);
-const totalPoints = ref(0);
+const avgPoints = ref(0);
+// const totalPoints = ref(0);
 const totalMatches = ref(0);
 const kda = ref('—');
 
@@ -104,16 +105,15 @@ watch(selectedPlayer, (newPlayer) => {
   playerTopHeroes.value = playerStats?.top_heroes?.[0];
   playerCost.value = playerStats?.cost.toFixed(0) ?? 0;
 
-  const pp = fantasyPlayerPointsAvailable.value.find(p => p.fantasyPlayer.id === newPlayer.id);
-  totalPoints.value = pp?.totalMatchFantasyPoints ?? 0;
-  totalMatches.value = pp?.totalMatches ?? 0;
-
   const ps = playerStats?.player_stats as any;
   if (ps) {
-    const k = (ps.avgKillsPoints ?? 0).toFixed(1);
-    const d = (ps.avgDeathsPoints ?? 0).toFixed(1);
-    const a = (ps.avgAssistsPoints ?? 0).toFixed(1);
+    // Dividing by the pt values to get average KDA values
+    const k = (ps.avgKillsPoints ?? 0 / 0.3).toFixed(1);
+    const d = (ps.avgDeathsPoints ?? 0 / 0.3).toFixed(1);
+    const a = (ps.avgAssistsPoints ?? 0 / 0.15).toFixed(1);
     kda.value = `${k}/${d}/${a}`;
+    avgPoints.value = ps.avgMatchFantasyPoints ?? 0;
+    totalMatches.value = ps.totalMatches ?? 0;
     formatPlayerAverages(ps);
   } else {
     kda.value = '—';
@@ -156,7 +156,6 @@ const randomPlayer = () => {
   background: var(--ot-bg-deep);
   border: 1px solid color-mix(in srgb, var(--rune-purple-dark) 20%, transparent);
   border-radius: 8px;
-  overflow: hidden;
 }
 
 .detail-header {
@@ -181,13 +180,13 @@ const randomPlayer = () => {
 .detail-scroll {
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
 }
 
 /* Stats */
 .stats-section {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   gap: 12px;
   padding: 16px;
   border-bottom: 1px solid color-mix(in srgb, var(--rune-purple-dark) 13%, transparent);
@@ -250,6 +249,7 @@ const randomPlayer = () => {
 .breakdown-section {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   gap: 10px;
   padding: 16px;
   background: var(--sg-bg-deep);
@@ -275,6 +275,7 @@ const randomPlayer = () => {
 .draft-btn-area {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   gap: 8px;
   padding: 16px;
   background: color-mix(in srgb, var(--rune-purple-deep) 8%, var(--ot-bg-deep));

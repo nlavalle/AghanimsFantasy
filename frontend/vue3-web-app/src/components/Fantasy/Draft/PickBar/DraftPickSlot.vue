@@ -75,11 +75,12 @@ const displayCost = computed(() =>
 <style scoped>
 .pick-slot {
   position: relative;
-  width: 240px;
-  height: 130px;
+  width: clamp(120px, 17vw, 240px);
+  height: clamp(65px, 9vw, 130px);
   cursor: pointer;
-  flex-shrink: 0;
+  flex-shrink: 1;
   z-index: 1;
+  margin-right: 0px;
 }
 
 .slot-parallelogram {
@@ -155,9 +156,9 @@ const displayCost = computed(() =>
   right: 0;
   padding: 4px 10px 6px;
   background: linear-gradient(to top,
-    color-mix(in srgb, var(--sg-bg-deep) 92%, transparent) 0%,
-    color-mix(in srgb, var(--sg-bg-deep) 60%, transparent) 60%,
-    transparent 100%);
+      color-mix(in srgb, var(--sg-bg-deep) 92%, transparent) 0%,
+      color-mix(in srgb, var(--sg-bg-deep) 60%, transparent) 60%,
+      transparent 100%);
 }
 
 .slot-bottom-row {

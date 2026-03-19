@@ -89,7 +89,7 @@ export const useFantasyLeagueStore = defineStore({
     },
 
     fetchFantasyDraftPoints() {
-      if (this.selectedLeague) {
+      if (this.selectedLeague?.league_id) {
         return localApiService.getUserDraftPoints(this.selectedLeague.league_id).then((draftResult: FantasyDraftPoints[]) => {
           this.fantasyDraftPoints = draftResult;
         })

@@ -1,10 +1,12 @@
 <template>
   <div>
     <div class="new-pick-bar">
-      <DraftPickSlot v-for="index in 5" :key="index" :index="index" :fantasy-player="fantasyDraftPicks[index]"
-        :cost="fantasyDraftPicks[index] ? Number(getPlayerCost(fantasyDraftPicks[index].dotaAccount.id)) : undefined"
-        :points="getPlayerPoints(index)" :is-selected="currentActiveDraftPlayerCheck(index)"
-        @select="changeActiveDraftPlayer(index)" />
+      <div class="pick-slots">
+        <DraftPickSlot v-for="index in 5" :key="index" :index="index" :fantasy-player="fantasyDraftPicks[index]"
+          :cost="fantasyDraftPicks[index] ? Number(getPlayerCost(fantasyDraftPicks[index].dotaAccount.id)) : undefined"
+          :points="getPlayerPoints(index)" :is-selected="currentActiveDraftPlayerCheck(index)"
+          @select="changeActiveDraftPlayer(index)" />
+      </div>
 
       <div class="bar-right">
         <div class="bar-info-cards">
@@ -84,7 +86,7 @@ const getPlayerPoints = (slotIndex: number) => {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0;
   padding: 12px 32px;
   background: linear-gradient(180deg, #22222E 0%, #171720 60%, #111118 100%);
   border-bottom: 1px solid transparent;
@@ -93,8 +95,16 @@ const getPlayerPoints = (slotIndex: number) => {
   overflow: hidden;
 }
 
+.pick-slots {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
 .bar-right {
-  margin-left: auto;
+  margin-left: 25px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;

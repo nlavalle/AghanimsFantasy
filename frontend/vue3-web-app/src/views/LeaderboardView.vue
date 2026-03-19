@@ -38,7 +38,8 @@ const rounds = computed(() =>
 
 const activeRoundIndex = computed(() => {
   if (fantasyDraftStore.selectedRound !== null) return fantasyDraftStore.selectedRound
-  return rounds.value.length - 1
+  const idx = rounds.value.findIndex(fl => fl.id === leagueStore.currentFantasyLeague.id)
+  return idx !== -1 ? idx : rounds.value.length - 1
 })
 
 const activeRound = computed(() => {

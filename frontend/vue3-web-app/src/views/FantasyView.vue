@@ -91,31 +91,18 @@ const scrollAfterAlertDialog = () => {
   }, 200);
 }
 
-// const refreshFantasy = () => {
-//   loaded.value = false
-//   Promise.all([
-//     fantasyLeagueStore.fetchFantasyPlayerViewModels(),
-//     fantasyLeagueStore.fetchFantasyPlayerPoints(),
-//     fantasyDraftStore.fetchLeaderboard()
-//   ])
-//     ?.then(() => {
-//       loaded.value = true
-//     })
-//     .catch(() => {
-//       loaded.value = true
-//     })
-// }
-
 // Runs immediately on mount and re-runs if currentFantasyLeague becomes
 // available after mount (cold load where leagues are fetched asynchronously).
 watch(() => fantasyLeagueStore.currentFantasyLeague, async (fl) => {
-  if (!fl) return
+  if (!fl.id) return
 
-  await Promise.all([
+  const fetches = [
     fantasyLeagueStore.fetchFantasyPlayerViewModels(),
     fantasyLeagueStore.fetchFantasyPlayerPoints(),
-    fantasyLeagueStore.fetchFantasyDraftPoints()
-  ]).then(() => {
+    ...(authStore.authenticated ? [fantasyLeagueStore.fetchFantasyDraftPoints()] : [])
+  ]
+
+  await Promise.all(fetches).then(() => {
     setFantasyPlayerPoints(fantasyLeagueStore.fantasyPlayerPoints)
 
     if (authStore.authenticated) {
@@ -153,7 +140,7 @@ watch(() => fantasyLeagueStore.selectedFantasyDraftPoints, () => {
   top: 203px;
   right: 0;
   width: 380px;
-  height: calc(100vh - 48px);
+  height: calc(100vh - 203px);
   z-index: 9;
   overflow-y: auto;
   box-shadow: -8px 0 32px rgba(0, 0, 0, 0.7), -2px 0 8px rgba(0, 0, 0, 0.5);

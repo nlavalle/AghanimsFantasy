@@ -74,7 +74,12 @@ describe('Fantasy draft — mechanic rules', () => {
 
   it('draft save button is disabled when over budget', () => {
     draftPlayer('Player One') // cost 700 > DRAFT_BUDGET (600)
-    cy.contains('button', 'Save Draft').should('be.disabled')
+    cy.contains('button', 'Save Draft').should('be.visible').and('be.disabled')
+  })
+
+  it('Save Draft and Clear Draft buttons are visible', () => {
+    cy.contains('button', 'Save Draft').should('be.visible')
+    cy.contains('button', 'Clear Draft').should('be.visible')
   })
 
   // -------------------------------------------------------------------------
@@ -107,6 +112,52 @@ describe('Fantasy draft — mechanic rules', () => {
 })
 
 // ---------------------------------------------------------------------------
+// Unauthenticated access
+// ---------------------------------------------------------------------------
+describe('Fantasy draft — unauthenticated user', () => {
+  beforeEach(() => {
+    cy.clock(FROZEN_NOW_MS, ['Date'])
+    cy.mockAuthenticated(false)
+    cy.mockFantasyScenario('pre-draft', FROZEN_NOW)
+    cy.visit('/fantasy')
+  })
+
+  it('can see the draft page', () => {
+    cy.get('.new-pick-bar').should('exist')
+  })
+
+  it('can see the player pool', () => {
+    cy.get('.pool-card').should('have.length.greaterThan', 0)
+  })
+
+  it('can click a player and see their stats panel', () => {
+    cy.contains('.card-name', 'Player One').click()
+    cy.get('.detail-panel').should('contain', 'Player One')
+  })
+
+  it('can draft a player into the pick bar', () => {
+    cy.contains('.card-name', 'Player Four').click()
+    cy.get('.detail-panel .draft-btn').click({ force: true })
+    cy.get('.new-pick-bar').should('contain', 'Player Four')
+  })
+
+  it('Save Draft and Clear Draft buttons are visible', () => {
+    cy.contains('button', 'Save Draft').should('be.visible')
+    cy.contains('button', 'Clear Draft').should('be.visible')
+  })
+
+  it('Save Draft button is disabled', () => {
+    cy.contains('button', 'Save Draft').should('be.visible').and('be.disabled')
+  })
+
+  it('Save Draft button remains disabled after picking players', () => {
+    cy.contains('.card-name', 'Player Four').click()
+    cy.get('.detail-panel .draft-btn').click({ force: true })
+    cy.contains('button', 'Save Draft').should('be.visible').and('be.disabled')
+  })
+})
+
+// ---------------------------------------------------------------------------
 // Saved draft pre-population
 // ---------------------------------------------------------------------------
 describe('Fantasy draft — saved draft pre-population', () => {
@@ -132,5 +183,10 @@ describe('Fantasy draft — saved draft pre-population', () => {
 
   it('no pick slot is selected (active) when all slots are pre-filled', () => {
     cy.get('.new-pick-bar .pick-slot.selected').should('have.length', 0)
+  })
+
+  it('Save Draft and Clear Draft buttons are visible', () => {
+    cy.contains('button', 'Save Draft').should('be.visible')
+    cy.contains('button', 'Clear Draft').should('be.visible')
   })
 })
