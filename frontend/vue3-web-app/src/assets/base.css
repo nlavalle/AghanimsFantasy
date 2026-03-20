@@ -127,6 +127,10 @@
   --rune-gray-mid: #6B7280;
   --rune-gray-light: #9CA3AF;
 
+  /* Rune green (farm/economy stats) */
+  --rune-green: #2ECC71;
+  --rune-green-light: #6FDFB0;
+
   /* Rune red (urgent/error states) */
   --rune-red: #E53935;
   --rune-red-light: #FF6B6B;

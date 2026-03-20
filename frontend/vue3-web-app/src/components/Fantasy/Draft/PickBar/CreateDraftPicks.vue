@@ -12,6 +12,7 @@
         <div class="bar-info-cards">
           <DraftBudgetCard />
           <DraftRoundCard :current="currentRound" :total="totalRounds" :rounds="leagueRounds"
+            :has-undrafted-open-round="hasUndraftedOpenRound"
             @select-round="leagueStore.setSelectedDraftFantasyLeague($event)" />
           <DraftTimerCard v-if="leagueStore.currentFantasyLeague"
             :target-time="leagueStore.currentFantasyLeague.fantasyDraftLocked" />
@@ -36,6 +37,7 @@
 import { computed } from 'vue';
 import { fantasyDraftState } from '@/components/Fantasy/fantasyDraft';
 import { useFantasyLeagueStore } from '@/stores/fantasyLeague';
+import { isDraftOpen } from '@/stores/fantasyLeagueUtils';
 import DraftPickSlot from './DraftPickSlot.vue';
 import DraftRoundCard from './DraftRoundCard.vue';
 import DraftTimerCard from './DraftTimerCard.vue';
@@ -60,6 +62,14 @@ const currentRound = computed(() => {
 })
 
 const totalRounds = computed(() => leagueRounds.value.length || 1)
+
+const hasUndraftedOpenRound = computed(() => {
+  const currentId = leagueStore.currentFantasyLeague?.id
+  return leagueRounds.value.some(fl =>
+    fl.id !== currentId &&
+    isDraftOpen(fl)
+  )
+})
 
 const changeActiveDraftPlayer = (activeDraftPlayerSlot: number) => {
   currentDraftSlotSelected.value = activeDraftPlayerSlot;

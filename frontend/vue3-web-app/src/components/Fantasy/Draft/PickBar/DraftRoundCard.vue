@@ -1,27 +1,17 @@
 <template>
-  <div class="round-card" @click="open = !open" ref="cardRef">
+  <div class="round-card" :class="{ 'round-card--alert': hasUndraftedOpenRound }" @click="open = !open" ref="cardRef">
     <div class="round-label">ROUND</div>
     <div class="round-value">
       {{ current }}<span class="round-denom"> / {{ total }}</span>
     </div>
 
     <Teleport to="body">
-      <div
-        v-if="open && rounds.length > 1"
-        class="round-dropdown"
-        :style="{ top: dropdownPos.y + 'px', left: dropdownPos.x + 'px' }"
-        @click.stop
-      >
-        <button
-          v-for="(round, idx) in rounds"
-          :key="round.id"
-          class="round-option"
-          :class="{
-            'round-option--active': idx + 1 === current,
-            'round-option--locked': !isDraftOpen(round)
-          }"
-          @click="select(idx, round)"
-        >
+      <div v-if="open && rounds.length > 1" class="round-dropdown"
+        :style="{ top: dropdownPos.y + 'px', left: dropdownPos.x + 'px' }" @click.stop>
+        <button v-for="(round, idx) in rounds" :key="round.id" class="round-option" :class="{
+          'round-option--active': idx + 1 === current,
+          'round-option--locked': !isDraftOpen(round)
+        }" @click="select(idx, round)">
           <span class="option-label">Round {{ idx + 1 }}</span>
           <span class="option-name">{{ round.name }}</span>
           <span class="option-status">{{ isDraftOpen(round) ? 'Open' : 'Locked' }}</span>
@@ -40,6 +30,7 @@ const props = defineProps<{
   current: number
   total: number
   rounds: FantasyLeague[]
+  hasUndraftedOpenRound?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -94,6 +85,29 @@ onUnmounted(() => document.removeEventListener('click', onOutsideClick))
 .round-card:hover {
   border-color: color-mix(in srgb, var(--rune-lavender) 50%, transparent);
 }
+
+.round-card--alert {
+  border-color: color-mix(in srgb, var(--rune-gold) 60%, transparent);
+  animation: round-card-pulse 2s ease-in-out infinite;
+  box-shadow: 0 0 6px 3px color-mix(in srgb, var(--rune-gold) 35%, transparent);
+}
+
+.round-card--alert:hover {
+  border-color: color-mix(in srgb, var(--rune-gold) 90%, transparent);
+  box-shadow: 0 0 12px 3px color-mix(in srgb, var(--rune-gold) 35%, transparent);
+}
+
+/* @keyframes round-card-pulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--rune-gold) 0%, transparent);
+  }
+
+  50% {
+    box-shadow: 0 0 12px 3px color-mix(in srgb, var(--rune-gold) 35%, transparent);
+  }
+} */
 
 .round-label {
   font-family: var(--font-body);

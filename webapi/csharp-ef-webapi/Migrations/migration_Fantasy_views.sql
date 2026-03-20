@@ -258,7 +258,7 @@ create or replace view nadcl.fantasy_normalized_averages as
 with avg_scores as (
 	select 
 		fp.dota_account_id,
-		count(DISTINCT match_details_player_id) as matches_played,
+		count(DISTINCT fantasy_match_player_id) as matches_played,
 		avg(kills_points) as kills_points,
 		avg(deaths_points) as deaths_points,
 		avg(assists_points) as assists_points,
@@ -360,7 +360,7 @@ with avg_scores as (
 )
 select
 	fp.id as fantasy_player_id,
-	(matches_played - matches_played_min) / nullif(matches_played_max - matches_played_min, 0)::numeric as matches_played,
+	matches_played::numeric as matches_played,
 	(kills_points - kills_points_min) / nullif(kills_points_max - kills_points_min, 0) as kills_points,
 	(deaths_points - deaths_points_min) / nullif(deaths_points_max - deaths_points_min, 0) as deaths_points,
 	(assists_points - assists_points_min) / nullif(assists_points_max - assists_points_min, 0) as assists_points,
@@ -384,7 +384,7 @@ select
 	(sentry_wards_placed_points - sentry_wards_placed_points_min) / nullif(sentry_wards_placed_points_max - sentry_wards_placed_points_min, 0) as sentry_wards_placed_points,
 	(wards_dewarded_points - wards_dewarded_points_min) / nullif(wards_dewarded_points_max - wards_dewarded_points_min, 0) as wards_dewarded_points,
 	(stun_duration_points - stun_duration_points_min) / nullif(stun_duration_points_max - stun_duration_points_min, 0) as stun_duration_points,
-	(total_match_fantasy_points - total_match_fantasy_points_min) / nullif(total_match_fantasy_points_max - total_match_fantasy_points_min, 0) as total_match_fantasy_points,
+	total_match_fantasy_points,
 	-- Valve scores
 	(fight_score - fight_score_min) / nullif(fight_score_max - fight_score_min, 0) as fight_score,
 	(farm_score - farm_score_min) / nullif(farm_score_max - farm_score_min, 0) as farm_score,

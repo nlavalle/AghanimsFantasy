@@ -23,12 +23,10 @@
         <v-tabs-window v-model="statsTab" style="width:100%" transition="fade-transition"
           reverse-transition="fade-transition">
           <v-tabs-window-item value="fantasy">
-            <v-col>
-              <v-row v-if="leagueStore.currentFantasyLeague">
-                <FantasyDataTable :selectedFantasyLeague="leagueStore.currentFantasyLeague">
-                </FantasyDataTable>
-              </v-row>
-            </v-col>
+            <div v-if="leagueStore.currentFantasyLeague" class="table-tab-wrap">
+              <FantasyDataTable :selectedFantasyLeague="leagueStore.currentFantasyLeague">
+              </FantasyDataTable>
+            </div>
           </v-tabs-window-item>
           <v-tabs-window-item value="league">
             <v-col>
@@ -106,5 +104,9 @@ const refreshStats = () => {
 <style scoped>
 .league-selector :deep(.v-list-item-title) {
   font-size: 0.8rem;
+}
+
+.table-tab-wrap {
+  width: 100%;
 }
 </style>
